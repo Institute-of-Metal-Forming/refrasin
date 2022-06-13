@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+
+    <PropertyGroup>
+        <AssemblyName>RefraSin.Core.ParticleModel</AssemblyName>
+        <RootNamespace>RefraSin.Core.ParticleModel</RootNamespace>
+
+        <Description>Library for simulation of sintering processes (basic particle model)</Description>
+        <Copyright>Institut für Metallformung - TU Bergakademie Freiberg</Copyright>
+        <PackageProjectUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/refrabund</PackageProjectUrl>
+        <RepositoryUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/refrabund</RepositoryUrl>
+        <Authors>Max Weiner</Authors>
+        <Company>Institut für Metallformung - TU Bergakademie Freiberg</Company>
+
+        <Version>2021.12.09</Version>
+
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+        <Nullable>enable</Nullable>
+
+        <IncludePlugins>True</IncludePlugins>
+
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="IMF.Coordinates" Version="2021.12.9" />
+      <PackageReference Include="IMF.Enumerables" Version="2021.12.9" />
+    </ItemGroup>
+
+</Project>
