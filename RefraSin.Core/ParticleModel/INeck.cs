@@ -17,7 +17,9 @@ namespace RefraSin.Core.ParticleModel
         
         public double Radius { get; }
         
-        public double GrainBoundaryLenght { get; }
+        public double GrainBoundaryLength { get; }
+        
+        public double MeanCurvature { get; }
         
         public int Id { get; }
     }

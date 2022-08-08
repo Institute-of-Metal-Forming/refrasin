@@ -14,8 +14,9 @@ namespace RefraSin.Core.ParticleModel.States
             ParticleId = template.ParticleId;
             ContactedParticleId = template.ContactedParticleId;
             Radius = template.Radius;
-            GrainBoundaryLenght = template.GrainBoundaryLenght;
+            GrainBoundaryLength = template.GrainBoundaryLength;
             Id = template.Id;
+            MeanCurvature = template.MeanCurvature;
         }
         
         public INeckNode LowerNeckNode { get; }
@@ -24,7 +25,9 @@ namespace RefraSin.Core.ParticleModel.States
         public Guid ParticleId { get; }
         public Guid ContactedParticleId { get; }
         public double Radius { get; }
-        public double GrainBoundaryLenght { get; }
+        public double GrainBoundaryLength { get; }
+
+        public double MeanCurvature { get; }
         public int Id { get; }
     }
 }

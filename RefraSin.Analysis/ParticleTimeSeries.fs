@@ -21,6 +21,13 @@ module ParticleTimeSeries =
         timeSeries
         |> Seq.map (fun (t, p) -> (t, p |> relativeNeckRadii))
 
+    let MeanGrainBoundaryCurvatureSeries (timeSeries: ParticleTimeSeries) : ValuesTimeSeries =
+        let meanCurvatures (p: IParticle) =
+            p.Necks |> Seq.map (fun n -> n.MeanCurvature)
+
+        timeSeries
+        |> Seq.map (fun (t, p) -> (t, p |> meanCurvatures))
+
 
 [<Extension>]
 module ParticleTimeSeriesExtensions =
