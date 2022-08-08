@@ -11,15 +11,6 @@ namespace RefraSin.Core.ParticleModel.States
     public abstract class NodeState : INode
     {
         /// <summary>
-        /// Standardkonstruktor.
-        /// </summary>
-        public NodeState()
-        {
-            Coordinates = new PolarPoint();
-            AbsoluteCoordinates = Coordinates.Absolute;
-        }
-
-        /// <summary>
         /// Kopierkonstruktor.
         /// </summary>
         /// <param name="template">Vorlage</param>
@@ -35,6 +26,7 @@ namespace RefraSin.Core.ParticleModel.States
             DeviatoricVacancyConcentration = template.DeviatoricVacancyConcentration;
             DiffusionalFlowBalance = template.DiffusionalFlowBalance;
             SurfaceDistance = template.SurfaceDistance;
+            VacancyConcentration = template.VacancyConcentration;
         }
         
         /// <inheritdoc />
@@ -60,6 +52,9 @@ namespace RefraSin.Core.ParticleModel.States
 
         /// <inheritdoc />
         public double DeviatoricVacancyConcentration { get; set; }
+
+        /// <inheritdoc />
+        public double VacancyConcentration { get; }
 
         /// <inheritdoc />
         public double DiffusionalFlowBalance { get; set; }

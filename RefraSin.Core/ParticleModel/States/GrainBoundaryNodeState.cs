@@ -6,13 +6,6 @@ namespace RefraSin.Core.ParticleModel.States
     public class GrainBoundaryNodeState : ContactNodeState, IGrainBoundaryNode
     {
         /// <summary>
-        /// Standardkonstruktor.
-        /// </summary>
-        public GrainBoundaryNodeState() : base()
-        {
-        }
-
-        /// <summary>
         /// Kopierkonstruktor.
         /// </summary>
         /// <param name="template">Vorlage</param>

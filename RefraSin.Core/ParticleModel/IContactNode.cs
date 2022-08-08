@@ -16,5 +16,10 @@ namespace RefraSin.Core.ParticleModel
         /// Id des Partikels, welches dieser Knoten berührt.
         /// </summary>
         public Guid ContactedParticleId { get; }
+        
+        /// <summary>
+        /// Volume transfer across the grain boundary.
+        /// </summary>
+        public double Transfer { get; }
     }
 }

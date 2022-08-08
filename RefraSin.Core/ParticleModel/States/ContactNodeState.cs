@@ -8,13 +8,6 @@ namespace RefraSin.Core.ParticleModel.States
     public abstract class ContactNodeState : NodeState, IContactNode
     {
         /// <summary>
-        /// Standardkonstruktor.
-        /// </summary>
-        public ContactNodeState() : base()
-        {
-        }
-
-        /// <summary>
         /// Kopierkonstruktor.
         /// </summary>
         /// <param name="template">Vorlage</param>
@@ -22,6 +15,7 @@ namespace RefraSin.Core.ParticleModel.States
         {
             ContactStress = template.ContactStress;
             ContactedParticleId = template.ContactedParticleId;
+            Transfer = template.Transfer;
         }
 
         /// <inheritdoc />
@@ -29,5 +23,8 @@ namespace RefraSin.Core.ParticleModel.States
 
         /// <inheritdoc />
         public Guid ContactedParticleId { get; set; }
+
+        /// <inheritdoc />
+        public double Transfer { get; }
     }
 }

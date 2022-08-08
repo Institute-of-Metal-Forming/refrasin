@@ -13,8 +13,10 @@ namespace RefraSin.Core.Materials
     /// <param name="CurrentMaterial"></param>
     /// <param name="ContactedMaterial"></param>
     /// <param name="InterfaceEnergy"></param>
-    /// <param name="DiffusionCoefficient"></param>
-    public record MaterialInterface(Material CurrentMaterial, Material ContactedMaterial, double InterfaceEnergy, double DiffusionCoefficient)
+    /// <param name="DiffusionCoefficient">Diffusion coefficient along the grain boundary.</param>
+    /// <param name="TransferCoefficient">Coefficient of volume transfer across the grain boundary.</param>
+    public record MaterialInterface(Material CurrentMaterial, Material ContactedMaterial, double InterfaceEnergy, double DiffusionCoefficient,
+        double TransferCoefficient = 0)
     {
         /// <summary>
         /// Dihedral angle at triple points of this interface and two free surfaces.

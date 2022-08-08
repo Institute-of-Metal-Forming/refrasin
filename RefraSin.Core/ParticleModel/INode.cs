@@ -48,6 +48,11 @@ namespace RefraSin.Core.ParticleModel
         /// Deviatorische Leerstellenkonzentration am Knoten.
         /// </summary>
         public double DeviatoricVacancyConcentration { get; }
+        
+        /// <summary>
+        /// Absolute Leerstellenkonzentration am Knoten.
+        /// </summary>
+        public double VacancyConcentration { get; }
 
         /// <summary>
         /// Gradient der Leerstellenkonzentration zu den Nachbarknoten.

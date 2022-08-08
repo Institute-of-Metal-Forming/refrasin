@@ -37,7 +37,7 @@ namespace RefraSin.Core.ParticleModel
                         upper = upper.Upper;
                     }
 
-                    return (NeckNode) upper;
+                    return (NeckNode)upper;
                 }
                 else
                 {
@@ -47,7 +47,7 @@ namespace RefraSin.Core.ParticleModel
                         lower = lower.Lower;
                     }
 
-                    return (NeckNode) lower;
+                    return (NeckNode)lower;
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace RefraSin.Core.ParticleModel
                 var y = surfaceDistance * Sin(delta);
 
                 _curvature = -(y + x * Trig.Cot(MaterialInterface.DihedralAngle)) / Pow(x, 2) /
-                                 Pow(1 + Pow(Trig.Cot(MaterialInterface.DihedralAngle), 2), 1.5);
+                             Pow(1 + Pow(Trig.Cot(MaterialInterface.DihedralAngle), 2), 1.5);
                 return _curvature.Value;
             }
         }
@@ -94,6 +94,21 @@ namespace RefraSin.Core.ParticleModel
         {
             get => SurfaceTension;
             set => throw new NotSupportedException();
+        }
+
+        public override double Transfer
+        {
+            get
+            {
+                if (Upper is GrainBoundaryNode)
+                {
+                    return MaterialInterface.TransferCoefficient * (VacancyConcentration - ContactedNode.VacancyConcentration)
+                                                                 * SurfaceDistance.ToUpper / 2;
+                }
+                
+                return MaterialInterface.TransferCoefficient * (VacancyConcentration - ContactedNode.VacancyConcentration)
+                                                             * SurfaceDistance.ToLower / 2;
+            }
         }
 
         #region TimeStep
@@ -119,8 +134,8 @@ namespace RefraSin.Core.ParticleModel
                 MergeFutureCoordinates();
 
                 for (int i = 0;
-                    !_logger.LogIfMaximumIterationCountReached("neck node shifting", i, session.SolverOptions.MaxIterationCount, LogLevel.Error);
-                    i++)
+                     !_logger.LogIfMaximumIterationCountReached("neck node shifting", i, session.SolverOptions.MaxIterationCount, LogLevel.Error);
+                     i++)
                 {
                     DoTangentialShifting(goalVolume1, goalVolume2);
 

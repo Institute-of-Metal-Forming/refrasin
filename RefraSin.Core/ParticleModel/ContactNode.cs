@@ -129,6 +129,9 @@ namespace RefraSin.Core.ParticleModel
         public double PastContactStress { get; set; }
 
         /// <inheritdoc />
+        public abstract double Transfer { get; }
+
+        /// <inheritdoc />
         public override double DeviatoricChemicalPotential => _deviatoricChemicalPotential ??=
             -(SurfaceTension + ContactStress) * Particle.Material.MolarVolume;
 

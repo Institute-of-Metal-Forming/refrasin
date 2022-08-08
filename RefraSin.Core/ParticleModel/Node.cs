@@ -46,7 +46,7 @@ namespace RefraSin.Core.ParticleModel
 
         /// <inheritdoc />
         public Guid ParticleId => Particle.Id;
-        
+
         public Node Upper => _upper ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Upper);
 
         public Node Lower => _lower ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Lower);
@@ -115,7 +115,7 @@ namespace RefraSin.Core.ParticleModel
         private ToUpperToLowerAngle? _angleDistance;
         private ToUpperToLower? _surfaceDistance;
         private ToUpperToLowerAngle? _surfaceRadiusAngle;
-        
+
         /// <summary>
         ///     Koordinaten des Punktes mit Basis auf <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
         /// </summary>
@@ -174,7 +174,7 @@ namespace RefraSin.Core.ParticleModel
         private ToUpperToLowerAngle? _futureAngleDistance;
         private ToUpperToLower? _futureSurfaceDistance;
         private ToUpperToLowerAngle? _futureSurfaceRadiusAngle;
-        
+
         /// <summary>
         ///     Koordinaten des Knotens nach Durchführung des Zeitschritts. Kann
         /// </summary>
@@ -231,7 +231,7 @@ namespace RefraSin.Core.ParticleModel
         private double? _deviatoricVacancyConcentration;
         private ToUpperToLower? _vacancyConcentrationGradient;
         private ToUpperToLower? _diffusionalFlow;
-        
+
         public abstract double InterfaceEnergy { get; }
 
         public abstract ToUpperToLower DiffusionCoefficient { get; }
@@ -262,6 +262,8 @@ namespace RefraSin.Core.ParticleModel
         public virtual double DeviatoricVacancyConcentration => _deviatoricVacancyConcentration ??=
             -Particle.Material.ThermalVacancyConcentration / Particle.Process.UniversalGasConstant / Particle.Process.Temperature *
             DeviatoricChemicalPotential;
+        
+        public double VacancyConcentration => Particle.Material.ThermalVacancyConcentration + DeviatoricVacancyConcentration;
 
         public virtual ToUpperToLower VacancyConcentrationGradient =>
             _vacancyConcentrationGradient ??= new ToUpperToLower(
@@ -322,7 +324,7 @@ namespace RefraSin.Core.ParticleModel
         {
             Coordinates = _futureCoordinates ?? throw new InvalidOperationException(
                     "This node has not calculated a time step yet. Call CalculateTimeStep() before.")
-                {Source = ToString()};
+                { Source = ToString() };
             _futureCoordinates = null;
             ClearFutureGeometryCache();
         }
@@ -344,7 +346,7 @@ namespace RefraSin.Core.ParticleModel
             _surfaceDistance = null;
             _surfaceRadiusAngle = null;
         }
-        
+
         protected virtual void ClearDiffusionCache()
         {
             _diffusionalFlow = null;

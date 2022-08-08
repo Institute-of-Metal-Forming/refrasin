@@ -14,6 +14,9 @@ namespace RefraSin.Core.ParticleModel
 
         public override double InterfaceEnergy => MaterialInterface.InterfaceEnergy;
 
+        public override double Transfer => MaterialInterface.TransferCoefficient * (VacancyConcentration - ContactedNode.VacancyConcentration)
+            * SurfaceDistance.Sum / 2;
+
         public override ToUpperToLower DiffusionCoefficient => _diffusionCoefficient ??=
             new ToUpperToLower(MaterialInterface.DiffusionCoefficient, MaterialInterface.DiffusionCoefficient);
 

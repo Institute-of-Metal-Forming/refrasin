@@ -5,7 +5,6 @@ namespace RefraSin.Core.ParticleModel.States
     /// </summary>
     public class SurfaceNodeState : NodeState, ISurfaceNode
     {
-        public SurfaceNodeState() : base() { }
         public SurfaceNodeState(INode template) : base(template) { }
     }
 }
