@@ -24,20 +24,20 @@ public class TwoParticleTest
     {
         var material = new Material(
             "",
-            8e6,
-            1e6,
-            1e6,
+            8e-6,
+            1,
+            1e-9,
             1e-4
         );
 
         var materialInterfaces = new MaterialInterfaceCollection()
         {
-            new(material, material, 0.7e6, 0.8e6)
+            new(material, material, 0.7, 0.8e-9)
         };
 
         var particleSource = new TrigonometricParticleSource(
             material,
-            500,
+            0.5,
             0.2,
             0.2,
             5
@@ -46,7 +46,7 @@ public class TwoParticleTest
         var treeSource = new ExplicitTreeSource(
             new ExplicitTreeItem(new PolarPoint(), particleSource, 0, new[]
             {
-                new ExplicitTreeItem(new PolarPoint(0, 1500), particleSource, Constants.Pi)
+                new ExplicitTreeItem(new PolarPoint(0, 1.5), particleSource, Constants.Pi)
             })
         );
 

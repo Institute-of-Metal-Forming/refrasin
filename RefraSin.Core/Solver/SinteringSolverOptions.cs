@@ -22,7 +22,7 @@ namespace RefraSin.Core.Solver
         /// <summary>
         /// Goal discretization width in space.
         /// </summary>
-        public double DiscretizationWidth { get; set; } = 10;
+        public double DiscretizationWidth { get; set; } = 10e-3;
 
         /// <summary>
         /// Count of time steps until an increase of time step width is tried again after decrease.
