@@ -15,7 +15,7 @@
 
         <Version>2022.01.07</Version>
 
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
@@ -32,6 +32,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\RefraSin.Core\RefraSin.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="FSharp.Core" Version="7.0.300" />
     </ItemGroup>
 
 </Project>

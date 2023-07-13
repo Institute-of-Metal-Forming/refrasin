@@ -11,7 +11,7 @@
 
         <Version>2021.12.09</Version>
 
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
 
@@ -29,7 +29,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OxyPlot.Core" Version="2.1.0" />
+      <PackageReference Include="OxyPlot.Core" Version="2.1.2" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,6 +1,7 @@
 using System.Linq;
 using IMF.Enumerables;
 using IMF.Utils;
+using MoreLinq.Extensions;
 using RefraSin.Core.Materials;
 using RefraSin.Core.ParticleModel;
 using RefraSin.Core.ParticleSources;
@@ -44,7 +45,7 @@ namespace RefraSin.Core.ParticleTreeSources
             var samples = RandomizedParticleSource.GetParticles(process, surfaceNodeCountFunction).Take((int)(RingParticleCount + 1))
                 .Select(p => (particle: p, maxRadius: p.Surface.Max(k => k.Coordinates.R))).ToArray();
 
-            var root = samples.MaxBy(x => x.maxRadius);
+            var root = samples.MaxBy(x => x.maxRadius).First();
             var necklaceMembers = samples.Where(x => x.particle != root.particle).ToArray();
 
             var totalMeanRadius = necklaceMembers.Sum(x => x.maxRadius);

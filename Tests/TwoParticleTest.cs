@@ -1,7 +1,9 @@
 using System.Threading;
 using IMF.Coordinates.Polar;
 using MathNet.Numerics;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using RefraSin.Core;
 using RefraSin.Core.Materials;
 using RefraSin.Core.ParticleSources;
 using RefraSin.Core.ParticleTreeSources;
@@ -11,6 +13,12 @@ namespace Tests;
 
 public class TwoParticleTest
 {
+    [SetUp]
+    public void Init()
+    {
+        Configuration.UseLoggerFactory(LoggerFactory.Create(builder => { builder.AddNUnit(); }));
+    }
+
     [Test]
     public void RunTwoParticleTest()
     {
@@ -36,7 +44,7 @@ public class TwoParticleTest
         );
 
         var treeSource = new ExplicitTreeSource(
-            new ExplicitTreeItem(new PolarPoint(), particleSource, 0,new[]
+            new ExplicitTreeItem(new PolarPoint(), particleSource, 0, new[]
             {
                 new ExplicitTreeItem(new PolarPoint(0, 1500), particleSource, Constants.Pi)
             })
@@ -51,7 +59,7 @@ public class TwoParticleTest
         );
 
         var solution = process.Solve(CancellationToken.None);
-        
+
         Assert.IsTrue(solution.Succeeded, "solution.Succeeded");
     }
 }

@@ -402,7 +402,7 @@ namespace RefraSin.Core.Solver
 
         private static double[] CalculateElementsVolumeDifferencesOfGrainBoundaryNodes(double[] childsNodesSelfVolumes,
             double[] childsNodesPulledVolumes) =>
-            childsNodesPulledVolumes.Zip(childsNodesSelfVolumes).Select(t => t.First - t.Second).ToArray();
+            childsNodesPulledVolumes.Zip(childsNodesSelfVolumes, (pulled, self) => pulled - self).ToArray();
 
         private static bool VolumeDifferencesAreSmallEnough(GrainBoundaryNode[] grainBoundaryNodes, double[] volumeDifferences, Session session)
         {
@@ -434,11 +434,11 @@ namespace RefraSin.Core.Solver
             double grainBoundaryTensionBrakeFactor,
             Session session)
         {
-            var stressChanges = grainBoundaryNodes.Zip(volumeDifferences).Select(t =>
-            {
-                var (node, failVolume) = t;
-                return grainBoundaryTensionBrakeFactor * node.CalculateContactStressChangeFromFailVolume(failVolume, session.TimeStepWidth) / 5;
-            }).ToArray();
+            var stressChanges = grainBoundaryNodes.Zip(volumeDifferences,
+                (node, diff) =>
+                {
+                    return grainBoundaryTensionBrakeFactor * node.CalculateContactStressChangeFromFailVolume(diff, session.TimeStepWidth) / 5;
+                }).ToArray();
             return stressChanges;
         }
 
@@ -465,11 +465,10 @@ namespace RefraSin.Core.Solver
 
         private static void ApplyStressChangesOnGrainBoundaryNodes(GrainBoundaryNode[] grainBoundaryNodes, double[] stressChanges)
         {
-            foreach (var t in grainBoundaryNodes.Zip(stressChanges))
+            foreach (var t in grainBoundaryNodes.Zip(stressChanges, (node, stressChange) => (node, stressChange)))
             {
-                var (node, stressChange) = t;
-                node.ContactStress += stressChange;
-                node.ContactedNode.ContactStress = node.ContactStress;
+                t.node.ContactStress += t.stressChange;
+                t.node.ContactedNode.ContactStress = t.node.ContactStress;
             }
         }
     }
