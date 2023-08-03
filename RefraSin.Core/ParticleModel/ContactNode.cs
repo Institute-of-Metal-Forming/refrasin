@@ -1,6 +1,8 @@
 using System;
-using IMF.Coordinates.Polar;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.Materials;
+using RefraSin.Core.ParticleModel.Interfaces;
 
 namespace RefraSin.Core.ParticleModel
 {
@@ -10,25 +12,21 @@ namespace RefraSin.Core.ParticleModel
     public abstract class ContactNode<TContacted> : ContactNode where TContacted : ContactNode<TContacted>
     {
         private TContacted? _contactedNode = null;
-        private MaterialInterface? _materialInterface;
 
         /// <inheritdoc />
-        protected ContactNode(Particle particle, PolarPoint coordinates) : base(particle, coordinates) { }
+        protected ContactNode((Angle phi, double r) coordinates) : base(coordinates) { }
 
         /// <summary>
         /// Verbundener Knoten des anderen Partikels.
         /// </summary>
-        public TContacted ContactedNode
-        {
-            get => _contactedNode ?? throw new NotConnectedException(this);
-            set => _contactedNode = value;
-        }
+        public TContacted ContactedNode => _contactedNode ?? throw new NotConnectedException(this);
 
-        public MaterialInterface MaterialInterface
-        {
-            get => _materialInterface ??= Particle.GetMaterialInterface(ContactedNode.Particle);
-            set => _materialInterface = value;
-        }
+        /// <summary>
+        /// Properties of the interface between two materials.
+        /// </summary>
+        public MaterialInterface MaterialInterface => _materialInterface ??= Particle.GetMaterialInterface(ContactedNode.Particle);
+
+        private MaterialInterface? _materialInterface;
 
         /// <inheritdoc />
         public override Guid ContactedParticleId => ContactedNode.ParticleId;
@@ -40,7 +38,7 @@ namespace RefraSin.Core.ParticleModel
         public virtual void Connect(TContacted other)
         {
             _contactedNode = other;
-            other._contactedNode = (TContacted) this;
+            other._contactedNode = (TContacted)this;
         }
 
         /// <summary>
@@ -50,37 +48,6 @@ namespace RefraSin.Core.ParticleModel
         {
             ContactedNode._contactedNode = null;
             _contactedNode = null;
-        }
-
-        /// <inheritdoc />
-        public override void InitFutureCoordinates()
-        {
-            FutureCoordinates = Coordinates.Clone();
-            ContactedNode.FutureCoordinates = ContactedNode.Coordinates.Clone();
-        }
-
-        /// <summary>
-        /// Merges both contacted knots' <see cref="Node.FutureCoordinates"/> at their middle point. 
-        /// </summary>
-        protected void MergeFutureCoordinates()
-        {
-            var middleCoordinates = FutureCoordinates.Absolute
-                .PointHalfWayTo(ContactedNode.FutureCoordinates.Absolute);
-            FutureCoordinates = new PolarPoint(middleCoordinates, Particle.FutureLocalCoordinateSystem);
-            ContactedNode.FutureCoordinates =
-                new PolarPoint(middleCoordinates, ContactedNode.Particle.FutureLocalCoordinateSystem);
-
-            ClearFutureGeometryCache();
-            ContactedNode.ClearFutureGeometryCache();
-        }
-
-        /// <summary>
-        /// Sets the contacted knot's <see cref="Node.FutureCoordinates"/> to the same point as this knot.
-        /// </summary>
-        public void PullContactedNodesFutureCoordinates()
-        {
-            ContactedNode.FutureCoordinates = new PolarPoint(FutureCoordinates, ContactedNode.Particle.FutureLocalCoordinateSystem);
-            ContactedNode.ClearFutureGeometryCache();
         }
 
         public class NotConnectedException : InvalidOperationException
@@ -101,52 +68,13 @@ namespace RefraSin.Core.ParticleModel
     /// </summary>
     public abstract class ContactNode : Node, IContactNode
     {
-        private double _contactStress;
-        private double? _deviatoricChemicalPotential;
-
         /// <inheritdoc />
-        protected ContactNode(Particle particle, PolarPoint coordinates) : base(particle, coordinates) { }
+        protected ContactNode((Angle phi, double r) coordinates) : base(coordinates) { }
 
         /// <inheritdoc />
         public abstract Guid ContactedParticleId { get; }
 
-        /// <summary>
-        /// Spannung durch den Kontakt.
-        /// </summary>
-        public virtual double ContactStress
-        {
-            get => _contactStress;
-            set
-            {
-                _contactStress = value;
-                ClearDiffusionCache();
-            }
-        }
-
-        /// <summary>
-        /// Spannung durch den Kontakt im vorigen Zeitschritt.
-        /// </summary>
-        public double PastContactStress { get; set; }
-
         /// <inheritdoc />
-        public abstract double Transfer { get; }
-
-        /// <inheritdoc />
-        public override double DeviatoricChemicalPotential => _deviatoricChemicalPotential ??=
-            -(SurfaceTension + ContactStress) * Particle.Material.MolarVolume;
-
-        /// <inheritdoc />
-        public override void ApplyTimeStep()
-        {
-            PastContactStress = ContactStress;
-            base.ApplyTimeStep();
-        }
-        
-        /// <inheritdoc />
-        protected override void ClearDiffusionCache()
-        {
-            _deviatoricChemicalPotential = null;
-            base.ClearDiffusionCache();
-        }
+        public abstract double TransferCoefficient { get; }
     }
 }

@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
-using IMF.Coordinates;
-using IMF.Coordinates.Absolute;
-using IMF.Coordinates.Polar;
 using IMF.Enumerables;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.Materials;
 using RefraSin.Core.ParticleModel.Interfaces;
 

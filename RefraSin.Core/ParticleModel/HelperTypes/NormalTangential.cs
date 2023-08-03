@@ -1,3 +1,5 @@
+using RefraSin.Coordinates;
+
 namespace RefraSin.Core.ParticleModel.HelperTypes;
 
 /// <summary>
@@ -20,4 +22,26 @@ public struct NormalTangential
     /// Tangential component.
     /// </summary>
     public double Tangential { get; }
+}
+
+/// <summary>
+/// Structure encapsulating angle quantities with two components, one in normal direction, one in tangential.
+/// </summary>
+public struct NormalTangentialAngle
+{
+    public NormalTangentialAngle(Angle normal, Angle tangential)
+    {
+        Normal = normal;
+        Tangential = tangential;
+    }
+
+    /// <summary>
+    /// Normal component.
+    /// </summary>
+    public Angle Normal { get; }
+
+    /// <summary>
+    /// Tangential component.
+    /// </summary>
+    public Angle Tangential { get; }
 }

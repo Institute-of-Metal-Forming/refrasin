@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using IMF.Coordinates;
-using IMF.Enumerables;
+using RefraSin.Coordinates;
+using RefraSin.Enumerables;
 
 namespace RefraSin.Core.ParticleModel
 {
@@ -11,7 +12,20 @@ namespace RefraSin.Core.ParticleModel
     public class ParticleSurface : Ring<Node>
     {
         /// <inheritdoc />
-        public ParticleSurface(IEnumerable<Node> enumerable) : base(enumerable) { }
+        public ParticleSurface(Particle particle)
+        {
+            Particle = particle;
+        }
+
+        public Particle Particle { get; }
+
+        public void AddNodes(IEnumerable<Node> nodes)
+        {
+            foreach (var node in nodes)
+            {
+                Add(node);
+            }
+        }
 
         /// <summary>
         /// Bestimmt die beiden einem Winkel nächstgelegenen Oberflächenknoten.

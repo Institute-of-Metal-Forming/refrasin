@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using IMF.Coordinates;
-using IMF.Coordinates.Absolute;
-using IMF.Coordinates.Polar;
 using IMF.Enumerables;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel;
 using RefraSin.Core.ParticleSources;
 using RefraSin.Core.SinteringProcesses;

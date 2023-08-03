@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RefraSin.Core.ParticleModel;
+using RefraSin.Core.ParticleModel.Interfaces;
 using RefraSin.Core.ParticleModel.States;
 
 namespace RefraSin.Core.Solver.Solution

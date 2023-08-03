@@ -1,48 +1,49 @@
 using System;
 using System.Collections.Generic;
-using IMF.Coordinates;
-using IMF.Coordinates.Absolute;
-using IMF.Coordinates.Polar;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.Materials;
-using RefraSin.Core.ParticleModel.Interfaces;
 
-namespace RefraSin.Core.ParticleModel
+namespace RefraSin.Core.ParticleModel.Interfaces;
+
+/// <summary>
+/// Interface representing a powder particle.
+/// </summary>
+public interface IParticle
 {
     /// <summary>
-    /// Schnittstelle für Pulverteilchen.
+    /// Unique ID.
     /// </summary>
-    public interface IParticle
-    {
-        /// <summary>
-        /// ID
-        /// </summary>
-        public Guid Id { get; }
+    public Guid Id { get; }
 
-        /// <summary>
-        /// Drehwinkel des Partikels.
-        /// </summary>
-        public Angle RotationAngle { get; }
+    /// <summary>
+    /// Rotation angle of the particle's coordinate system around its center.
+    /// </summary>
+    public Angle RotationAngle { get; }
 
-        /// <summary>
-        /// Koordinaten der Teilchenmitte.
-        /// </summary>
-        public AbsolutePoint AbsoluteCenterCoordinates { get; }
+    /// <summary>
+    /// Absolute coordinates of the particle's center.
+    /// </summary>
+    public AbsolutePoint AbsoluteCenterCoordinates { get; }
 
-        /// <summary>
-        /// Koordinaten der Teilchenmitte.
-        /// </summary>
-        public PolarPoint CenterCoordinates { get; }
+    /// <summary>
+    /// Polar coordinates of the particle's center in means of the parent's coordinate system.
+    /// </summary>
+    public PolarPoint CenterCoordinates { get; }
         
-        /// <summary>
-        /// Materialdaten.
-        /// </summary>
-        public Material Material { get; }
+    /// <summary>
+    /// Properties of the material, the particle consists of.
+    /// </summary>
+    public Material Material { get; }
 
-        /// <summary>
-        /// Liste der Oberflächenknoten.
-        /// </summary>
-        public IReadOnlyList<INode> SurfaceNodes { get; }
+    /// <summary>
+    /// List of all surface nodes.
+    /// </summary>
+    public IReadOnlyList<INode> SurfaceNodes { get; }
 
-        public IReadOnlyList<INeck> Necks { get; }
-    }
+    /// <summary>
+    /// List of all necks to neighbor particles.
+    /// </summary>
+    public IReadOnlyList<INeck> Necks { get; }
 }

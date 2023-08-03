@@ -2,7 +2,7 @@ using System;
 
 namespace RefraSin.Core.ParticleModel
 {
-    public class InvalidNeighborhoodException : Exception
+    public class InvalidNeighborhoodException : InvalidOperationException
     {
         public InvalidNeighborhoodException(Node sourceNode, Neighbor requestedNeighbor) : this(null, sourceNode, requestedNeighbor) { }
 
@@ -11,7 +11,7 @@ namespace RefraSin.Core.ParticleModel
         {
             SourceNode = sourceNode;
             RequestedNeighbor = requestedNeighbor;
-            Message = $"The node {sourceNode.ToString()} has no {requestedNeighbor.ToString().ToLower()} neighbor.";
+            Message = $"The node {sourceNode} has no {requestedNeighbor.ToString().ToLower()} neighbor.";
         }
 
         public Node SourceNode { get; }

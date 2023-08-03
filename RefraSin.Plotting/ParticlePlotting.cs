@@ -5,6 +5,7 @@ using OxyPlot.Annotations;
 using OxyPlot.Series;
 using RefraSin.Core;
 using RefraSin.Core.ParticleModel;
+using RefraSin.Core.ParticleModel.Interfaces;
 
 namespace RefraSin.Plotting
 {

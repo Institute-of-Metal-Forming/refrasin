@@ -1,12 +1,11 @@
 using System;
 
-namespace RefraSin.Core.ParticleModel
+namespace RefraSin.Core.ParticleModel.Interfaces;
+
+/// <summary>
+/// Interface für Halsknoten.
+/// </summary>
+public interface INeckNode : IContactNode
 {
-    /// <summary>
-    /// Interface für Halsknoten.
-    /// </summary>
-    public interface INeckNode : IContactNode
-    {
-        public Guid OppositeNeckNodeId { get; }
-    }
+    public Guid OppositeNeckNodeId { get; }
 }

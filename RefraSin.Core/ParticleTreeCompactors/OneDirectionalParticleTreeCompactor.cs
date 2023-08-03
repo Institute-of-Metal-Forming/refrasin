@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using IMF.Coordinates;
-using IMF.Coordinates.Polar;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel;
 using RefraSin.Core.Solver;
 

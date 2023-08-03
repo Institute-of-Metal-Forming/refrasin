@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using IMF.Coordinates;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Series;
+using RefraSin.Coordinates;
 
 namespace RefraSin.Plotting
 {

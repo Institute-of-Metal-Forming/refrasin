@@ -1,7 +1,7 @@
 using System.Linq;
-using IMF.Coordinates;
 using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
+using RefraSin.Coordinates;
 using static System.Math;
 using static MathNet.Numerics.Constants;
 

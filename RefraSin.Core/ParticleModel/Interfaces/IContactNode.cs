@@ -1,26 +1,19 @@
 using System;
-using RefraSin.Core.ParticleModel.Interfaces;
 
-namespace RefraSin.Core.ParticleModel
+namespace RefraSin.Core.ParticleModel.Interfaces;
+
+/// <summary>
+/// Schnittstelle für Knoten, welche einen Kontakt herstellen.
+/// </summary>
+public interface IContactNode : INode
 {
     /// <summary>
-    /// Schnittstelle für Knoten, welche einen Kontakt herstellen.
+    /// Id des Partikels, welches dieser Knoten berührt.
     /// </summary>
-    public interface IContactNode : INode
-    {
-        /// <summary>
-        /// Spannung durch berührung der Oberlächen.
-        /// </summary>
-        public double ContactStress { get; }
+    public Guid ContactedParticleId { get; }
         
-        /// <summary>
-        /// Id des Partikels, welches dieser Knoten berührt.
-        /// </summary>
-        public Guid ContactedParticleId { get; }
-        
-        /// <summary>
-        /// Volume transfer across the grain boundary.
-        /// </summary>
-        public double Transfer { get; }
-    }
+    /// <summary>
+    /// Coefficient for volume transfer to/from the environment of the particle.
+    /// </summary>
+    public double TransferCoefficient { get; }
 }

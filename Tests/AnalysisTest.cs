@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IMF.Coordinates;
-using IMF.Coordinates.Absolute;
-using IMF.Coordinates.Polar;
 using MathNet.Numerics;
 using NUnit.Framework;
 using RefraSin.Analysis;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.Materials;
 using RefraSin.Core.ParticleModel;
 using RefraSin.Core.ParticleModel.Interfaces;

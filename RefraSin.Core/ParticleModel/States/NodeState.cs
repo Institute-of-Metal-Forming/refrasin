@@ -1,69 +1,47 @@
 using System;
 using System.Globalization;
-using IMF.Coordinates.Absolute;
-using IMF.Coordinates.Polar;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel.HelperTypes;
 using RefraSin.Core.ParticleModel.Interfaces;
 
 namespace RefraSin.Core.ParticleModel.States
 {
     /// <summary>
-    /// Stellt den Zustand eines Oberflächenknotens dar.
+    /// Represents a read-only state snapshot of a node.
     /// </summary>
     public abstract class NodeState : INode
     {
-        /// <summary>
-        /// Kopierkonstruktor.
-        /// </summary>
-        /// <param name="template">Vorlage</param>
-        public NodeState(INode template)
-        {
-            Id = template.Id;
-            ParticleId = template.ParticleId;
-            Coordinates = template.Coordinates;
-            AbsoluteCoordinates = template.AbsoluteCoordinates;
-            Curvature = template.Curvature;
-            SurfaceTension = template.SurfaceTension;
-            DeviatoricChemicalPotential = template.DeviatoricChemicalPotential;
-            DeviatoricVacancyConcentration = template.DeviatoricVacancyConcentration;
-            DiffusionalFlowBalance = template.DiffusionalFlowBalance;
-            SurfaceDistance = template.SurfaceDistance;
-            VacancyConcentration = template.VacancyConcentration;
-        }
-        
         /// <inheritdoc />
-        public Guid Id { get; set; }
+        public Guid Id { get; }
 
         /// <inheritdoc />
-        public Guid ParticleId { get; set; }
+        public Guid ParticleId { get; }
 
         /// <inheritdoc />
-        public PolarPoint Coordinates { get; set; }
+        public PolarPoint Coordinates { get; }
 
         /// <inheritdoc />
-        public AbsolutePoint AbsoluteCoordinates { get; set; }
+        public AbsolutePoint AbsoluteCoordinates { get; }
 
         /// <inheritdoc />
-        public double Curvature { get; set; }
+        public ToUpperToLower SurfaceDistance { get; }
 
         /// <inheritdoc />
-        public double SurfaceTension { get; set; }
+        public ToUpperToLowerAngle SurfaceRadiusAngle { get; }
 
         /// <inheritdoc />
-        public double DeviatoricChemicalPotential { get; set; }
+        public ToUpperToLowerAngle AngleDistance { get; }
 
         /// <inheritdoc />
-        public double DeviatoricVacancyConcentration { get; set; }
+        public ToUpperToLower SurfaceDiffusionCoefficient { get; }
 
         /// <inheritdoc />
-        public double VacancyConcentration { get; }
+        public NormalTangential GibbsEnergyGradient { get; }
 
         /// <inheritdoc />
-        public double DiffusionalFlowBalance { get; set; }
+        public NormalTangential VolumeGradient { get; }
 
-        /// <inheritdoc />
-        public ToUpperToLower SurfaceDistance { get; set; }
-        
         /// <inheritdoc />
         public override string ToString() => $"{GetType()} {Id.ToShortString()} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
     }

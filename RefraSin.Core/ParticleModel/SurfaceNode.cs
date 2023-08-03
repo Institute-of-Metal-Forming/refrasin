@@ -1,6 +1,9 @@
-using IMF.Coordinates.Polar;
+using System;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel.HelperTypes;
 using RefraSin.Core.ParticleModel.Interfaces;
+using RefraSin.Core.ParticleModel.TimeSteps;
 using RefraSin.Core.Solver;
 
 namespace RefraSin.Core.ParticleModel
@@ -11,21 +14,36 @@ namespace RefraSin.Core.ParticleModel
     public class SurfaceNode : Node, ISurfaceNode
     {
         /// <inheritdoc />
-        public SurfaceNode(Particle particle, PolarPoint coordinates) : base(particle, coordinates)
+        public SurfaceNode((Angle phi, double r) coordinates) : base(coordinates) { }
+
+        /// <inheritdoc />
+        public SurfaceNode((Angle phi, double r) coordinates, Guid id) : base(coordinates, id) { }
+
+        /// <inheritdoc />
+        public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
+            Particle.Material.SurfaceEnergy,
+            Particle.Material.SurfaceEnergy
+        );
+
+        private ToUpperToLower? _surfaceEnergy;
+
+        /// <inheritdoc />
+        public override ToUpperToLower SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower(
+            Particle.Material.SurfaceDiffusionCoefficient,
+            Particle.Material.SurfaceDiffusionCoefficient
+        );
+
+        private ToUpperToLower? _surfaceDiffusionCoefficient;
+
+        /// <inheritdoc />
+        public override Node ApplyTimeStep(INodeTimeStep timeStep)
         {
-            DiffusionCoefficient = new ToUpperToLower(Particle.Material.SurfaceDiffusionCoefficient,
-                Particle.Material.SurfaceDiffusionCoefficient);
-        }
+            CheckTimeStep(timeStep);
 
-        public override double InterfaceEnergy => Particle.Material.SurfaceEnergy;
+            var newCoordinates = Coordinates + timeStep.DisplacementVector;
+            var newNode = new SurfaceNode(newCoordinates.ToTuple(), Id);
 
-        public override ToUpperToLower DiffusionCoefficient { get; }
-
-        public void RemoveSelfIfNeighborsToClose(ISinteringSolverSession session)
-        {
-            var limit = session.SolverOptions.DiscretizationWidth * session.SolverOptions.RemeshingDistanceDeletionLimit;
-            if (SurfaceDistance.ToUpper < limit && SurfaceDistance.ToLower < limit)
-                Remove();
+            return newNode;
         }
     }
 }

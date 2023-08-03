@@ -1,10 +1,11 @@
 using System;
-using IMF.Coordinates.Polar;
 using IMF.Maths;
 using IMF.Utils;
 using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel.HelperTypes;
+using RefraSin.Core.ParticleModel.Interfaces;
 using RefraSin.Core.Solver;
 using static System.Math;
 using static MathNet.Numerics.Constants;

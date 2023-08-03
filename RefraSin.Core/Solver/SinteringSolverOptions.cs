@@ -1,6 +1,6 @@
 using System;
-using IMF.Coordinates;
 using IMF.Iteration;
+using RefraSin.Coordinates;
 
 namespace RefraSin.Core.Solver
 {

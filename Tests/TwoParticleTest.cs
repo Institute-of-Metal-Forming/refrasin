@@ -1,8 +1,8 @@
 using System.Threading;
-using IMF.Coordinates.Polar;
 using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core;
 using RefraSin.Core.Materials;
 using RefraSin.Core.ParticleSources;

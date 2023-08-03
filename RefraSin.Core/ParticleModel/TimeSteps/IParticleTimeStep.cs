@@ -1,11 +1,17 @@
+using System;
 using System.Collections.Generic;
-using IMF.Coordinates;
-using IMF.Coordinates.Polar;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 
-namespace RefraSin.Core.Solver.TimeSteps;
+namespace RefraSin.Core.ParticleModel.TimeSteps;
 
 public interface IParticleTimeStep
 {
+    /// <summary>
+    /// Unique ID of the particle this time step belongs to.
+    /// </summary>
+    public Guid ParticleId { get; }
+
     /// <summary>
     /// Displacement of the particle center in radial direction.
     /// </summary>
@@ -34,5 +40,7 @@ public interface IParticleTimeStep
     /// <summary>
     /// List of this particle's node time steps.
     /// </summary>
-    public IList<INodeTimeStep> NodeTimeSteps { get; }
+    public IReadOnlyDictionary<Guid, INodeTimeStep> NodeTimeSteps { get; }
+
+    public IReadOnlyDictionary<Guid, IParticleTimeStep> ChildrenTimeSteps { get; }
 }

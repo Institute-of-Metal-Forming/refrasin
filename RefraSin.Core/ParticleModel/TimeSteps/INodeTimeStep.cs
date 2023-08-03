@@ -1,11 +1,16 @@
-using IMF.Coordinates.Polar;
-using RefraSin.Core.ParticleModel;
+using System;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel.HelperTypes;
 
-namespace RefraSin.Core.Solver.TimeSteps;
+namespace RefraSin.Core.ParticleModel.TimeSteps;
 
 public interface INodeTimeStep
 {
+    /// <summary>
+    /// Unique ID of the node this time step belongs to.
+    /// </summary>
+    public Guid NodeId { get; }
+
     /// <summary>
     /// Distance od displacement in normal direction to the surface.
     /// </summary>

@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using System.Threading;
-using IMF.Coordinates;
-using IMF.Coordinates.Polar;
 using IMF.Iteration;
 using MathNet.Numerics;
 using MathNet.Numerics.Optimization;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel;
 using RefraSin.Core.SinteringProcesses;
 using RefraSin.Core.Solver.Solution;
