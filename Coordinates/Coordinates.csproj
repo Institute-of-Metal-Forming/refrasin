@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>RefraSin.Coordinates</AssemblyName>
+        <RootNamespace>RefraSin.Coordinates</RootNamespace>
+        <PackageId>IMF.Coordinates</PackageId>
+        <Description>Library for dealing with 2D coordinates</Description>
+        <Copyright>Institut für Metallformung - TU Bergakademie Freiberg</Copyright>
+        <PackageProjectUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/csharputils</PackageProjectUrl>
+        <RepositoryUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/csharputils</RepositoryUrl>
+        <Authors>Max Weiner</Authors>
+        <Company>Institut für Metallformung - TU Bergakademie Freiberg</Company>
+
+        <Version>2023.06.30</Version>
+        
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DocumentationFile>bin\Debug\net5.0\Coordinates.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DocumentationFile>bin\Release\net5.0\Coordinates.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
+    </ItemGroup>
+
+</Project>
