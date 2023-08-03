@@ -4,6 +4,7 @@ using IMF.Maths;
 using IMF.Utils;
 using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
+using RefraSin.Core.ParticleModel.HelperTypes;
 using RefraSin.Core.Solver;
 using static System.Math;
 using static MathNet.Numerics.Constants;

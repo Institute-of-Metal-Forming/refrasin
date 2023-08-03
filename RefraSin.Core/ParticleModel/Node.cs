@@ -6,6 +6,8 @@ using IMF.Enumerables;
 using IMF.Maths;
 using IMF.Utils;
 using Microsoft.Extensions.Logging;
+using RefraSin.Core.ParticleModel.HelperTypes;
+using RefraSin.Core.ParticleModel.Interfaces;
 using RefraSin.Core.Solver;
 using static System.Math;
 using static MathNet.Numerics.Constants;
@@ -54,25 +56,13 @@ namespace RefraSin.Core.ParticleModel
         Node? IRingItem<Node>.Upper
         {
             get => _upper;
-            set
-            {
-                _upper?.ClearCache();
-                _upper = value;
-                ClearCache();
-                _upper?.ClearCache();
-            }
+            set => _upper = value;
         }
 
         Node? IRingItem<Node>.Lower
         {
             get => _lower;
-            set
-            {
-                _lower?.ClearCache();
-                _lower = value;
-                ClearCache();
-                _lower?.ClearCache();
-            }
+            set => _lower = value;
         }
 
         /// <inheritdoc />
@@ -115,6 +105,7 @@ namespace RefraSin.Core.ParticleModel
         private ToUpperToLowerAngle? _angleDistance;
         private ToUpperToLower? _surfaceDistance;
         private ToUpperToLowerAngle? _surfaceRadiusAngle;
+        private double? _neighborElementsVolume;
 
         /// <summary>
         ///     Koordinaten des Punktes mit Basis auf <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
@@ -126,9 +117,6 @@ namespace RefraSin.Core.ParticleModel
             {
                 _coordinates = value;
                 _coordinates.System = Particle.LocalCoordinateSystem;
-                ClearCache();
-                _upper?.ClearCache();
-                _lower?.ClearCache();
             }
         }
 
@@ -162,65 +150,9 @@ namespace RefraSin.Core.ParticleModel
         /// <summary>
         ///     Gesamtes Volumen der an den Knoten angrenzenden Elemente.
         /// </summary>
-        public double NeighborElementsVolume => 0.5 * Coordinates.R
+        public double NeighborElementsVolume => _neighborElementsVolume ??= 0.5 * Coordinates.R
                                                     * (Upper.Coordinates.R * Sin(AngleDistance.ToUpper)
                                                      + Lower.Coordinates.R * Sin(AngleDistance.ToLower));
-
-        #endregion
-
-        #region FutureGeometry
-
-        private PolarPoint? _futureCoordinates;
-        private ToUpperToLowerAngle? _futureAngleDistance;
-        private ToUpperToLower? _futureSurfaceDistance;
-        private ToUpperToLowerAngle? _futureSurfaceRadiusAngle;
-
-        /// <summary>
-        ///     Koordinaten des Knotens nach Durchführung des Zeitschritts. Kann
-        /// </summary>
-        public PolarPoint FutureCoordinates
-        {
-            get => _futureCoordinates ?? throw new PropertyNotSetException(nameof(FutureCoordinates), ToString(true));
-            private protected set
-            {
-                value.System = Particle.FutureLocalCoordinateSystem;
-                _futureCoordinates = value;
-                ClearFutureGeometryCache();
-                _upper?.ClearFutureGeometryCache();
-                _lower?.ClearFutureGeometryCache();
-            }
-        }
-
-        /// <summary>
-        ///     Winkeldistanz zu den Nachbarknoten (Größe des kürzesten Winkels).
-        /// </summary>
-        public ToUpperToLowerAngle FutureAngleDistance => _futureAngleDistance ??= new ToUpperToLowerAngle(
-            FutureCoordinates.AngleTo(Upper.FutureCoordinates),
-            FutureCoordinates.AngleTo(Lower.FutureCoordinates)
-        );
-
-        /// <summary>
-        ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
-        /// </summary>
-        public ToUpperToLower FutureSurfaceDistance => _futureSurfaceDistance ??= new ToUpperToLower(
-            CosLaw.C(Upper.FutureCoordinates.R, FutureCoordinates.R, FutureAngleDistance.ToUpper),
-            CosLaw.C(Lower.FutureCoordinates.R, FutureCoordinates.R, FutureAngleDistance.ToLower)
-        );
-
-        /// <summary>
-        ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
-        /// </summary>
-        public ToUpperToLowerAngle FutureSurfaceRadiusAngle => _futureSurfaceRadiusAngle ??= new ToUpperToLowerAngle(
-            CosLaw.Gamma(FutureSurfaceDistance.ToUpper, FutureCoordinates.R, Upper.FutureCoordinates.R),
-            CosLaw.Gamma(FutureSurfaceDistance.ToLower, FutureCoordinates.R, Lower.FutureCoordinates.R)
-        );
-
-        /// <summary>
-        ///     Gesamtes Volumen der an den Knoten angrenzenden Elemente.
-        /// </summary>
-        public double FutureNeighborElementsVolume => 0.5 * FutureCoordinates.R
-                                                          * (Upper.FutureCoordinates.R * Sin(FutureAngleDistance.ToUpper)
-                                                           + Lower.FutureCoordinates.R * Sin(FutureAngleDistance.ToLower));
 
         #endregion
 
@@ -262,7 +194,7 @@ namespace RefraSin.Core.ParticleModel
         public virtual double DeviatoricVacancyConcentration => _deviatoricVacancyConcentration ??=
             -Particle.Material.ThermalVacancyConcentration / Particle.Process.UniversalGasConstant / Particle.Process.Temperature *
             DeviatoricChemicalPotential;
-        
+
         public double VacancyConcentration => Particle.Material.ThermalVacancyConcentration + DeviatoricVacancyConcentration;
 
         public virtual ToUpperToLower VacancyConcentrationGradient =>
@@ -290,12 +222,7 @@ namespace RefraSin.Core.ParticleModel
             private set => _timeStepDisplacementVector = value;
         }
 
-        public virtual void InitFutureCoordinates()
-        {
-            FutureCoordinates = Coordinates.Clone();
-        }
-
-        public virtual void CalculateTimeStep(ISinteringSolverSession session)
+        public virtual void CalculateTimeStep(ISinteringSolverSession session, Particle newParticle)
         {
             var gamma = (Pi2 - SurfaceRadiusAngle.ToUpper.Radians - SurfaceRadiusAngle.ToLower.Radians) / 2;
             var ds = 2 * DiffusionalFlowBalance * session.TimeStepWidth / SurfaceDistance.Sum / Sin(gamma);
@@ -327,39 +254,6 @@ namespace RefraSin.Core.ParticleModel
                 { Source = ToString() };
             _futureCoordinates = null;
             ClearFutureGeometryCache();
-        }
-
-        #endregion
-
-        #region CacheHandling
-
-        protected virtual void ClearCache()
-        {
-            ClearGeometryCache();
-            ClearDiffusionCache();
-        }
-
-        protected virtual void ClearGeometryCache()
-        {
-            _curvature = null;
-            _angleDistance = null;
-            _surfaceDistance = null;
-            _surfaceRadiusAngle = null;
-        }
-
-        protected virtual void ClearDiffusionCache()
-        {
-            _diffusionalFlow = null;
-            _deviatoricChemicalPotential = null;
-            _deviatoricVacancyConcentration = null;
-            _vacancyConcentrationGradient = null;
-        }
-
-        protected virtual void ClearFutureGeometryCache()
-        {
-            _futureAngleDistance = null;
-            _futureSurfaceDistance = null;
-            _futureSurfaceRadiusAngle = null;
         }
 
         #endregion

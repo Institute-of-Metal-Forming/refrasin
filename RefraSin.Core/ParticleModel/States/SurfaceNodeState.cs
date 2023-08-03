@@ -1,3 +1,5 @@
+using RefraSin.Core.ParticleModel.Interfaces;
+
 namespace RefraSin.Core.ParticleModel.States
 {
     /// <summary>

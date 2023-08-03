@@ -1,4 +1,6 @@
 using IMF.Coordinates.Polar;
+using RefraSin.Core.ParticleModel.HelperTypes;
+using RefraSin.Core.ParticleModel.Interfaces;
 using RefraSin.Core.Solver;
 
 namespace RefraSin.Core.ParticleModel

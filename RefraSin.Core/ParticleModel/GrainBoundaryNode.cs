@@ -1,4 +1,5 @@
 using IMF.Coordinates.Polar;
+using RefraSin.Core.ParticleModel.HelperTypes;
 
 namespace RefraSin.Core.ParticleModel
 {

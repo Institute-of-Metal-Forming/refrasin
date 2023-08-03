@@ -2,7 +2,7 @@
 
 using IMF.Coordinates;
 
-namespace RefraSin.Core.ParticleModel
+namespace RefraSin.Core.ParticleModel.HelperTypes
 {
     /// <summary>
     /// Stellt ein double-Tupel mit Werten einer nach oben und nach unten vorhandenen Eigenschaft dar.

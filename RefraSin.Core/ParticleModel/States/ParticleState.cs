@@ -7,6 +7,7 @@ using IMF.Coordinates.Absolute;
 using IMF.Coordinates.Polar;
 using IMF.Enumerables;
 using RefraSin.Core.Materials;
+using RefraSin.Core.ParticleModel.Interfaces;
 
 namespace RefraSin.Core.ParticleModel.States
 {

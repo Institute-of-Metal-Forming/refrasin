@@ -4,6 +4,7 @@ using IMF.Coordinates;
 using IMF.Coordinates.Absolute;
 using IMF.Coordinates.Polar;
 using RefraSin.Core.Materials;
+using RefraSin.Core.ParticleModel.Interfaces;
 
 namespace RefraSin.Core.ParticleModel
 {

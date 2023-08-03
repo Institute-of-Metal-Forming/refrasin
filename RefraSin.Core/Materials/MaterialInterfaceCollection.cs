@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RefraSin.Core.Materials
 {
@@ -81,7 +82,8 @@ namespace RefraSin.Core.Materials
             IEnumerable<KeyValuePair<(Material current, Material other), MaterialInterface>>.GetEnumerator() => _dictionary.GetEnumerator();
 
         /// <inheritdoc />
-        public bool TryGetValue((Material current, Material other) key, out MaterialInterface value) => _dictionary.TryGetValue(key, out value);
+        public bool TryGetValue((Material current, Material other) key, [MaybeNullWhen(false)] out MaterialInterface value) =>
+            _dictionary.TryGetValue(key, out value);
 
         /// <inheritdoc />
         public MaterialInterface this[(Material current, Material other) key] => _dictionary[key];

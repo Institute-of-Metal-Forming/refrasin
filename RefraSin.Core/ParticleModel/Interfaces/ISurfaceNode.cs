@@ -1,4 +1,4 @@
-namespace RefraSin.Core.ParticleModel
+namespace RefraSin.Core.ParticleModel.Interfaces
 {
     public interface ISurfaceNode : INode { }
 }

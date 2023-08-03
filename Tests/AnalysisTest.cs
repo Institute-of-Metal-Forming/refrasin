@@ -9,6 +9,7 @@ using NUnit.Framework;
 using RefraSin.Analysis;
 using RefraSin.Core.Materials;
 using RefraSin.Core.ParticleModel;
+using RefraSin.Core.ParticleModel.Interfaces;
 using RefraSin.Core.ParticleModel.States;
 using RefraSin.Core.Solver.Solution;
 

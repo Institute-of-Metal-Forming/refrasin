@@ -2,6 +2,8 @@ using System;
 using System.Globalization;
 using IMF.Coordinates.Absolute;
 using IMF.Coordinates.Polar;
+using RefraSin.Core.ParticleModel.HelperTypes;
+using RefraSin.Core.ParticleModel.Interfaces;
 
 namespace RefraSin.Core.ParticleModel.States
 {

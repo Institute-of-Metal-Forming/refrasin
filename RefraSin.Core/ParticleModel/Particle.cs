@@ -7,6 +7,7 @@ using IMF.Coordinates.Polar;
 using IMF.Enumerables;
 using IMF.Utils;
 using RefraSin.Core.Materials;
+using RefraSin.Core.ParticleModel.Interfaces;
 using RefraSin.Core.SinteringProcesses;
 
 namespace RefraSin.Core.ParticleModel
@@ -55,6 +56,12 @@ namespace RefraSin.Core.ParticleModel
             Material = material;
 
             Surface = new ParticleSurface(surfaceNodeSource(this));
+        }
+
+        public Particle(IParticle particle, IEnumerable<INode> nodes, ICoordinates centerCoordinates)
+        {
+            Process = particle;
+
         }
 
         /// <summary>
