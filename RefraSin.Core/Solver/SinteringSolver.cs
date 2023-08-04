@@ -23,7 +23,7 @@ namespace RefraSin.Core.Solver
         ///     Hauptfunktion für das Lösen des Sintermodells.
         /// </summary>
         /// <returns>true wenn erfolgreich, sonst false</returns>
-        public static ISinteringSolverSolution Solve(ISinteringProcess process, SinteringSolverOptions options, CancellationToken cancellationToken)
+        public static ISinteringSolverSolution Solve(ISinteringProcess process, SolverOptions options, CancellationToken cancellationToken)
         {
             var session = Session.CreateSessionFromProcess(process, options);
             session.Start();
@@ -63,7 +63,7 @@ namespace RefraSin.Core.Solver
                 cancellationToken.ThrowIfCancellationRequested();
                 session.ThrowIfTimedOut();
 
-                if (i > session.SolverOptions.MaxIterationCount)
+                if (i > session.Options.MaxIterationCount)
                     throw new CriticalIterationInterceptedException(nameof(CalculateTimeStepWithDecreasingTimeStepWidthsUntilTimeStepIsValid),
                         MaxIterationCountExceeded, i);
 
@@ -214,7 +214,7 @@ namespace RefraSin.Core.Solver
 
             for (var i = 0;; i++)
             {
-                if (i > session.SolverOptions.MaxIterationCount)
+                if (i > session.Options.MaxIterationCount)
                     throw new CriticalIterationInterceptedException($"{nameof(CalculateChildsMovement)} of {child}",
                         MaxIterationCountExceeded, i);
 
@@ -269,15 +269,15 @@ namespace RefraSin.Core.Solver
             PolarVector direction, Session session)
         {
             var (lowerBound, upperBound) = GuessMinimizationBounds(child, session);
-            var tolerance = session.SolverOptions.IterationPrecision / 2 *
-                            Abs(child.MovementDistanceOfLastTimeStep ?? session.SolverOptions.DiscretizationWidth / 10);
+            var tolerance = session.Options.IterationPrecision / 2 *
+                            Abs(child.MovementDistanceOfLastTimeStep ?? session.Options.DiscretizationWidth / 10);
             var minimizedFunction = CreateStressIntegralFunction(child, grainBoundaryNodes, direction, session);
 
             var minimum = GoldenSectionMinimizer.Minimum(
                 minimizedFunction,
                 lowerBound, upperBound, tolerance,
-                session.SolverOptions.MaxIterationCount,
-                session.SolverOptions.MaxIterationCount
+                session.Options.MaxIterationCount,
+                session.Options.MaxIterationCount
             );
 
             return minimum.MinimizingPoint;
@@ -312,11 +312,11 @@ namespace RefraSin.Core.Solver
                     child.MovementDistanceOfLastTimeStep.Value + windowAroundLastDistance);
             }
 
-            return (-0.01 * session.SolverOptions.DiscretizationWidth, +0.01 * session.SolverOptions.DiscretizationWidth);
+            return (-0.01 * session.Options.DiscretizationWidth, +0.01 * session.Options.DiscretizationWidth);
         }
 
         private static bool MovementVectorDidNotChangeWithinPrecision(PolarVector movementVector, PolarVector oldMovementVector, Session session) =>
-            Abs((movementVector - oldMovementVector).Norm) < Abs(session.SolverOptions.IterationPrecision * movementVector.Norm * 10);
+            Abs((movementVector - oldMovementVector).Norm) < Abs(session.Options.IterationPrecision * movementVector.Norm * 10);
 
         private static bool TryCalculateGrainBoundaryStresses(GrainBoundaryNode[] grainBoundaryNodes, Session session)
         {
@@ -354,7 +354,7 @@ namespace RefraSin.Core.Solver
             int i;
             for (i = 0;; i++)
             {
-                if (i > session.SolverOptions.MaxIterationCount)
+                if (i > session.Options.MaxIterationCount)
                     throw new UncriticalIterationInterceptedException(nameof(ModifyGrainBoundaryStressesUntilGrainBoundaryIsCompact),
                         MaxIterationCountExceeded, i);
 
@@ -409,7 +409,7 @@ namespace RefraSin.Core.Solver
             var averageVolumeChange = grainBoundaryNodes
                 .Select(k => Abs(k.NeighborElementsVolume - k.FutureNeighborElementsVolume)).Average();
 
-            if (volumeDifferences.All(v => Abs(v) < session.SolverOptions.IterationPrecision * averageVolumeChange))
+            if (volumeDifferences.All(v => Abs(v) < session.Options.IterationPrecision * averageVolumeChange))
                 return true;
 
             return false;
@@ -419,7 +419,7 @@ namespace RefraSin.Core.Solver
             double[] volumeDifferences, int iterationCount, Session session)
         {
             var grainBoundaryTensionBrakeFactor =
-                Pow((session.SolverOptions.MaxIterationCount - (double)iterationCount) / session.SolverOptions.MaxIterationCount, 2)
+                Pow((session.Options.MaxIterationCount - (double)iterationCount) / session.Options.MaxIterationCount, 2)
               / Pow(grainBoundaryNodes.Length, 0.5);
 
             var stressChanges =
@@ -457,7 +457,7 @@ namespace RefraSin.Core.Solver
                                         grainBoundaryNodes[j].SurfaceDistance.Sum;
 
                 modifiedStressChanges[j] =
-                    stressChanges[j] + session.SolverOptions.GrainBoundaryStressChangeNeighborInfluenceBreakFactor * neighborInfluence;
+                    stressChanges[j] + session.Options.GrainBoundaryStressChangeNeighborInfluenceBreakFactor * neighborInfluence;
             }
 
             return modifiedStressChanges;

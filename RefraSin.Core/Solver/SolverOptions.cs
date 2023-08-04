@@ -7,7 +7,7 @@ namespace RefraSin.Core.Solver
     /// <summary>
     /// Class holding options to customize solver behavior.
     /// </summary>
-    public class SinteringSolverOptions
+    public class SolverOptions
     {
         /// <summary>
         /// Maximum count of iterations until an <see cref="IterationInterceptedException"/> is thrown.

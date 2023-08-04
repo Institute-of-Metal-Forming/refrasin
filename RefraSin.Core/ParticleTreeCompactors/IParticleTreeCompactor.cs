@@ -11,6 +11,6 @@ namespace RefraSin.Core.ParticleTreeCompactors
         /// Execute compaction on a specified particle tree.
         /// </summary>
         /// <param name="session"></param>
-        public void Compact(ISinteringSolverSession session);
+        public void Compact(ISolverSession session);
     }
 }

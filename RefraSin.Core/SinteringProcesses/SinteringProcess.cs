@@ -66,7 +66,7 @@ namespace RefraSin.Core.SinteringProcesses
         /// <summary>
         /// Options for solver behavior.
         /// </summary>
-        public SinteringSolverOptions SolverOptions { get; set; } = new();
+        public SolverOptions SolverOptions { get; set; } = new();
 
         /// <summary>
         ///     Solve the process.

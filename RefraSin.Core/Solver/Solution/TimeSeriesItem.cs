@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RefraSin.Core.ParticleModel;
 using RefraSin.Core.ParticleModel.Interfaces;
-using RefraSin.Core.ParticleModel.States;
+using RefraSin.Core.ParticleModel.Records;
 
 namespace RefraSin.Core.Solver.Solution
 {
@@ -19,7 +19,7 @@ namespace RefraSin.Core.Solver.Solution
         public TimeSeriesItem(double time, IEnumerable<IParticle> particles)
         {
             Time = time;
-            Particles = particles.Select(p => new ParticleState(p)).ToArray();
+            Particles = particles.Select(p => new ParticleRecord(p)).ToArray();
         }
         
         /// <summary>

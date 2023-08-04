@@ -16,7 +16,7 @@ namespace RefraSin.Core.Solver
 {
     public partial class SinteringSolver
     {
-        private class Session : ISinteringSolverSession
+        private class Session : ISolverSession
         {
             private readonly ILogger _logger = Configuration.CreateLogger(typeof(SinteringSolver));
             private readonly List<TimeSeriesItem> _solutionStates = new();
@@ -24,13 +24,13 @@ namespace RefraSin.Core.Solver
             private double? _initialTotalParticlesVolume;
             private double _timeStepWidth;
 
-            private Session(ISinteringProcess process, SinteringSolverOptions solverOptions)
+            private Session(ISinteringProcess process, SolverOptions solverOptions)
             {
                 StartTime = process.StartTime;
                 EndTime = process.EndTime;
                 CurrentTime = StartTime;
                 _timeStepWidth = solverOptions.InitialTimeStepWidth; // use of field is essential for LastStepsTimeStepWidth != 0
-                SolverOptions = solverOptions;
+                Options = solverOptions;
 
                 Particles = process.TreeSource.GetParticleTree(process, SurfaceNodeCountFunction);
                 process.Compactor.Compact(this);
@@ -56,7 +56,7 @@ namespace RefraSin.Core.Solver
 
             public Tree<Particle> Particles { get; }
 
-            public SinteringSolverOptions SolverOptions { get; }
+            public SolverOptions Options { get; }
 
             public IReadOnlyList<TimeSeriesItem> TimeSeries => _solutionStates;
 
@@ -88,7 +88,7 @@ namespace RefraSin.Core.Solver
 
             public void ThrowIfTimedOut()
             {
-                if (SolverOptions.TimeOut > 0 && _stopwatch.Elapsed.TotalSeconds > SolverOptions.TimeOut)
+                if (Options.TimeOut > 0 && _stopwatch.Elapsed.TotalSeconds > Options.TimeOut)
                     throw new TimeoutException();
             }
 
@@ -105,7 +105,7 @@ namespace RefraSin.Core.Solver
 
             private double CalculateTotalParticlesVolume() => Particles.Sum(p => p.Surface.Sum(k => k.NeighborElementsVolume));
 
-            public static Session CreateSessionFromProcess(ISinteringProcess process, SinteringSolverOptions solverOptions) =>
+            public static Session CreateSessionFromProcess(ISinteringProcess process, SolverOptions solverOptions) =>
                 new(process, solverOptions);
 
             public void ApplyTimeStep()
@@ -122,14 +122,14 @@ namespace RefraSin.Core.Solver
 
             public void DecreaseTimeStepWidthConditionally()
             {
-                var newTimeStepWidth = TimeStepWidth / SolverOptions.TimeStepAdaptationFactor;
+                var newTimeStepWidth = TimeStepWidth / Options.TimeStepAdaptationFactor;
 
-                if (newTimeStepWidth < SolverOptions.MinTimeStepWidth)
+                if (newTimeStepWidth < Options.MinTimeStepWidth)
                     throw new CriticalIterationInterceptedException(
                         nameof(CalculateTimeStepWithDecreasingTimeStepWidthsUntilTimeStepIsValid),
                         InterceptReason.InvalidStateOccured,
                         furtherInformation:
-                        $"Tried to decrease current time step width of {TimeStepWidth}, but it fall below defined minimal time step width of {SolverOptions.MinTimeStepWidth}."
+                        $"Tried to decrease current time step width of {TimeStepWidth}, but it fall below defined minimal time step width of {Options.MinTimeStepWidth}."
                     );
 
                 TimeStepWidth = newTimeStepWidth;
@@ -139,8 +139,8 @@ namespace RefraSin.Core.Solver
 
             public void IncreaseTimeStepWidthConditionally()
             {
-                var newTimeStepWidth = TimeStepWidth * SolverOptions.TimeStepAdaptationFactor;
-                if (newTimeStepWidth < SolverOptions.MaxTimeStepWidth && TimeStepsSinceLastTimeStepWidthChange >= SolverOptions.TimeStepIncreaseDelay)
+                var newTimeStepWidth = TimeStepWidth * Options.TimeStepAdaptationFactor;
+                if (newTimeStepWidth < Options.MaxTimeStepWidth && TimeStepsSinceLastTimeStepWidthChange >= Options.TimeStepIncreaseDelay)
                 {
                     TimeStepWidth = newTimeStepWidth;
                     TimeStepsSinceLastTimeStepWidthChange = -1;
@@ -150,7 +150,7 @@ namespace RefraSin.Core.Solver
 
             private void SaveCurrentStateToSolutionStates() => _solutionStates.Add(new TimeSeriesItem(CurrentTime, Particles));
 
-            private int SurfaceNodeCountFunction(double particleRadius) => (int)(Pi2 * particleRadius / SolverOptions.DiscretizationWidth);
+            private int SurfaceNodeCountFunction(double particleRadius) => (int)(Pi2 * particleRadius / Options.DiscretizationWidth);
 
             #region Log Methods
 

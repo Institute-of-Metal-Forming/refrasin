@@ -1,53 +1,59 @@
+using System;
 using System.Collections.Generic;
-using IMF.Enumerables;
 using RefraSin.Core.ParticleModel;
-using RefraSin.Core.Solver.Solution;
+using RefraSin.Core.ParticleModel.Interfaces;
+using RefraSin.Enumerables;
 
 namespace RefraSin.Core.Solver
 {
     /// <summary>
     /// Interface for objects holding session data of a solution procedure.
     /// </summary>
-    public interface ISinteringSolverSession
+    public interface ISolverSession
     {
         /// <summary>
         /// Time of the current step.
         /// </summary>
         public double CurrentTime { get; }
-        
+
         /// <summary>
         /// Time where the solution started.
         /// </summary>
         public double StartTime { get; }
-        
+
         /// <summary>
         /// Time where the solution should end.
         /// </summary>
         public double EndTime { get; }
-        
+
         /// <summary>
         /// Current step width of time integration.
         /// </summary>
         public double TimeStepWidth { get; }
-        
+
         /// <summary>
         /// Step width used in the last time step.
         /// </summary>
         public double? TimeStepWidthOfLastStep { get; }
-        
+
         /// <summary>
-        /// Tree of particles.
+        /// Registry of all particles.
         /// </summary>
-        public Tree<Particle> Particles { get; }
-        
+        public IReadOnlyDictionary<Guid, IParticle> Particles { get; }
+
+        /// <summary>
+        /// Registry of all nodes of all particles.
+        /// </summary>
+        public IReadOnlyDictionary<Guid, INode> Nodes { get; }
+
         /// <summary>
         /// Options for the solver.
         /// </summary>
-        public SinteringSolverOptions SolverOptions { get; }
-        
+        public SolverOptions Options { get; }
+
         /// <summary>
-        /// Times series of solution states calculated so far.
+        /// Object for storing the calculated solution data. Store and forget from the perspective of the solver.
         /// </summary>
-        public IReadOnlyList<TimeSeriesItem> TimeSeries { get; }
+        public ISolutionStorage SolutionStorage { get; }
     }
 }

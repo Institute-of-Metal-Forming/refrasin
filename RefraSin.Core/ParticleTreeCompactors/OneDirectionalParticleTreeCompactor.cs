@@ -18,9 +18,9 @@ namespace RefraSin.Core.ParticleTreeCompactors
         public int DiscretizationWidthDistanceStepRatio { get; set; } = 10;
 
         /// <inheritdoc />
-        public void Compact(ISinteringSolverSession session)
+        public void Compact(ISolverSession session)
         {
-            var distanceStep = session.SolverOptions.DiscretizationWidth / DiscretizationWidthDistanceStepRatio;
+            var distanceStep = session.Options.DiscretizationWidth / DiscretizationWidthDistanceStepRatio;
 
             foreach (var parent in session.Particles)
             {
