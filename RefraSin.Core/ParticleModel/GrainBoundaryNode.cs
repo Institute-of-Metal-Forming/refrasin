@@ -1,5 +1,6 @@
 using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel.HelperTypes;
+using RefraSin.Core.ParticleModel.TimeSteps;
 
 namespace RefraSin.Core.ParticleModel
 {
@@ -13,19 +14,21 @@ namespace RefraSin.Core.ParticleModel
 
         /// <inheritdoc />
         public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
-            Particle.Material.SurfaceEnergy,
-            Particle.Material.SurfaceEnergy
+            MaterialInterface.InterfaceEnergy,
+            MaterialInterface.InterfaceEnergy
         );
 
         private ToUpperToLower? _surfaceEnergy;
 
         /// <inheritdoc />
         public override ToUpperToLower SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower(
-            Particle.Material.SurfaceDiffusionCoefficient,
-            Particle.Material.SurfaceDiffusionCoefficient
+            MaterialInterface.DiffusionCoefficient,
+            MaterialInterface.DiffusionCoefficient
         );
 
         private ToUpperToLower? _surfaceDiffusionCoefficient;
 
+        /// <inheritdoc />
+        public override Node ApplyTimeStep(INodeTimeStep timeStep) => throw new System.NotImplementedException();
     }
 }

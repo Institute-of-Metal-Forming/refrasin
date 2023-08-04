@@ -3,6 +3,7 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Core.Materials;
 using RefraSin.Core.ParticleModel.Interfaces;
+using RefraSin.Core.ParticleModel.Records;
 
 namespace RefraSin.Core.ParticleModel
 {
@@ -24,12 +25,15 @@ namespace RefraSin.Core.ParticleModel
         /// <summary>
         /// Properties of the interface between two materials.
         /// </summary>
-        public MaterialInterface MaterialInterface => _materialInterface ??= Particle.GetMaterialInterface(ContactedNode.Particle);
+        public MaterialInterface MaterialInterface => _materialInterface ??= Particle.MaterialInterfaces[ContactedNode.Particle.Material];
 
         private MaterialInterface? _materialInterface;
 
         /// <inheritdoc />
         public override Guid ContactedParticleId => ContactedNode.ParticleId;
+
+        /// <inheritdoc />
+        public override double TransferCoefficient => MaterialInterface.TransferCoefficient;
 
         /// <summary>
         /// Stellt eine Verbindung zwischen zwei Knoten her (setzt die gegenseitigen <see cref="ContactedNode"/>).
