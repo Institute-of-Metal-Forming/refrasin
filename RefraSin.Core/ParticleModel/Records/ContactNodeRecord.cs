@@ -14,6 +14,7 @@ namespace RefraSin.Core.ParticleModel.Records
         /// <inheritdoc />
         protected ContactNodeRecord(IContactNode template) : base(template)
         {
+            ContactedNodeId = template.ContactedNodeId;
             ContactedParticleId = template.ContactedParticleId;
             TransferCoefficient = template.TransferCoefficient;
         }
@@ -33,6 +34,7 @@ namespace RefraSin.Core.ParticleModel.Records
             NormalTangential GibbsEnergyGradient,
             NormalTangential VolumeGradient,
             Guid contactedParticleId,
+            Guid contactedNodeId,
             double transferCoefficient
         ) : base(
             Id,
@@ -52,10 +54,14 @@ namespace RefraSin.Core.ParticleModel.Records
         {
             ContactedParticleId = contactedParticleId;
             TransferCoefficient = transferCoefficient;
+            ContactedNodeId = contactedNodeId;
         }
 
         /// <inheritdoc />
         public Guid ContactedParticleId { get; }
+
+        /// <inheritdoc />
+        public Guid ContactedNodeId { get; }
 
         /// <inheritdoc />
         public double TransferCoefficient { get; }

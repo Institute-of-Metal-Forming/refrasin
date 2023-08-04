@@ -32,6 +32,7 @@ public record NeckNodeRecord : ContactNodeRecord, INeckNode
         NormalTangential GibbsEnergyGradient,
         NormalTangential VolumeGradient,
         Guid contactedParticleId,
+        Guid contactedNodeId,
         double transferCoefficient,
         Guid oppositeNeckNodeId
     ) : base(
@@ -49,6 +50,7 @@ public record NeckNodeRecord : ContactNodeRecord, INeckNode
         GibbsEnergyGradient,
         VolumeGradient,
         contactedParticleId,
+        contactedNodeId,
         transferCoefficient
     )
     {

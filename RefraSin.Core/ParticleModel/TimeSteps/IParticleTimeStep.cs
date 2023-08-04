@@ -41,6 +41,4 @@ public interface IParticleTimeStep
     /// List of this particle's node time steps.
     /// </summary>
     public IReadOnlyDictionary<Guid, INodeTimeStep> NodeTimeSteps { get; }
-
-    public IReadOnlyDictionary<Guid, IParticleTimeStep> ChildrenTimeSteps { get; }
 }

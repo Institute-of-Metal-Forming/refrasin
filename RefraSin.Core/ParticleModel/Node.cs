@@ -84,7 +84,7 @@ namespace RefraSin.Core.ParticleModel
         /// <summary>
         /// Coordinates of the node in terms of particle's local coordinate system <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
         /// </summary>
-        public PolarPoint Coordinates { get; }
+        public PolarPoint Coordinates { get; private set; }
 
         /// <inheritdoc />
         public AbsolutePoint AbsoluteCoordinates => Coordinates.Absolute;
@@ -158,15 +158,60 @@ namespace RefraSin.Core.ParticleModel
 
         private NormalTangential? _volumeGradient;
 
-        public abstract Node ApplyTimeStep(INodeTimeStep timeStep);
+        protected virtual void ClearCaches()
+        {
+            _angleDistance = null;
+            _surfaceDistance = null;
+            _surfaceRadiusAngle = null;
+            _volume = null;
+            _surfaceAngle = null;
+            _gibbsEnergyGradient = null;
+            _volumeGradient = null;
+        }
 
-        protected void CheckTimeStep(INodeTimeStep timeStep)
+        public virtual void ApplyTimeStep(INodeTimeStep timeStep)
+        {
+            CheckTimeStep(timeStep);
+
+            Coordinates += timeStep.DisplacementVector;
+
+            ClearCaches();
+        }
+
+        protected virtual void CheckTimeStep(INodeTimeStep timeStep)
         {
             if (timeStep.NodeId != Id)
                 throw new InvalidOperationException("IDs of node and time step do not match.");
 
             if (timeStep.DisplacementVector.System != Coordinates.System)
                 throw new InvalidOperationException("Current coordinates and displacement vector must be in same coordinate system.");
+        }
+
+        public virtual void ApplyState(INode state)
+        {
+            CheckState(state);
+
+            Coordinates = new PolarPoint(state.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
+
+            _angleDistance = state.AngleDistance;
+            _surfaceDistance = state.SurfaceDistance;
+            _surfaceRadiusAngle = state.SurfaceRadiusAngle;
+            _volume = state.Volume;
+            _surfaceAngle = state.SurfaceAngle;
+            _gibbsEnergyGradient = state.GibbsEnergyGradient;
+            _volumeGradient = state.VolumeGradient;
+
+            ClearCaches();
+        }
+
+
+        protected virtual void CheckState(INode state)
+        {
+            if (state.Id != Id)
+                throw new InvalidOperationException("IDs of node and state do not match.");
+
+            if (state.Coordinates.System != Coordinates.System)
+                throw new InvalidOperationException("Current coordinates and state coordinates must be in same coordinate system.");
         }
 
         /// <summary>

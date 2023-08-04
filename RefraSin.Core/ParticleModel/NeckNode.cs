@@ -17,6 +17,9 @@ namespace RefraSin.Core.ParticleModel
         /// <inheritdoc />
         public NeckNode((Angle phi, double r) coordinates) : base(coordinates) { }
 
+        /// <inheritdoc />
+        public Guid OppositeNeckNodeId { get; }
+
         public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
             Upper.SurfaceEnergy.ToLower,
             Lower.SurfaceEnergy.ToUpper
@@ -33,9 +36,29 @@ namespace RefraSin.Core.ParticleModel
         private ToUpperToLower? _surfaceDiffusionCoefficient;
 
         /// <inheritdoc />
-        public override Node ApplyTimeStep(INodeTimeStep timeStep) => throw new NotImplementedException();
+        protected override void ClearCaches()
+        {
+            base.ClearCaches();
+            _surfaceEnergy = null;
+            _surfaceDiffusionCoefficient = null;
+        }
+
+        /// <inheritdoc cref="Node.ApplyState"/>
+        public override void ApplyState(INode state)
+        {
+            base.ApplyState(state);
+
+            _surfaceEnergy = state.SurfaceEnergy;
+            _surfaceDiffusionCoefficient = state.SurfaceDiffusionCoefficient;
+        }
 
         /// <inheritdoc />
-        public Guid OppositeNeckNodeId { get; }
+        protected override void CheckState(INode state)
+        {
+            base.CheckState(state);
+
+            if (state is not INeckNode)
+                throw new ArgumentException($"The given state is no instance of {nameof(INeckNode)}", nameof(state));
+        }
     }
 }

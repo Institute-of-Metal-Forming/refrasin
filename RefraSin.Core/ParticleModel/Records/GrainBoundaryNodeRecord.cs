@@ -29,6 +29,7 @@ public record GrainBoundaryNodeRecord : ContactNodeRecord, IGrainBoundaryNode
         NormalTangential GibbsEnergyGradient,
         NormalTangential VolumeGradient,
         Guid contactedParticleId,
+        Guid contactedNodeId,
         double transferCoefficient
     ) : base(
         Id,
@@ -45,6 +46,7 @@ public record GrainBoundaryNodeRecord : ContactNodeRecord, IGrainBoundaryNode
         GibbsEnergyGradient,
         VolumeGradient,
         contactedParticleId,
+        contactedNodeId,
         transferCoefficient
     ) { }
 }

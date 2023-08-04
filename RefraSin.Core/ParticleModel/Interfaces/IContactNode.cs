@@ -11,7 +11,12 @@ public interface IContactNode : INode
     /// Id des Partikels, welches dieser Knoten berührt.
     /// </summary>
     public Guid ContactedParticleId { get; }
-        
+
+    /// <summary>
+    /// Id des Partikels, welches dieser Knoten berührt.
+    /// </summary>
+    public Guid ContactedNodeId { get; }
+
     /// <summary>
     /// Coefficient for volume transfer to/from the environment of the particle.
     /// </summary>

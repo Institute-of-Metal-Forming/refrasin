@@ -1,5 +1,7 @@
+using System;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Core.ParticleModel.HelperTypes;
+using RefraSin.Core.ParticleModel.Interfaces;
 using RefraSin.Core.ParticleModel.TimeSteps;
 
 namespace RefraSin.Core.ParticleModel
@@ -29,6 +31,29 @@ namespace RefraSin.Core.ParticleModel
         private ToUpperToLower? _surfaceDiffusionCoefficient;
 
         /// <inheritdoc />
-        public override Node ApplyTimeStep(INodeTimeStep timeStep) => throw new System.NotImplementedException();
+        protected override void ClearCaches()
+        {
+            base.ClearCaches();
+            _surfaceEnergy = null;
+            _surfaceDiffusionCoefficient = null;
+        }
+
+        /// <inheritdoc cref="Node.ApplyState"/>
+        public override void ApplyState(INode state)
+        {
+            base.ApplyState(state);
+
+            _surfaceEnergy = state.SurfaceEnergy;
+            _surfaceDiffusionCoefficient = state.SurfaceDiffusionCoefficient;
+        }
+
+        /// <inheritdoc />
+        protected override void CheckState(INode state)
+        {
+            base.CheckState(state);
+
+            if (state is not IGrainBoundaryNode)
+                throw new ArgumentException($"The given state is no instance of {nameof(IGrainBoundaryNode)}", nameof(state));
+        }
     }
 }

@@ -27,7 +27,6 @@ namespace RefraSin.Core.ParticleModel
             var upper = (NeckNode) next;
             UpperNeckNode = upper;
             Radius = (UpperNeckNode.AbsoluteCoordinates - LowerNeckNode.AbsoluteCoordinates).Norm / 2;
-            MeanCurvature = grainBoundaryNodes.Sum(n => n.Curvature * n.SurfaceDistance.Sum) / grainBoundaryNodes.Sum(n => n.SurfaceDistance.Sum);
             Id = MergeGuidsToHash(ParticleId, ContactedParticleId, LowerNeckNode.Id, lower.ContactedNode.Id, UpperNeckNode.Id,
                 upper.ContactedNode.Id);
         }
@@ -39,7 +38,6 @@ namespace RefraSin.Core.ParticleModel
         public double Radius { get; }
         public double GrainBoundaryLength { get; }
         
-        public double MeanCurvature { get; }
         public int Id { get; }
         
         /// <summary>

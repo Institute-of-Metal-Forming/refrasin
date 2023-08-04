@@ -16,8 +16,6 @@ namespace RefraSin.Core.ParticleModel;
 /// </summary>
 public class Particle : IParticle, ITreeItem<Particle>
 {
-    private static readonly PolarCoordinateSystem DefaultCenterCoordinatesSystem = new() { Label = "default center coordinates system" };
-
     private Particle(
         (Angle phi, double r) centerCoordinates,
         Angle rotationAngle,
@@ -89,7 +87,7 @@ public class Particle : IParticle, ITreeItem<Particle>
     /// <summary>
     /// Drehwinkel des Partikels.
     /// </summary>
-    public Angle RotationAngle { get; }
+    public Angle RotationAngle { get; private set; }
 
     /// <inheritdoc />
     public AbsolutePoint AbsoluteCenterCoordinates => CenterCoordinates.Absolute;
@@ -100,7 +98,7 @@ public class Particle : IParticle, ITreeItem<Particle>
     /// <summary>
     /// Koordinaten des Ursprungs des lokalen Koordinatensystem ausgedrückt im Koordinatensystem des <see cref="Parent"/>
     /// </summary>
-    public PolarPoint CenterCoordinates { get; }
+    public PolarPoint CenterCoordinates { get; private set; }
 
     /// <summary>
     /// Übergeordnetes Partikel dieses Partikels in der Baumanordnung.
@@ -112,31 +110,18 @@ public class Particle : IParticle, ITreeItem<Particle>
     /// </summary>
     public TreeChildrenCollection<Particle> Children { get; }
 
-    public Particle ApplyTimeStep(IParticleTimeStep timeStep)
+    public virtual void ApplyTimeStep(IParticleTimeStep timeStep)
     {
         CheckTimeStep(timeStep);
 
-        var newCoordinates = CenterCoordinates + timeStep.DisplacementVector;
+        CenterCoordinates += timeStep.DisplacementVector;
 
-        var newParticle = new Particle(
-            newCoordinates.ToTuple(),
-            (RotationAngle + timeStep.RotationDisplacement).Reduce(),
-            Id,
-            Material,
-            MaterialInterfaces
-        );
+        RotationAngle = (RotationAngle + timeStep.RotationDisplacement).Reduce();
 
         foreach (var node in Surface)
         {
-            newParticle.Surface.Add(node.ApplyTimeStep(timeStep.NodeTimeSteps[node.Id]));
+            node.ApplyTimeStep(timeStep.NodeTimeSteps[node.Id]);
         }
-
-        foreach (var child in Children)
-        {
-            newParticle.Children.Add(child.ApplyTimeStep(timeStep.ChildrenTimeSteps[child.Id]));
-        }
-
-        return newParticle;
     }
 
     private void CheckTimeStep(IParticleTimeStep timeStep)
@@ -148,9 +133,30 @@ public class Particle : IParticle, ITreeItem<Particle>
             throw new InvalidOperationException("Current coordinates and displacement vector must be in same coordinate system.");
     }
 
-    /// <inheritdoc/>
-    public override string ToString()
+    public virtual void ApplyState(IParticle state)
     {
-        return $"{GetType().Name} {Id.ToShortString()}";
+        CheckState(state);
+
+        CenterCoordinates = state.CenterCoordinates;
+        RotationAngle = state.RotationAngle;
+
+        var nodeStates = state.SurfaceNodes.ToDictionary(n => n.Id);
+
+        foreach (var node in Surface)
+        {
+            node.ApplyState(nodeStates[node.Id]);
+        }
     }
+
+    protected virtual void CheckState(IParticle state)
+    {
+        if (state.Id != Id)
+            throw new InvalidOperationException("IDs of node and state do not match.");
+
+        if (state.CenterCoordinates.System != CenterCoordinates.System)
+            throw new InvalidOperationException("Current coordinates and state coordinates must be in same coordinate system.");
+    }
+
+    /// <inheritdoc/>
+    public override string ToString() => $"{GetType().Name} {Id.ToShortString()}";
 }

@@ -36,14 +36,28 @@ namespace RefraSin.Core.ParticleModel
         private ToUpperToLower? _surfaceDiffusionCoefficient;
 
         /// <inheritdoc />
-        public override Node ApplyTimeStep(INodeTimeStep timeStep)
+        protected override void ClearCaches()
         {
-            CheckTimeStep(timeStep);
+            base.ClearCaches();
+            _surfaceEnergy = null;
+            _surfaceDiffusionCoefficient = null;
+        }
 
-            var newCoordinates = Coordinates + timeStep.DisplacementVector;
-            var newNode = new SurfaceNode(newCoordinates.ToTuple(), Id);
+        /// <inheritdoc cref="Node.ApplyState"/>
+        public override void ApplyState(INode state)
+        {
+            base.ApplyState(state);
+            _surfaceEnergy = state.SurfaceEnergy;
+            _surfaceDiffusionCoefficient = state.SurfaceDiffusionCoefficient;
+        }
 
-            return newNode;
+        /// <inheritdoc />
+        protected override void CheckState(INode state)
+        {
+            base.CheckState(state);
+
+            if (state is not ISurfaceNode)
+                throw new ArgumentException($"The given state is no instance of {nameof(ISurfaceNode)}", nameof(state));
         }
     }
 }

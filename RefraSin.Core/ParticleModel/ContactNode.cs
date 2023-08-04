@@ -33,6 +33,9 @@ namespace RefraSin.Core.ParticleModel
         public override Guid ContactedParticleId => ContactedNode.ParticleId;
 
         /// <inheritdoc />
+        public override Guid ContactedNodeId => ContactedNode.Id;
+
+        /// <inheritdoc />
         public override double TransferCoefficient => MaterialInterface.TransferCoefficient;
 
         /// <summary>
@@ -79,6 +82,27 @@ namespace RefraSin.Core.ParticleModel
         public abstract Guid ContactedParticleId { get; }
 
         /// <inheritdoc />
+        public abstract Guid ContactedNodeId { get; }
+
+        /// <inheritdoc />
         public abstract double TransferCoefficient { get; }
+
+        /// <inheritdoc />
+        protected override void CheckState(INode state)
+        {
+            base.CheckState(state);
+
+            if (state is IContactNode contactState)
+            {
+                if (contactState.ContactedParticleId != ContactedParticleId)
+                    throw new InvalidOperationException("Contacted particle IDs of state and node do not match.");
+                if (contactState.ContactedNodeId != ContactedNodeId)
+                    throw new InvalidOperationException("Contacted node IDs of state and node do not match.");
+            }
+            else
+            {
+                throw new ArgumentException($"The given state is no instance of {nameof(IContactNode)}", nameof(state));
+            }
+        }
     }
 }
