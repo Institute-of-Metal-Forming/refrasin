@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>RefraSin.Iteration</AssemblyName>
+        <RootNamespace>RefraSin.Iteration</RootNamespace>
+        <PackageId>IMF.Iteration</PackageId>
+        <Description>Library providing helpers for iterational computations</Description>
+        <Copyright>Institut für Metallformung - TU Bergakademie Freiberg</Copyright>
+        <PackageProjectUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/csharputils</PackageProjectUrl>
+        <RepositoryUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/csharputils</RepositoryUrl>
+        <Authors>Max Weiner</Authors>
+        <Company>Institut für Metallformung - TU Bergakademie Freiberg</Company>
+
+        <Version>2021.12.10</Version>
+
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\net6.0\Iteration.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\net6.0\Iteration.xml</DocumentationFile>
+    </PropertyGroup>
+
+</Project>

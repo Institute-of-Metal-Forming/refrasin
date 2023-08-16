@@ -10,7 +10,7 @@ namespace RefraSin.Core.Solver
     /// <summary>
     ///     Lösungsalgorithmus für den Sinterprozess.
     /// </summary>
-    public static partial class SinteringSolver
+    public static partial class Solver
     {
         /// <summary>
         ///     Hauptfunktion für das Lösen des Sintermodells.

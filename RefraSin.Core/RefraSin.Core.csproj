@@ -36,8 +36,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Coordinates\Coordinates.csproj" />
-      <ProjectReference Include="..\Enumerables\Enumerables.csproj" />
+      <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
+      <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj" />
+      <ProjectReference Include="..\RefraSin.Iteration\RefraSin.Iteration.csproj" />
     </ItemGroup>
+
 
 </Project>

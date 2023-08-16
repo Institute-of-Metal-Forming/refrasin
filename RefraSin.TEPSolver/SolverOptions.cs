@@ -1,4 +1,3 @@
-using System;
 using RefraSin.Coordinates;
 using RefraSin.Iteration;
 
