@@ -6,13 +6,13 @@ namespace RefraSin.ParticleModel.Records;
 /// <summary>
 /// Represents an immutable record of a grain boundary node.
 /// </summary>
-public record GrainBoundaryNodeRecord : ContactNodeRecord, IGrainBoundaryNode
+public record GrainBoundaryNode : ContactNode, IGrainBoundaryNode
 {
     /// <inheritdoc />
-    public GrainBoundaryNodeRecord(IGrainBoundaryNode template) : base(template) { }
+    public GrainBoundaryNode(IGrainBoundaryNode template) : base(template) { }
 
     /// <inheritdoc />
-    public GrainBoundaryNodeRecord(Guid Id,
+    public GrainBoundaryNode(Guid Id,
         Guid ParticleId,
         PolarPoint Coordinates,
         AbsolutePoint AbsoluteCoordinates,

@@ -4,18 +4,17 @@ using RefraSin.Coordinates.Polar;
 namespace RefraSin.ParticleModel.Records;
 
 /// <summary>
-/// Represents an immutable record of a neck node.
+/// Represents an immutable record of a surface node.
 /// </summary>
-public record NeckNodeRecord : ContactNodeRecord, INeckNode
+public record SurfaceNode : Node, ISurfaceNode
 {
     /// <inheritdoc />
-    public NeckNodeRecord(INeckNode template) : base(template)
-    {
-        OppositeNeckNodeId = template.OppositeNeckNodeId;
-    }
+    public SurfaceNode(INode template) : base(template) { }
 
-    /// <inheritdoc />
-    public NeckNodeRecord(Guid Id,
+    /// <summary>
+    /// Represents an immutable record of a surface node.
+    /// </summary>
+    public SurfaceNode(Guid Id,
         Guid ParticleId,
         PolarPoint Coordinates,
         AbsolutePoint AbsoluteCoordinates,
@@ -27,11 +26,7 @@ public record NeckNodeRecord : ContactNodeRecord, INeckNode
         ToUpperToLower SurfaceEnergy,
         ToUpperToLower SurfaceDiffusionCoefficient,
         NormalTangential GibbsEnergyGradient,
-        NormalTangential VolumeGradient,
-        Guid contactedParticleId,
-        Guid contactedNodeId,
-        double transferCoefficient,
-        Guid oppositeNeckNodeId
+        NormalTangential VolumeGradient
     ) : base(
         Id,
         ParticleId,
@@ -45,15 +40,6 @@ public record NeckNodeRecord : ContactNodeRecord, INeckNode
         SurfaceEnergy,
         SurfaceDiffusionCoefficient,
         GibbsEnergyGradient,
-        VolumeGradient,
-        contactedParticleId,
-        contactedNodeId,
-        transferCoefficient
-    )
-    {
-        OppositeNeckNodeId = oppositeNeckNodeId;
-    }
-
-    /// <inheritdoc />
-    public Guid OppositeNeckNodeId { get; }
+        VolumeGradient
+    ) { }
 }

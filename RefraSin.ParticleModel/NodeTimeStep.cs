@@ -12,7 +12,7 @@ namespace RefraSin.ParticleModel.Records;
 /// <param name="DiffusionalFlow"></param>
 /// <param name="OuterDiffusionalFlow"></param>
 /// <param name="VolumeChange"></param>
-public record NodeTimeStepRecord(
+public record NodeTimeStep(
     Guid NodeId,
     double NormalDisplacement,
     double TangentialDisplacement,
@@ -22,7 +22,7 @@ public record NodeTimeStepRecord(
     double VolumeChange
 ) : INodeTimeStep
 {
-    public NodeTimeStepRecord(INodeTimeStep template) : this(
+    public NodeTimeStep(INodeTimeStep template) : this(
         template.NodeId,
         template.NormalDisplacement,
         template.TangentialDisplacement,

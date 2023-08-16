@@ -3,7 +3,7 @@ namespace RefraSin.ParticleModel.Records;
 /// <summary>
 /// Represents an immutable record of a neck.
 /// </summary>
-public record NeckRecord(
+public record Neck(
     Guid Id,
     Guid ParticleId,
     Guid ContactedParticleId,
@@ -14,13 +14,13 @@ public record NeckRecord(
     double GrainBoundaryLength
 ) : INeck
 {
-    public NeckRecord(INeck template) : this(
+    public Neck(INeck template) : this(
         template.Id,
         template.ParticleId,
         template.ContactedParticleId,
-        new NeckNodeRecord(template.LowerNeckNode),
-        new NeckNodeRecord(template.UpperNeckNode),
-        template.GrainBoundaryNodes.Select(n => new GrainBoundaryNodeRecord(n)).ToArray(),
+        new NeckNode(template.LowerNeckNode),
+        new NeckNode(template.UpperNeckNode),
+        template.GrainBoundaryNodes.Select(n => new GrainBoundaryNode(n)).ToArray(),
         template.Radius,
         template.GrainBoundaryLength
     ) { }

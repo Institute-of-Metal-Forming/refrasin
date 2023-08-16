@@ -6,7 +6,7 @@ namespace RefraSin.ParticleModel.Records;
 /// <summary>
 /// Represents an immutable record of a node.
 /// </summary>
-public abstract record NodeRecord(
+public abstract record Node(
     Guid Id,
     Guid ParticleId,
     PolarPoint Coordinates,
@@ -26,7 +26,7 @@ public abstract record NodeRecord(
     /// Creates a new instance by shallow copying from a template.
     /// </summary>
     /// <param name="template">the template to copy from</param>
-    protected NodeRecord(INode template) : this(
+    protected Node(INode template) : this(
         template.Id,
         template.ParticleId,
         template.Coordinates,

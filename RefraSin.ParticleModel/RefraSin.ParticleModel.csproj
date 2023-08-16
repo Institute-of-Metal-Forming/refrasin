@@ -12,4 +12,5 @@
       <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
     </ItemGroup>
 
+
 </Project>

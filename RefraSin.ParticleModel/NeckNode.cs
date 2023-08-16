@@ -4,20 +4,18 @@ using RefraSin.Coordinates.Polar;
 namespace RefraSin.ParticleModel.Records;
 
 /// <summary>
-/// Represents an immutable state of a contact node.
+/// Represents an immutable record of a neck node.
 /// </summary>
-public abstract record ContactNodeRecord : NodeRecord, IContactNode
+public record NeckNode : ContactNode, INeckNode
 {
     /// <inheritdoc />
-    protected ContactNodeRecord(IContactNode template) : base(template)
+    public NeckNode(INeckNode template) : base(template)
     {
-        ContactedNodeId = template.ContactedNodeId;
-        ContactedParticleId = template.ContactedParticleId;
-        TransferCoefficient = template.TransferCoefficient;
+        OppositeNeckNodeId = template.OppositeNeckNodeId;
     }
 
     /// <inheritdoc />
-    protected ContactNodeRecord(Guid Id,
+    public NeckNode(Guid Id,
         Guid ParticleId,
         PolarPoint Coordinates,
         AbsolutePoint AbsoluteCoordinates,
@@ -32,7 +30,8 @@ public abstract record ContactNodeRecord : NodeRecord, IContactNode
         NormalTangential VolumeGradient,
         Guid contactedParticleId,
         Guid contactedNodeId,
-        double transferCoefficient
+        double transferCoefficient,
+        Guid oppositeNeckNodeId
     ) : base(
         Id,
         ParticleId,
@@ -46,20 +45,15 @@ public abstract record ContactNodeRecord : NodeRecord, IContactNode
         SurfaceEnergy,
         SurfaceDiffusionCoefficient,
         GibbsEnergyGradient,
-        VolumeGradient
+        VolumeGradient,
+        contactedParticleId,
+        contactedNodeId,
+        transferCoefficient
     )
     {
-        ContactedParticleId = contactedParticleId;
-        TransferCoefficient = transferCoefficient;
-        ContactedNodeId = contactedNodeId;
+        OppositeNeckNodeId = oppositeNeckNodeId;
     }
 
     /// <inheritdoc />
-    public Guid ContactedParticleId { get; }
-
-    /// <inheritdoc />
-    public Guid ContactedNodeId { get; }
-
-    /// <inheritdoc />
-    public double TransferCoefficient { get; }
+    public Guid OppositeNeckNodeId { get; }
 }

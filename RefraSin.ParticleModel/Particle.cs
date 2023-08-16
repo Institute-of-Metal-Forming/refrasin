@@ -7,7 +7,7 @@ namespace RefraSin.ParticleModel.Records;
 /// <summary>
 /// Represents an immutable record of a particle.
 /// </summary>
-public record ParticleRecord(
+public record Particle(
     Guid Id,
     Angle RotationAngle,
     PolarPoint CenterCoordinates,
@@ -20,7 +20,7 @@ public record ParticleRecord(
     /// Kopierkonstruktor.
     /// </summary>
     /// <param name="template">Vorlage</param>
-    public ParticleRecord(IParticle template) : this(
+    public Particle(IParticle template) : this(
         template.Id,
         template.RotationAngle,
         template.CenterCoordinates,
@@ -28,12 +28,12 @@ public record ParticleRecord(
         template.SurfaceNodes.Select<INode, INode>(
             k => k switch
             {
-                INeckNode nk          => new NeckNodeRecord(nk),
-                IGrainBoundaryNode ck => new GrainBoundaryNodeRecord(ck),
-                _                     => new SurfaceNodeRecord(k)
+                INeckNode nk          => new NeckNode(nk),
+                IGrainBoundaryNode ck => new GrainBoundaryNode(ck),
+                _                     => new SurfaceNode(k)
             }
         ).ToArray(),
-        template.Necks.Select(n => new NeckRecord(n)).ToArray()
+        template.Necks.Select(n => new Neck(n)).ToArray()
     ) { }
 
     /// <inheritdoc />

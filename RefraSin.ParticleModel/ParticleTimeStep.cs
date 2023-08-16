@@ -3,17 +3,17 @@ using RefraSin.Coordinates.Polar;
 
 namespace RefraSin.ParticleModel.Records;
 
-public record ParticleTimeStepRecord(Guid ParticleId, double RadialDisplacement, Angle AngleDisplacement, Angle RotationDisplacement,
-    PolarVector DisplacementVector, double VolumeChange, IReadOnlyDictionary<Guid, NodeTimeStepRecord> NodeTimeSteps) : IParticleTimeStep
+public record ParticleTimeStep(Guid ParticleId, double RadialDisplacement, Angle AngleDisplacement, Angle RotationDisplacement,
+    PolarVector DisplacementVector, double VolumeChange, IReadOnlyDictionary<Guid, NodeTimeStep> NodeTimeSteps) : IParticleTimeStep
 {
-    public ParticleTimeStepRecord(IParticleTimeStep template) : this(
+    public ParticleTimeStep(IParticleTimeStep template) : this(
         template.ParticleId,
         template.RadialDisplacement,
         template.AngleDisplacement,
         template.RotationDisplacement,
         template.DisplacementVector,
         template.VolumeChange,
-        template.NodeTimeSteps.Values.ToDictionary(ts => ts.NodeId, ts => new NodeTimeStepRecord(ts))
+        template.NodeTimeSteps.Values.ToDictionary(ts => ts.NodeId, ts => new NodeTimeStep(ts))
     ) { }
 
     /// <inheritdoc />
@@ -35,7 +35,7 @@ public record ParticleTimeStepRecord(Guid ParticleId, double RadialDisplacement,
     public double VolumeChange { get; } = VolumeChange;
 
     /// <inheritdoc cref="IParticleTimeStep.NodeTimeSteps"/>
-    public IReadOnlyDictionary<Guid, NodeTimeStepRecord> NodeTimeSteps { get; } = NodeTimeSteps;
+    public IReadOnlyDictionary<Guid, NodeTimeStep> NodeTimeSteps { get; } = NodeTimeSteps;
 
     IReadOnlyDictionary<Guid, INodeTimeStep> IParticleTimeStep.NodeTimeSteps { get; } =
         NodeTimeSteps.Values.ToDictionary(ts => ts.NodeId, ts => (INodeTimeStep)ts);

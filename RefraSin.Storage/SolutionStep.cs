@@ -13,7 +13,7 @@ public record SolutionStep : ISolutionStep
         StartTime = startTime;
         EndTime = endTime;
         TimeStepWidth = endTime - startTime;
-        ParticleTimeSteps = particleTimeSteps.Select(s => s as ParticleTimeStepRecord ?? new ParticleTimeStepRecord(s)).ToArray();
+        ParticleTimeSteps = particleTimeSteps.Select(s => s as ParticleTimeStep ?? new ParticleTimeStep(s)).ToArray();
     }
 
     public SolutionStep(ISolutionStep step)
@@ -21,7 +21,7 @@ public record SolutionStep : ISolutionStep
         StartTime = step.StartTime;
         EndTime = step.EndTime;
         TimeStepWidth = StartTime - EndTime;
-        ParticleTimeSteps = step.ParticleTimeSteps.Select(s => s as ParticleTimeStepRecord ?? new ParticleTimeStepRecord(s)).ToArray();
+        ParticleTimeSteps = step.ParticleTimeSteps.Select(s => s as ParticleTimeStep ?? new ParticleTimeStep(s)).ToArray();
     }
 
     /// <inheritdoc />
@@ -34,7 +34,7 @@ public record SolutionStep : ISolutionStep
     public double TimeStepWidth { get; }
 
     /// <inheritdoc cref="ISolutionStep.ParticleTimeSteps"/>
-    public IReadOnlyList<ParticleTimeStepRecord> ParticleTimeSteps { get; }
+    public IReadOnlyList<ParticleTimeStep> ParticleTimeSteps { get; }
 
     IReadOnlyList<IParticleTimeStep> ISolutionStep.ParticleTimeSteps => ParticleTimeSteps;
 }

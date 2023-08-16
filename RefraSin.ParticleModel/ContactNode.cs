@@ -4,17 +4,20 @@ using RefraSin.Coordinates.Polar;
 namespace RefraSin.ParticleModel.Records;
 
 /// <summary>
-/// Represents an immutable record of a surface node.
+/// Represents an immutable state of a contact node.
 /// </summary>
-public record SurfaceNodeRecord : NodeRecord, ISurfaceNode
+public abstract record ContactNode : Node, IContactNode
 {
     /// <inheritdoc />
-    public SurfaceNodeRecord(INode template) : base(template) { }
+    protected ContactNode(IContactNode template) : base(template)
+    {
+        ContactedNodeId = template.ContactedNodeId;
+        ContactedParticleId = template.ContactedParticleId;
+        TransferCoefficient = template.TransferCoefficient;
+    }
 
-    /// <summary>
-    /// Represents an immutable record of a surface node.
-    /// </summary>
-    public SurfaceNodeRecord(Guid Id,
+    /// <inheritdoc />
+    protected ContactNode(Guid Id,
         Guid ParticleId,
         PolarPoint Coordinates,
         AbsolutePoint AbsoluteCoordinates,
@@ -26,7 +29,10 @@ public record SurfaceNodeRecord : NodeRecord, ISurfaceNode
         ToUpperToLower SurfaceEnergy,
         ToUpperToLower SurfaceDiffusionCoefficient,
         NormalTangential GibbsEnergyGradient,
-        NormalTangential VolumeGradient
+        NormalTangential VolumeGradient,
+        Guid contactedParticleId,
+        Guid contactedNodeId,
+        double transferCoefficient
     ) : base(
         Id,
         ParticleId,
@@ -41,5 +47,19 @@ public record SurfaceNodeRecord : NodeRecord, ISurfaceNode
         SurfaceDiffusionCoefficient,
         GibbsEnergyGradient,
         VolumeGradient
-    ) { }
+    )
+    {
+        ContactedParticleId = contactedParticleId;
+        TransferCoefficient = transferCoefficient;
+        ContactedNodeId = contactedNodeId;
+    }
+
+    /// <inheritdoc />
+    public Guid ContactedParticleId { get; }
+
+    /// <inheritdoc />
+    public Guid ContactedNodeId { get; }
+
+    /// <inheritdoc />
+    public double TransferCoefficient { get; }
 }
