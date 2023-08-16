@@ -1,9 +1,8 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
-using RefraSin.ParticleModel;
 
-namespace RefraSin.Storage.ParticleModel;
+namespace RefraSin.ParticleModel.Records;
 
 /// <summary>
 /// Represents an immutable record of a particle.
@@ -34,7 +33,7 @@ public record ParticleRecord(
                 _                     => new SurfaceNodeRecord(k)
             }
         ).ToArray(),
-        template.Necks.Select(n => new NeckState(n)).ToArray()
+        template.Necks.Select(n => new NeckRecord(n)).ToArray()
     ) { }
 
     /// <inheritdoc />

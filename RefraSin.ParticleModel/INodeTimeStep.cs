@@ -38,6 +38,4 @@ public interface INodeTimeStep
     /// Total volume change.
     /// </summary>
     public double VolumeChange { get; }
-
-    public void Validate();
 }

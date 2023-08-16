@@ -43,5 +43,5 @@ public interface INeck
     /// <summary>
     /// Unique ID of the neck.
     /// </summary>
-    public int Id { get; }
+    public Guid Id { get; }
 }
