@@ -2,28 +2,10 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
-        <PackageId>IMF.Enumerables</PackageId>
-        <Description>Library providing additional enumerable classes</Description>
-        <Copyright>Institut für Metallformung - TU Bergakademie Freiberg</Copyright>
-        <PackageProjectUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/csharputils</PackageProjectUrl>
-        <RepositoryUrl>https://gitlab.hrz.tu-chemnitz.de/imf-numerik/csharputils</RepositoryUrl>
-        <Authors>Max Weiner</Authors>
-        <Company>Institut für Metallformung - TU Bergakademie Freiberg</Company>
-
-        <Version>2023.06.30</Version>
-
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
         <RootNamespace>RefraSin.Enumerables</RootNamespace>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net5.0\IMF.Enumerables.xml</DocumentationFile>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net5.0\IMF.Enumerables.xml</DocumentationFile>
     </PropertyGroup>
 
 </Project>
