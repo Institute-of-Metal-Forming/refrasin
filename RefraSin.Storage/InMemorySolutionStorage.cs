@@ -5,24 +5,32 @@ public class InMemorySolutionStorage : ISolutionStorage
     /// <summary>
     /// List of all stored solution states.
     /// </summary>
-    public IReadOnlyList<ISolutionState> States => _states;
-    private readonly List<ISolutionState> _states = new();
+    public IReadOnlyList<SolutionState> States => _states;
+
+    private readonly List<SolutionState> _states = new();
 
     /// <summary>
     /// List of all stored solution steps.
     /// </summary>
-    public IReadOnlyList<ISolutionStep> Steps => _steps;
-    private readonly List<ISolutionStep> _steps = new();
+    public IReadOnlyList<SolutionStep> Steps => _steps;
+
+    private readonly List<SolutionStep> _steps = new();
 
     /// <inheritdoc />
     public void StoreState(ISolutionState state)
     {
-        _states.Add(state);
+        if (state is SolutionState s)
+            _states.Add(s);
+        else
+            _states.Add(new SolutionState(state));
     }
 
     /// <inheritdoc />
     public void StoreStep(ISolutionStep step)
     {
-        _steps.Add(step);
+        if (step is SolutionStep s)
+            _steps.Add(s);
+        else
+            _steps.Add(new SolutionStep(step));
     }
 }
