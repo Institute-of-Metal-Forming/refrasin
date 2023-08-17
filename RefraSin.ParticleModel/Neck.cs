@@ -25,13 +25,27 @@ public record Neck(
         template.GrainBoundaryLength
     ) { }
 
-    public INeckNode LowerNeckNode { get; } = LowerNeckNode;
-    public INeckNode UpperNeckNode { get; } = UpperNeckNode;
-    public IReadOnlyList<IGrainBoundaryNode> GrainBoundaryNodes { get; } = GrainBoundaryNodes;
-    public Guid ParticleId { get; } = ParticleId;
-    public Guid ContactedParticleId { get; } = ContactedParticleId;
-    public double Radius { get; } = Radius;
-    public double GrainBoundaryLength { get; } = GrainBoundaryLength;
-
+    /// <inheritdoc />
     public Guid Id { get; } = Id;
+
+    /// <inheritdoc />
+    public INeckNode LowerNeckNode { get; } = LowerNeckNode;
+
+    /// <inheritdoc />
+    public INeckNode UpperNeckNode { get; } = UpperNeckNode;
+
+    /// <inheritdoc />
+    public IReadOnlyList<IGrainBoundaryNode> GrainBoundaryNodes { get; } = GrainBoundaryNodes;
+
+    /// <inheritdoc />
+    public Guid ParticleId { get; } = ParticleId;
+
+    /// <inheritdoc />
+    public Guid ContactedParticleId { get; } = ContactedParticleId;
+
+    /// <inheritdoc />
+    public double Radius { get; } = Radius;
+
+    /// <inheritdoc />
+    public double GrainBoundaryLength { get; } = GrainBoundaryLength;
 }

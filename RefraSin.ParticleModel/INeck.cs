@@ -6,6 +6,11 @@ namespace RefraSin.ParticleModel;
 public interface INeck
 {
     /// <summary>
+    /// Unique ID of the neck.
+    /// </summary>
+    public Guid Id { get; }
+
+    /// <summary>
     /// Lower end neck node.
     /// </summary>
     public INeckNode LowerNeckNode { get; }
@@ -39,9 +44,4 @@ public interface INeck
     /// Total length of the grain boundary.
     /// </summary>
     public double GrainBoundaryLength { get; }
-
-    /// <summary>
-    /// Unique ID of the neck.
-    /// </summary>
-    public Guid Id { get; }
 }
