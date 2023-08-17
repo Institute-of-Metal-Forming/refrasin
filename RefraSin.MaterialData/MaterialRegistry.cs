@@ -31,6 +31,9 @@ public record MaterialRegistry : IMaterialRegistry
     public IMaterialInterface GetMaterialInterface(Guid from, Guid to) => _interfaces[(from, to)];
 
     /// <inheritdoc />
+    public IMaterialInterface GetMaterialInterface(IMaterial from, IMaterial to) => _interfaces[(from.Id, to.Id)];
+
+    /// <inheritdoc />
     public IMaterialInterface GetMaterialInterface(string from, string to) =>
         _interfaces.Values.First(i => _materials[i.From].Name == from && _materials[i.To].Name == to);
 }
