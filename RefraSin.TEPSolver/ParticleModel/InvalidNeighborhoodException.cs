@@ -1,27 +1,28 @@
-namespace RefraSin.TEPSolver.ParticleModel
+using RefraSin.ParticleModel;
+
+namespace RefraSin.TEPSolver.ParticleModel;
+
+public class InvalidNeighborhoodException : InvalidOperationException
 {
-    public class InvalidNeighborhoodException : InvalidOperationException
+    public InvalidNeighborhoodException(INode sourceNode, Neighbor requestedNeighbor) : this(null, sourceNode, requestedNeighbor) { }
+
+    public InvalidNeighborhoodException(Exception? innerException, INode sourceNode, Neighbor requestedNeighbor) : base(string.Empty,
+        innerException)
     {
-        public InvalidNeighborhoodException(Node sourceNode, Neighbor requestedNeighbor) : this(null, sourceNode, requestedNeighbor) { }
+        SourceNode = sourceNode;
+        RequestedNeighbor = requestedNeighbor;
+        Message = $"The node {sourceNode} has no {requestedNeighbor.ToString().ToLower()} neighbor.";
+    }
 
-        public InvalidNeighborhoodException(Exception? innerException, Node sourceNode, Neighbor requestedNeighbor) : base(string.Empty,
-            innerException)
-        {
-            SourceNode = sourceNode;
-            RequestedNeighbor = requestedNeighbor;
-            Message = $"The node {sourceNode} has no {requestedNeighbor.ToString().ToLower()} neighbor.";
-        }
+    public INode SourceNode { get; }
 
-        public Node SourceNode { get; }
+    public Neighbor RequestedNeighbor { get; }
 
-        public Neighbor RequestedNeighbor { get; }
+    public override string Message { get; }
 
-        public override string Message { get; }
-
-        public enum Neighbor
-        {
-            Upper,
-            Lower
-        }
+    public enum Neighbor
+    {
+        Upper,
+        Lower
     }
 }

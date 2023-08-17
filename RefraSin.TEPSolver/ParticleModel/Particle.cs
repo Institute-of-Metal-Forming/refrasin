@@ -10,24 +10,23 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-public class Particle : IParticle, ITreeItem<Particle>
+internal class Particle : IParticle, ITreeItem<Particle>
 {
-    private Particle(
-        (Angle phi, double r) centerCoordinates,
-        Angle rotationAngle,
-        Guid id,
-        IMaterial material,
-        IReadOnlyDictionary<IMaterial, IMaterialInterface> materialInterfaces
+    public Particle(
+        Particle? parent,
+        IParticleSpec particleSpec,
+        ISolverSession solverSession
     )
     {
-        Id = id;
+        Id = particleSpec.Id;
+        Parent = parent;
 
-        CenterCoordinates = new PolarPoint(centerCoordinates)
+        CenterCoordinates = new PolarPoint(particleSpec.AbsoluteCenterCoordinates)
         {
             SystemSource = () => Parent?.LocalCoordinateSystem ?? PolarCoordinateSystem.Default
         };
 
-        RotationAngle = rotationAngle;
+        RotationAngle = particleSpec.RotationAngle;
 
         LocalCoordinateSystem = new PolarCoordinateSystem
         {
@@ -35,25 +34,31 @@ public class Particle : IParticle, ITreeItem<Particle>
             RotationAngleSource = () => RotationAngle
         };
 
-        Material = material;
-        MaterialInterfaces = materialInterfaces;
+        Material = solverSession.MaterialRegistry.GetMaterial(particleSpec.MaterialId);
+        MaterialInterfaces = solverSession.MaterialRegistry.MaterialInterfaces
+            .Where(i => i.From == particleSpec.MaterialId)
+            .ToDictionary(i => i.To);
 
-        Surface = new ParticleSurface(this);
+        Surface = new ParticleSurface(this, particleSpec.NodeSpecs, solverSession);
         Children = new TreeChildrenCollection<Particle>(this);
+        SolverSession = solverSession;
     }
 
     /// <inheritdoc/>
     public Guid Id { get; }
 
     /// <summary>
-    /// Ring of surface nodes.
+    /// Material data.
     /// </summary>
-    public ParticleSurface Surface { get; }
-
-    /// <inheritdoc/>
     public IMaterial Material { get; }
 
-    public IReadOnlyDictionary<IMaterial, IMaterialInterface> MaterialInterfaces { get; }
+    /// <inheritdoc />
+    Guid IParticleSpec.MaterialId => Material.Id;
+
+    /// <summary>
+    /// Dictionary of material IDs to material interface data, assuming that the current instances material is always on the from side.
+    /// </summary>
+    public IReadOnlyDictionary<Guid, IMaterialInterface> MaterialInterfaces { get; }
 
     /// <summary>
     /// Lokales Koordinatensystem des Partikels. Bearbeitung über <see cref="CenterCoordinates"/> und <see cref="RotationAngle"/>. Sollte nicht direkt verändert werden!!!
@@ -61,40 +66,28 @@ public class Particle : IParticle, ITreeItem<Particle>
     internal PolarCoordinateSystem LocalCoordinateSystem { get; }
 
     /// <summary>
-    /// ID
+    /// Koordinaten des Ursprungs des lokalen Koordinatensystem ausgedrückt im Koordinatensystem des <see cref="Parent"/>
     /// </summary>
+    public PolarPoint CenterCoordinates { get; private set; }
 
-    public IReadOnlyList<INeck> Necks
-    {
-        get
-        {
-            var necks = new List<Neck>();
-            foreach (var node in Surface)
-            {
-                if (node is NeckNode neckNode)
-                    if (node.Upper is GrainBoundaryNode)
-                        necks.Add(new Neck(neckNode));
-            }
-
-            return necks;
-        }
-    }
+    /// <inheritdoc />
+    public AbsolutePoint AbsoluteCenterCoordinates => CenterCoordinates.Absolute;
 
     /// <summary>
     /// Drehwinkel des Partikels.
     /// </summary>
     public Angle RotationAngle { get; private set; }
 
-    /// <inheritdoc />
-    public AbsolutePoint AbsoluteCenterCoordinates => CenterCoordinates.Absolute;
-
-    /// <inheritdoc />
-    public IReadOnlyList<INode> SurfaceNodes => Surface.ToArray();
-
     /// <summary>
-    /// Koordinaten des Ursprungs des lokalen Koordinatensystem ausgedrückt im Koordinatensystem des <see cref="Parent"/>
+    /// Ring of surface nodes.
     /// </summary>
-    public PolarPoint CenterCoordinates { get; private set; }
+    public ParticleSurface Surface { get; }
+
+    /// <inheritdoc />
+    public IReadOnlyList<INode> Nodes => Surface.ToArray();
+
+    /// <inheritdoc />
+    IReadOnlyList<INodeSpec> IParticleSpec.NodeSpecs => Nodes;
 
     /// <summary>
     /// Übergeordnetes Partikel dieses Partikels in der Baumanordnung.
@@ -105,6 +98,15 @@ public class Particle : IParticle, ITreeItem<Particle>
     /// Untergeordnete Partikel dieses Partikels in der Baumanordnung.
     /// </summary>
     public TreeChildrenCollection<Particle> Children { get; }
+
+    /// <summary>
+    /// Reference to the current solver session.
+    /// </summary>
+    private ISolverSession SolverSession { get; }
+
+    public List<Neck> Necks { get; } = new();
+
+    IReadOnlyList<INeck> IParticle.Necks => Necks;
 
     public virtual void ApplyTimeStep(IParticleTimeStep timeStep)
     {
@@ -136,7 +138,7 @@ public class Particle : IParticle, ITreeItem<Particle>
         CenterCoordinates = state.CenterCoordinates;
         RotationAngle = state.RotationAngle;
 
-        var nodeStates = state.SurfaceNodes.ToDictionary(n => n.Id);
+        var nodeStates = state.Nodes.ToDictionary(n => n.Id);
 
         foreach (var node in Surface)
         {

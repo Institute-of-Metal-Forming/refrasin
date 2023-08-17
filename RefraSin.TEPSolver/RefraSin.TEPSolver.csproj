@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
       <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj" />
+      <ProjectReference Include="..\RefraSin.Iteration\RefraSin.Iteration.csproj" />
       <ProjectReference Include="..\RefraSin.MaterialData\RefraSin.MaterialData.csproj" />
       <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj" />
       <ProjectReference Include="..\RefraSin.Storage\RefraSin.Storage.csproj" />
@@ -19,5 +20,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     </ItemGroup>
+
+
 
 </Project>

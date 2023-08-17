@@ -1,63 +1,73 @@
 using Microsoft.Extensions.Logging;
-using RefraSin.Core.Solver;
-using RefraSin.ParticleModel;
+using RefraSin.MaterialData;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.ParticleModel;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
-namespace RefraSin.TEPSolver
+namespace RefraSin.TEPSolver;
+
+/// <summary>
+/// Interface for objects holding session data of a solution procedure.
+/// </summary>
+internal interface ISolverSession
 {
     /// <summary>
-    /// Interface for objects holding session data of a solution procedure.
+    /// Time of the current step.
     /// </summary>
-    public interface ISolverSession
-    {
-        /// <summary>
-        /// Time of the current step.
-        /// </summary>
-        public double CurrentTime { get; }
+    public double CurrentTime { get; }
 
-        /// <summary>
-        /// Time where the solution started.
-        /// </summary>
-        public double StartTime { get; }
+    /// <summary>
+    /// Time where the solution started.
+    /// </summary>
+    public double StartTime { get; }
 
-        /// <summary>
-        /// Time where the solution should end.
-        /// </summary>
-        public double EndTime { get; }
+    /// <summary>
+    /// Time where the solution should end.
+    /// </summary>
+    public double EndTime { get; }
 
-        /// <summary>
-        /// Current step width of time integration.
-        /// </summary>
-        public double TimeStepWidth { get; }
+    /// <summary>
+    /// Current step width of time integration.
+    /// </summary>
+    public double TimeStepWidth { get; }
 
-        /// <summary>
-        /// Step width used in the last time step.
-        /// </summary>
-        public double? TimeStepWidthOfLastStep { get; }
+    /// <summary>
+    /// Step width used in the last time step.
+    /// </summary>
+    public double? TimeStepWidthOfLastStep { get; }
 
-        /// <summary>
-        /// Registry of all particles.
-        /// </summary>
-        public IReadOnlyDictionary<Guid, IParticle> Particles { get; }
+    /// <summary>
+    /// Root particle of the particle tree.
+    /// </summary>
+    public Particle RootParticle { get; }
 
-        /// <summary>
-        /// Registry of all nodes of all particles.
-        /// </summary>
-        public IReadOnlyDictionary<Guid, INode> Nodes { get; }
+    /// <summary>
+    /// Registry of all particles.
+    /// </summary>
+    public IReadOnlyDictionary<Guid, Particle> Particles { get; }
 
-        /// <summary>
-        /// Options for the solver.
-        /// </summary>
-        public SolverOptions Options { get; }
+    /// <summary>
+    /// Registry of all nodes of all particles.
+    /// </summary>
+    public IReadOnlyDictionary<Guid, Node> Nodes { get; }
 
-        /// <summary>
-        /// Object for storing the calculated solution data. Store and forget from the perspective of the solver.
-        /// </summary>
-        public ISolutionStorage SolutionStorage { get; }
+    /// <summary>
+    /// Options for the solver.
+    /// </summary>
+    public ISolverOptions Options { get; }
 
-        /// <summary>
-        /// Factory for loggers used in the session.
-        /// </summary>
-        public ILoggerFactory LoggerFactory { get; }
-    }
+    /// <summary>
+    /// Object for storing the calculated solution data. Store and forget from the perspective of the solver.
+    /// </summary>
+    public ISolutionStorage SolutionStorage { get; }
+
+    /// <summary>
+    /// Registry for material and material interface data.
+    /// </summary>
+    public IReadOnlyMaterialRegistry MaterialRegistry { get; }
+
+    /// <summary>
+    /// Factory for loggers used in the session.
+    /// </summary>
+    public ILogger<Solver> Logger { get; }
 }

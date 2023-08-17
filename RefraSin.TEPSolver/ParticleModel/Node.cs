@@ -1,6 +1,4 @@
 using System.Globalization;
-using Microsoft.Extensions.Logging;
-using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
@@ -8,222 +6,222 @@ using RefraSin.Enumerables;
 using RefraSin.ParticleModel;
 using static System.Math;
 
-namespace RefraSin.TEPSolver.ParticleModel
+namespace RefraSin.TEPSolver.ParticleModel;
+
+/// <summary>
+/// Abstract base class for particle surface nodes.
+/// </summary>
+internal abstract class Node : INode, IRingItem<Node>
 {
-    /// <summary>
-    /// Abstract base class for particle surface nodes.
-    /// </summary>
-    public abstract class Node : INode, IRingItem<Node>
+    protected Node(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession)
     {
-        protected Node((Angle phi, double r) coordinates, Guid id)
-        {
-            Id = id;
-            Coordinates = new PolarPoint(coordinates) { SystemSource = () => Particle.LocalCoordinateSystem };
-        }
+        Id = nodeSpec.Id;
 
-        protected Node((Angle phi, double r) coordinates) : this(coordinates, Guid.NewGuid()) { }
+        if (nodeSpec.ParticleId != particle.Id)
+            throw new ArgumentException("IDs of the node spec and the given particle instance do not match.");
 
-        public Guid Id { get; set; }
+        Particle = particle;
+        Coordinates = new PolarPoint(nodeSpec.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
+        SolverSession = solverSession;
+    }
 
-        private Node? _lower;
-        private Node? _upper;
+    /// <summary>
+    /// Reference to the current solver session.
+    /// </summary>
+    protected ISolverSession SolverSession { get; }
 
-        /// <summary>
-        ///     Partikel, zu dem dieser Knoten gehört.
-        /// </summary>
-        public Particle Particle => Surface.Particle;
+    public Guid Id { get; set; }
 
-        /// <inheritdoc />
-        public Guid ParticleId => Particle.Id;
+    private Node? _lower;
+    private Node? _upper;
 
-        /// <summary>
-        /// A reference to the upper neighbor of this node.
-        /// </summary>
-        /// <exception cref="InvalidNeighborhoodException">If this node has currently no upper neighbor set.</exception>
-        public Node Upper => _upper ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Upper);
+    /// <summary>
+    ///     Partikel, zu dem dieser Knoten gehört.
+    /// </summary>
+    public Particle Particle { get; }
 
-        /// <summary>
-        /// A reference to the lower neighbor of this node.
-        /// </summary>
-        /// <exception cref="InvalidNeighborhoodException">If this node has currently no lower neighbor set.</exception>
-        public Node Lower => _lower ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Lower);
+    /// <inheritdoc />
+    public Guid ParticleId => Particle.Id;
 
-        /// <inheritdoc />
-        Node? IRingItem<Node>.Upper
-        {
-            get => _upper;
-            set => _upper = value;
-        }
+    /// <summary>
+    /// A reference to the upper neighbor of this node.
+    /// </summary>
+    /// <exception cref="InvalidNeighborhoodException">If this node has currently no upper neighbor set.</exception>
+    public Node Upper => _upper ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Upper);
 
-        /// <inheritdoc />
-        Node? IRingItem<Node>.Lower
-        {
-            get => _lower;
-            set => _lower = value;
-        }
+    /// <summary>
+    /// A reference to the lower neighbor of this node.
+    /// </summary>
+    /// <exception cref="InvalidNeighborhoodException">If this node has currently no lower neighbor set.</exception>
+    public Node Lower => _lower ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Lower);
 
-        /// <inheritdoc />
-        Ring<Node>? IRingItem<Node>.Ring { get; set; }
+    /// <inheritdoc />
+    Node? IRingItem<Node>.Upper
+    {
+        get => _upper;
+        set => _upper = value;
+    }
 
-        /// <summary>
-        /// A reference to the <see cref="ParticleSurface"/> instance this node is part of.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">If the node is not included in a surface.</exception>
-        private ParticleSurface Surface => (ParticleSurface?)((IRingItem<Node>)this).Ring ??
-                                           throw new InvalidOperationException($"The node {this} is not included in a particle surface.");
+    /// <inheritdoc />
+    Node? IRingItem<Node>.Lower
+    {
+        get => _lower;
+        set => _lower = value;
+    }
 
-        /// <summary>
-        /// Coordinates of the node in terms of particle's local coordinate system <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
-        /// </summary>
-        public PolarPoint Coordinates { get; private set; }
+    /// <inheritdoc />
+    Ring<Node>? IRingItem<Node>.Ring { get; set; }
 
-        /// <inheritdoc />
-        public AbsolutePoint AbsoluteCoordinates => Coordinates.Absolute;
+    /// <summary>
+    /// Coordinates of the node in terms of particle's local coordinate system <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
+    /// </summary>
+    public PolarPoint Coordinates { get; private set; }
 
-        /// <summary>
-        ///     Winkeldistanz zu den Nachbarknoten (Größe des kürzesten Winkels).
-        /// </summary>
-        public ToUpperToLowerAngle AngleDistance => _angleDistance ??= new ToUpperToLowerAngle(
-            Coordinates.AngleTo(Upper.Coordinates),
-            Coordinates.AngleTo(Lower.Coordinates)
-        );
+    /// <inheritdoc />
+    public AbsolutePoint AbsoluteCoordinates => Coordinates.Absolute;
 
-        private ToUpperToLowerAngle? _angleDistance;
+    /// <summary>
+    ///     Winkeldistanz zu den Nachbarknoten (Größe des kürzesten Winkels).
+    /// </summary>
+    public ToUpperToLowerAngle AngleDistance => _angleDistance ??= new ToUpperToLowerAngle(
+        Coordinates.AngleTo(Upper.Coordinates),
+        Coordinates.AngleTo(Lower.Coordinates)
+    );
 
-        /// <summary>
-        ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
-        /// </summary>
-        public ToUpperToLower SurfaceDistance => _surfaceDistance ??= new ToUpperToLower(
-            CosLaw.C(Upper.Coordinates.R, Coordinates.R, AngleDistance.ToUpper),
-            CosLaw.C(Lower.Coordinates.R, Coordinates.R, AngleDistance.ToLower)
-        );
+    private ToUpperToLowerAngle? _angleDistance;
 
-        private ToUpperToLower? _surfaceDistance;
+    /// <summary>
+    ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
+    /// </summary>
+    public ToUpperToLower SurfaceDistance => _surfaceDistance ??= new ToUpperToLower(
+        CosLaw.C(Upper.Coordinates.R, Coordinates.R, AngleDistance.ToUpper),
+        CosLaw.C(Lower.Coordinates.R, Coordinates.R, AngleDistance.ToLower)
+    );
 
-        /// <summary>
-        ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
-        /// </summary>
-        public ToUpperToLowerAngle SurfaceRadiusAngle => _surfaceRadiusAngle ??= new ToUpperToLowerAngle(
-            CosLaw.Gamma(SurfaceDistance.ToUpper, Coordinates.R, Upper.Coordinates.R),
-            CosLaw.Gamma(SurfaceDistance.ToLower, Coordinates.R, Lower.Coordinates.R)
-        );
+    private ToUpperToLower? _surfaceDistance;
 
-        private ToUpperToLowerAngle? _surfaceRadiusAngle;
+    /// <summary>
+    ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
+    /// </summary>
+    public ToUpperToLowerAngle SurfaceRadiusAngle => _surfaceRadiusAngle ??= new ToUpperToLowerAngle(
+        CosLaw.Gamma(SurfaceDistance.ToUpper, Coordinates.R, Upper.Coordinates.R),
+        CosLaw.Gamma(SurfaceDistance.ToLower, Coordinates.R, Lower.Coordinates.R)
+    );
 
-        /// <summary>
-        ///     Gesamtes Volumen der an den Knoten angrenzenden Elemente.
-        /// </summary>
-        public ToUpperToLower Volume => _volume ??= new ToUpperToLower(
-            0.5 * Coordinates.R * Upper.Coordinates.R * Sin(AngleDistance.ToUpper),
-            0.5 * Coordinates.R * Lower.Coordinates.R * Sin(AngleDistance.ToLower)
-        );
+    private ToUpperToLowerAngle? _surfaceRadiusAngle;
 
-        private ToUpperToLower? _volume;
+    /// <summary>
+    ///     Gesamtes Volumen der an den Knoten angrenzenden Elemente.
+    /// </summary>
+    public ToUpperToLower Volume => _volume ??= new ToUpperToLower(
+        0.5 * Coordinates.R * Upper.Coordinates.R * Sin(AngleDistance.ToUpper),
+        0.5 * Coordinates.R * Lower.Coordinates.R * Sin(AngleDistance.ToLower)
+    );
 
-        public NormalTangentialAngle SurfaceAngle => _surfaceAngle ??= new NormalTangentialAngle(
-            PI - 0.5 * SurfaceRadiusAngle.Sum,
-            PI / 2 - 0.5 * SurfaceRadiusAngle.Sum
-        );
+    private ToUpperToLower? _volume;
 
-        private NormalTangentialAngle? _surfaceAngle;
+    public NormalTangentialAngle SurfaceAngle => _surfaceAngle ??= new NormalTangentialAngle(
+        PI - 0.5 * SurfaceRadiusAngle.Sum,
+        PI / 2 - 0.5 * SurfaceRadiusAngle.Sum
+    );
 
-        /// <inheritdoc />
-        public abstract ToUpperToLower SurfaceEnergy { get; }
+    private NormalTangentialAngle? _surfaceAngle;
 
-        /// <inheritdoc />
-        public abstract ToUpperToLower SurfaceDiffusionCoefficient { get; }
+    /// <inheritdoc />
+    public abstract ToUpperToLower SurfaceEnergy { get; }
 
-        /// <inheritdoc />
-        public NormalTangential GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential(
-            -(SurfaceEnergy.ToUpper + SurfaceEnergy.ToLower) * Cos(SurfaceAngle.Normal),
-            -(SurfaceEnergy.ToUpper - SurfaceEnergy.ToLower) * Cos(SurfaceAngle.Tangential)
-        );
+    /// <inheritdoc />
+    public abstract ToUpperToLower SurfaceDiffusionCoefficient { get; }
 
-        private NormalTangential? _gibbsEnergyGradient;
+    /// <inheritdoc />
+    public NormalTangential GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential(
+        -(SurfaceEnergy.ToUpper + SurfaceEnergy.ToLower) * Cos(SurfaceAngle.Normal),
+        -(SurfaceEnergy.ToUpper - SurfaceEnergy.ToLower) * Cos(SurfaceAngle.Tangential)
+    );
 
-        /// <inheritdoc />
-        public NormalTangential VolumeGradient => _volumeGradient ??= new NormalTangential(
-            0.5 * (SurfaceDistance.ToUpper + SurfaceDistance.ToLower) * Sin(SurfaceAngle.Normal),
-            0.5 * (SurfaceDistance.ToUpper - SurfaceDistance.ToLower) * Sin(SurfaceAngle.Tangential)
-        );
+    private NormalTangential? _gibbsEnergyGradient;
 
-        private NormalTangential? _volumeGradient;
+    /// <inheritdoc />
+    public NormalTangential VolumeGradient => _volumeGradient ??= new NormalTangential(
+        0.5 * (SurfaceDistance.ToUpper + SurfaceDistance.ToLower) * Sin(SurfaceAngle.Normal),
+        0.5 * (SurfaceDistance.ToUpper - SurfaceDistance.ToLower) * Sin(SurfaceAngle.Tangential)
+    );
 
-        protected virtual void ClearCaches()
-        {
-            _angleDistance = null;
-            _surfaceDistance = null;
-            _surfaceRadiusAngle = null;
-            _volume = null;
-            _surfaceAngle = null;
-            _gibbsEnergyGradient = null;
-            _volumeGradient = null;
-        }
+    private NormalTangential? _volumeGradient;
 
-        public virtual void ApplyTimeStep(INodeTimeStep timeStep)
-        {
-            CheckTimeStep(timeStep);
+    protected virtual void ClearCaches()
+    {
+        _angleDistance = null;
+        _surfaceDistance = null;
+        _surfaceRadiusAngle = null;
+        _volume = null;
+        _surfaceAngle = null;
+        _gibbsEnergyGradient = null;
+        _volumeGradient = null;
+    }
 
-            Coordinates += timeStep.DisplacementVector;
+    public virtual void ApplyTimeStep(INodeTimeStep timeStep)
+    {
+        CheckTimeStep(timeStep);
 
-            ClearCaches();
-        }
+        Coordinates += timeStep.DisplacementVector;
 
-        protected virtual void CheckTimeStep(INodeTimeStep timeStep)
-        {
-            if (timeStep.NodeId != Id)
-                throw new InvalidOperationException("IDs of node and time step do not match.");
+        ClearCaches();
+    }
 
-            if (timeStep.DisplacementVector.System != Coordinates.System)
-                throw new InvalidOperationException("Current coordinates and displacement vector must be in same coordinate system.");
-        }
+    protected virtual void CheckTimeStep(INodeTimeStep timeStep)
+    {
+        if (timeStep.NodeId != Id)
+            throw new InvalidOperationException("IDs of node and time step do not match.");
 
-        public virtual void ApplyState(INode state)
-        {
-            CheckState(state);
+        if (timeStep.DisplacementVector.System != Coordinates.System)
+            throw new InvalidOperationException("Current coordinates and displacement vector must be in same coordinate system.");
+    }
 
-            Coordinates = new PolarPoint(state.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
+    public virtual void ApplyState(INode state)
+    {
+        CheckState(state);
 
-            _angleDistance = state.AngleDistance;
-            _surfaceDistance = state.SurfaceDistance;
-            _surfaceRadiusAngle = state.SurfaceRadiusAngle;
-            _volume = state.Volume;
-            _surfaceAngle = state.SurfaceAngle;
-            _gibbsEnergyGradient = state.GibbsEnergyGradient;
-            _volumeGradient = state.VolumeGradient;
+        Coordinates = new PolarPoint(state.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
 
-            ClearCaches();
-        }
+        _angleDistance = state.AngleDistance;
+        _surfaceDistance = state.SurfaceDistance;
+        _surfaceRadiusAngle = state.SurfaceRadiusAngle;
+        _volume = state.Volume;
+        _surfaceAngle = state.SurfaceAngle;
+        _gibbsEnergyGradient = state.GibbsEnergyGradient;
+        _volumeGradient = state.VolumeGradient;
 
+        ClearCaches();
+    }
 
-        protected virtual void CheckState(INode state)
-        {
-            if (state.Id != Id)
-                throw new InvalidOperationException("IDs of node and state do not match.");
+    protected virtual void CheckState(INode state)
+    {
+        if (state.Id != Id)
+            throw new InvalidOperationException("IDs of node and state do not match.");
 
-            if (state.Coordinates.System != Coordinates.System)
-                throw new InvalidOperationException("Current coordinates and state coordinates must be in same coordinate system.");
-        }
+        if (state.Coordinates.System != Coordinates.System)
+            throw new InvalidOperationException("Current coordinates and state coordinates must be in same coordinate system.");
+    }
 
-        /// <summary>
-        ///     Gibt die Repräsentation des Knotens als String zurück.
-        ///     Format: "{Typname} {Id} of {Partikel}".
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString() =>
-            $"{GetType().Name} {Id} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)} of {Particle}";
+    /// <summary>
+    ///     Gibt die Repräsentation des Knotens als String zurück.
+    ///     Format: "{Typname} {Id} of {Partikel}".
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString() =>
+        $"{GetType().Name} {Id} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)} of {Particle}";
 
-        /// <summary>
-        ///     Gibt die Repräsentation des Knotens als String zurück.
-        ///     Format: "{Typname} {Id} of {Partikel}".
-        /// </summary>
-        /// <returns></returns>
-        public string ToString(bool shortVersion)
-        {
-            if (shortVersion)
-                return
-                    $"{GetType().Name} {Id}";
-            return ToString();
-        }
+    /// <summary>
+    ///     Gibt die Repräsentation des Knotens als String zurück.
+    ///     Format: "{Typname} {Id} of {Partikel}".
+    /// </summary>
+    /// <returns></returns>
+    public string ToString(bool shortVersion)
+    {
+        if (shortVersion)
+            return
+                $"{GetType().Name} {Id}";
+        return ToString();
     }
 }

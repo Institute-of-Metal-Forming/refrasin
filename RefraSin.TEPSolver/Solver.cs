@@ -1,103 +1,47 @@
-using System;
-using System.Threading;
-using RefraSin.Core.SinteringProcesses;
-using RefraSin.Core.Solver.Solution;
-using RefraSin.Iteration;
-using static RefraSin.Iteration.InterceptReason;
+using Microsoft.Extensions.Logging;
+using RefraSin.MaterialData;
+using RefraSin.ParticleModel;
+using RefraSin.Storage;
 
-namespace RefraSin.Core.Solver
+namespace RefraSin.TEPSolver;
+
+/// <summary>
+/// Solver for performing time integration of sintering processes based on the thermodynamic extremal principle (TEP).
+/// </summary>
+public partial class Solver
 {
     /// <summary>
-    ///     Lösungsalgorithmus für den Sinterprozess.
+    /// Numeric options to control solver behavior.
     /// </summary>
-    public static partial class Solver
+    public ISolverOptions Options { get; set; } = new SolverOptions();
+
+    /// <summary>
+    /// Registry for material and material interface data.
+    /// </summary>
+    public IMaterialRegistry MaterialRegistry { get; set; }
+
+    /// <summary>
+    /// Storage for solution data.
+    /// </summary>
+    public ISolutionStorage SolutionStorage { get; set; }
+
+    /// <summary>
+    /// Factory for loggers used in the session.
+    /// </summary>
+    public ILoggerFactory LoggerFactory { get; set; }
+
+    public ISolutionState CreateInitialState(IEnumerable<IParticleSpec> particleSpecs)
     {
-        /// <summary>
-        ///     Hauptfunktion für das Lösen des Sintermodells.
-        /// </summary>
-        /// <returns>true wenn erfolgreich, sonst false</returns>
-        public static ISinteringSolverSolution Solve(ISinteringProcess process, SolverOptions options, CancellationToken cancellationToken)
-        {
-            var session = Session.CreateSessionFromProcess(process, options);
-            session.Start();
+        throw new NotImplementedException();
+    }
 
-            try
-            {
-                RunTimeIntegrationLoop(session, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                session.EndFailed(e);
-                return new SolutionResult(false, session.TimeSeries, process);
-            }
-
-            session.End();
-
-            return new SolutionResult(true, session.TimeSeries, process);
-        }
-
-        private static void RunTimeIntegrationLoop(Session session, CancellationToken cancellationToken)
-        {
-            while (EndTimeIsNotReached(session))
-            {
-                CalculateTimeStepWithDecreasingTimeStepWidthsUntilTimeStepIsValid(session, cancellationToken);
-
-                session.ApplyTimeStep();
-                session.IncreaseTimeStepWidthConditionally();
-            }
-        }
-
-        private static bool EndTimeIsNotReached(Session session) => !(session.CurrentTime > session.EndTime);
-
-        private static void CalculateTimeStepWithDecreasingTimeStepWidthsUntilTimeStepIsValid(Session session, CancellationToken cancellationToken)
-        {
-            for (var i = 0;; i++)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                session.ThrowIfTimedOut();
-
-                if (i > session.Options.MaxIterationCount)
-                    throw new CriticalIterationInterceptedException(nameof(CalculateTimeStepWithDecreasingTimeStepWidthsUntilTimeStepIsValid),
-                        MaxIterationCountExceeded, i);
-
-                if (TryCalculateTimeStep(session))
-                    return;
-
-                session.DecreaseTimeStepWidthConditionally();
-            }
-        }
-
-        private static bool TryCalculateTimeStep(Session session)
-        {
-            try
-            {
-                CalculateTimeStep(session);
-            }
-            catch (InvalidTimeStepException e)
-            {
-                session.LogInvalidTimeStep(e);
-                return false;
-            }
-            catch (UncriticalIterationInterceptedException e)
-            {
-                session.LogUncriticalIterationIntercepted(e);
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        ///     Berechne Zustand nach neuem Zeitschritt.
-        /// </summary>
-        private static void CalculateTimeStep(Session session)
-        {
-            InitParticleFuturePlacement(session.Particles.Root);
-
-            RemeshParticleSurfaces(session);
-            CalculateTimeStepsOnFreeSurfaces(session);
-            CalculateTimeStepsOnGrainBoundaries(session);
-            ValidateTimeSteps(session);
-        }
+    /// <summary>
+    /// Run the solution procedure starting with the given state till the specified time.
+    /// </summary>
+    /// <param name="initialState"></param>
+    /// <param name="endTime"></param>
+    public void Solve(ISolutionState initialState, double endTime)
+    {
+        throw new NotImplementedException();
     }
 }
