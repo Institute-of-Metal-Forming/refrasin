@@ -142,7 +142,7 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
     /// <summary>
     ///     Gets a tuple of the coordinates.
     /// </summary>
-    public (double Phi, double R) ToTuple() => (Phi, R);
+    public (Angle Phi, double R) ToTuple() => (Phi, R);
 
     /// <summary>
     ///     Compute the angle distance between two sets of coordinates.
