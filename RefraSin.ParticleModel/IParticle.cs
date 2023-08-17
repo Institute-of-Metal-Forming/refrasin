@@ -1,4 +1,3 @@
-using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 
@@ -7,23 +6,8 @@ namespace RefraSin.ParticleModel;
 /// <summary>
 /// Interface representing a powder particle.
 /// </summary>
-public interface IParticle
+public interface IParticle : IParticleSpec
 {
-    /// <summary>
-    /// Unique ID.
-    /// </summary>
-    public Guid Id { get; }
-
-    /// <summary>
-    /// Rotation angle of the particle's coordinate system around its center.
-    /// </summary>
-    public Angle RotationAngle { get; }
-
-    /// <summary>
-    /// Absolute coordinates of the particle's center.
-    /// </summary>
-    public AbsolutePoint AbsoluteCenterCoordinates { get; }
-
     /// <summary>
     /// Polar coordinates of the particle's center in means of the parent's coordinate system.
     /// </summary>
@@ -32,7 +16,7 @@ public interface IParticle
     /// <summary>
     /// List of all surface nodes.
     /// </summary>
-    public IReadOnlyList<INode> SurfaceNodes { get; }
+    public IReadOnlyList<INode> Nodes { get; }
 
     /// <summary>
     /// List of all necks to neighbor particles.

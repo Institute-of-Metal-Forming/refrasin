@@ -2,30 +2,46 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 
-namespace RefraSin.ParticleModel.Records;
+namespace RefraSin.ParticleModel;
 
 /// <summary>
 /// Represents an immutable record of a particle.
 /// </summary>
-public record Particle(
-    Guid Id,
-    Angle RotationAngle,
-    PolarPoint CenterCoordinates,
-    AbsolutePoint AbsoluteCenterCoordinates,
-    IReadOnlyList<INode> SurfaceNodes,
-    IReadOnlyList<INeck> Necks
-) : IParticle
+public record Particle : IParticle
 {
+    /// <summary>
+    /// Represents an immutable record of a particle.
+    /// </summary>
+    public Particle(
+        Guid id,
+        PolarPoint centerCoordinates,
+        AbsolutePoint absoluteCenterCoordinates,
+        Angle rotationAngle,
+        Guid materialId,
+        IReadOnlyList<INode> nodes,
+        IReadOnlyList<INeck>? necks = null
+    )
+    {
+        Id = id;
+        CenterCoordinates = centerCoordinates;
+        AbsoluteCenterCoordinates = absoluteCenterCoordinates;
+        RotationAngle = rotationAngle;
+        MaterialId = materialId;
+        Nodes = nodes;
+        Necks = necks ?? Array.Empty<INeck>();
+    }
+
     /// <summary>
     /// Kopierkonstruktor.
     /// </summary>
     /// <param name="template">Vorlage</param>
     public Particle(IParticle template) : this(
         template.Id,
-        template.RotationAngle,
         template.CenterCoordinates,
         template.AbsoluteCenterCoordinates,
-        template.SurfaceNodes.Select<INode, INode>(
+        template.RotationAngle,
+        template.MaterialId,
+        template.Nodes.Select<INode, INode>(
             k => k switch
             {
                 INeckNode nk          => new NeckNode(nk),
@@ -37,20 +53,25 @@ public record Particle(
     ) { }
 
     /// <inheritdoc />
-    public Guid Id { get; } = Id;
+    public Guid Id { get; }
 
     /// <inheritdoc />
-    public Angle RotationAngle { get; } = RotationAngle;
+    public PolarPoint CenterCoordinates { get; }
 
     /// <inheritdoc />
-    public PolarPoint CenterCoordinates { get; } = CenterCoordinates;
+    public AbsolutePoint AbsoluteCenterCoordinates { get; }
 
     /// <inheritdoc />
-    public AbsolutePoint AbsoluteCenterCoordinates { get; } = AbsoluteCenterCoordinates;
+    public Angle RotationAngle { get; }
 
     /// <inheritdoc />
-    public IReadOnlyList<INode> SurfaceNodes { get; } = SurfaceNodes;
+    public IReadOnlyList<INode> Nodes { get; }
+
+    IReadOnlyList<INodeSpec> IParticleSpec.NodeSpecs => Nodes;
 
     /// <inheritdoc />
-    public IReadOnlyList<INeck> Necks { get; } = Necks;
+    public IReadOnlyList<INeck> Necks { get; }
+
+    /// <inheritdoc />
+    public Guid MaterialId { get; }
 }

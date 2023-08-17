@@ -1,7 +1,7 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Polar;
 
-namespace RefraSin.ParticleModel.Records;
+namespace RefraSin.ParticleModel;
 
 public record ParticleTimeStep(Guid ParticleId, double RadialDisplacement, Angle AngleDisplacement, Angle RotationDisplacement,
     PolarVector DisplacementVector, double VolumeChange, IReadOnlyDictionary<Guid, NodeTimeStep> NodeTimeSteps) : IParticleTimeStep

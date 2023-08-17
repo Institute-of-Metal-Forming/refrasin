@@ -1,7 +1,7 @@
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 
-namespace RefraSin.ParticleModel.Records;
+namespace RefraSin.ParticleModel;
 
 /// <summary>
 /// Represents an immutable record of a surface node.

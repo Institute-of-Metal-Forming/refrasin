@@ -6,23 +6,8 @@ namespace RefraSin.ParticleModel;
 /// <summary>
 /// Interface representing a node of a particle surface.
 /// </summary>
-public interface INode
+public interface INode : INodeSpec
 {
-    /// <summary>
-    /// Unique ID of the node.
-    /// </summary>
-    public Guid Id { get; }
-
-    /// <summary>
-    /// ID of the parent particle.
-    /// </summary>
-    public Guid ParticleId { get; }
-
-    /// <summary>
-    /// Polar coordinates in the particle's coordinate system (<see cref="Particle.LocalCoordinateSystem"/>).
-    /// </summary>
-    public PolarPoint Coordinates { get; }
-
     /// <summary>
     /// Absolute coordinates.
     /// </summary>

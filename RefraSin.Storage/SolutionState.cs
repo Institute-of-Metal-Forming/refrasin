@@ -1,5 +1,4 @@
 using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Records;
 
 namespace RefraSin.Storage;
 

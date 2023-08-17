@@ -1,4 +1,4 @@
-namespace RefraSin.ParticleModel.Records;
+namespace RefraSin.ParticleModel;
 
 /// <summary>
 /// Represents an immutable record of a neck.
