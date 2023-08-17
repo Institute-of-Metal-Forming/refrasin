@@ -31,10 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\RefraSin.Core\RefraSin.Core.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Update="FSharp.Core" Version="7.0.300" />
     </ItemGroup>
 
