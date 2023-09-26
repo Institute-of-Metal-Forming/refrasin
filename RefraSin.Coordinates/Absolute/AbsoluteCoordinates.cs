@@ -119,6 +119,9 @@ public abstract class AbsoluteCoordinates : Coordinates, IFormattable
     /// </summary>
     public (double X, double Y) ToTuple() => (X, Y);
 
+    /// <inheritdoc />
+    public override double[] ToArray() => new[] { X, Y };
+
     /// <summary>
     ///     Base implementation of Equals() with precision.
     /// </summary>

@@ -1,4 +1,5 @@
 using RefraSin.Coordinates;
+using static System.Math;
 
 namespace RefraSin.ParticleModel;
 
@@ -11,17 +12,29 @@ public struct NormalTangential
     {
         Normal = normal;
         Tangential = tangential;
+        Sum = Sqrt(Pow(Normal, 2) + Pow(Tangential, 2));
     }
 
     /// <summary>
     /// Normal component.
     /// </summary>
-    public double Normal { get; }
+    public readonly double Normal;
 
     /// <summary>
     /// Tangential component.
     /// </summary>
-    public double Tangential { get; }
+    public readonly double Tangential;
+
+    /// <summary>
+    /// Vector sum (euclidian norm) of the components.
+    /// </summary>
+    /// <returns></returns>
+    public readonly double Sum;
+
+    /// <summary>
+    /// Returns the components of the instance as 2-element array.
+    /// </summary>
+    public double[] ToArray() => new[] { Normal, Tangential };
 }
 
 /// <summary>
@@ -38,10 +51,24 @@ public struct NormalTangentialAngle
     /// <summary>
     /// Normal component.
     /// </summary>
-    public Angle Normal { get; }
+    public readonly Angle Normal;
 
     /// <summary>
     /// Tangential component.
     /// </summary>
-    public Angle Tangential { get; }
+    public readonly Angle Tangential;
+
+    public static implicit operator NormalTangential(NormalTangentialAngle other) => new(other.Normal, other.Tangential);
+
+    public static implicit operator NormalTangentialAngle(NormalTangential other) => new(other.Normal, other.Tangential);
+
+    /// <summary>
+    /// Returns the components of the instance as 2-element array.
+    /// </summary>
+    public Angle[] ToArray() => new[] { Normal, Tangential };
+
+    /// <summary>
+    /// Returns the components of the instance as 2-element array.
+    /// </summary>
+    public double[] ToDoubleArray() => new double[] { Normal, Tangential };
 }

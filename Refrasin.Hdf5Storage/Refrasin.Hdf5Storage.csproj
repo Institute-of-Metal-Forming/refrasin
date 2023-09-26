@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
+        <RootNamespace>Refrasin.HDF5Storage</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HDF5-CSharp" Version="1.18.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\RefraSin.Storage\RefraSin.Storage.csproj" />
+    </ItemGroup>
+
+</Project>
