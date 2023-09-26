@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refrasin.Hdf5Storage", "Ref
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Hdf5Storage.Test", "RefraSin.Hdf5Storage.Test\RefraSin.Hdf5Storage.Test.csproj", "{E1DF96B4-759A-43EE-A04C-3F354CF26152}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.TEPSolver.Test", "RefraSin.TEPSolver.Test\RefraSin.TEPSolver.Test.csproj", "{627870BA-9F85-495B-86AE-1FEDC7F47D9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,6 +86,10 @@ Global
 		{E1DF96B4-759A-43EE-A04C-3F354CF26152}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1DF96B4-759A-43EE-A04C-3F354CF26152}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1DF96B4-759A-43EE-A04C-3F354CF26152}.Release|Any CPU.Build.0 = Release|Any CPU
+		{627870BA-9F85-495B-86AE-1FEDC7F47D9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{627870BA-9F85-495B-86AE-1FEDC7F47D9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{627870BA-9F85-495B-86AE-1FEDC7F47D9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{627870BA-9F85-495B-86AE-1FEDC7F47D9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
