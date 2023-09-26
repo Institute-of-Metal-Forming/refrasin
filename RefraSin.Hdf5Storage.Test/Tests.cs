@@ -20,7 +20,7 @@ public class Tests
     {
         var fileName = Path.GetTempFileName();
 
-        var storage = new HDF5SolutionStorage(fileName);
+        var storage = new Hdf5SolutionStorage(fileName);
 
         TestContext.WriteLine(fileName);
         That(File.Exists(fileName), Is.True);
@@ -32,7 +32,7 @@ public class Tests
     public void TestWriteState()
     {
         var fileName = Path.GetTempFileName().Replace(".tmp", ".h5");
-        var storage = new HDF5SolutionStorage(fileName);
+        var storage = new Hdf5SolutionStorage(fileName);
 
         TestContext.WriteLine(fileName);
         var preFileSize = new FileInfo(fileName).Length;
@@ -78,7 +78,7 @@ public class Tests
     public void TestWriteStep()
     {
         var fileName = Path.GetTempFileName().Replace(".tmp", ".h5");
-        var storage = new HDF5SolutionStorage(fileName);
+        var storage = new Hdf5SolutionStorage(fileName);
 
         TestContext.WriteLine(fileName);
         var preFileSize = new FileInfo(fileName).Length;

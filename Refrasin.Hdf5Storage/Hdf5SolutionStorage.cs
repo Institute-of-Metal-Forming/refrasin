@@ -5,9 +5,9 @@ using RefraSin.Storage;
 
 namespace Refrasin.HDF5Storage;
 
-public class HDF5SolutionStorage : ISolutionStorage, IDisposable
+public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
 {
-    public HDF5SolutionStorage(string filePath, string statesGroupName = "States", string stepsGroupName = "Steps")
+    public Hdf5SolutionStorage(string filePath, string statesGroupName = "States", string stepsGroupName = "Steps")
     {
         FilePath = filePath;
         StatesGroupName = statesGroupName;

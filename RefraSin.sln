@@ -22,9 +22,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.TEPSolver", "Refra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ParticleModel.Test", "RefraSin.ParticleModel.Test\RefraSin.ParticleModel.Test.csproj", "{6B6FA91D-C6A0-45C8-B722-4B5868A4EA73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refrasin.HDF5Storage", "Refrasin.HDF5Storage\Refrasin.HDF5Storage.csproj", "{7116BF2A-8533-4C5F-AFC7-5B005EFC6C88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refrasin.Hdf5Storage", "Refrasin.Hdf5Storage\Refrasin.Hdf5Storage.csproj", "{7116BF2A-8533-4C5F-AFC7-5B005EFC6C88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.HDF5Storage.Test", "RefraSin.HDF5Storage.Test\RefraSin.HDF5Storage.Test.csproj", "{E1DF96B4-759A-43EE-A04C-3F354CF26152}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Hdf5Storage.Test", "RefraSin.Hdf5Storage.Test\RefraSin.Hdf5Storage.Test.csproj", "{E1DF96B4-759A-43EE-A04C-3F354CF26152}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
