@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.ParticleModel;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 

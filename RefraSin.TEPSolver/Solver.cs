@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.ParticleModel;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -30,10 +32,7 @@ public partial class Solver
     /// </summary>
     public ILoggerFactory LoggerFactory { get; set; }
 
-    public ISolutionState CreateInitialState(IEnumerable<IParticleSpec> particleSpecs)
-    {
-        throw new NotImplementedException();
-    }
+    internal ISolverSession CreateSession(ISolutionState initialState, double endTime) => new SolverSession(this, initialState, endTime);
 
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.

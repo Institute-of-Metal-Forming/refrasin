@@ -8,19 +8,23 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
-      <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj" />
-      <ProjectReference Include="..\RefraSin.Iteration\RefraSin.Iteration.csproj" />
-      <ProjectReference Include="..\RefraSin.MaterialData\RefraSin.MaterialData.csproj" />
-      <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj" />
-      <ProjectReference Include="..\RefraSin.Storage\RefraSin.Storage.csproj" />
+        <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj"/>
+        <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj"/>
+        <ProjectReference Include="..\RefraSin.Iteration\RefraSin.Iteration.csproj"/>
+        <ProjectReference Include="..\RefraSin.MaterialData\RefraSin.MaterialData.csproj"/>
+        <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj"/>
+        <ProjectReference Include="..\RefraSin.Storage\RefraSin.Storage.csproj"/>
     </ItemGroup>
 
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1"/>
     </ItemGroup>
 
-
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(MSBuildProjectName).Test</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 
 </Project>
