@@ -6,6 +6,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleSpecFactories;
 using RefraSin.Storage;
 using static NUnit.Framework.Assert;
+using PolarPoint = RefraSin.Coordinates.Polar.PolarPoint;
 
 namespace RefraSin.HDF5Storage.Test;
 
@@ -30,13 +31,11 @@ public class Tests
     [Test]
     public void TestWriteState()
     {
-        var fileName = Path.GetTempFileName();
-
+        var fileName = Path.GetTempFileName().Replace(".tmp", ".h5");
         var storage = new HDF5SolutionStorage(fileName);
 
         TestContext.WriteLine(fileName);
-        var fi = new FileInfo(fileName);
-        var preFileSize = fi.Length;
+        var preFileSize = new FileInfo(fileName).Length;
 
         var particleSpec = new ShapeFunctionParticleSpecFactory(100, 0.1, 5, 0.1, Guid.NewGuid()).GetParticleSpec();
         var particle = new Particle(
@@ -70,7 +69,7 @@ public class Tests
             }
         ));
 
-        That(fi, Has.Length.GreaterThan(preFileSize));
+        That(new FileInfo(fileName), Has.Length.GreaterThan(preFileSize));
 
         storage.Dispose();
     }
