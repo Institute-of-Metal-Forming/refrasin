@@ -48,7 +48,17 @@ public class HDF5SolutionStorage : ISolutionStorage, IDisposable
     /// <inheritdoc />
     public void StoreStep(ISolutionStep step)
     {
-        throw new NotImplementedException();
+        var stepId = Hdf5.CreateOrOpenGroup(StepsGroupId, _stepIndex.ToString());
+        Hdf5.WriteAttribute(stepId, nameof(step.StartTime), step.StartTime);
+        Hdf5.WriteAttribute(stepId, nameof(step.EndTime), step.EndTime);
+        Hdf5.WriteAttribute(stepId, nameof(step.TimeStepWidth), step.TimeStepWidth);
+
+        foreach (var particleTimeStep in step.ParticleTimeSteps)
+        {
+            Hdf5.WriteObject(stepId, new ParticleTimeStepGroup(particleTimeStep), particleTimeStep.ParticleId.ToString());
+        }
+
+        _stepIndex += 1;
     }
 
     /// <inheritdoc />

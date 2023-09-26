@@ -73,4 +73,48 @@ public class Tests
 
         storage.Dispose();
     }
+
+    [Test]
+    public void TestWriteStep()
+    {
+        var fileName = Path.GetTempFileName().Replace(".tmp", ".h5");
+        var storage = new HDF5SolutionStorage(fileName);
+
+        TestContext.WriteLine(fileName);
+        var preFileSize = new FileInfo(fileName).Length;
+
+        var particleStep = new ParticleTimeStep(
+            Guid.NewGuid(),
+            1,
+            0.5,
+            0.25,
+            new PolarVector(0, 0),
+            3.14,
+            new[]
+            {
+                new NodeTimeStep(
+                    Guid.NewGuid(),
+                    1,
+                    2,
+                    new PolarVector(0, 0),
+                    new ToUpperToLower(1, -1),
+                    0,
+                    1.11
+                )
+            }.ToDictionary(n => n.NodeId)
+        );
+
+        storage.StoreStep(new SolutionStep(
+            0,
+            0.12,
+            new[]
+            {
+                particleStep
+            }
+        ));
+
+        That(new FileInfo(fileName), Has.Length.GreaterThan(preFileSize));
+
+        storage.Dispose();
+    }
 }
