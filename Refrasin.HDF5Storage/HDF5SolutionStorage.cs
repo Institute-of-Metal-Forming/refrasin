@@ -37,9 +37,19 @@ public class HDF5SolutionStorage : ISolutionStorage, IDisposable
         var stateId = Hdf5.CreateOrOpenGroup(StatesGroupId, _stateIndex.ToString());
         Hdf5.WriteAttribute(stateId, nameof(state.Time), state.Time);
 
+        Hdf5.WriteCompounds(stateId, "Particles", state.ParticleStates.Select(p => new ParticleCompound(p)).ToArray(),
+            new Dictionary<string, List<string>>());
+
+        var nodesGroupId = Hdf5.CreateOrOpenGroup(stateId, "Nodes");
+
         foreach (var particleState in state.ParticleStates)
         {
-            Hdf5.WriteObject(stateId, new ParticleGroup(particleState), particleState.Id.ToString());
+            Hdf5.WriteCompounds(
+                nodesGroupId,
+                particleState.Id.ToString(),
+                particleState.Nodes.Select(n => new NodeCompound(n)).ToArray(),
+                new Dictionary<string, List<string>>()
+            );
         }
 
         _stateIndex += 1;
@@ -53,9 +63,17 @@ public class HDF5SolutionStorage : ISolutionStorage, IDisposable
         Hdf5.WriteAttribute(stepId, nameof(step.EndTime), step.EndTime);
         Hdf5.WriteAttribute(stepId, nameof(step.TimeStepWidth), step.TimeStepWidth);
 
+        Hdf5.WriteCompounds(stepId, "Particles", step.ParticleTimeSteps.Select(p => new ParticleTimeStepCompound(p)).ToArray(),
+            new Dictionary<string, List<string>>());
+
+        var nodesGroupId = Hdf5.CreateOrOpenGroup(stepId, "Nodes");
+
         foreach (var particleTimeStep in step.ParticleTimeSteps)
         {
-            Hdf5.WriteObject(stepId, new ParticleTimeStepGroup(particleTimeStep), particleTimeStep.ParticleId.ToString());
+            Hdf5.WriteCompounds(nodesGroupId, particleTimeStep.ParticleId.ToString(),
+                particleTimeStep.NodeTimeSteps.Values.Select(n => new NodeTimeStepCompound(n)).ToArray(),
+                new Dictionary<string, List<string>>()
+            );
         }
 
         _stepIndex += 1;

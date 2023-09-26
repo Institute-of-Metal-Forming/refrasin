@@ -1,28 +1,30 @@
+using System.Runtime.InteropServices;
 using RefraSin.ParticleModel;
 
 namespace Refrasin.HDF5Storage;
 
-internal class ParticleGroup
+internal struct ParticleCompound
 {
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
     public string Id;
 
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public double[] AbsoluteCenterCoordinates;
 
     public double RotationAngle;
 
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
     public string MaterialId;
 
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public double[] CenterCoordinates;
 
-    public NodeCompound[] Nodes;
-
-    public ParticleGroup(IParticle particle)
+    public ParticleCompound(IParticle particle)
     {
         Id = particle.Id.ToString();
         AbsoluteCenterCoordinates = particle.AbsoluteCenterCoordinates.ToArray();
         RotationAngle = particle.RotationAngle;
         MaterialId = particle.MaterialId.ToString();
         CenterCoordinates = particle.CenterCoordinates.ToArray();
-        Nodes = particle.Nodes.Select(n => new NodeCompound(n)).ToArray();
     }
 }
