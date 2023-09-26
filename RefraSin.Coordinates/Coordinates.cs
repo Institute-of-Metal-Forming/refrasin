@@ -63,6 +63,9 @@ public abstract class Coordinates : ICoordinates
     /// <inheritdoc />
     public abstract void RotateBy(Angle angle);
 
+    /// <inheritdoc />
+    public abstract double[] ToArray();
+
     /// <summary>
     ///     String representation of this object. Formats with distinct format strings.
     /// </summary>

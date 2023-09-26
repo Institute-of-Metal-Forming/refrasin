@@ -139,6 +139,9 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
     public string ToString(string? coordinatesFormat, string? numberFormat, string? angleFormat, IFormatProvider? formatProvider) =>
         ToString(Phi, R, coordinatesFormat, $"{numberFormat}:{angleFormat}", numberFormat, nameof(Phi), nameof(R), formatProvider);
 
+    /// <inheritdoc />
+    public override double[] ToArray() => new double[] { Phi, R };
+
     /// <summary>
     ///     Gets a tuple of the coordinates.
     /// </summary>
@@ -177,7 +180,7 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
         if (R.AlmostEqual(0)) return other.R.AlmostEqual(0);
         if (System.Equals(other.System))
             return R.AlmostEqual(other.R) && Phi.Radians.AlmostEqual(other.Phi.Radians);
-        return Equals((IVector) other);
+        return Equals((IVector)other);
     }
 
     /// <summary>
@@ -188,7 +191,7 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
         if (R.AlmostEqual(0, precision)) return other.R.AlmostEqual(0, precision);
         if (System.Equals(other.System))
             return R.AlmostEqual(other.R, precision) && Phi.Radians.AlmostEqual(other.Phi.Radians, precision);
-        return Equals((IVector) other);
+        return Equals((IVector)other);
     }
 
     /// <summary>
@@ -199,6 +202,6 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
         if (R.AlmostEqual(0, digits)) return other.R.AlmostEqual(0, digits);
         if (System.Equals(other.System))
             return R.AlmostEqual(other.R, digits) && Phi.Radians.AlmostEqual(other.Phi.Radians, digits);
-        return Equals((IVector) other);
+        return Equals((IVector)other);
     }
 }

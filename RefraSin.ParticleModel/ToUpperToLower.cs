@@ -36,6 +36,11 @@ public readonly struct ToUpperToLower
 
     /// <inheritdoc />
     public override string ToString() => $"ToUpper: {ToUpper}, ToLower: {ToLower}, Sum: {Sum}";
+
+    /// <summary>
+    /// Returns the components of the instance as 2-element array.
+    /// </summary>
+    public double[] ToArray() => new[] { ToUpper, ToLower };
 }
 
 /// <summary>
@@ -72,4 +77,18 @@ public readonly struct ToUpperToLowerAngle
 
     /// <inheritdoc />
     public override string ToString() => $"ToUpper: {ToUpper}, ToLower: {ToLower}, Sum: {Sum}";
+
+    public static implicit operator ToUpperToLower(ToUpperToLowerAngle other) => new(other.ToUpper, other.ToLower);
+
+    public static implicit operator ToUpperToLowerAngle(ToUpperToLower other) => new(other.ToUpper, other.ToLower);
+
+    /// <summary>
+    /// Returns the components of the instance as 2-element array.
+    /// </summary>
+    public Angle[] ToArray() => new[] { ToUpper, ToLower };
+
+    /// <summary>
+    /// Returns the components of the instance as 2-element array.
+    /// </summary>
+    public double[] ToDoubleArray() => new double[] { ToUpper, ToLower };
 }

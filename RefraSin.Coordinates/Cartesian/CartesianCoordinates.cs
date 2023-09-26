@@ -122,6 +122,9 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
     /// </summary>
     public (double X, double Y) ToTuple() => (X, Y);
 
+    /// <inheritdoc />
+    public override double[] ToArray() => new[] { X, Y };
+
     /// <summary>
     ///     Base implementation of Equals() with precision.
     /// </summary>
@@ -129,7 +132,7 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
     {
         if (System.Equals(other.System))
             return X.AlmostEqual(other.X, precision) && Y.AlmostEqual(other.Y, precision);
-        return Equals((IPoint) other);
+        return Equals((IPoint)other);
     }
 
     /// <summary>
@@ -139,7 +142,7 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
     {
         if (System.Equals(other.System))
             return X.AlmostEqual(other.X, digits) && Y.AlmostEqual(other.Y, digits);
-        return Equals((IPoint) other);
+        return Equals((IPoint)other);
     }
 
     /// <summary>
@@ -150,6 +153,6 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
         if (other == null) return false;
         if (System.Equals(other.System))
             return X.AlmostEqual(other.X) && Y.AlmostEqual(other.Y);
-        return Equals((IPoint) other);
+        return Equals((IPoint)other);
     }
 }

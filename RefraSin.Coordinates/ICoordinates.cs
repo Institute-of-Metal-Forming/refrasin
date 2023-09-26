@@ -10,4 +10,10 @@ public interface ICoordinates
     /// </summary>
     /// <param name="angle">rotation angle</param>
     public void RotateBy(Angle angle);
+
+    /// <summary>
+    /// Returns the coordinates as 2-element array.
+    /// </summary>
+    /// <returns></returns>
+    public double[] ToArray();
 }
