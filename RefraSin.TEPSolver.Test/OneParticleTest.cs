@@ -3,8 +3,10 @@ using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleSpecFactories;
+using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using static NUnit.Framework.Assert;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver.Test;
 
@@ -18,10 +20,8 @@ public class OneParticleTest
         _solver = new Solver();
         _solver.LoggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); });
         _solver.SolutionStorage = new InMemorySolutionStorage();
-        _materialRegistry = new MaterialRegistry();
-        _solver.MaterialRegistry = _materialRegistry;
 
-        var material1 = new Material(
+        _material = new Material(
             _particleSpec.MaterialId,
             "Al2O3",
             1e-9,
@@ -31,60 +31,39 @@ public class OneParticleTest
             1.8e3,
             101.96e-3
         );
-        _materialRegistry.RegisterMaterial(material1);
 
-        var materialInterface1 = new MaterialInterface(
-            material1.Id,
-            material1.Id,
+        _materialInterface = new MaterialInterface(
+            _material.Id,
+            _material.Id,
             0.5,
             1e-9,
             0
         );
-        _materialRegistry.RegisterMaterialInterface(materialInterface1);
 
-        _initialState = new SolutionState(
+        _process = new SinteringProcess(
             0,
-            new[]
-            {
-                new Particle(
-                    _particleSpec.Id,
-                    new PolarPoint(_particleSpec.AbsoluteCenterCoordinates),
-                    _particleSpec.AbsoluteCenterCoordinates,
-                    _particleSpec.RotationAngle,
-                    _particleSpec.MaterialId,
-                    _particleSpec.NodeSpecs.Select(ns => new SurfaceNode(
-                        ns.Id,
-                        _particleSpec.Id,
-                        ns.Coordinates,
-                        ns.Coordinates.Absolute,
-                        new ToUpperToLower(1, 1),
-                        new ToUpperToLowerAngle(1, 1),
-                        new ToUpperToLowerAngle(1, 1),
-                        new ToUpperToLower(1, 1),
-                        new NormalTangentialAngle(1, 1),
-                        new ToUpperToLower(1, 1),
-                        new ToUpperToLower(1, 1),
-                        new NormalTangential(1, 1),
-                        new NormalTangential(1, 1)
-                    )).ToArray()
-                )
-            }
+            1,
+            new[] { _particleSpec },
+            new[] { _material },
+            new[] { _materialInterface }
         );
     }
 
     private IParticleSpec _particleSpec;
     private Solver _solver;
-    private MaterialRegistry _materialRegistry;
-    private ISolutionState _initialState;
+    private IMaterial _material;
+    private IMaterialInterface _materialInterface;
+    private ISinteringProcess _process;
 
     [Test]
     public void TestCreateSession()
     {
-        var session = _solver.CreateSession(_initialState, 1);
+        var session = _solver.CreateSession(_process);
         var particle = session.Particles.Values.First();
 
         That(particle.Id, Is.EqualTo(_particleSpec.Id));
-        That(particle.Material, Is.EqualTo(_materialRegistry.Materials[0]));
+        That(particle.Material, Is.EqualTo(_material));
         That(particle.Nodes, Has.Count.EqualTo(100));
+        That(particle, Is.TypeOf<Particle>());
     }
 }

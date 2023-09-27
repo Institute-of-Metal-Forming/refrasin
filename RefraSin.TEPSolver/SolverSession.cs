@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
+using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
@@ -10,19 +11,28 @@ public partial class Solver
 {
     private class SolverSession : ISolverSession
     {
-        public SolverSession(Solver solver, ISolutionState initialState, double endTime)
+        private readonly IMaterialRegistry _materialRegistry;
+
+        public SolverSession(Solver solver, ISinteringProcess process)
         {
-            EndTime = endTime;
-            CurrentTime = initialState.Time;
+            EndTime = process.EndTime;
+            CurrentTime = process.StartTime;
             StartTime = CurrentTime;
             TimeStepWidth = solver.Options.InitialTimeStepWidth;
             TimeStepWidthOfLastStep = TimeStepWidth;
             Options = solver.Options;
             SolutionStorage = solver.SolutionStorage;
-            MaterialRegistry = solver.MaterialRegistry;
+            _materialRegistry = new MaterialRegistry();
+
+            foreach (var material in process.Materials)
+                _materialRegistry.RegisterMaterial(material);
+
+            foreach (var materialInterface in process.MaterialInterfaces)
+                _materialRegistry.RegisterMaterialInterface(materialInterface);
+
             Logger = solver.LoggerFactory.CreateLogger<Solver>();
 
-            var particles = initialState.ParticleStates.Select(ps => new Particle(null, ps, this)).ToArray();
+            var particles = process.ParticleSpecs.Select(ps => new Particle(null, ps, this)).ToArray();
             RootParticle = particles[0];
             Particles = particles.ToDictionary(p => p.Id);
             Nodes = particles.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
@@ -63,7 +73,7 @@ public partial class Solver
         public ISolutionStorage SolutionStorage { get; }
 
         /// <inheritdoc />
-        public IReadOnlyMaterialRegistry MaterialRegistry { get; }
+        public IReadOnlyMaterialRegistry MaterialRegistry => _materialRegistry;
 
         /// <inheritdoc />
         public ILogger<Solver> Logger { get; }
