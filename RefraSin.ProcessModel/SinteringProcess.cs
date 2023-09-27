@@ -3,8 +3,19 @@ using RefraSin.ParticleModel;
 
 namespace RefraSin.ProcessModel;
 
+/// <summary>
+/// Data structure representing a sintering process.
+/// </summary>
 public class SinteringProcess : ISinteringProcess
 {
+    /// <summary>
+    /// Creates a new sintering process.
+    /// </summary>
+    /// <param name="startTime">time coordinate of the process start</param>
+    /// <param name="endTime">time coordinate of the process end</param>
+    /// <param name="particleSpecs">enumerable of particle specifications</param>
+    /// <param name="materials">enumerable of materials appearing</param>
+    /// <param name="materialInterfaces">enumerable of material interfaces appearing</param>
     public SinteringProcess(
         double startTime,
         double endTime,

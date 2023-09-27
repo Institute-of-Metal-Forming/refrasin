@@ -17,9 +17,10 @@ public class OneParticleTest
     public void Setup()
     {
         _particleSpec = new ShapeFunctionParticleSpecFactory(100, 0.1, 5, 0.1, Guid.NewGuid()).GetParticleSpec();
-        _solver = new Solver();
-        _solver.LoggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); });
-        _solver.SolutionStorage = new InMemorySolutionStorage();
+        _solver = new Solver
+        {
+            LoggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); }),
+        };
 
         _material = new Material(
             _particleSpec.MaterialId,

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 
@@ -17,13 +18,16 @@ public partial class Solver
     /// <summary>
     /// Storage for solution data.
     /// </summary>
-    public ISolutionStorage SolutionStorage { get; set; }
+    public ISolutionStorage SolutionStorage { get; set; } = new InMemorySolutionStorage();
 
     /// <summary>
     /// Factory for loggers used in the session.
     /// </summary>
-    public ILoggerFactory LoggerFactory { get; set; }
+    public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
+    /// <summary>
+    /// Creates a new solver session for the given process.
+    /// </summary>
     internal ISolverSession CreateSession(ISinteringProcess process) => new SolverSession(this, process);
 
     /// <summary>
