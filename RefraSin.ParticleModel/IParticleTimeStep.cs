@@ -26,16 +26,6 @@ public interface IParticleTimeStep
     public Angle RotationDisplacement { get; }
 
     /// <summary>
-    /// Total vector of particle center displacement.
-    /// </summary>
-    public PolarVector DisplacementVector { get; }
-
-    /// <summary>
-    /// Total volume change.
-    /// </summary>
-    public double VolumeChange { get; }
-
-    /// <summary>
     /// List of this particle's node time steps.
     /// </summary>
     public IReadOnlyDictionary<Guid, INodeTimeStep> NodeTimeSteps { get; }

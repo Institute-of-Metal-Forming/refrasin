@@ -32,4 +32,14 @@ public interface ISinteringProcess
     /// List of material interfaces appearing in the process.
     /// </summary>
     public IReadOnlyList<IMaterialInterface> MaterialInterfaces { get; }
+
+    /// <summary>
+    /// Constant process temperature.
+    /// </summary>
+    public double Temperature { get; }
+
+    /// <summary>
+    /// Universal gas constant R.
+    /// </summary>
+    public double GasConstant { get; }
 }

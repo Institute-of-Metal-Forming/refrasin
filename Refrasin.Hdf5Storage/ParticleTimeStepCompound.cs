@@ -14,14 +14,11 @@ internal struct ParticleTimeStepCompound
 
     public readonly double RotationDisplacement;
 
-    public readonly double VolumeChange;
-
     public ParticleTimeStepCompound(IParticleTimeStep particleTimeStep)
     {
         ParticleId = particleTimeStep.ParticleId.ToString();
         RadialDisplacement = particleTimeStep.RadialDisplacement;
         AngleDisplacement = particleTimeStep.AngleDisplacement;
         RotationDisplacement = particleTimeStep.RotationDisplacement;
-        VolumeChange = particleTimeStep.VolumeChange;
     }
 }

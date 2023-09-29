@@ -46,7 +46,8 @@ public class OneParticleTest
             1,
             new[] { _particleSpec },
             new[] { _material },
-            new[] { _materialInterface }
+            new[] { _materialInterface },
+            1273
         );
     }
 
@@ -66,5 +67,12 @@ public class OneParticleTest
         That(particle.Material, Is.EqualTo(_material));
         That(particle.Nodes, Has.Count.EqualTo(100));
         That(particle, Is.TypeOf<Particle>());
+    }
+
+
+    [Test]
+    public void TestBuildEquationMatrix()
+    {
+
     }
 }

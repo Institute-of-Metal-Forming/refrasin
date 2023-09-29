@@ -17,8 +17,6 @@ internal struct NodeTimeStepCompound
 
     public readonly double OuterDiffusionalFlow;
 
-    public readonly double VolumeChange;
-
     public NodeTimeStepCompound(INodeTimeStep nodeTimeStep)
     {
         NodeId = nodeTimeStep.NodeId.ToString();
@@ -26,6 +24,5 @@ internal struct NodeTimeStepCompound
         TangentialDisplacement = nodeTimeStep.TangentialDisplacement;
         DiffusionalFlow = nodeTimeStep.DiffusionalFlow.ToArray();
         OuterDiffusionalFlow = nodeTimeStep.OuterDiffusionalFlow;
-        VolumeChange = nodeTimeStep.OuterDiffusionalFlow;
     }
 }

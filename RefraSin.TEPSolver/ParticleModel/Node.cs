@@ -164,7 +164,9 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         CheckTimeStep(timeStep);
 
-        Coordinates += timeStep.DisplacementVector;
+        var displacementVector = new PolarVector();
+
+        Coordinates += displacementVector;
 
         ClearCaches();
     }
@@ -173,9 +175,6 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         if (timeStep.NodeId != Id)
             throw new InvalidOperationException("IDs of node and time step do not match.");
-
-        if (timeStep.DisplacementVector.System != Coordinates.System)
-            throw new InvalidOperationException("Current coordinates and displacement vector must be in same coordinate system.");
     }
 
     public virtual void ApplyState(INode state)

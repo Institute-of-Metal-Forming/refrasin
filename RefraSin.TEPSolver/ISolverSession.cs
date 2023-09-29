@@ -26,6 +26,16 @@ internal interface ISolverSession
     public double EndTime { get; }
 
     /// <summary>
+    /// Constant process temperature.
+    /// </summary>
+    public double Temperature { get; }
+
+    /// <summary>
+    /// Universal gas constant R.
+    /// </summary>
+    public double GasConstant { get; }
+
+    /// <summary>
     /// Current step width of time integration.
     /// </summary>
     public double TimeStepWidth { get; }
@@ -69,4 +79,8 @@ internal interface ISolverSession
     /// Factory for loggers used in the session.
     /// </summary>
     public ILogger<Solver> Logger { get; }
+
+    public LagrangianGradient LagrangianGradient { get; }
+
+    public void RenewLagrangianGradient();
 }

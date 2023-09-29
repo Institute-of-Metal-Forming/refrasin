@@ -1,5 +1,12 @@
+using MathNet.Numerics;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.Optimization;
+using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using MoreLinq;
+using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 
@@ -28,13 +35,48 @@ public partial class Solver
     /// <summary>
     /// Creates a new solver session for the given process.
     /// </summary>
-    internal ISolverSession CreateSession(ISinteringProcess process) => new SolverSession(this, process);
+    internal SolverSession CreateSession(ISinteringProcess process) => new SolverSession(this, process);
 
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
     /// </summary>
     public void Solve(ISinteringProcess process)
     {
-        throw new NotImplementedException();
+        var session = CreateSession(process);
+        Solve(session);
+    }
+
+    internal static void Solve(SolverSession session)
+    {
+        while (session.CurrentTime < session.EndTime)
+        {
+            var timeSteps = SolveStep(session);
+            session.CurrentTime += session.TimeStepWidth;
+
+            foreach (var timeStep in timeSteps)
+                session.Particles[timeStep.ParticleId].ApplyTimeStep(timeStep);
+        }
+    }
+
+    internal static IReadOnlyList<IParticleTimeStep> SolveStep(ISolverSession session)
+    {
+        session.LagrangianGradient.FindRoot();
+
+        return session.Particles.Values.Select(p => new ParticleTimeStep(
+            p.Id,
+            0,
+            0,
+            0,
+            p.Surface.Select(n => new NodeTimeStep(
+                n.Id,
+                session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.NormalDisplacement),
+                0,
+                new ToUpperToLower(
+                    session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.FluxToUpper),
+                    -session.LagrangianGradient.GetSolutionValue(n.Lower.Id, LagrangianGradient.NodeUnknown.FluxToUpper)
+                ),
+                0
+            ))
+        )).ToArray();
     }
 }

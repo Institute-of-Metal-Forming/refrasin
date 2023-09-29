@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
+        <RootNamespace>RefraSin.TEPSolver</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,11 +21,15 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+        <PackageReference Include="morelinq" Version="3.4.2" />
     </ItemGroup>
 
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>$(MSBuildProjectName).Test</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(MSBuildProjectName).FSharp</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
 
