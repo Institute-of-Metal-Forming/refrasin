@@ -149,6 +149,16 @@ internal abstract class Node : INode, IRingItem<Node>
 
     private NormalTangential? _volumeGradient;
 
+    public double GuessFluxToUpper()
+    {
+        var vacancyConcentrationGradient = -Particle.Material.EquilibriumVacancyConcentration
+                                         / (SolverSession.GasConstant * SolverSession.Temperature)
+                                         * (Upper.GibbsEnergyGradient.Normal - GibbsEnergyGradient.Normal)
+                                         * Particle.Material.MolarVolume
+                                           / Pow(SurfaceDistance.ToUpper, 2);
+        return vacancyConcentrationGradient * SurfaceDiffusionCoefficient.ToUpper;
+    }
+
     protected virtual void ClearCaches()
     {
         _angleDistance = null;

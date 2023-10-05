@@ -200,17 +200,17 @@ internal class LagrangianGradient
     {
         yield break;
 
-        foreach (var particle in SolverSession.Particles.Values)
-        {
-        }
+        foreach (var particle in SolverSession.Particles.Values) { }
     }
 
     private IEnumerable<double> YieldNodeUnknownsInitialGuess()
     {
         foreach (var node in SolverSession.Nodes.Values)
         {
+            var flux = node.GuessFluxToUpper();
+
             yield return 1.0e-6;
-            yield return 1.0e-4;
+            yield return flux;
             yield return 1;
         }
     }
