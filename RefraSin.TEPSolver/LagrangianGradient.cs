@@ -25,7 +25,7 @@ internal class LagrangianGradient
 
         TotalUnknownsCount = NodeStartIndex + NodeCount * NodeUnknownsCount;
 
-        _solution = Enumerable.Repeat(1.0, TotalUnknownsCount).ToArray();
+        _solution = YieldInitialGuess().ToArray();
     }
 
     public ISolverSession SolverSession { get; }
@@ -164,5 +164,38 @@ internal class LagrangianGradient
     public void FindRoot()
     {
         _solution = Broyden.FindRoot(EvaluateAt, _solution);
+    }
+
+    private IEnumerable<double> YieldInitialGuess() =>
+        YieldGlobalUnknownsInitialGuess()
+            .Concat(
+                YieldParticleUnknownsInitialGuess()
+            )
+            .Concat(
+                YieldNodeUnknownsInitialGuess()
+            );
+
+    private IEnumerable<double> YieldGlobalUnknownsInitialGuess()
+    {
+        yield return 1;
+    }
+
+    private IEnumerable<double> YieldParticleUnknownsInitialGuess()
+    {
+        yield break;
+
+        foreach (var particle in SolverSession.Particles.Values)
+        {
+        }
+    }
+
+    private IEnumerable<double> YieldNodeUnknownsInitialGuess()
+    {
+        foreach (var node in SolverSession.Nodes.Values)
+        {
+            yield return 1.0e-6;
+            yield return 1.0e-4;
+            yield return 1;
+        }
     }
 }
