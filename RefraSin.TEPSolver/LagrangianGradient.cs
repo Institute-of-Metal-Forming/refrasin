@@ -131,10 +131,10 @@ internal class LagrangianGradient
               / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
               * node.SurfaceDiffusionCoefficient.ToUpper * node.SurfaceDistance.ToUpper * state[GetIndex(node.Id, NodeUnknown.FluxToUpper)]
               * state[GetIndex(GlobalUnknown.Lambda1)];
-            var thisRequiredConstraintsTerm = -SolverSession.TimeStepWidth * state[GetIndex(node.Id, NodeUnknown.Lambda2)];
-            var upperRequiredConstraintsTerm = -SolverSession.TimeStepWidth * state[GetIndex(node.Upper.Id, NodeUnknown.Lambda2)];
+            var thisRequiredConstraintsTerm = SolverSession.TimeStepWidth * state[GetIndex(node.Id, NodeUnknown.Lambda2)];
+            var upperRequiredConstraintsTerm = SolverSession.TimeStepWidth * state[GetIndex(node.Upper.Id, NodeUnknown.Lambda2)];
 
-            yield return dissipationTerm + thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
+            yield return dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
         }
     }
 
