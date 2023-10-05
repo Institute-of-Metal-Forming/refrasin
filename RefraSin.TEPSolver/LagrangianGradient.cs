@@ -1,3 +1,4 @@
+using MathNet.Numerics;
 using MathNet.Numerics.RootFinding;
 using MoreLinq;
 using RefraSin.TEPSolver.ParticleModel;
@@ -84,7 +85,17 @@ internal class LagrangianGradient
 
     public IReadOnlyList<double> Solution => _solution;
 
-    public double[] EvaluateAt(double[] state) => YieldEquations(state).ToArray();
+    public double[] EvaluateAt(double[] state)
+    {
+        var evaluation = YieldEquations(state).ToArray();
+
+        if (evaluation.Any(x => !double.IsFinite(x)))
+        {
+            throw new InvalidOperationException("One ore more components of the gradient evaluated to an infinite value.");
+        }
+
+        return evaluation;
+    }
 
     private IEnumerable<double> YieldEquations(double[] state) =>
         YieldStateVelocityDerivatives(state)
@@ -163,7 +174,12 @@ internal class LagrangianGradient
 
     public void FindRoot()
     {
-        _solution = Broyden.FindRoot(EvaluateAt, _solution);
+        _solution = Broyden.FindRoot(
+            EvaluateAt,
+            initialGuess: _solution,
+            maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
+            accuracy: SolverSession.Options.RootFindingAccuracy
+        );
     }
 
     private IEnumerable<double> YieldInitialGuess() =>

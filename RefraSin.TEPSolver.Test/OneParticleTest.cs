@@ -20,6 +20,10 @@ public class OneParticleTest
         _solver = new Solver
         {
             LoggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); }),
+            Options = new SolverOptions
+            {
+                InitialTimeStepWidth = 0.01
+            }
         };
 
         _material = new Material(
@@ -71,8 +75,8 @@ public class OneParticleTest
 
 
     [Test]
-    public void TestBuildEquationMatrix()
+    public void TestSolution()
     {
-
+        _solver.Solve(_process);
     }
 }
