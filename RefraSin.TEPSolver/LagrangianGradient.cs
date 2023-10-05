@@ -123,7 +123,7 @@ internal class LagrangianGradient
 
     private IEnumerable<double> YieldFluxDerivatives(double[] state)
     {
-        foreach (var node in SolverSession.Nodes.Values)
+        foreach (var node in SolverSession.Nodes.Values) // for each flux
         {
             // Flux To Upper
             var dissipationTerm =
@@ -131,10 +131,10 @@ internal class LagrangianGradient
               / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
               * node.SurfaceDiffusionCoefficient.ToUpper * node.SurfaceDistance.ToUpper * state[GetIndex(node.Id, NodeUnknown.FluxToUpper)]
               * state[GetIndex(GlobalUnknown.Lambda1)];
-            var upperRequiredConstraintsTerm = -SolverSession.TimeStepWidth * state[GetIndex(node.Id, NodeUnknown.Lambda2)];
-            var lowerRequiredConstraintsTerm = -SolverSession.TimeStepWidth * state[GetIndex(node.Lower.Id, NodeUnknown.Lambda2)];
+            var thisRequiredConstraintsTerm = -SolverSession.TimeStepWidth * state[GetIndex(node.Id, NodeUnknown.Lambda2)];
+            var upperRequiredConstraintsTerm = -SolverSession.TimeStepWidth * state[GetIndex(node.Upper.Id, NodeUnknown.Lambda2)];
 
-            yield return dissipationTerm + upperRequiredConstraintsTerm + lowerRequiredConstraintsTerm;
+            yield return dissipationTerm + thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
         }
     }
 
@@ -165,7 +165,7 @@ internal class LagrangianGradient
                 SolverSession.TimeStepWidth *
                 (
                     state[GetIndex(node.Id, NodeUnknown.FluxToUpper)]
-                  + state[GetIndex(node.Lower.Id, NodeUnknown.FluxToUpper)]
+                  - state[GetIndex(node.Lower.Id, NodeUnknown.FluxToUpper)]
                 );
 
             yield return volumeTerm - fluxTerm;
