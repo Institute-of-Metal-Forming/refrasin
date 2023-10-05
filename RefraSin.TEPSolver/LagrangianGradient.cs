@@ -11,15 +11,19 @@ internal class LagrangianGradient
     {
         SolverSession = solverSession;
 
+        GlobalUnknownsCount = Enum.GetNames(typeof(GlobalUnknown)).Length;
+
+        ParticleUnknownsCount = Enum.GetNames(typeof(ParticleUnknown)).Length;
         ParticleCount = solverSession.Particles.Count;
-        ParticleStartIndex = Enum.GetNames(typeof(GlobalUnknown)).Length;
+        ParticleStartIndex = GlobalUnknownsCount;
         ParticleIndices = solverSession.Particles.Keys.Index().ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
+        NodeUnknownsCount = Enum.GetNames(typeof(NodeUnknown)).Length;
         NodeCount = solverSession.Nodes.Count;
-        NodeStartIndex = ParticleStartIndex + ParticleCount * Enum.GetNames(typeof(ParticleUnknown)).Length;
+        NodeStartIndex = ParticleStartIndex + ParticleCount * ParticleUnknownsCount;
         NodeIndices = solverSession.Nodes.Keys.Index().ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
-        TotalUnknownsCount = NodeStartIndex + NodeCount * Enum.GetNames(typeof(NodeUnknown)).Length + 1;
+        TotalUnknownsCount = NodeStartIndex + NodeCount * NodeUnknownsCount;
 
         _solution = Enumerable.Repeat(1.0, TotalUnknownsCount).ToArray();
     }
@@ -47,12 +51,16 @@ internal class LagrangianGradient
         Lambda1
     }
 
+    public int GlobalUnknownsCount { get; }
+
     public enum ParticleUnknown
     {
         // RadialDisplacement,
         // AngleDisplacement,
         // RotationDisplacement
     }
+
+    public int ParticleUnknownsCount { get; }
 
     public enum NodeUnknown
     {
@@ -61,11 +69,14 @@ internal class LagrangianGradient
         Lambda2
     }
 
+    public int NodeUnknownsCount { get; }
+
     public int GetIndex(GlobalUnknown unknown) => (int)unknown;
 
-    public int GetIndex(Guid particleId, ParticleUnknown unknown) => ParticleStartIndex + (int)unknown * ParticleIndices[particleId];
+    public int GetIndex(Guid particleId, ParticleUnknown unknown) =>
+        ParticleStartIndex + ParticleUnknownsCount * ParticleIndices[particleId] + (int)unknown;
 
-    public int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + (int)unknown * NodeIndices[nodeId];
+    public int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + NodeUnknownsCount * NodeIndices[nodeId] + (int)unknown;
 
     public double GetSolutionValue(Guid particleId, ParticleUnknown unknown) => _solution[GetIndex(particleId, unknown)];
 
