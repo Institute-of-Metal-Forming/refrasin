@@ -192,9 +192,12 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         CheckTimeStep(timeStep);
 
-        var displacementVector = new PolarVector();
+        var angle = SurfaceRadiusAngle.ToUpper + SurfaceAngle.Normal;
+        var newR = CosLaw.C(Coordinates.R, timeStep.NormalDisplacement, angle);
+        var dPhi = SinLaw.Alpha(timeStep.NormalDisplacement, newR, angle);
 
-        Coordinates += displacementVector;
+        Coordinates.R = newR;
+        Coordinates.Phi += dPhi;
 
         ClearCaches();
     }
