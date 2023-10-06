@@ -114,7 +114,7 @@ internal class LagrangianGradient
         foreach (var node in SolverSession.Nodes.Values)
         {
             // Normal Displacement
-            var gibbsTerm = node.GibbsEnergyGradient.Normal * (1 + state[GetIndex(GlobalUnknown.Lambda1)]);
+            var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + state[GetIndex(GlobalUnknown.Lambda1)]);
             var requiredConstraintsTerm = node.VolumeGradient.Normal * state[GetIndex(node.Id, NodeUnknown.Lambda2)];
 
             yield return gibbsTerm + requiredConstraintsTerm;
@@ -127,29 +127,29 @@ internal class LagrangianGradient
         {
             // Flux To Upper
             var dissipationTerm =
-                -2 * SolverSession.GasConstant * SolverSession.Temperature * SolverSession.TimeStepWidth
+                2 * SolverSession.GasConstant * SolverSession.Temperature * SolverSession.TimeStepWidth
               / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
-              * node.SurfaceDiffusionCoefficient.ToUpper * node.SurfaceDistance.ToUpper * state[GetIndex(node.Id, NodeUnknown.FluxToUpper)]
+              * node.SurfaceDistance.ToUpper * state[GetIndex(node.Id, NodeUnknown.FluxToUpper)] / node.SurfaceDiffusionCoefficient.ToUpper
               * state[GetIndex(GlobalUnknown.Lambda1)];
             var thisRequiredConstraintsTerm = SolverSession.TimeStepWidth * state[GetIndex(node.Id, NodeUnknown.Lambda2)];
             var upperRequiredConstraintsTerm = SolverSession.TimeStepWidth * state[GetIndex(node.Upper.Id, NodeUnknown.Lambda2)];
 
-            yield return dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
+            yield return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
         }
     }
 
     private IEnumerable<double> YieldDissipationEquality(double[] state)
     {
         var dissipation = SolverSession.Nodes.Values.Select(n =>
-            n.GibbsEnergyGradient.Normal * state[GetIndex(n.Id, NodeUnknown.NormalDisplacement)]
+            -n.GibbsEnergyGradient.Normal * state[GetIndex(n.Id, NodeUnknown.NormalDisplacement)]
         ).Sum();
 
         var dissipationFunction =
             SolverSession.GasConstant * SolverSession.Temperature * SolverSession.TimeStepWidth / 2
           * SolverSession.Nodes.Values.Select(n =>
                 (
-                    n.SurfaceDiffusionCoefficient.ToUpper * n.SurfaceDistance.ToUpper * Pow(state[GetIndex(n.Id, NodeUnknown.FluxToUpper)], 2)
-                  + n.SurfaceDiffusionCoefficient.ToLower * n.SurfaceDistance.ToLower * Pow(state[GetIndex(n.Lower.Id, NodeUnknown.FluxToUpper)], 2)
+                    n.SurfaceDistance.ToUpper * Pow(state[GetIndex(n.Id, NodeUnknown.FluxToUpper)], 2) / n.SurfaceDiffusionCoefficient.ToUpper
+                  + n.SurfaceDistance.ToLower * Pow(state[GetIndex(n.Lower.Id, NodeUnknown.FluxToUpper)], 2) / n.SurfaceDiffusionCoefficient.ToLower
                 ) / (n.Particle.Material.MolarVolume * n.Particle.Material.EquilibriumVacancyConcentration)
             ).Sum();
 
@@ -207,10 +207,8 @@ internal class LagrangianGradient
     {
         foreach (var node in SolverSession.Nodes.Values)
         {
-            var flux = node.GuessFluxToUpper();
-
-            yield return 1.0e-6;
-            yield return flux;
+            yield return node.GuessNormalDisplacement();
+            yield return node.GuessFluxToUpper();;
             yield return 1;
         }
     }
