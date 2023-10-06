@@ -11,10 +11,10 @@ public class SolverOptions : ISolverOptions
     public int MaxIterationCount { get; set; } = 100;
 
     /// <inheritdoc />
-    public int RootFindingMaxIterationCount { get; set; } = 1000;
+    public int RootFindingMaxIterationCount { get; set; } = 100;
 
     /// <inheritdoc />
-    public double RootFindingAccuracy { get; } = 1e-4;
+    public double RootFindingAccuracy { get; } = 1e-8;
 
     /// <inheritdoc />
     public double IterationPrecision { get; set; } = 0.01;
