@@ -28,7 +28,8 @@ public class OneParticleTest
             LoggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); }),
             Options = new SolverOptions
             {
-                InitialTimeStepWidth = 1
+                InitialTimeStepWidth = 1,
+                MinTimeStepWidth = 0.1,
             },
             SolutionStorage = _solutionStorage
         };
@@ -84,25 +85,30 @@ public class OneParticleTest
     [Test]
     public void TestSolution()
     {
-        _solver.Solve(_process);
-
-        var dir = Path.GetTempFileName().Replace(".tmp", "");
-        Directory.CreateDirectory(dir);
-        TestContext.WriteLine(dir);
-
-        foreach (var (i, state) in _solutionStorage.States.Index())
+        try
         {
-            var plt = new Plot();
+            _solver.Solve(_process);
+        }
+        finally
+        {
+            var dir = Path.GetTempFileName().Replace(".tmp", "");
+            Directory.CreateDirectory(dir);
+            TestContext.WriteLine(dir);
 
-            var coordinates = state.ParticleStates[0].Nodes
-                .Append(state.ParticleStates[0].Nodes[0])
-                .Select(n => new ScottPlot.Coordinates(n.AbsoluteCoordinates.X, n.AbsoluteCoordinates.Y))
-                .ToArray();
-            plt.Add.Scatter(coordinates);
+            foreach (var (i, state) in _solutionStorage.States.Index())
+            {
+                var plt = new Plot();
 
-            plt.Title($"t = {state.Time.ToString(CultureInfo.InvariantCulture)}");
+                var coordinates = state.ParticleStates[0].Nodes
+                    .Append(state.ParticleStates[0].Nodes[0])
+                    .Select(n => new ScottPlot.Coordinates(n.AbsoluteCoordinates.X, n.AbsoluteCoordinates.Y))
+                    .ToArray();
+                plt.Add.Scatter(coordinates);
 
-            plt.SavePng(Path.Combine(dir, $"{i}.png"), 3000, 3000);
+                plt.Title($"t = {state.Time.ToString(CultureInfo.InvariantCulture)}");
+
+                plt.SavePng(Path.Combine(dir, $"{i}.png"), 3000, 3000);
+            }
         }
     }
 }

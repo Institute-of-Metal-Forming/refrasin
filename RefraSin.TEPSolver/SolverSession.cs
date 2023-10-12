@@ -15,6 +15,8 @@ internal class SolverSession : ISolverSession
     private readonly IMaterialRegistry _materialRegistry;
     private readonly ISolutionStorage _solutionStorage;
 
+    private int _timeStepIndexWhereStepWidthWasLastModified = 0;
+
     public SolverSession(Solver solver, ISinteringProcess process)
     {
         EndTime = process.EndTime;
@@ -50,6 +52,9 @@ internal class SolverSession : ISolverSession
 
     /// <inheritdoc />
     public double EndTime { get; }
+
+    /// <inheritdoc />
+    public int TimeStepIndex { get; private set; }
 
     /// <inheritdoc />
     public double Temperature { get; }
@@ -91,6 +96,7 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public void IncreaseCurrentTime()
     {
+        TimeStepIndex++;
         CurrentTime += TimeStepWidth;
     }
 
@@ -98,6 +104,7 @@ internal class SolverSession : ISolverSession
     public void IncreaseTimeStepWidth()
     {
         TimeStepWidth *= Options.TimeStepAdaptationFactor;
+        _timeStepIndexWhereStepWidthWasLastModified = TimeStepIndex;
 
         if (TimeStepWidth > Options.MaxTimeStepWidth)
         {
@@ -106,9 +113,19 @@ internal class SolverSession : ISolverSession
     }
 
     /// <inheritdoc />
+    public void MayIncreaseTimeStepWidth()
+    {
+        if (TimeStepIndex - _timeStepIndexWhereStepWidthWasLastModified > Options.TimeStepIncreaseDelay)
+            IncreaseTimeStepWidth();
+    }
+
+    /// <inheritdoc />
     public void DecreaseTimeStepWidth()
     {
         TimeStepWidth /= Options.TimeStepAdaptationFactor;
+        _timeStepIndexWhereStepWidthWasLastModified = TimeStepIndex;
+
+        Logger.LogInformation("Time step width decreased to {TimeStepWidth}.", TimeStepWidth);
 
         if (TimeStepWidth < Options.MinTimeStepWidth)
         {

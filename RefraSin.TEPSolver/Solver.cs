@@ -6,9 +6,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MoreLinq;
 using RefraSin.Coordinates.Polar;
+using RefraSin.Iteration;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -43,16 +45,16 @@ public partial class Solver
     public void Solve(ISinteringProcess process)
     {
         var session = CreateSession(process);
-        Solve(session);
+        DoTimeIntegration(session);
     }
 
-    internal static void Solve(ISolverSession session)
+    private static void DoTimeIntegration(ISolverSession session)
     {
         session.StoreCurrentState();
 
         while (session.CurrentTime < session.EndTime)
         {
-            var particleTimeSteps = SolveStep(session);
+            var particleTimeSteps = TrySolveStepUntilValid(session);
             session.StoreStep(particleTimeSteps);
 
             session.IncreaseCurrentTime();
@@ -61,28 +63,58 @@ public partial class Solver
                 session.Particles[timeStep.ParticleId].ApplyTimeStep(timeStep);
 
             session.StoreCurrentState();
+            session.MayIncreaseTimeStepWidth();
         }
+
+        session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", session.TimeStepIndex + 1);
     }
 
-    internal static IReadOnlyList<IParticleTimeStep> SolveStep(ISolverSession session)
+    private static IReadOnlyList<IParticleTimeStep> TrySolveStepUntilValid(ISolverSession session)
+    {
+        int i;
+
+        for (i = 0; i < session.Options.MaxIterationCount; i++)
+        {
+            try
+            {
+                var particleTimeSteps = SolveStep(session);
+
+                return particleTimeSteps;
+            }
+            catch (Exception e)
+            {
+                session.Logger.LogError(e, "Exception occured during time step solution. Lowering time step width and try again.");
+                session.DecreaseTimeStepWidth();
+            }
+        }
+
+        throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
+    }
+
+    private static IReadOnlyList<IParticleTimeStep> SolveStep(ISolverSession session)
     {
         session.LagrangianGradient.FindRoot();
 
-        return session.Particles.Values.Select(p => new ParticleTimeStep(
-            p.Id,
-            0,
-            0,
-            0,
-            p.Surface.Select(n => new NodeTimeStep(
-                n.Id,
-                session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.NormalDisplacement),
+        return GenerateTimeStepsFromGradientSolution(session).ToArray();
+    }
+
+    private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(ISolverSession session)
+    {
+        foreach (var p in session.Particles.Values)
+            yield return new ParticleTimeStep(
+                p.Id,
                 0,
-                new ToUpperToLower(
-                    session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.FluxToUpper),
-                    -session.LagrangianGradient.GetSolutionValue(n.Lower.Id, LagrangianGradient.NodeUnknown.FluxToUpper)
-                ),
-                0
-            ))
-        )).ToArray();
+                0,
+                0,
+                p.Surface.Select(n =>
+                    new NodeTimeStep(n.Id,
+                        session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.NormalDisplacement),
+                        0,
+                        new ToUpperToLower(
+                            session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.FluxToUpper),
+                            -session.LagrangianGradient.GetSolutionValue(n.Lower.Id, LagrangianGradient.NodeUnknown.FluxToUpper)
+                        ),
+                        0
+                    )));
     }
 }

@@ -27,6 +27,8 @@ internal interface ISolverSession
     /// </summary>
     public double EndTime { get; }
 
+    public int TimeStepIndex { get; }
+
     /// <summary>
     /// Constant process temperature.
     /// </summary>
@@ -74,6 +76,7 @@ internal interface ISolverSession
     public void IncreaseCurrentTime();
 
     public void IncreaseTimeStepWidth();
+    public void MayIncreaseTimeStepWidth();
 
     public void DecreaseTimeStepWidth();
 
