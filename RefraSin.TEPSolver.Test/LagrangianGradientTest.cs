@@ -67,7 +67,7 @@ public class LagrangianGradientTest
     [Test]
     public void TestGlobalIndices()
     {
-        Assert.That(_gradient.GetIndex(LagrangianGradient.GlobalUnknown.Lambda1), Is.EqualTo(0));
+        Assert.That(_gradient.StepVectorMap.GetIndex(GlobalUnknown.Lambda1), Is.EqualTo(0));
     }
 
     [Test]
@@ -76,35 +76,35 @@ public class LagrangianGradientTest
         // first particle
 
         // first node
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[0].Id, LagrangianGradient.NodeUnknown.NormalDisplacement), Is.EqualTo(1));
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[0].Id, LagrangianGradient.NodeUnknown.FluxToUpper), Is.EqualTo(2));
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[0].Id, LagrangianGradient.NodeUnknown.Lambda2), Is.EqualTo(3));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[0].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(1));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[0].Id, NodeUnknown.FluxToUpper), Is.EqualTo(2));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[0].Id, NodeUnknown.Lambda2), Is.EqualTo(3));
 
         // second node
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[1].Id, LagrangianGradient.NodeUnknown.NormalDisplacement), Is.EqualTo(4));
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[1].Id, LagrangianGradient.NodeUnknown.FluxToUpper), Is.EqualTo(5));
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[1].Id, LagrangianGradient.NodeUnknown.Lambda2), Is.EqualTo(6));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[1].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(4));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[1].Id, NodeUnknown.FluxToUpper), Is.EqualTo(5));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[1].Id, NodeUnknown.Lambda2), Is.EqualTo(6));
 
         // last node
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[99].Id, LagrangianGradient.NodeUnknown.NormalDisplacement), Is.EqualTo(298));
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[99].Id, LagrangianGradient.NodeUnknown.FluxToUpper), Is.EqualTo(299));
-        Assert.That(_gradient.GetIndex(_particleSpec1.NodeSpecs[99].Id, LagrangianGradient.NodeUnknown.Lambda2), Is.EqualTo(300));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[99].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(298));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[99].Id, NodeUnknown.FluxToUpper), Is.EqualTo(299));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec1.NodeSpecs[99].Id, NodeUnknown.Lambda2), Is.EqualTo(300));
 
         // second particle
 
         // first node
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[0].Id, LagrangianGradient.NodeUnknown.NormalDisplacement), Is.EqualTo(301));
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[0].Id, LagrangianGradient.NodeUnknown.FluxToUpper), Is.EqualTo(302));
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[0].Id, LagrangianGradient.NodeUnknown.Lambda2), Is.EqualTo(303));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[0].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(301));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[0].Id, NodeUnknown.FluxToUpper), Is.EqualTo(302));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[0].Id, NodeUnknown.Lambda2), Is.EqualTo(303));
 
         // second node
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[1].Id, LagrangianGradient.NodeUnknown.NormalDisplacement), Is.EqualTo(304));
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[1].Id, LagrangianGradient.NodeUnknown.FluxToUpper), Is.EqualTo(305));
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[1].Id, LagrangianGradient.NodeUnknown.Lambda2), Is.EqualTo(306));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[1].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(304));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[1].Id, NodeUnknown.FluxToUpper), Is.EqualTo(305));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[1].Id, NodeUnknown.Lambda2), Is.EqualTo(306));
 
         // last node
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[99].Id, LagrangianGradient.NodeUnknown.NormalDisplacement), Is.EqualTo(598));
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[99].Id, LagrangianGradient.NodeUnknown.FluxToUpper), Is.EqualTo(599));
-        Assert.That(_gradient.GetIndex(_particleSpec2.NodeSpecs[99].Id, LagrangianGradient.NodeUnknown.Lambda2), Is.EqualTo(600));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[99].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(598));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[99].Id, NodeUnknown.FluxToUpper), Is.EqualTo(599));
+        Assert.That(_gradient.StepVectorMap.GetIndex(_particleSpec2.NodeSpecs[99].Id, NodeUnknown.Lambda2), Is.EqualTo(600));
     }
 }

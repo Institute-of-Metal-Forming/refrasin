@@ -108,11 +108,11 @@ public partial class Solver
                 0,
                 p.Surface.Select(n =>
                     new NodeTimeStep(n.Id,
-                        session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.NormalDisplacement),
+                        session.LagrangianGradient.Solution[n].NormalDisplacement,
                         0,
                         new ToUpperToLower(
-                            session.LagrangianGradient.GetSolutionValue(n.Id, LagrangianGradient.NodeUnknown.FluxToUpper),
-                            -session.LagrangianGradient.GetSolutionValue(n.Lower.Id, LagrangianGradient.NodeUnknown.FluxToUpper)
+                            session.LagrangianGradient.Solution[n].FluxToUpper,
+                            -session.LagrangianGradient.Solution[n].FluxToUpper
                         ),
                         0
                     )));
