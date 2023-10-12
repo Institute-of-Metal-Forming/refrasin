@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.Step;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
@@ -69,9 +70,9 @@ internal interface ISolverSession
     /// </summary>
     public ILogger<Solver> Logger { get; }
 
-    public LagrangianGradient LagrangianGradient { get; }
+    public StepVectorMap StepVectorMap { get; }
 
-    public void RenewLagrangianGradient();
+    public StepVector? LastStep { get; }
 
     public void IncreaseCurrentTime();
 

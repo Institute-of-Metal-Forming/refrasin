@@ -75,8 +75,8 @@ public class OneParticleTest
     [Test]
     public void TestCreateSession()
     {
-        var session = _solver.CreateSession(_process);
-        var particle = session.Particles.Values.First();
+        _solver.CreateSession(_process);
+        var particle = _solver.Session.Particles.Values.First();
 
         That(particle.Id, Is.EqualTo(_particleSpec.Id));
         That(particle.Material, Is.EqualTo(_material));
