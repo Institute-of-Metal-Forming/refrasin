@@ -88,7 +88,7 @@ public class Solver
         {
             try
             {
-                var particleTimeSteps = SolveStep();
+                var particleTimeSteps = TrySolveStepWithLastStepOrGuess();
 
                 return particleTimeSteps;
             }
@@ -102,7 +102,7 @@ public class Solver
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
     }
 
-    private StepVector SolveStep()
+    private StepVector TrySolveStepWithLastStepOrGuess()
     {
         StepVector solution = Session.LastStep ?? GuessSolution();
 
@@ -148,43 +148,46 @@ public class Solver
                     )));
     }
 
-    private double[] EvaluateLagrangianGradientAt(double[] state)
+    private StepVector EvaluateLagrangianGradientAt(StepVector stepVector)
     {
-        var evaluation = YieldEquations(new StepVector(state, Session.StepVectorMap)).ToArray();
+        var evaluation = YieldEquations(stepVector).ToArray();
 
         if (evaluation.Any(x => !double.IsFinite(x)))
         {
             throw new InvalidOperationException("One ore more components of the gradient evaluated to an infinite value.");
         }
 
-        return evaluation;
+        return new StepVector(evaluation, Session.StepVectorMap);
     }
 
-    private IEnumerable<double> YieldEquations(StepVector state) =>
-        YieldStateVelocityDerivatives(state)
+    private double[] EvaluateLagrangianGradientAt(double[] vector) =>
+        EvaluateLagrangianGradientAt(new StepVector(vector, Session.StepVectorMap)).AsArray();
+
+    private IEnumerable<double> YieldEquations(StepVector stepVector) =>
+        YieldStateVelocityDerivatives(stepVector)
             .Concat(
-                YieldFluxDerivatives(state)
+                YieldFluxDerivatives(stepVector)
             )
             .Concat(
-                YieldDissipationEquality(state)
+                YieldDissipationEquality(stepVector)
             )
             .Concat(
-                YieldRequiredConstraints(state)
+                YieldRequiredConstraints(stepVector)
             );
 
-    private IEnumerable<double> YieldStateVelocityDerivatives(StepVector state)
+    private IEnumerable<double> YieldStateVelocityDerivatives(StepVector stepVector)
     {
         foreach (var node in Session.Nodes.Values)
         {
             // Normal Displacement
-            var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + state.Lambda1);
-            var requiredConstraintsTerm = node.VolumeGradient.Normal * state[node].Lambda2;
+            var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
+            var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector[node].Lambda2;
 
             yield return gibbsTerm + requiredConstraintsTerm;
         }
     }
 
-    private IEnumerable<double> YieldFluxDerivatives(StepVector state)
+    private IEnumerable<double> YieldFluxDerivatives(StepVector stepVector)
     {
         foreach (var node in Session.Nodes.Values) // for each flux
         {
@@ -192,43 +195,43 @@ public class Solver
             var dissipationTerm =
                 2 * Session.GasConstant * Session.Temperature * Session.TimeStepWidth
               / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
-              * node.SurfaceDistance.ToUpper * state[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
-              * state.Lambda1;
-            var thisRequiredConstraintsTerm = Session.TimeStepWidth * state[node].Lambda2;
-            var upperRequiredConstraintsTerm = Session.TimeStepWidth * state[node.Upper].Lambda2;
+              * node.SurfaceDistance.ToUpper * stepVector[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
+              * stepVector.Lambda1;
+            var thisRequiredConstraintsTerm = Session.TimeStepWidth * stepVector[node].Lambda2;
+            var upperRequiredConstraintsTerm = Session.TimeStepWidth * stepVector[node.Upper].Lambda2;
 
             yield return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
         }
     }
 
-    private IEnumerable<double> YieldDissipationEquality(StepVector state)
+    private IEnumerable<double> YieldDissipationEquality(StepVector stepVector)
     {
         var dissipation = Session.Nodes.Values.Select(n =>
-            -n.GibbsEnergyGradient.Normal * state[n].NormalDisplacement
+            -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
         ).Sum();
 
         var dissipationFunction =
             Session.GasConstant * Session.Temperature * Session.TimeStepWidth / 2
           * Session.Nodes.Values.Select(n =>
                 (
-                    n.SurfaceDistance.ToUpper * Pow(state[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
-                  + n.SurfaceDistance.ToLower * Pow(state[n.Lower].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToLower
+                    n.SurfaceDistance.ToUpper * Pow(stepVector[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
+                  + n.SurfaceDistance.ToLower * Pow(stepVector[n.Lower].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToLower
                 ) / (n.Particle.Material.MolarVolume * n.Particle.Material.EquilibriumVacancyConcentration)
             ).Sum();
 
         yield return dissipation - dissipationFunction;
     }
 
-    private IEnumerable<double> YieldRequiredConstraints(StepVector state)
+    private IEnumerable<double> YieldRequiredConstraints(StepVector stepVector)
     {
         foreach (var node in Session.Nodes.Values)
         {
-            var volumeTerm = node.VolumeGradient.Normal * state[node].NormalDisplacement;
+            var volumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
             var fluxTerm =
                 Session.TimeStepWidth *
                 (
-                    state[node].FluxToUpper
-                  - state[node.Lower].FluxToUpper
+                    stepVector[node].FluxToUpper
+                  - stepVector[node.Lower].FluxToUpper
                 );
 
             yield return volumeTerm - fluxTerm;
