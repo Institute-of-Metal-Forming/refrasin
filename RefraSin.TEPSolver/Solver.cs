@@ -54,7 +54,8 @@ public partial class Solver
 
         while (session.CurrentTime < session.EndTime)
         {
-            var particleTimeSteps = TrySolveStepUntilValid(session);
+            var stepVector = TrySolveStepUntilValid(session);
+            var particleTimeSteps = GenerateTimeStepsFromGradientSolution(session, stepVector).ToArray();
             session.StoreStep(particleTimeSteps);
 
             session.IncreaseCurrentTime();
@@ -69,7 +70,7 @@ public partial class Solver
         session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", session.TimeStepIndex + 1);
     }
 
-    private static IReadOnlyList<IParticleTimeStep> TrySolveStepUntilValid(ISolverSession session)
+    private static StepVector TrySolveStepUntilValid(ISolverSession session)
     {
         int i;
 
@@ -91,14 +92,9 @@ public partial class Solver
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
     }
 
-    private static IReadOnlyList<IParticleTimeStep> SolveStep(ISolverSession session)
-    {
-        session.LagrangianGradient.FindRoot();
+    private static StepVector SolveStep(ISolverSession session) => session.LagrangianGradient.FindRoot();
 
-        return GenerateTimeStepsFromGradientSolution(session).ToArray();
-    }
-
-    private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(ISolverSession session)
+    private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(ISolverSession session, StepVector stepVector)
     {
         foreach (var p in session.Particles.Values)
             yield return new ParticleTimeStep(
@@ -108,11 +104,11 @@ public partial class Solver
                 0,
                 p.Surface.Select(n =>
                     new NodeTimeStep(n.Id,
-                        session.LagrangianGradient.Solution[n].NormalDisplacement,
+                        stepVector[n].NormalDisplacement,
                         0,
                         new ToUpperToLower(
-                            session.LagrangianGradient.Solution[n].FluxToUpper,
-                            -session.LagrangianGradient.Solution[n].FluxToUpper
+                            stepVector[n].FluxToUpper,
+                            -stepVector[n].FluxToUpper
                         ),
                         0
                     )));

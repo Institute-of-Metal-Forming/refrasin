@@ -234,11 +234,13 @@ internal class LagrangianGradient
         }
     }
 
-    public void FindRoot()
+    public StepVector FindRoot()
     {
+        StepVector solution;
+
         try
         {
-            Solution = new StepVector(Broyden.FindRoot(
+            solution = new StepVector(Broyden.FindRoot(
                 EvaluateAtArray,
                 initialGuess: Solution,
                 maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
@@ -247,13 +249,16 @@ internal class LagrangianGradient
         }
         catch (NonConvergenceException e)
         {
-            Solution = new StepVector(Broyden.FindRoot(
+            solution = new StepVector(Broyden.FindRoot(
                 EvaluateAtArray,
                 initialGuess: GuessSolution(),
                 maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
                 accuracy: SolverSession.Options.RootFindingAccuracy
             ), StepVectorMap);
         }
+
+        Solution = solution;
+        return solution;
     }
 
     public StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), StepVectorMap);
