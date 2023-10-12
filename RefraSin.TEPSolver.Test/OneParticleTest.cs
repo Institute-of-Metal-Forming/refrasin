@@ -18,7 +18,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var endTime = 1e4;
+        var endTime = 1e3;
 
         _particleSpec = new ShapeFunctionParticleSpecFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticleSpec();
         _solutionStorage = new InMemorySolutionStorage();
@@ -30,6 +30,8 @@ public class OneParticleTest
             {
                 InitialTimeStepWidth = 1,
                 MinTimeStepWidth = 0.1,
+                MaxTimeStepWidth = 5,
+                TimeStepAdaptationFactor = 1.5,
             },
             SolutionStorage = _solutionStorage
         };

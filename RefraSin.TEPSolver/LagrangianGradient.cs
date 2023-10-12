@@ -174,12 +174,24 @@ internal class LagrangianGradient
 
     public void FindRoot()
     {
-        _solution = Broyden.FindRoot(
-            EvaluateAt,
-            initialGuess: _solution,
-            maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
-            accuracy: SolverSession.Options.RootFindingAccuracy
-        );
+        try
+        {
+            _solution = Broyden.FindRoot(
+                EvaluateAt,
+                initialGuess: _solution,
+                maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
+                accuracy: SolverSession.Options.RootFindingAccuracy
+            );
+        }
+        catch (NonConvergenceException e)
+        {
+            _solution = Broyden.FindRoot(
+                EvaluateAt,
+                initialGuess: YieldInitialGuess().ToArray(),
+                maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
+                accuracy: SolverSession.Options.RootFindingAccuracy
+            );
+        }
     }
 
     private IEnumerable<double> YieldInitialGuess() =>
@@ -208,7 +220,8 @@ internal class LagrangianGradient
         foreach (var node in SolverSession.Nodes.Values)
         {
             yield return node.GuessNormalDisplacement();
-            yield return node.GuessFluxToUpper();;
+            yield return node.GuessFluxToUpper();
+            ;
             yield return 1;
         }
     }
