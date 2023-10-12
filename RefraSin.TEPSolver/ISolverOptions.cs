@@ -14,6 +14,16 @@ public interface ISolverOptions
     int MaxIterationCount { get; }
 
     /// <summary>
+    /// Maximum count of iterations used in root finding routines.
+    /// </summary>
+    int RootFindingMaxIterationCount { get; }
+
+    /// <summary>
+    /// Accuracy value used for root finding routines.
+    /// </summary>
+    double RootFindingAccuracy { get; }
+
+    /// <summary>
     /// Goal precision of iteration loops as fraction of 1.
     /// </summary>
     double IterationPrecision { get; }

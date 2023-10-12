@@ -43,7 +43,7 @@ public class ShapeFunctionParticleSpecFactory : IParticleSpecFactory
     {
         var nodeCount = NodeCountFunction?.Invoke(this) ?? NodeCount;
 
-        var phis = Generate.LinearSpaced(nodeCount, 0, Pi2);
+        var phis = Generate.LinearSpaced(nodeCount + 1, 0, Pi2)[0..^1];
         var rs = Generate.Map(phis, ParticleShapeFunction);
         var particleId = Guid.NewGuid();
 

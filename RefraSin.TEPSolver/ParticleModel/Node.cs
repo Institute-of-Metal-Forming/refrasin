@@ -5,6 +5,7 @@ using RefraSin.Coordinates.Polar;
 using RefraSin.Enumerables;
 using RefraSin.ParticleModel;
 using static System.Math;
+using static MathNet.Numerics.Constants;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -149,6 +150,33 @@ internal abstract class Node : INode, IRingItem<Node>
 
     private NormalTangential? _volumeGradient;
 
+    public double GuessFluxToUpper()
+    {
+        var x1 = -Lower.Coordinates.R * Sin(AngleDistance.ToLower);
+        var x3 = Upper.Coordinates.R * Sin(AngleDistance.ToUpper);
+        var y1 = Lower.Coordinates.R * Cos(AngleDistance.ToLower);
+        var y2 = Coordinates.R;
+        var y3 = Upper.Coordinates.R * Cos(AngleDistance.ToUpper);
+
+        var curvature = -(x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3) / (Pow(x1, 2) * x3 - x1 * Pow(x3, 2));
+        var curvatureGibbs = GibbsEnergyGradient.Normal / SurfaceDistance.Sum / SurfaceEnergy.ToUpper;
+
+        var vacancyConcentrationGradient = -Particle.Material.EquilibriumVacancyConcentration
+                                         / (SolverSession.GasConstant * SolverSession.Temperature)
+                                         * (Upper.GibbsEnergyGradient.Normal - GibbsEnergyGradient.Normal)
+                                         * Particle.Material.MolarVolume
+                                         / Pow(SurfaceDistance.ToUpper, 2);
+        return -SurfaceDiffusionCoefficient.ToUpper * vacancyConcentrationGradient;
+    }
+
+    public double GuessNormalDisplacement()
+    {
+        var fluxBalance = GuessFluxToUpper() - Lower.GuessFluxToUpper();
+
+        var displacement = 2 * fluxBalance * SolverSession.TimeStepWidth / (SurfaceDistance.Sum * Sin(SurfaceAngle.Normal));
+        return displacement;
+    }
+
     protected virtual void ClearCaches()
     {
         _angleDistance = null;
@@ -164,7 +192,12 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         CheckTimeStep(timeStep);
 
-        Coordinates += timeStep.DisplacementVector;
+        var angle = SurfaceRadiusAngle.ToUpper + SurfaceAngle.Normal;
+        var newR = CosLaw.C(Coordinates.R, timeStep.NormalDisplacement, angle);
+        var dPhi = SinLaw.Alpha(timeStep.NormalDisplacement, newR, angle);
+
+        Coordinates.R = newR;
+        Coordinates.Phi += dPhi;
 
         ClearCaches();
     }
@@ -173,9 +206,6 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         if (timeStep.NodeId != Id)
             throw new InvalidOperationException("IDs of node and time step do not match.");
-
-        if (timeStep.DisplacementVector.System != Coordinates.System)
-            throw new InvalidOperationException("Current coordinates and displacement vector must be in same coordinate system.");
     }
 
     public virtual void ApplyState(INode state)

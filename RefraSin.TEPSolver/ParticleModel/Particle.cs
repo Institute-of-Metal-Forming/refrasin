@@ -112,7 +112,13 @@ internal class Particle : IParticle, ITreeItem<Particle>
     {
         CheckTimeStep(timeStep);
 
-        CenterCoordinates += timeStep.DisplacementVector;
+        var displacementVector = new PolarVector(
+            timeStep.AngleDisplacement,
+            timeStep.RadialDisplacement,
+            CenterCoordinates.System
+        );
+
+        CenterCoordinates += displacementVector;
 
         RotationAngle = (RotationAngle + timeStep.RotationDisplacement).Reduce();
 
@@ -126,9 +132,6 @@ internal class Particle : IParticle, ITreeItem<Particle>
     {
         if (timeStep.ParticleId != Id)
             throw new InvalidOperationException("IDs of particle and time step do not match.");
-
-        if (timeStep.DisplacementVector.System != CenterCoordinates.System)
-            throw new InvalidOperationException("Current coordinates and displacement vector must be in same coordinate system.");
     }
 
     public virtual void ApplyState(IParticle state)

@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
+using RefraSin.ParticleModel;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.ParticleModel;
+using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
@@ -26,20 +27,22 @@ internal interface ISolverSession
     /// </summary>
     public double EndTime { get; }
 
+    public int TimeStepIndex { get; }
+
+    /// <summary>
+    /// Constant process temperature.
+    /// </summary>
+    public double Temperature { get; }
+
+    /// <summary>
+    /// Universal gas constant R.
+    /// </summary>
+    public double GasConstant { get; }
+
     /// <summary>
     /// Current step width of time integration.
     /// </summary>
     public double TimeStepWidth { get; }
-
-    /// <summary>
-    /// Step width used in the last time step.
-    /// </summary>
-    public double? TimeStepWidthOfLastStep { get; }
-
-    /// <summary>
-    /// Root particle of the particle tree.
-    /// </summary>
-    public Particle RootParticle { get; }
 
     /// <summary>
     /// Registry of all particles.
@@ -57,11 +60,6 @@ internal interface ISolverSession
     public ISolverOptions Options { get; }
 
     /// <summary>
-    /// Object for storing the calculated solution data. Store and forget from the perspective of the solver.
-    /// </summary>
-    public ISolutionStorage SolutionStorage { get; }
-
-    /// <summary>
     /// Registry for material and material interface data.
     /// </summary>
     public IReadOnlyMaterialRegistry MaterialRegistry { get; }
@@ -70,4 +68,19 @@ internal interface ISolverSession
     /// Factory for loggers used in the session.
     /// </summary>
     public ILogger<Solver> Logger { get; }
+
+    public LagrangianGradient LagrangianGradient { get; }
+
+    public void RenewLagrangianGradient();
+
+    public void IncreaseCurrentTime();
+
+    public void IncreaseTimeStepWidth();
+    public void MayIncreaseTimeStepWidth();
+
+    public void DecreaseTimeStepWidth();
+
+    public void StoreCurrentState();
+
+    public void StoreStep(IEnumerable<IParticleTimeStep> particleTimeSteps);
 }
