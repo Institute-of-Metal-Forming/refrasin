@@ -157,7 +157,7 @@ internal class LagrangianGradient
         return new StepVector(evaluation, StepVectorMap);
     }
 
-    private Vector<double> EvaluateAtArray(Vector<double> state) => EvaluateAt(new StepVector(state, StepVectorMap));
+    private double[] EvaluateAtArray(double[] state) => EvaluateAt(new StepVector(state, StepVectorMap)).AsArray();
 
     private IEnumerable<double> YieldEquations(StepVector state) =>
         YieldStateVelocityDerivatives(state)
@@ -242,7 +242,7 @@ internal class LagrangianGradient
         {
             solution = new StepVector(Broyden.FindRoot(
                 EvaluateAtArray,
-                initialGuess: Solution,
+                initialGuess: Solution.AsArray(),
                 maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
                 accuracy: SolverSession.Options.RootFindingAccuracy
             ), StepVectorMap);
@@ -251,7 +251,7 @@ internal class LagrangianGradient
         {
             solution = new StepVector(Broyden.FindRoot(
                 EvaluateAtArray,
-                initialGuess: GuessSolution(),
+                initialGuess: GuessSolution().AsArray(),
                 maxIterations: SolverSession.Options.RootFindingMaxIterationCount,
                 accuracy: SolverSession.Options.RootFindingAccuracy
             ), StepVectorMap);
