@@ -5,6 +5,7 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.Step;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
@@ -41,7 +42,7 @@ internal class SolverSession : ISolverSession
         Particles = particles.ToDictionary(p => p.Id);
         Nodes = Particles.Values.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
 
-        LagrangianGradient = new LagrangianGradient(this);
+        StepVectorMap = new StepVectorMap(this);
     }
 
     /// <inheritdoc />
@@ -84,14 +85,10 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public ILogger<Solver> Logger { get; }
 
-    /// <inheritdoc />
-    public LagrangianGradient LagrangianGradient { get; private set; }
+    public StepVectorMap StepVectorMap { get; }
 
     /// <inheritdoc />
-    public void RenewLagrangianGradient()
-    {
-        LagrangianGradient = new LagrangianGradient(this);
-    }
+    public StepVector? LastStep { get; set; }
 
     /// <inheritdoc />
     public void IncreaseCurrentTime()

@@ -1,25 +1,23 @@
 using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.Optimization;
 using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using MoreLinq;
-using RefraSin.Coordinates.Polar;
 using RefraSin.Iteration;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Step;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
+using static System.Math;
 
 namespace RefraSin.TEPSolver;
 
 /// <summary>
 /// Solver for performing time integration of sintering processes based on the thermodynamic extremal principle (TEP).
 /// </summary>
-public partial class Solver
+public class Solver
 {
+    private ISolverSession? _session;
+
     /// <summary>
     /// Numeric options to control solver behavior.
     /// </summary>
@@ -31,73 +29,108 @@ public partial class Solver
     public ISolutionStorage SolutionStorage { get; set; } = new InMemorySolutionStorage();
 
     /// <summary>
-    /// Factory for loggers used in the session.
+    /// Factory for loggers used in the Session.
     /// </summary>
     public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
+    internal ISolverSession Session
+    {
+        get => _session ?? throw new InvalidOperationException("Solution procedure is not initialized.");
+        private set => _session = value;
+    }
+
     /// <summary>
-    /// Creates a new solver session for the given process.
+    /// Creates a new solver Session for the given process.
     /// </summary>
-    internal SolverSession CreateSession(ISinteringProcess process) => new SolverSession(this, process);
+    internal SolverSession CreateSession(ISinteringProcess process)
+    {
+        var session = new SolverSession(this, process);
+        Session = session;
+        return session;
+    }
 
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
     /// </summary>
     public void Solve(ISinteringProcess process)
     {
-        var session = CreateSession(process);
-        DoTimeIntegration(session);
+        CreateSession(process);
+        DoTimeIntegration();
     }
 
-    private static void DoTimeIntegration(ISolverSession session)
+    private void DoTimeIntegration()
     {
-        session.StoreCurrentState();
+        Session.StoreCurrentState();
 
-        while (session.CurrentTime < session.EndTime)
+        while (Session.CurrentTime < Session.EndTime)
         {
-            var stepVector = TrySolveStepUntilValid(session);
-            var particleTimeSteps = GenerateTimeStepsFromGradientSolution(session, stepVector).ToArray();
-            session.StoreStep(particleTimeSteps);
+            var stepVector = TrySolveStepUntilValid();
+            var particleTimeSteps = GenerateTimeStepsFromGradientSolution(stepVector).ToArray();
+            Session.StoreStep(particleTimeSteps);
 
-            session.IncreaseCurrentTime();
+            Session.IncreaseCurrentTime();
 
             foreach (var timeStep in particleTimeSteps)
-                session.Particles[timeStep.ParticleId].ApplyTimeStep(timeStep);
+                Session.Particles[timeStep.ParticleId].ApplyTimeStep(timeStep);
 
-            session.StoreCurrentState();
-            session.MayIncreaseTimeStepWidth();
+            Session.StoreCurrentState();
+            Session.MayIncreaseTimeStepWidth();
         }
 
-        session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", session.TimeStepIndex + 1);
+        Session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", Session.TimeStepIndex + 1);
     }
 
-    private static StepVector TrySolveStepUntilValid(ISolverSession session)
+    private StepVector TrySolveStepUntilValid()
     {
         int i;
 
-        for (i = 0; i < session.Options.MaxIterationCount; i++)
+        for (i = 0; i < Session.Options.MaxIterationCount; i++)
         {
             try
             {
-                var particleTimeSteps = SolveStep(session);
+                var particleTimeSteps = SolveStep();
 
                 return particleTimeSteps;
             }
             catch (Exception e)
             {
-                session.Logger.LogError(e, "Exception occured during time step solution. Lowering time step width and try again.");
-                session.DecreaseTimeStepWidth();
+                Session.Logger.LogError(e, "Exception occured during time step solution. Lowering time step width and try again.");
+                Session.DecreaseTimeStepWidth();
             }
         }
 
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
     }
 
-    private static StepVector SolveStep(ISolverSession session) => session.LagrangianGradient.FindRoot();
-
-    private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(ISolverSession session, StepVector stepVector)
+    private StepVector SolveStep()
     {
-        foreach (var p in session.Particles.Values)
+        StepVector solution = Session.LastStep ?? GuessSolution();
+
+        try
+        {
+            solution = new StepVector(Broyden.FindRoot(
+                EvaluateLagrangianGradientAt,
+                initialGuess: solution.AsArray(),
+                maxIterations: Session.Options.RootFindingMaxIterationCount,
+                accuracy: Session.Options.RootFindingAccuracy
+            ), Session.StepVectorMap);
+        }
+        catch (NonConvergenceException e)
+        {
+            solution = new StepVector(Broyden.FindRoot(
+                EvaluateLagrangianGradientAt,
+                initialGuess: GuessSolution().AsArray(),
+                maxIterations: Session.Options.RootFindingMaxIterationCount,
+                accuracy: Session.Options.RootFindingAccuracy
+            ), Session.StepVectorMap);
+        }
+
+        return solution;
+    }
+
+    private IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
+    {
+        foreach (var p in Session.Particles.Values)
             yield return new ParticleTimeStep(
                 p.Id,
                 0,
@@ -113,5 +146,126 @@ public partial class Solver
                         ),
                         0
                     )));
+    }
+
+    private double[] EvaluateLagrangianGradientAt(double[] state)
+    {
+        var evaluation = YieldEquations(new StepVector(state, Session.StepVectorMap)).ToArray();
+
+        if (evaluation.Any(x => !double.IsFinite(x)))
+        {
+            throw new InvalidOperationException("One ore more components of the gradient evaluated to an infinite value.");
+        }
+
+        return evaluation;
+    }
+
+    private IEnumerable<double> YieldEquations(StepVector state) =>
+        YieldStateVelocityDerivatives(state)
+            .Concat(
+                YieldFluxDerivatives(state)
+            )
+            .Concat(
+                YieldDissipationEquality(state)
+            )
+            .Concat(
+                YieldRequiredConstraints(state)
+            );
+
+    private IEnumerable<double> YieldStateVelocityDerivatives(StepVector state)
+    {
+        foreach (var node in Session.Nodes.Values)
+        {
+            // Normal Displacement
+            var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + state.Lambda1);
+            var requiredConstraintsTerm = node.VolumeGradient.Normal * state[node].Lambda2;
+
+            yield return gibbsTerm + requiredConstraintsTerm;
+        }
+    }
+
+    private IEnumerable<double> YieldFluxDerivatives(StepVector state)
+    {
+        foreach (var node in Session.Nodes.Values) // for each flux
+        {
+            // Flux To Upper
+            var dissipationTerm =
+                2 * Session.GasConstant * Session.Temperature * Session.TimeStepWidth
+              / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
+              * node.SurfaceDistance.ToUpper * state[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
+              * state.Lambda1;
+            var thisRequiredConstraintsTerm = Session.TimeStepWidth * state[node].Lambda2;
+            var upperRequiredConstraintsTerm = Session.TimeStepWidth * state[node.Upper].Lambda2;
+
+            yield return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
+        }
+    }
+
+    private IEnumerable<double> YieldDissipationEquality(StepVector state)
+    {
+        var dissipation = Session.Nodes.Values.Select(n =>
+            -n.GibbsEnergyGradient.Normal * state[n].NormalDisplacement
+        ).Sum();
+
+        var dissipationFunction =
+            Session.GasConstant * Session.Temperature * Session.TimeStepWidth / 2
+          * Session.Nodes.Values.Select(n =>
+                (
+                    n.SurfaceDistance.ToUpper * Pow(state[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
+                  + n.SurfaceDistance.ToLower * Pow(state[n.Lower].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToLower
+                ) / (n.Particle.Material.MolarVolume * n.Particle.Material.EquilibriumVacancyConcentration)
+            ).Sum();
+
+        yield return dissipation - dissipationFunction;
+    }
+
+    private IEnumerable<double> YieldRequiredConstraints(StepVector state)
+    {
+        foreach (var node in Session.Nodes.Values)
+        {
+            var volumeTerm = node.VolumeGradient.Normal * state[node].NormalDisplacement;
+            var fluxTerm =
+                Session.TimeStepWidth *
+                (
+                    state[node].FluxToUpper
+                  - state[node.Lower].FluxToUpper
+                );
+
+            yield return volumeTerm - fluxTerm;
+        }
+    }
+
+    private StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), Session.StepVectorMap);
+
+    private IEnumerable<double> YieldInitialGuess() =>
+        YieldGlobalUnknownsInitialGuess()
+            .Concat(
+                YieldParticleUnknownsInitialGuess()
+            )
+            .Concat(
+                YieldNodeUnknownsInitialGuess()
+            );
+
+    private IEnumerable<double> YieldGlobalUnknownsInitialGuess()
+    {
+        yield return 1;
+    }
+
+    private IEnumerable<double> YieldParticleUnknownsInitialGuess()
+    {
+        yield break;
+
+        foreach (var particle in Session.Particles.Values) { }
+    }
+
+    private IEnumerable<double> YieldNodeUnknownsInitialGuess()
+    {
+        foreach (var node in Session.Nodes.Values)
+        {
+            yield return node.GuessNormalDisplacement();
+            yield return node.GuessFluxToUpper();
+            ;
+            yield return 1;
+        }
     }
 }
