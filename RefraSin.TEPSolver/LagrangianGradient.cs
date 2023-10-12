@@ -60,19 +60,19 @@ internal class StepVectorMap
     public int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + NodeUnknownsCount * NodeIndices[nodeId] + (int)unknown;
 }
 
-public enum GlobalUnknown
+internal enum GlobalUnknown
 {
     Lambda1
 }
 
-public enum NodeUnknown
+internal enum NodeUnknown
 {
     NormalDisplacement,
     FluxToUpper,
     Lambda2
 }
 
-public enum ParticleUnknown
+internal enum ParticleUnknown
 {
     // RadialDisplacement,
     // AngleDisplacement,
