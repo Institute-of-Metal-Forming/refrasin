@@ -58,7 +58,7 @@ public class Solver
         DoTimeIntegration();
     }
 
-    private void DoTimeIntegration()
+    internal void DoTimeIntegration()
     {
         Session.StoreCurrentState();
 
@@ -80,7 +80,7 @@ public class Solver
         Session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", Session.TimeStepIndex + 1);
     }
 
-    private StepVector TrySolveStepUntilValid()
+    internal StepVector TrySolveStepUntilValid()
     {
         int i;
 
@@ -102,7 +102,7 @@ public class Solver
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
     }
 
-    private StepVector TrySolveStepWithLastStepOrGuess()
+    internal StepVector TrySolveStepWithLastStepOrGuess()
     {
         StepVector solution = Session.LastStep ?? GuessSolution();
 
@@ -128,7 +128,7 @@ public class Solver
         return solution;
     }
 
-    private IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
+    internal IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
     {
         foreach (var p in Session.Particles.Values)
             yield return new ParticleTimeStep(
@@ -148,7 +148,7 @@ public class Solver
                     )));
     }
 
-    private StepVector EvaluateLagrangianGradientAt(StepVector stepVector)
+    internal StepVector EvaluateLagrangianGradientAt(StepVector stepVector)
     {
         var evaluation = YieldEquations(stepVector).ToArray();
 
@@ -160,10 +160,10 @@ public class Solver
         return new StepVector(evaluation, Session.StepVectorMap);
     }
 
-    private double[] EvaluateLagrangianGradientAt(double[] vector) =>
+    internal double[] EvaluateLagrangianGradientAt(double[] vector) =>
         EvaluateLagrangianGradientAt(new StepVector(vector, Session.StepVectorMap)).AsArray();
 
-    private IEnumerable<double> YieldEquations(StepVector stepVector) =>
+    internal IEnumerable<double> YieldEquations(StepVector stepVector) =>
         YieldStateVelocityDerivatives(stepVector)
             .Concat(
                 YieldFluxDerivatives(stepVector)
@@ -175,7 +175,7 @@ public class Solver
                 YieldRequiredConstraints(stepVector)
             );
 
-    private IEnumerable<double> YieldStateVelocityDerivatives(StepVector stepVector)
+    internal IEnumerable<double> YieldStateVelocityDerivatives(StepVector stepVector)
     {
         foreach (var node in Session.Nodes.Values)
         {
@@ -187,7 +187,7 @@ public class Solver
         }
     }
 
-    private IEnumerable<double> YieldFluxDerivatives(StepVector stepVector)
+    internal IEnumerable<double> YieldFluxDerivatives(StepVector stepVector)
     {
         foreach (var node in Session.Nodes.Values) // for each flux
         {
@@ -204,7 +204,7 @@ public class Solver
         }
     }
 
-    private IEnumerable<double> YieldDissipationEquality(StepVector stepVector)
+    internal IEnumerable<double> YieldDissipationEquality(StepVector stepVector)
     {
         var dissipation = Session.Nodes.Values.Select(n =>
             -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
@@ -222,7 +222,7 @@ public class Solver
         yield return dissipation - dissipationFunction;
     }
 
-    private IEnumerable<double> YieldRequiredConstraints(StepVector stepVector)
+    internal IEnumerable<double> YieldRequiredConstraints(StepVector stepVector)
     {
         foreach (var node in Session.Nodes.Values)
         {
@@ -238,9 +238,9 @@ public class Solver
         }
     }
 
-    private StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), Session.StepVectorMap);
+    internal StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), Session.StepVectorMap);
 
-    private IEnumerable<double> YieldInitialGuess() =>
+    internal IEnumerable<double> YieldInitialGuess() =>
         YieldGlobalUnknownsInitialGuess()
             .Concat(
                 YieldParticleUnknownsInitialGuess()
@@ -249,19 +249,19 @@ public class Solver
                 YieldNodeUnknownsInitialGuess()
             );
 
-    private IEnumerable<double> YieldGlobalUnknownsInitialGuess()
+    internal IEnumerable<double> YieldGlobalUnknownsInitialGuess()
     {
         yield return 1;
     }
 
-    private IEnumerable<double> YieldParticleUnknownsInitialGuess()
+    internal IEnumerable<double> YieldParticleUnknownsInitialGuess()
     {
         yield break;
 
         foreach (var particle in Session.Particles.Values) { }
     }
 
-    private IEnumerable<double> YieldNodeUnknownsInitialGuess()
+    internal IEnumerable<double> YieldNodeUnknownsInitialGuess()
     {
         foreach (var node in Session.Nodes.Values)
         {
