@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
+using RefraSin.ParticleModel;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.ParticleModel;
+using Node = RefraSin.TEPSolver.ParticleModel.Node;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -41,16 +43,6 @@ internal interface ISolverSession
     public double TimeStepWidth { get; }
 
     /// <summary>
-    /// Step width used in the last time step.
-    /// </summary>
-    public double? TimeStepWidthOfLastStep { get; }
-
-    /// <summary>
-    /// Root particle of the particle tree.
-    /// </summary>
-    public Particle RootParticle { get; }
-
-    /// <summary>
     /// Registry of all particles.
     /// </summary>
     public IReadOnlyDictionary<Guid, Particle> Particles { get; }
@@ -66,11 +58,6 @@ internal interface ISolverSession
     public ISolverOptions Options { get; }
 
     /// <summary>
-    /// Object for storing the calculated solution data. Store and forget from the perspective of the solver.
-    /// </summary>
-    public ISolutionStorage SolutionStorage { get; }
-
-    /// <summary>
     /// Registry for material and material interface data.
     /// </summary>
     public IReadOnlyMaterialRegistry MaterialRegistry { get; }
@@ -83,4 +70,14 @@ internal interface ISolverSession
     public LagrangianGradient LagrangianGradient { get; }
 
     public void RenewLagrangianGradient();
+
+    public void IncreaseCurrentTime();
+
+    public void IncreaseTimeStepWidth();
+
+    public void DecreaseTimeStepWidth();
+
+    public void StoreCurrentState();
+
+    public void StoreStep(IEnumerable<IParticleTimeStep> particleTimeSteps);
 }

@@ -46,24 +46,21 @@ public partial class Solver
         Solve(session);
     }
 
-    internal static void Solve(SolverSession session)
+    internal static void Solve(ISolverSession session)
     {
-        session.SolutionStorage.StoreState(new SolutionState(session.CurrentTime, session.Particles.Values));
+        session.StoreCurrentState();
 
         while (session.CurrentTime < session.EndTime)
         {
-            var timeSteps = SolveStep(session);
+            var particleTimeSteps = SolveStep(session);
+            session.StoreStep(particleTimeSteps);
 
-            var nextTime = session.CurrentTime + session.TimeStepWidth;
+            session.IncreaseCurrentTime();
 
-            session.SolutionStorage.StoreStep(new SolutionStep(session.CurrentTime, nextTime, timeSteps));
-
-            session.CurrentTime = nextTime;
-
-            foreach (var timeStep in timeSteps)
+            foreach (var timeStep in particleTimeSteps)
                 session.Particles[timeStep.ParticleId].ApplyTimeStep(timeStep);
 
-            session.SolutionStorage.StoreState(new SolutionState(session.CurrentTime, session.Particles.Values));
+            session.StoreCurrentState();
         }
     }
 
