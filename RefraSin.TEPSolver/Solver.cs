@@ -91,8 +91,10 @@ public class Solver
             {
                 var step = TrySolveStepWithLastStepOrGuess();
 
-                if (Session.LastStep is not null)
-                    return (step + Session.LastStep) / 2;
+                step = MakeAdamsMoultonCorrection(step);
+
+                CheckForInstability(step);
+
                 return step;
             }
             catch (Exception e)
@@ -103,6 +105,32 @@ public class Solver
         }
 
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
+    }
+
+    private StepVector MakeAdamsMoultonCorrection(StepVector step)
+    {
+        if (Session.LastStep is not null)
+            return (step + Session.LastStep) / 2;
+        return step;
+    }
+
+    private void CheckForInstability(StepVector step)
+    {
+        foreach (var particle in Session.Particles.Values)
+        {
+            var displacements = particle.Nodes.Select(n => step[n].NormalDisplacement).ToArray();
+            var differences = displacements.Zip(displacements.Skip(1).Append(displacements[0]), (current, next) => next - current).ToArray();
+
+            for (int i = 0; i < differences.Length; i++)
+            {
+                if (
+                    differences[i] * differences[(i + 1) % differences.Length] < 0 &&
+                    differences[(i + 1) % differences.Length] * differences[(i + 2) % differences.Length] < 0 &&
+                    differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0
+                )
+                    throw new Exception($"Instability detected around node {i}");
+            }
+        }
     }
 
     internal StepVector TrySolveStepWithLastStepOrGuess()

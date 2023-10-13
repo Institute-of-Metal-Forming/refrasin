@@ -30,7 +30,7 @@ public class OneParticleTest
             {
                 InitialTimeStepWidth = 1,
                 MinTimeStepWidth = 0.1,
-                MaxTimeStepWidth = 5,
+                // MaxTimeStepWidth = 5,
                 TimeStepAdaptationFactor = 1.5,
             },
             SolutionStorage = _solutionStorage
@@ -109,7 +109,23 @@ public class OneParticleTest
 
                 plt.Title($"t = {state.Time.ToString(CultureInfo.InvariantCulture)}");
 
-                plt.SavePng(Path.Combine(dir, $"{i}.png"), 3000, 3000);
+                plt.SavePng(Path.Combine(dir, $"p{i}.png"), 3000, 3000);
+            }
+
+            foreach (var (i, step) in _solutionStorage.Steps.Index())
+            {
+                var plt = new Plot();
+
+                var coordinates = step.ParticleTimeSteps[0].NodeTimeSteps.Values
+                    .Select((n, j) => new ScottPlot.Coordinates(j, n.NormalDisplacement))
+                    .ToArray();
+                plt.Add.Scatter(coordinates);
+
+                plt.Add.Line(0, 0, coordinates.Length, 0);
+
+                plt.Title($"t = {step.StartTime.ToString(CultureInfo.InvariantCulture)}");
+
+                plt.SavePng(Path.Combine(dir, $"nd{i}.png"), 600, 400);
             }
         }
     }
