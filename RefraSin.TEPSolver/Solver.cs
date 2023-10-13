@@ -16,7 +16,7 @@ namespace RefraSin.TEPSolver;
 /// </summary>
 public class Solver
 {
-    private ISolverSession? _session;
+    private SolverSession? _session;
 
     /// <summary>
     /// Numeric options to control solver behavior.
@@ -33,7 +33,7 @@ public class Solver
     /// </summary>
     public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
-    internal ISolverSession Session
+    internal SolverSession Session
     {
         get => _session ?? throw new InvalidOperationException("Solution procedure is not initialized.");
         private set => _session = value;
@@ -65,6 +65,7 @@ public class Solver
         while (Session.CurrentTime < Session.EndTime)
         {
             var stepVector = TrySolveStepUntilValid();
+            Session.LastStep = stepVector;
             var particleTimeSteps = GenerateTimeStepsFromGradientSolution(stepVector).ToArray();
             Session.StoreStep(particleTimeSteps);
 
@@ -88,9 +89,11 @@ public class Solver
         {
             try
             {
-                var particleTimeSteps = TrySolveStepWithLastStepOrGuess();
+                var step = TrySolveStepWithLastStepOrGuess();
 
-                return particleTimeSteps;
+                if (Session.LastStep is not null)
+                    return (step + Session.LastStep) / 2;
+                return step;
             }
             catch (Exception e)
             {
@@ -193,12 +196,12 @@ public class Solver
         {
             // Flux To Upper
             var dissipationTerm =
-                2 * Session.GasConstant * Session.Temperature * Session.TimeStepWidth
+                2 * Session.GasConstant * Session.Temperature
               / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
               * node.SurfaceDistance.ToUpper * stepVector[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
               * stepVector.Lambda1;
-            var thisRequiredConstraintsTerm = Session.TimeStepWidth * stepVector[node].Lambda2;
-            var upperRequiredConstraintsTerm = Session.TimeStepWidth * stepVector[node.Upper].Lambda2;
+            var thisRequiredConstraintsTerm = stepVector[node].Lambda2;
+            var upperRequiredConstraintsTerm = stepVector[node.Upper].Lambda2;
 
             yield return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
         }
@@ -211,7 +214,7 @@ public class Solver
         ).Sum();
 
         var dissipationFunction =
-            Session.GasConstant * Session.Temperature * Session.TimeStepWidth / 2
+            Session.GasConstant * Session.Temperature / 2
           * Session.Nodes.Values.Select(n =>
                 (
                     n.SurfaceDistance.ToUpper * Pow(stepVector[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
@@ -227,12 +230,7 @@ public class Solver
         foreach (var node in Session.Nodes.Values)
         {
             var volumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
-            var fluxTerm =
-                Session.TimeStepWidth *
-                (
-                    stepVector[node].FluxToUpper
-                  - stepVector[node.Lower].FluxToUpper
-                );
+            var fluxTerm = stepVector[node].FluxToUpper - stepVector[node.Lower].FluxToUpper;
 
             yield return volumeTerm - fluxTerm;
         }

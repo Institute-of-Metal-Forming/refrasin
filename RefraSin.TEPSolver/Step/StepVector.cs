@@ -25,4 +25,10 @@ internal class StepVector : DenseVector
     public ParticleView this[IParticleSpec particle] => new(this, particle.Id);
 
     public double Lambda1 => this[StepVectorMap.GetIndex(GlobalUnknown.Lambda1)];
+
+    public static StepVector operator +(StepVector leftSide, StepVector rightSide) => new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);
+    public static StepVector operator -(StepVector leftSide, StepVector rightSide) => new((DenseVector)leftSide - rightSide, leftSide.StepVectorMap);
+    public static StepVector operator *(StepVector leftSide, double rightSide) => new((DenseVector)leftSide * rightSide, leftSide.StepVectorMap);
+    public static StepVector operator +(double leftSide, StepVector rightSide) => rightSide * leftSide;
+    public static StepVector operator /(StepVector leftSide, double rightSide) => new((DenseVector)leftSide / rightSide, leftSide.StepVectorMap);
 }

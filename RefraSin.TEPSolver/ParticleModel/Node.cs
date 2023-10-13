@@ -173,7 +173,7 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         var fluxBalance = GuessFluxToUpper() - Lower.GuessFluxToUpper();
 
-        var displacement = 2 * fluxBalance * SolverSession.TimeStepWidth / (SurfaceDistance.Sum * Sin(SurfaceAngle.Normal));
+        var displacement = 2 * fluxBalance / (SurfaceDistance.Sum * Sin(SurfaceAngle.Normal));
         return displacement;
     }
 
@@ -192,9 +192,10 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         CheckTimeStep(timeStep);
 
+        var normalDisplacement = timeStep.NormalDisplacement * SolverSession.TimeStepWidth;
         var angle = SurfaceRadiusAngle.ToUpper + SurfaceAngle.Normal;
-        var newR = CosLaw.C(Coordinates.R, timeStep.NormalDisplacement, angle);
-        var dPhi = SinLaw.Alpha(timeStep.NormalDisplacement, newR, angle);
+        var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
+        var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
 
         Coordinates.R = newR;
         Coordinates.Phi += dPhi;
