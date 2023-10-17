@@ -29,8 +29,8 @@ public abstract record Node(
     protected Node(INode template) : this(
         template.Id,
         template.ParticleId,
-        template.Coordinates,
-        template.AbsoluteCoordinates,
+        new PolarPoint(template.Coordinates, template.Coordinates.System),
+        new AbsolutePoint(template.AbsoluteCoordinates.ToTuple()),
         template.SurfaceDistance,
         template.SurfaceRadiusAngle,
         template.AngleDistance,

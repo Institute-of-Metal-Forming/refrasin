@@ -2,10 +2,10 @@ using MathNet.Numerics;
 using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using RefraSin.Iteration;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.Step;
 using static System.Math;
 
@@ -101,6 +101,11 @@ public class Solver
             {
                 Session.Logger.LogError(e, "Exception occured during time step solution. Lowering time step width and try again.");
                 Session.DecreaseTimeStepWidth();
+
+                if (e is InstabilityException)
+                {
+                    Session.ResetTo(Session.StateMemory.Pop());
+                }
             }
         }
 
@@ -128,7 +133,7 @@ public class Solver
                     differences[(i + 1) % differences.Length] * differences[(i + 2) % differences.Length] < 0 &&
                     differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0
                 )
-                    throw new Exception($"Instability detected around node {i}");
+                    throw new InstabilityException(particle.Id, particle.Nodes[i].Id, i);
             }
         }
     }

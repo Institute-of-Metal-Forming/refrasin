@@ -1,5 +1,5 @@
 using RefraSin.Coordinates;
-using RefraSin.Iteration;
+using RefraSin.TEPSolver.Exceptions;
 
 namespace RefraSin.TEPSolver;
 
@@ -87,4 +87,6 @@ public interface ISolverOptions
     /// Time out in seconds to cancel solution procedure after. Negative values disable this feature.
     /// </summary>
     double TimeOut { get; }
+
+    int SolutionMemoryCount { get; }
 }

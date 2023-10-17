@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MoreLinq;
-using RefraSin.Iteration;
+using RefraSin.Enumerables;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
@@ -43,6 +43,7 @@ internal class SolverSession : ISolverSession
         Nodes = Particles.Values.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
 
         StepVectorMap = new StepVectorMap(this);
+        StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
     }
 
     /// <inheritdoc />
@@ -87,17 +88,16 @@ internal class SolverSession : ISolverSession
 
     public StepVectorMap StepVectorMap { get; }
 
-    /// <inheritdoc />
     public StepVector? LastStep { get; set; }
 
-    /// <inheritdoc />
+    public FixedStack<ISolutionState> StateMemory { get; }
+
     public void IncreaseCurrentTime()
     {
         TimeStepIndex++;
         CurrentTime += TimeStepWidth;
     }
 
-    /// <inheritdoc />
     public void IncreaseTimeStepWidth()
     {
         TimeStepWidth *= Options.TimeStepAdaptationFactor;
@@ -109,14 +109,12 @@ internal class SolverSession : ISolverSession
         }
     }
 
-    /// <inheritdoc />
     public void MayIncreaseTimeStepWidth()
     {
         if (TimeStepIndex - _timeStepIndexWhereStepWidthWasLastModified > Options.TimeStepIncreaseDelay)
             IncreaseTimeStepWidth();
     }
 
-    /// <inheritdoc />
     public void DecreaseTimeStepWidth()
     {
         TimeStepWidth /= Options.TimeStepAdaptationFactor;
@@ -130,16 +128,28 @@ internal class SolverSession : ISolverSession
         }
     }
 
-    /// <inheritdoc />
     public void StoreCurrentState()
     {
-        _solutionStorage.StoreState(new SolutionState(CurrentTime, Particles.Values));
+        var solutionState = new SolutionState(CurrentTime, Particles.Values);
+        _solutionStorage.StoreState(solutionState);
+        StateMemory.Push(solutionState);
     }
 
-    /// <inheritdoc />
     public void StoreStep(IEnumerable<IParticleTimeStep> particleTimeSteps)
     {
         var nextTime = CurrentTime + TimeStepWidth;
         _solutionStorage.StoreStep(new SolutionStep(CurrentTime, nextTime, particleTimeSteps));
+    }
+
+    public void ResetTo(ISolutionState state)
+    {
+        CurrentTime = state.Time;
+
+        var particleStates = state.ParticleStates.ToDictionary(n => n.Id);
+
+        foreach (var particle in Particles.Values)
+        {
+            particle.ApplyState(particleStates[particle.Id]);
+        }
     }
 }

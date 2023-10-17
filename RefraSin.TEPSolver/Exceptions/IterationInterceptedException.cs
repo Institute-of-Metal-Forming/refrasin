@@ -1,9 +1,9 @@
-namespace RefraSin.Iteration;
+namespace RefraSin.TEPSolver.Exceptions;
 
 /// <summary>
 /// Exception raised when an iteration procedure was intercepted.
 /// </summary>
-public abstract class IterationInterceptedException : Exception
+public abstract class IterationInterceptedException : NumericException
 {
     /// <summary>
     /// Creates a new instance.

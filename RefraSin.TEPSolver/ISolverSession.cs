@@ -69,19 +69,4 @@ internal interface ISolverSession
     /// Factory for loggers used in the session.
     /// </summary>
     public ILogger<Solver> Logger { get; }
-
-    public StepVectorMap StepVectorMap { get; }
-
-    public StepVector? LastStep { get; }
-
-    public void IncreaseCurrentTime();
-
-    public void IncreaseTimeStepWidth();
-    public void MayIncreaseTimeStepWidth();
-
-    public void DecreaseTimeStepWidth();
-
-    public void StoreCurrentState();
-
-    public void StoreStep(IEnumerable<IParticleTimeStep> particleTimeSteps);
 }
