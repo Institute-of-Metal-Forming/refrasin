@@ -23,8 +23,8 @@ public record Particle : IParticle
     )
     {
         Id = id;
-        CenterCoordinates = centerCoordinates;
-        AbsoluteCenterCoordinates = absoluteCenterCoordinates;
+        CenterCoordinates = new PolarPoint(centerCoordinates, centerCoordinates.System);
+        AbsoluteCenterCoordinates = new AbsolutePoint(absoluteCenterCoordinates.ToTuple());
         RotationAngle = rotationAngle;
         MaterialId = materialId;
         Nodes = nodes;
