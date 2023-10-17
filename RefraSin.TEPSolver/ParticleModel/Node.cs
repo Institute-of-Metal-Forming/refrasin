@@ -215,14 +215,6 @@ internal abstract class Node : INode, IRingItem<Node>
 
         Coordinates = new PolarPoint(state.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
 
-        _angleDistance = state.AngleDistance;
-        _surfaceDistance = state.SurfaceDistance;
-        _surfaceRadiusAngle = state.SurfaceRadiusAngle;
-        _volume = state.Volume;
-        _surfaceAngle = state.SurfaceAngle;
-        _gibbsEnergyGradient = state.GibbsEnergyGradient;
-        _volumeGradient = state.VolumeGradient;
-
         ClearCaches();
     }
 

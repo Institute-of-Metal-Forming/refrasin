@@ -34,14 +34,6 @@ internal class SurfaceNode : Node, ISurfaceNode
         _surfaceDiffusionCoefficient = null;
     }
 
-    /// <inheritdoc cref="Node.ApplyState"/>
-    public override void ApplyState(INode state)
-    {
-        base.ApplyState(state);
-        _surfaceEnergy = state.SurfaceEnergy;
-        _surfaceDiffusionCoefficient = state.SurfaceDiffusionCoefficient;
-    }
-
     /// <inheritdoc />
     protected override void CheckState(INode state)
     {
