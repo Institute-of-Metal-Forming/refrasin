@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MoreLinq;
 using RefraSin.Enumerables;
-using RefraSin.Iteration;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;

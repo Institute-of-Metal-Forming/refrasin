@@ -56,5 +56,5 @@ public class SolverOptions : ISolverOptions
     public double TimeOut { get; set; } = -1;
 
     /// <inheritdoc />
-    public int SolutionMemoryCount { get; } = 3;
+    public int SolutionMemoryCount { get; } = 10;
 }

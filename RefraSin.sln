@@ -10,8 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Coordinates.Test",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Enumerables.Test", "RefraSin.Enumerables.Test\RefraSin.Enumerables.Test.csproj", "{5259A209-D292-420F-B61A-44D95EDD70FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Iteration", "RefraSin.Iteration\RefraSin.Iteration.csproj", "{D266103C-B2EE-4E7D-8350-EEBED18B84A1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Storage", "RefraSin.Storage\RefraSin.Storage.csproj", "{50FE80D5-0B7C-4ED4-95DF-B791CF05D23C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ParticleModel", "RefraSin.ParticleModel\RefraSin.ParticleModel.csproj", "{B32E8C4B-B3EA-4D83-9E05-34DB252CF43E}"
@@ -56,10 +54,6 @@ Global
 		{5259A209-D292-420F-B61A-44D95EDD70FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5259A209-D292-420F-B61A-44D95EDD70FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5259A209-D292-420F-B61A-44D95EDD70FA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D266103C-B2EE-4E7D-8350-EEBED18B84A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D266103C-B2EE-4E7D-8350-EEBED18B84A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D266103C-B2EE-4E7D-8350-EEBED18B84A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D266103C-B2EE-4E7D-8350-EEBED18B84A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{50FE80D5-0B7C-4ED4-95DF-B791CF05D23C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{50FE80D5-0B7C-4ED4-95DF-B791CF05D23C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50FE80D5-0B7C-4ED4-95DF-B791CF05D23C}.Release|Any CPU.ActiveCfg = Release|Any CPU

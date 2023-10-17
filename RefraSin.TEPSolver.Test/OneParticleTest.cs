@@ -18,7 +18,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var endTime = 1e3;
+        var endTime = 1e4;
 
         _particleSpec = new ShapeFunctionParticleSpecFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticleSpec();
         _solutionStorage = new InMemorySolutionStorage();
@@ -97,6 +97,9 @@ public class OneParticleTest
             Directory.CreateDirectory(dir);
             TestContext.WriteLine(dir);
 
+            var pdir = Path.Combine(dir, "p");
+            Directory.CreateDirectory(pdir);
+
             foreach (var (i, state) in _solutionStorage.States.Index())
             {
                 var plt = new Plot();
@@ -109,8 +112,11 @@ public class OneParticleTest
 
                 plt.Title($"t = {state.Time.ToString(CultureInfo.InvariantCulture)}");
 
-                plt.SavePng(Path.Combine(dir, $"p{i}.png"), 3000, 3000);
+                plt.SavePng(Path.Combine(pdir, $"{i}.png"), 3000, 3000);
             }
+
+            var nddir = Path.Combine(dir, "nd");
+            Directory.CreateDirectory(nddir);
 
             foreach (var (i, step) in _solutionStorage.Steps.Index())
             {
@@ -123,9 +129,9 @@ public class OneParticleTest
 
                 plt.Add.Line(0, 0, coordinates.Length, 0);
 
-                plt.Title($"t = {step.StartTime.ToString(CultureInfo.InvariantCulture)}");
+                plt.Title($"t = {step.StartTime.ToString(CultureInfo.InvariantCulture)} - {step.EndTime.ToString(CultureInfo.InvariantCulture)}");
 
-                plt.SavePng(Path.Combine(dir, $"nd{i}.png"), 600, 400);
+                plt.SavePng(Path.Combine(nddir, $"{i}.png"), 600, 400);
             }
         }
     }

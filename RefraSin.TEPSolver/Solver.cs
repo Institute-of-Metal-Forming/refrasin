@@ -2,10 +2,10 @@ using MathNet.Numerics;
 using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using RefraSin.Iteration;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.Step;
 using static System.Math;
 
@@ -133,7 +133,7 @@ public class Solver
                     differences[(i + 1) % differences.Length] * differences[(i + 2) % differences.Length] < 0 &&
                     differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0
                 )
-                    throw new InstabilityException(particle.Nodes[i].Id, i);
+                    throw new InstabilityException(particle.Id, particle.Nodes[i].Id, i);
             }
         }
     }

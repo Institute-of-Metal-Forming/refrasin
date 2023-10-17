@@ -1,5 +1,5 @@
 using RefraSin.Coordinates;
-using RefraSin.Iteration;
+using RefraSin.TEPSolver.Exceptions;
 
 namespace RefraSin.TEPSolver;
 
