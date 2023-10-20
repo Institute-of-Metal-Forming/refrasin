@@ -90,12 +90,12 @@ internal class Particle : IParticle, ITreeItem<Particle>
     IReadOnlyList<INodeSpec> IParticleSpec.NodeSpecs => Nodes;
 
     /// <inheritdoc cref="IParticleSpec.this[int]"/>
-    public INode this[int i] => i <= 0 ? Nodes[^(-i % Nodes.Count)] : Nodes[^(i % Nodes.Count)];
+    public INode this[int i] => i >= 0 ? Nodes[(i % Nodes.Count)] : Nodes[^-(i % Nodes.Count)];
 
     INodeSpec IParticleSpec.this[int i] => this[i];
 
     /// <inheritdoc cref="IParticleSpec.this[Guid]"/>
-    public INode this[Guid nodeId] => Nodes.FirstOrDefault(n => n.Id == Id) ??
+    public INode this[Guid nodeId] => Nodes.FirstOrDefault(n => n.Id == nodeId) ??
                                       throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
 
     INodeSpec IParticleSpec.this[Guid nodeId] => this[nodeId];

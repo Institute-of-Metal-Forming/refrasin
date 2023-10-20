@@ -22,9 +22,9 @@ public record ParticleSpec(Guid Id, AbsolutePoint AbsoluteCenterCoordinates, Ang
     public IReadOnlyList<INodeSpec> NodeSpecs { get; } = NodeSpecs;
 
     /// <inheritdoc />
-    public INodeSpec this[int i] => i <= 0 ? NodeSpecs[^(-i % NodeSpecs.Count)] : NodeSpecs[^(i % NodeSpecs.Count)];
+    public INodeSpec this[int i] => i >= 0 ? NodeSpecs[(i % NodeSpecs.Count)] : NodeSpecs[^-(i % NodeSpecs.Count)];
 
     /// <inheritdoc />
-    public INodeSpec this[Guid nodeId] => NodeSpecs.FirstOrDefault(n => n.Id == Id) ??
+    public INodeSpec this[Guid nodeId] => NodeSpecs.FirstOrDefault(n => n.Id == nodeId) ??
                                           throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
 }
