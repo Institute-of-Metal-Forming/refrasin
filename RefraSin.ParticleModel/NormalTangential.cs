@@ -35,6 +35,9 @@ public struct NormalTangential
     /// Returns the components of the instance as 2-element array.
     /// </summary>
     public double[] ToArray() => new[] { Normal, Tangential };
+
+    public static implicit operator NormalTangential(double both) => new(both, both);
+    public static implicit operator NormalTangential((double Normal, double Tangential) t) => new(t.Normal, t.Tangential);
 }
 
 /// <summary>
@@ -61,6 +64,10 @@ public struct NormalTangentialAngle
     public static implicit operator NormalTangential(NormalTangentialAngle other) => new(other.Normal, other.Tangential);
 
     public static implicit operator NormalTangentialAngle(NormalTangential other) => new(other.Normal, other.Tangential);
+    public static implicit operator NormalTangentialAngle(double both) => new(both, both);
+    public static implicit operator NormalTangentialAngle((double Normal, double Tangential) t) => new(t.Normal, t.Tangential);
+    public static implicit operator NormalTangentialAngle(Angle both) => new(both, both);
+    public static implicit operator NormalTangentialAngle((Angle Normal, Angle Tangential) t) => new(t.Normal, t.Tangential);
 
     /// <summary>
     /// Returns the components of the instance as 2-element array.
