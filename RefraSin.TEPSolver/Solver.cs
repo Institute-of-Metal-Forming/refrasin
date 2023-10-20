@@ -8,6 +8,7 @@ using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.Step;
 using static System.Math;
+using Node = RefraSin.TEPSolver.ParticleModel.Node;
 
 namespace RefraSin.TEPSolver;
 
@@ -138,7 +139,7 @@ public class Solver
         }
     }
 
-    internal StepVector TrySolveStepWithLastStepOrGuess()
+    private StepVector TrySolveStepWithLastStepOrGuess()
     {
         StepVector solution = Session.LastStep ?? GuessSolution();
 
@@ -164,7 +165,7 @@ public class Solver
         return solution;
     }
 
-    internal IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
+    private IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
     {
         foreach (var p in Session.Particles.Values)
             yield return new ParticleTimeStep(
@@ -184,7 +185,7 @@ public class Solver
                     )));
     }
 
-    internal StepVector EvaluateLagrangianGradientAt(StepVector stepVector)
+    private StepVector EvaluateLagrangianGradientAt(StepVector stepVector)
     {
         var evaluation = YieldEquations(stepVector).ToArray();
 
@@ -196,51 +197,51 @@ public class Solver
         return new StepVector(evaluation, Session.StepVectorMap);
     }
 
-    internal double[] EvaluateLagrangianGradientAt(double[] vector) =>
+    private double[] EvaluateLagrangianGradientAt(double[] vector) =>
         EvaluateLagrangianGradientAt(new StepVector(vector, Session.StepVectorMap)).AsArray();
 
-    internal IEnumerable<double> YieldEquations(StepVector stepVector) =>
-        YieldStateVelocityDerivatives(stepVector)
-            .Concat(
-                YieldFluxDerivatives(stepVector)
-            )
-            .Concat(
-                YieldDissipationEquality(stepVector)
-            )
-            .Concat(
-                YieldRequiredConstraints(stepVector)
-            );
-
-    internal IEnumerable<double> YieldStateVelocityDerivatives(StepVector stepVector)
+    private IEnumerable<double> YieldEquations(StepVector stepVector)
     {
         foreach (var node in Session.Nodes.Values)
         {
-            // Normal Displacement
-            var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
-            var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector[node].Lambda2;
-
-            yield return gibbsTerm + requiredConstraintsTerm;
+            yield return StateVelocityDerivative(stepVector, node);
+            yield return FluxDerivative(stepVector, node);
+            yield return RequiredConstraint(stepVector, node);
         }
+
+        yield return DissipationEquality(stepVector);
     }
 
-    internal IEnumerable<double> YieldFluxDerivatives(StepVector stepVector)
+    private double StateVelocityDerivative(StepVector stepVector, Node node)
     {
-        foreach (var node in Session.Nodes.Values) // for each flux
-        {
-            // Flux To Upper
-            var dissipationTerm =
-                2 * Session.GasConstant * Session.Temperature
-              / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
-              * node.SurfaceDistance.ToUpper * stepVector[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
-              * stepVector.Lambda1;
-            var thisRequiredConstraintsTerm = stepVector[node].Lambda2;
-            var upperRequiredConstraintsTerm = stepVector[node.Upper].Lambda2;
+        var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
+        var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector[node].Lambda2;
 
-            yield return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
-        }
+        return gibbsTerm + requiredConstraintsTerm;
     }
 
-    internal IEnumerable<double> YieldDissipationEquality(StepVector stepVector)
+    private double FluxDerivative(StepVector stepVector, Node node)
+    {
+        var dissipationTerm =
+            2 * Session.GasConstant * Session.Temperature
+          / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
+          * node.SurfaceDistance.ToUpper * stepVector[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
+          * stepVector.Lambda1;
+        var thisRequiredConstraintsTerm = stepVector[node].Lambda2;
+        var upperRequiredConstraintsTerm = stepVector[node.Upper].Lambda2;
+
+        return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
+    }
+
+    private double RequiredConstraint(StepVector stepVector, Node node)
+    {
+        var volumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
+        var fluxTerm = stepVector[node].FluxToUpper - stepVector[node.Lower].FluxToUpper;
+
+        return volumeTerm - fluxTerm;
+    }
+
+    private double DissipationEquality(StepVector stepVector)
     {
         var dissipation = Session.Nodes.Values.Select(n =>
             -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
@@ -255,23 +256,12 @@ public class Solver
                 ) / (n.Particle.Material.MolarVolume * n.Particle.Material.EquilibriumVacancyConcentration)
             ).Sum();
 
-        yield return dissipation - dissipationFunction;
+        return dissipation - dissipationFunction;
     }
 
-    internal IEnumerable<double> YieldRequiredConstraints(StepVector stepVector)
-    {
-        foreach (var node in Session.Nodes.Values)
-        {
-            var volumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
-            var fluxTerm = stepVector[node].FluxToUpper - stepVector[node.Lower].FluxToUpper;
+    private StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), Session.StepVectorMap);
 
-            yield return volumeTerm - fluxTerm;
-        }
-    }
-
-    internal StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), Session.StepVectorMap);
-
-    internal IEnumerable<double> YieldInitialGuess() =>
+    private IEnumerable<double> YieldInitialGuess() =>
         YieldGlobalUnknownsInitialGuess()
             .Concat(
                 YieldParticleUnknownsInitialGuess()
@@ -280,19 +270,19 @@ public class Solver
                 YieldNodeUnknownsInitialGuess()
             );
 
-    internal IEnumerable<double> YieldGlobalUnknownsInitialGuess()
+    private IEnumerable<double> YieldGlobalUnknownsInitialGuess()
     {
         yield return 1;
     }
 
-    internal IEnumerable<double> YieldParticleUnknownsInitialGuess()
+    private IEnumerable<double> YieldParticleUnknownsInitialGuess()
     {
         yield break;
 
         foreach (var particle in Session.Particles.Values) { }
     }
 
-    internal IEnumerable<double> YieldNodeUnknownsInitialGuess()
+    private IEnumerable<double> YieldNodeUnknownsInitialGuess()
     {
         foreach (var node in Session.Nodes.Values)
         {
