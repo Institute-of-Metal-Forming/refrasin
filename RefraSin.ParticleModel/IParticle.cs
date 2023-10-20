@@ -22,4 +22,10 @@ public interface IParticle : IParticleSpec
     /// List of all necks to neighbor particles.
     /// </summary>
     public IReadOnlyList<INeck> Necks { get; }
+
+    /// <inheritdoc cref="IParticleSpec.this[int]"/>
+    public new INode this[int i] { get; }
+
+    /// <inheritdoc cref="IParticleSpec.this[Guid]"/>
+    public new INode this[Guid nodeId] { get; }
 }
