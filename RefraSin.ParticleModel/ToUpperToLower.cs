@@ -41,6 +41,9 @@ public readonly struct ToUpperToLower
     /// Returns the components of the instance as 2-element array.
     /// </summary>
     public double[] ToArray() => new[] { ToUpper, ToLower };
+
+    public static implicit operator ToUpperToLower(double both) => new(both, both);
+    public static implicit operator ToUpperToLower((double ToUpper, double ToLower) t) => new(t.ToUpper, t.ToLower);
 }
 
 /// <summary>
@@ -81,6 +84,10 @@ public readonly struct ToUpperToLowerAngle
     public static implicit operator ToUpperToLower(ToUpperToLowerAngle other) => new(other.ToUpper, other.ToLower);
 
     public static implicit operator ToUpperToLowerAngle(ToUpperToLower other) => new(other.ToUpper, other.ToLower);
+    public static implicit operator ToUpperToLowerAngle(double both) => new(both, both);
+    public static implicit operator ToUpperToLowerAngle((double ToUpper, double ToLower) t) => new(t.ToUpper, t.ToLower);
+    public static implicit operator ToUpperToLowerAngle(Angle both) => new(both, both);
+    public static implicit operator ToUpperToLowerAngle((Angle ToUpper, Angle ToLower) t) => new(t.ToUpper, t.ToLower);
 
     /// <summary>
     /// Returns the components of the instance as 2-element array.
