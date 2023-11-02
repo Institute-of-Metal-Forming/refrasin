@@ -105,6 +105,7 @@ public class OneParticleTest
             PlotParticles();
             PlotDisplacements();
             PlotTimeSteps();
+            PlotParticleCenter();
         }
     }
 
@@ -162,5 +163,19 @@ public class OneParticleTest
         plt.Add.Line(0, meanStepWidth, _process.EndTime, meanStepWidth);
 
         plt.SavePng(Path.Combine(_tempDir, "timeSteps.png"), 600, 400);
+    }
+
+    private void PlotParticleCenter()
+    {
+        var plt = new Plot();
+
+        plt.Add.Scatter(_solutionStorage.States.Select(s =>
+            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.X)
+        ).ToArray());
+        plt.Add.Scatter(_solutionStorage.States.Select(s =>
+            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.Y)
+        ).ToArray());
+
+        plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
     }
 }
