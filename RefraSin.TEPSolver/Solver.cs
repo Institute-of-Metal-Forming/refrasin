@@ -73,7 +73,7 @@ public class Solver
             Session.IncreaseCurrentTime();
 
             foreach (var timeStep in particleTimeSteps)
-                Session.Particles[timeStep.ParticleId].ApplyTimeStep(timeStep);
+                Session.Particles[timeStep.ParticleId].ApplyTimeStep(stepVector, Session.TimeStepWidth);
 
             Session.StoreCurrentState();
             Session.MayIncreaseTimeStepWidth();
@@ -92,7 +92,7 @@ public class Solver
             {
                 var step = TrySolveStepWithLastStepOrGuess();
 
-                step = MakeAdamsMoultonCorrection(step);
+                // step = MakeAdamsMoultonCorrection(step);
 
                 CheckForInstability(step);
 
@@ -139,6 +139,8 @@ public class Solver
         }
     }
 
+    // private StepVector GetRungeKuttaK(ISolutionState state, )
+
     private StepVector TrySolveStepWithLastStepOrGuess()
     {
         try
@@ -164,9 +166,9 @@ public class Solver
         foreach (var p in Session.Particles.Values)
             yield return new ParticleTimeStep(
                 p.Id,
-                0,
-                0,
-                0,
+                stepVector[p].RadialDisplacement,
+                stepVector[p].AngleDisplacement,
+                stepVector[p].RotationDisplacement,
                 p.Surface.Select(n =>
                     new NodeTimeStep(n.Id,
                         stepVector[n].NormalDisplacement,
@@ -196,6 +198,13 @@ public class Solver
 
     private IEnumerable<double> YieldEquations(StepVector stepVector)
     {
+        foreach (var particle in Session.Particles.Values)
+        {
+            yield return stepVector[particle].RadialDisplacement;
+            yield return stepVector[particle].AngleDisplacement;
+            yield return stepVector[particle].RotationDisplacement;
+        }
+
         foreach (var node in Session.Nodes.Values)
         {
             yield return StateVelocityDerivative(stepVector, node);
@@ -271,9 +280,12 @@ public class Solver
 
     private IEnumerable<double> YieldParticleUnknownsInitialGuess()
     {
-        yield break;
-
-        foreach (var particle in Session.Particles.Values) { }
+        foreach (var particle in Session.Particles.Values)
+        {
+            yield return 0;
+            yield return 0;
+            yield return 0;
+        }
     }
 
     private IEnumerable<double> YieldNodeUnknownsInitialGuess()
