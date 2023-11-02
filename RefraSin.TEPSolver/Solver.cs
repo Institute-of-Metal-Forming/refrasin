@@ -1,5 +1,4 @@
 using MathNet.Numerics;
-using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RefraSin.ParticleModel;
@@ -7,8 +6,6 @@ using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.Step;
-using static System.Math;
-using Node = RefraSin.TEPSolver.ParticleModel.Node;
 
 namespace RefraSin.TEPSolver;
 
@@ -59,7 +56,7 @@ public class Solver
         DoTimeIntegration();
     }
 
-    internal void DoTimeIntegration()
+    private void DoTimeIntegration()
     {
         Session.StoreCurrentState();
 
@@ -139,27 +136,19 @@ public class Solver
         }
     }
 
-    // private StepVector GetRungeKuttaK(ISolutionState state, )
-
     private StepVector TrySolveStepWithLastStepOrGuess()
     {
+        var lagrangianGradient = new LagrangianGradient(Session);
+
         try
         {
-            return SolveStep(Session.LastStep ?? GuessSolution());
+            return lagrangianGradient.Solve(Session.LastStep ?? lagrangianGradient.GuessSolution());
         }
         catch (NonConvergenceException e)
         {
-            return SolveStep(GuessSolution());
+            return lagrangianGradient.Solve(lagrangianGradient.GuessSolution());
         }
     }
-
-    private StepVector SolveStep(StepVector initialGuess) =>
-        new(Broyden.FindRoot(
-            EvaluateLagrangianGradientAt,
-            initialGuess: initialGuess.AsArray(),
-            maxIterations: Session.Options.RootFindingMaxIterationCount,
-            accuracy: Session.Options.RootFindingAccuracy
-        ), Session.StepVectorMap);
 
     private IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
     {
@@ -179,130 +168,5 @@ public class Solver
                         ),
                         0
                     )));
-    }
-
-    private StepVector EvaluateLagrangianGradientAt(StepVector stepVector)
-    {
-        var evaluation = YieldEquations(stepVector).ToArray();
-
-        if (evaluation.Any(x => !double.IsFinite(x)))
-        {
-            throw new InvalidOperationException("One ore more components of the gradient evaluated to an infinite value.");
-        }
-
-        return new StepVector(evaluation, Session.StepVectorMap);
-    }
-
-    private double[] EvaluateLagrangianGradientAt(double[] vector) =>
-        EvaluateLagrangianGradientAt(new StepVector(vector, Session.StepVectorMap)).AsArray();
-
-    private IEnumerable<double> YieldEquations(StepVector stepVector)
-    {
-        // fix root particle to origin
-        var root = Session.Particles.Values.First()!;
-        yield return stepVector[root].RadialDisplacement;
-        yield return stepVector[root].AngleDisplacement;
-        yield return stepVector[root].RotationDisplacement;
-
-        // yield particle displacement equations
-        foreach (var particle in Session.Particles.Values.Skip(1))
-        {
-            yield return stepVector[particle].RadialDisplacement;
-            yield return stepVector[particle].AngleDisplacement;
-            yield return stepVector[particle].RotationDisplacement;
-        }
-
-        // yield node equations
-        foreach (var node in Session.Nodes.Values)
-        {
-            yield return StateVelocityDerivative(stepVector, node);
-            yield return FluxDerivative(stepVector, node);
-            yield return RequiredConstraint(stepVector, node);
-        }
-
-        yield return DissipationEquality(stepVector);
-    }
-
-    private double StateVelocityDerivative(StepVector stepVector, Node node)
-    {
-        var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
-        var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector[node].Lambda2;
-
-        return gibbsTerm + requiredConstraintsTerm;
-    }
-
-    private double FluxDerivative(StepVector stepVector, Node node)
-    {
-        var dissipationTerm =
-            2 * Session.GasConstant * Session.Temperature
-          / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
-          * node.SurfaceDistance.ToUpper * stepVector[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
-          * stepVector.Lambda1;
-        var thisRequiredConstraintsTerm = stepVector[node].Lambda2;
-        var upperRequiredConstraintsTerm = stepVector[node.Upper].Lambda2;
-
-        return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
-    }
-
-    private double RequiredConstraint(StepVector stepVector, Node node)
-    {
-        var volumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
-        var fluxTerm = stepVector[node].FluxToUpper - stepVector[node.Lower].FluxToUpper;
-
-        return volumeTerm - fluxTerm;
-    }
-
-    private double DissipationEquality(StepVector stepVector)
-    {
-        var dissipation = Session.Nodes.Values.Select(n =>
-            -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
-        ).Sum();
-
-        var dissipationFunction =
-            Session.GasConstant * Session.Temperature / 2
-          * Session.Nodes.Values.Select(n =>
-                (
-                    n.SurfaceDistance.ToUpper * Pow(stepVector[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
-                  + n.SurfaceDistance.ToLower * Pow(stepVector[n.Lower].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToLower
-                ) / (n.Particle.Material.MolarVolume * n.Particle.Material.EquilibriumVacancyConcentration)
-            ).Sum();
-
-        return dissipation - dissipationFunction;
-    }
-
-    private StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), Session.StepVectorMap);
-
-    private IEnumerable<double> YieldInitialGuess() =>
-        YieldGlobalUnknownsInitialGuess()
-            .Concat(
-                YieldParticleUnknownsInitialGuess()
-            )
-            .Concat(
-                YieldNodeUnknownsInitialGuess()
-            );
-
-    private IEnumerable<double> YieldGlobalUnknownsInitialGuess()
-    {
-        yield return 1;
-    }
-
-    private IEnumerable<double> YieldParticleUnknownsInitialGuess()
-    {
-        foreach (var particle in Session.Particles.Values)
-        {
-            yield return 0;
-            yield return 0;
-            yield return 0;
-        }
-    }
-
-    private IEnumerable<double> YieldNodeUnknownsInitialGuess()
-    {
-        foreach (var node in Session.Nodes.Values)
-        {
-            yield return node.GuessNormalDisplacement();
-            yield return node.GuessFluxToUpper();
-            yield return 1;
-        }
     }
 }
