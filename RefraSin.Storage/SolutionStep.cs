@@ -19,7 +19,7 @@ public record SolutionStep : ISolutionStep
     {
         StartTime = step.StartTime;
         EndTime = step.EndTime;
-        TimeStepWidth = StartTime - EndTime;
+        TimeStepWidth = step.TimeStepWidth;
         ParticleTimeSteps = step.ParticleTimeSteps.Select(s => s as ParticleTimeStep ?? new ParticleTimeStep(s)).ToArray();
     }
 
