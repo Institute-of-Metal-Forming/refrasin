@@ -198,13 +198,21 @@ public class Solver
 
     private IEnumerable<double> YieldEquations(StepVector stepVector)
     {
-        foreach (var particle in Session.Particles.Values)
+        // fix root particle to origin
+        var root = Session.Particles.Values.First()!;
+        yield return stepVector[root].RadialDisplacement;
+        yield return stepVector[root].AngleDisplacement;
+        yield return stepVector[root].RotationDisplacement;
+
+        // yield particle displacement equations
+        foreach (var particle in Session.Particles.Values.Skip(1))
         {
             yield return stepVector[particle].RadialDisplacement;
             yield return stepVector[particle].AngleDisplacement;
             yield return stepVector[particle].RotationDisplacement;
         }
 
+        // yield node equations
         foreach (var node in Session.Nodes.Values)
         {
             yield return StateVelocityDerivative(stepVector, node);
