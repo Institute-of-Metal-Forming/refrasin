@@ -4,6 +4,7 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Enumerables;
 using RefraSin.ParticleModel;
+using RefraSin.TEPSolver.Step;
 using static System.Math;
 using static MathNet.Numerics.Constants;
 
@@ -188,11 +189,9 @@ internal abstract class Node : INode, IRingItem<Node>
         _volumeGradient = null;
     }
 
-    public virtual void ApplyTimeStep(INodeTimeStep timeStep)
+    public virtual void ApplyTimeStep(StepVector stepVector, double timeStepWidth)
     {
-        CheckTimeStep(timeStep);
-
-        var normalDisplacement = timeStep.NormalDisplacement * SolverSession.TimeStepWidth;
+        var normalDisplacement = stepVector[this].NormalDisplacement * timeStepWidth;
         var angle = SurfaceRadiusAngle.ToUpper + SurfaceAngle.Normal;
         var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
         var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
@@ -201,12 +200,6 @@ internal abstract class Node : INode, IRingItem<Node>
         Coordinates.Phi += dPhi;
 
         ClearCaches();
-    }
-
-    protected virtual void CheckTimeStep(INodeTimeStep timeStep)
-    {
-        if (timeStep.NodeId != Id)
-            throw new InvalidOperationException("IDs of node and time step do not match.");
     }
 
     public virtual void ApplyState(INode state)

@@ -4,6 +4,7 @@ using RefraSin.Coordinates.Polar;
 using RefraSin.Enumerables;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.TEPSolver.Step;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -119,30 +120,24 @@ internal class Particle : IParticle, ITreeItem<Particle>
 
     IReadOnlyList<INeck> IParticle.Necks => Necks;
 
-    public virtual void ApplyTimeStep(IParticleTimeStep timeStep)
+    public virtual void ApplyTimeStep(StepVector stepVector, double timeStepWidth)
     {
-        CheckTimeStep(timeStep);
+        var particleView = stepVector[this];
 
         var displacementVector = new PolarVector(
-            timeStep.AngleDisplacement,
-            timeStep.RadialDisplacement,
+            particleView.AngleDisplacement * timeStepWidth,
+            particleView.RadialDisplacement * timeStepWidth,
             CenterCoordinates.System
         );
 
         CenterCoordinates += displacementVector;
 
-        RotationAngle = (RotationAngle + timeStep.RotationDisplacement).Reduce();
+        RotationAngle = (RotationAngle + particleView.RotationDisplacement * timeStepWidth).Reduce();
 
         foreach (var node in Surface)
         {
-            node.ApplyTimeStep(timeStep.NodeTimeSteps[node.Id]);
+            node.ApplyTimeStep(stepVector, timeStepWidth);
         }
-    }
-
-    private void CheckTimeStep(IParticleTimeStep timeStep)
-    {
-        if (timeStep.ParticleId != Id)
-            throw new InvalidOperationException("IDs of particle and time step do not match.");
     }
 
     public virtual void ApplyState(IParticle state)

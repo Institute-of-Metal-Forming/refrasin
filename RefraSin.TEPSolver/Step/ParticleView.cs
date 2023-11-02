@@ -10,4 +10,7 @@ internal class ParticleView
         _vector = vector;
         _particleId = particleId;
     }
+    public double RadialDisplacement => _vector[_vector.StepVectorMap.GetIndex(_particleId, ParticleUnknown.RadialDisplacement)];
+    public double AngleDisplacement => _vector[_vector.StepVectorMap.GetIndex(_particleId, ParticleUnknown.AngleDisplacement)];
+    public double RotationDisplacement => _vector[_vector.StepVectorMap.GetIndex(_particleId, ParticleUnknown.RotationDisplacement)];
 }
