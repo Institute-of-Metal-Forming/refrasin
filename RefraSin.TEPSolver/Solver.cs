@@ -141,29 +141,23 @@ public class Solver
 
     private StepVector TrySolveStepWithLastStepOrGuess()
     {
-        StepVector solution = Session.LastStep ?? GuessSolution();
-
         try
         {
-            solution = new StepVector(Broyden.FindRoot(
-                EvaluateLagrangianGradientAt,
-                initialGuess: solution.AsArray(),
-                maxIterations: Session.Options.RootFindingMaxIterationCount,
-                accuracy: Session.Options.RootFindingAccuracy
-            ), Session.StepVectorMap);
+            return SolveStep(Session.LastStep ?? GuessSolution());
         }
         catch (NonConvergenceException e)
         {
-            solution = new StepVector(Broyden.FindRoot(
-                EvaluateLagrangianGradientAt,
-                initialGuess: GuessSolution().AsArray(),
-                maxIterations: Session.Options.RootFindingMaxIterationCount,
-                accuracy: Session.Options.RootFindingAccuracy
-            ), Session.StepVectorMap);
+            return SolveStep(GuessSolution());
         }
-
-        return solution;
     }
+
+    private StepVector SolveStep(StepVector initialGuess) =>
+        new(Broyden.FindRoot(
+            EvaluateLagrangianGradientAt,
+            initialGuess: initialGuess.AsArray(),
+            maxIterations: Session.Options.RootFindingMaxIterationCount,
+            accuracy: Session.Options.RootFindingAccuracy
+        ), Session.StepVectorMap);
 
     private IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
     {
@@ -288,7 +282,6 @@ public class Solver
         {
             yield return node.GuessNormalDisplacement();
             yield return node.GuessFluxToUpper();
-            ;
             yield return 1;
         }
     }
