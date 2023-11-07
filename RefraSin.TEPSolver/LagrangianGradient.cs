@@ -7,20 +7,25 @@ namespace RefraSin.TEPSolver;
 
 internal class LagrangianGradient
 {
-    private readonly SolverSession _session;
+    private readonly ISolverSession _session;
 
-    public LagrangianGradient(SolverSession session)
+    public LagrangianGradient(ISolverSession session)
     {
         _session = session;
     }
 
-    public StepVector Solve(StepVector initialGuess) =>
-        new(Broyden.FindRoot(
-            EvaluateLagrangianGradientAt,
+    public StepVector Solve(StepVector initialGuess)
+    {
+        double[] Fun(double[] vector) =>
+            EvaluateLagrangianGradientAt(new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
+
+        return new StepVector(Broyden.FindRoot(
+            Fun,
             initialGuess: initialGuess.AsArray(),
             maxIterations: _session.Options.RootFindingMaxIterationCount,
             accuracy: _session.Options.RootFindingAccuracy
-        ), _session.StepVectorMap);
+        ), initialGuess.StepVectorMap);
+    }
 
     private StepVector EvaluateLagrangianGradientAt(StepVector stepVector)
     {
@@ -31,11 +36,8 @@ internal class LagrangianGradient
             throw new InvalidOperationException("One ore more components of the gradient evaluated to an infinite value.");
         }
 
-        return new StepVector(evaluation, _session.StepVectorMap);
+        return new StepVector(evaluation, stepVector.StepVectorMap);
     }
-
-    private double[] EvaluateLagrangianGradientAt(double[] vector) =>
-        EvaluateLagrangianGradientAt(new StepVector(vector, _session.StepVectorMap)).AsArray();
 
     private IEnumerable<double> YieldEquations(StepVector stepVector)
     {
@@ -111,7 +113,7 @@ internal class LagrangianGradient
         return dissipation - dissipationFunction;
     }
 
-    public StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), _session.StepVectorMap);
+    public StepVector GuessSolution() => new(YieldInitialGuess().ToArray(), new StepVectorMap(_session.Particles.Values, _session.Nodes.Values));
 
     private IEnumerable<double> YieldInitialGuess() =>
         YieldGlobalUnknownsInitialGuess()
