@@ -5,13 +5,16 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.Step;
+using RefraSin.TEPSolver.TimeIntegration;
+using RefraSin.TEPSolver.TimeIntegration.Stepper;
+using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.TimeIntegration.Validation;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 
-internal class SolverSession : ISolverSession
+public class SolverSession : ISolverSession
 {
     private readonly IMaterialRegistry _materialRegistry;
     private readonly ISolutionStorage _solutionStorage;
@@ -43,7 +46,7 @@ internal class SolverSession : ISolverSession
         Nodes = Particles.Values.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
 
         StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
-        Stepper = solver.Stepper;
+        TimeStepper = solver.TimeStepper;
     }
 
     /// <inheritdoc />
@@ -86,10 +89,15 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public ILogger<Solver> Logger { get; }
 
-
     public StepVector? LastStep { get; set; }
 
-    public IStepper Stepper { get; }
+    public ITimeStepper TimeStepper { get; }
+
+    /// <inheritdoc />
+    public IReadOnlyList<IStepValidator> StepValidators { get; } = new[] { new InstabilityDetector() };
+
+    /// <inheritdoc />
+    public ISystemSolver SystemSolver { get; } = new BroydenSystemSolver();
 
     public FixedStack<ISolutionState> StateMemory { get; }
 

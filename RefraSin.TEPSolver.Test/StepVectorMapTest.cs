@@ -4,7 +4,7 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleSpecFactories;
 using RefraSin.ProcessModel;
-using RefraSin.TEPSolver.Step;
+using RefraSin.TEPSolver.TimeIntegration.StepVectors;
 
 namespace RefraSin.TEPSolver.Test;
 

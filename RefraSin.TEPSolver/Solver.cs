@@ -5,7 +5,8 @@ using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
-using RefraSin.TEPSolver.Step;
+using RefraSin.TEPSolver.TimeIntegration.Stepper;
+using RefraSin.TEPSolver.TimeIntegration.StepVectors;
 
 namespace RefraSin.TEPSolver;
 
@@ -29,7 +30,7 @@ public class Solver
     /// </summary>
     public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
-    public IStepper Stepper { get; set; } = new AdamsMoultonStepper();
+    public ITimeStepper TimeStepper { get; set; } = new AdamsMoultonTimeStepper();
 
     /// <summary>
     /// Creates a new solver Session for the given process.
@@ -78,7 +79,10 @@ public class Solver
             {
                 var step = TrySolveStepWithLastStepOrGuess(session);
 
-                CheckForInstability(session, step);
+                foreach (var validator in session.StepValidators)
+                {
+                    validator.Validate(session, step);
+                }
 
                 return step;
             }
@@ -97,36 +101,15 @@ public class Solver
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
     }
 
-    private static void CheckForInstability(SolverSession session, StepVector step)
-    {
-        foreach (var particle in session.Particles.Values)
-        {
-            var displacements = particle.Nodes.Select(n => step[n].NormalDisplacement).ToArray();
-            var differences = displacements.Zip(displacements.Skip(1).Append(displacements[0]), (current, next) => next - current).ToArray();
-
-            for (int i = 0; i < differences.Length; i++)
-            {
-                if (
-                    differences[i] * differences[(i + 1) % differences.Length] < 0 &&
-                    differences[(i + 1) % differences.Length] * differences[(i + 2) % differences.Length] < 0 &&
-                    differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0
-                )
-                    throw new InstabilityException(particle.Id, particle.Nodes[i].Id, i);
-            }
-        }
-    }
-
     private static StepVector TrySolveStepWithLastStepOrGuess(SolverSession session)
     {
-        var lagrangianGradient = new LagrangianGradient(session);
-
         try
         {
-            return session.Stepper.Step(session, lagrangianGradient, session.LastStep ?? lagrangianGradient.GuessSolution());
+            return session.TimeStepper.Step(session, session.LastStep ?? LagrangianGradient.GuessSolution(session));
         }
         catch (NonConvergenceException e)
         {
-            return session.Stepper.Step(session, lagrangianGradient, lagrangianGradient.GuessSolution());
+            return session.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session));
         }
     }
 
