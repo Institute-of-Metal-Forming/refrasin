@@ -14,8 +14,6 @@ namespace RefraSin.TEPSolver;
 /// </summary>
 public class Solver
 {
-    private SolverSession? _session;
-
     /// <summary>
     /// Numeric options to control solver behavior.
     /// </summary>
@@ -31,78 +29,67 @@ public class Solver
     /// </summary>
     public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
-    internal SolverSession Session
-    {
-        get => _session ?? throw new InvalidOperationException("Solution procedure is not initialized.");
-        private set => _session = value;
-    }
-
     /// <summary>
     /// Creates a new solver Session for the given process.
     /// </summary>
-    internal SolverSession CreateSession(ISinteringProcess process)
-    {
-        var session = new SolverSession(this, process);
-        Session = session;
-        return session;
-    }
+    internal SolverSession CreateSession(ISinteringProcess process) => new(this, process);
 
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
     /// </summary>
     public void Solve(ISinteringProcess process)
     {
-        CreateSession(process);
-        DoTimeIntegration();
+        var session = CreateSession(process);
+        DoTimeIntegration(session);
     }
 
-    private void DoTimeIntegration()
+    private static void DoTimeIntegration(SolverSession session)
     {
-        Session.StoreCurrentState();
+        session.StoreCurrentState();
 
-        while (Session.CurrentTime < Session.EndTime)
+        while (session.CurrentTime < session.EndTime)
         {
-            var stepVector = TrySolveStepUntilValid();
-            Session.LastStep = stepVector;
-            var particleTimeSteps = GenerateTimeStepsFromGradientSolution(stepVector).ToArray();
-            Session.StoreStep(particleTimeSteps);
+            var stepVector = TrySolveStepUntilValid(session);
+            session.LastStep = stepVector;
+            var particleTimeSteps = GenerateTimeStepsFromGradientSolution(session, stepVector).ToArray();
+            session.StoreStep(particleTimeSteps);
 
-            Session.IncreaseCurrentTime();
+            session.IncreaseCurrentTime();
 
             foreach (var timeStep in particleTimeSteps)
-                Session.Particles[timeStep.ParticleId].ApplyTimeStep(stepVector, Session.TimeStepWidth);
+                session.Particles[timeStep.ParticleId].ApplyTimeStep(stepVector, session.TimeStepWidth);
 
-            Session.StoreCurrentState();
-            Session.MayIncreaseTimeStepWidth();
+            session.StoreCurrentState();
+            session.MayIncreaseTimeStepWidth();
         }
 
-        Session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", Session.TimeStepIndex + 1);
+        session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", session.TimeStepIndex + 1);
     }
 
-    internal StepVector TrySolveStepUntilValid()
+    internal static StepVector TrySolveStepUntilValid(SolverSession session)
     {
         int i;
 
-        for (i = 0; i < Session.Options.MaxIterationCount; i++)
+        for (i = 0; i < session.Options.MaxIterationCount; i++)
         {
             try
             {
-                var step = TrySolveStepWithLastStepOrGuess();
+                var step = TrySolveStepWithLastStepOrGuess(session);
 
                 // step = MakeAdamsMoultonCorrection(step);
 
-                CheckForInstability(step);
+                CheckForInstability(session, step);
 
                 return step;
             }
             catch (Exception e)
             {
-                Session.Logger.LogError(e, "Exception occured during time step solution. Lowering time step width and try again.");
-                Session.DecreaseTimeStepWidth();
+                session.Logger.LogError(e, "Exception occured during time step solution. Lowering time step width and try again.");
+                session.DecreaseTimeStepWidth();
 
                 if (e is InstabilityException)
                 {
-                    Session.ResetTo(Session.StateMemory.Pop());
+                    session.ResetTo(session.StateMemory.Pop());
                 }
             }
         }
@@ -110,16 +97,16 @@ public class Solver
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
     }
 
-    private StepVector MakeAdamsMoultonCorrection(StepVector step)
+    private static StepVector MakeAdamsMoultonCorrection(SolverSession session, StepVector step)
     {
-        if (Session.LastStep is not null)
-            return (step + Session.LastStep) / 2;
+        if (session.LastStep is not null)
+            return (step + session.LastStep) / 2;
         return step;
     }
 
-    private void CheckForInstability(StepVector step)
+    private static void CheckForInstability(SolverSession session, StepVector step)
     {
-        foreach (var particle in Session.Particles.Values)
+        foreach (var particle in session.Particles.Values)
         {
             var displacements = particle.Nodes.Select(n => step[n].NormalDisplacement).ToArray();
             var differences = displacements.Zip(displacements.Skip(1).Append(displacements[0]), (current, next) => next - current).ToArray();
@@ -136,13 +123,13 @@ public class Solver
         }
     }
 
-    private StepVector TrySolveStepWithLastStepOrGuess()
+    private static StepVector TrySolveStepWithLastStepOrGuess(SolverSession session)
     {
-        var lagrangianGradient = new LagrangianGradient(Session);
+        var lagrangianGradient = new LagrangianGradient(session);
 
         try
         {
-            return lagrangianGradient.Solve(Session.LastStep ?? lagrangianGradient.GuessSolution());
+            return lagrangianGradient.Solve(session.LastStep ?? lagrangianGradient.GuessSolution());
         }
         catch (NonConvergenceException e)
         {
@@ -150,9 +137,9 @@ public class Solver
         }
     }
 
-    private IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(StepVector stepVector)
+    private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(SolverSession session, StepVector stepVector)
     {
-        foreach (var p in Session.Particles.Values)
+        foreach (var p in session.Particles.Values)
             yield return new ParticleTimeStep(
                 p.Id,
                 stepVector[p].RadialDisplacement,
