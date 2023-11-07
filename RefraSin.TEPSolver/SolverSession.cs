@@ -4,9 +4,9 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
-using RefraSin.TEPSolver.SystemSolvers;
 using RefraSin.TEPSolver.TimeSteppers;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
@@ -47,7 +47,7 @@ internal class SolverSession : ISolverSession
         StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
         TimeStepper = solver.TimeStepper;
         StepValidators = solver.StepValidators.ToArray();
-        SystemSolver = solver.SystemSolver;
+        RootFinder = solver.RootFinder;
     }
 
     /// <inheritdoc />
@@ -98,7 +98,7 @@ internal class SolverSession : ISolverSession
     public IReadOnlyList<IStepValidator> StepValidators { get; }
 
     /// <inheritdoc />
-    public ISystemSolver SystemSolver { get; }
+    public IRootFinder RootFinder { get; }
 
     public FixedStack<ISolutionState> StateMemory { get; }
 

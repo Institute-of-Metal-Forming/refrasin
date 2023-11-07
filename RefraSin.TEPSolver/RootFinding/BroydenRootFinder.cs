@@ -1,12 +1,12 @@
 using MathNet.Numerics.RootFinding;
 using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver.SystemSolvers;
+namespace RefraSin.TEPSolver.RootFinding;
 
-public class BroydenSystemSolver : ISystemSolver
+public class BroydenRootFinder : IRootFinder
 {
     /// <inheritdoc />
-    public StepVector Solve(ISolverSession solverSession, StepVector initialGuess)
+    public StepVector FindRoot(ISolverSession solverSession, StepVector initialGuess)
     {
         double[] Fun(double[] vector) =>
             LagrangianGradient.EvaluateAt(solverSession, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
