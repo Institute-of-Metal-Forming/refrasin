@@ -1,6 +1,6 @@
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver.TimeIntegration.Stepper;
+namespace RefraSin.TEPSolver.TimeSteppers;
 
 internal class AdamsMoultonTimeStepper : ITimeStepper
 {

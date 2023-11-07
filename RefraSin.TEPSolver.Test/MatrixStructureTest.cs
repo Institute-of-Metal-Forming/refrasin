@@ -2,7 +2,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MoreLinq;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 
 namespace RefraSin.TEPSolver.Test;

@@ -1,4 +1,4 @@
-namespace RefraSin.TEPSolver.TimeIntegration.StepVectors;
+namespace RefraSin.TEPSolver.StepVectors;
 
 internal enum ParticleUnknown
 {

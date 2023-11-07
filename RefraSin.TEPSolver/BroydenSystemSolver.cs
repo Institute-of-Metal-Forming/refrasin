@@ -1,5 +1,5 @@
 using MathNet.Numerics.RootFinding;
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver;
 

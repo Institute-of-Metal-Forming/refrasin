@@ -1,7 +1,7 @@
 using RefraSin.TEPSolver.Exceptions;
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver.TimeIntegration.Validation;
+namespace RefraSin.TEPSolver.StepValidators;
 
 public class InstabilityDetector : IStepValidator
 {

@@ -1,11 +1,8 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
-using RefraSin.Storage;
-using RefraSin.TEPSolver.TimeIntegration;
-using RefraSin.TEPSolver.TimeIntegration.Stepper;
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
-using RefraSin.TEPSolver.TimeIntegration.Validation;
+using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepVectors;
+using RefraSin.TEPSolver.TimeSteppers;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
