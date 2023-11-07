@@ -38,16 +38,11 @@ public class Solver
     public ISystemSolver SystemSolver { get; } = new BroydenSystemSolver();
 
     /// <summary>
-    /// Creates a new solver Session for the given process.
-    /// </summary>
-    internal SolverSession CreateSession(ISinteringProcess process) => new(this, process);
-
-    /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
     /// </summary>
     public void Solve(ISinteringProcess process)
     {
-        var session = CreateSession(process);
+        var session = new SolverSession(this, process);
         DoTimeIntegration(session);
     }
 

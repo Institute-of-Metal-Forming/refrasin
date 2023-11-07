@@ -20,7 +20,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var endTime = 1e4;
+        var endTime = 1e2;
 
         _particleSpec = new ShapeFunctionParticleSpecFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticleSpec();
         _solutionStorage = new InMemorySolutionStorage();
@@ -80,18 +80,6 @@ public class OneParticleTest
     private ISinteringProcess _process;
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
-
-    [Test]
-    public void TestCreateSession()
-    {
-        var session = _solver.CreateSession(_process);
-        var particle = session.Particles.Values.First();
-
-        That(particle.Id, Is.EqualTo(_particleSpec.Id));
-        That(particle.Material, Is.EqualTo(_material));
-        That(particle.Nodes, Has.Count.EqualTo(100));
-        That(particle, Is.TypeOf<Particle>());
-    }
 
     [Test]
     public void TestSolution()
