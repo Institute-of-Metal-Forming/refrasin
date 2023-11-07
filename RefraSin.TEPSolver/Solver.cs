@@ -7,6 +7,7 @@ using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.TimeIntegration.Stepper;
 using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.TimeIntegration.Validation;
 
 namespace RefraSin.TEPSolver;
 
@@ -31,6 +32,10 @@ public class Solver
     public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
     public ITimeStepper TimeStepper { get; set; } = new AdamsMoultonTimeStepper();
+
+    public IEnumerable<IStepValidator> StepValidators { get; } = new[] { new InstabilityDetector() };
+
+    public ISystemSolver SystemSolver { get; } = new BroydenSystemSolver();
 
     /// <summary>
     /// Creates a new solver Session for the given process.
