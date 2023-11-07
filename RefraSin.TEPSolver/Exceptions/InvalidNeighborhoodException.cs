@@ -1,6 +1,6 @@
 using RefraSin.ParticleModel;
 
-namespace RefraSin.TEPSolver.ParticleModel;
+namespace RefraSin.TEPSolver.Exceptions;
 
 public class InvalidNeighborhoodException : InvalidOperationException
 {
