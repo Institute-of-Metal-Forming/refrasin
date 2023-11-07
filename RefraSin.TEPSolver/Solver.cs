@@ -5,9 +5,9 @@ using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
+using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
-using RefraSin.TEPSolver.SystemSolvers;
 using RefraSin.TEPSolver.TimeSteppers;
 
 namespace RefraSin.TEPSolver;
@@ -36,7 +36,7 @@ public class Solver
 
     public IEnumerable<IStepValidator> StepValidators { get; } = new[] { new InstabilityDetector() };
 
-    public ISystemSolver SystemSolver { get; } = new BroydenSystemSolver();
+    public IRootFinder RootFinder { get; } = new BroydenRootFinder();
 
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
