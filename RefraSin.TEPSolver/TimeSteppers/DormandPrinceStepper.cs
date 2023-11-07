@@ -1,4 +1,4 @@
-namespace RefraSin.TEPSolver.TimeIntegration.Stepper;
+namespace RefraSin.TEPSolver.TimeSteppers;
 
 /// <summary>
 /// Dormand Prince 853 Stepper adapted from http://numerical.recipes/webnotes/nr3web20.pdf.

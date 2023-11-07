@@ -2,7 +2,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using RefraSin.ParticleModel;
 
-namespace RefraSin.TEPSolver.TimeIntegration.StepVectors;
+namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVector : DenseVector
 {

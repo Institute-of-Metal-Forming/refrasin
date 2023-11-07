@@ -5,9 +5,9 @@ using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
-using RefraSin.TEPSolver.TimeIntegration.Stepper;
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
-using RefraSin.TEPSolver.TimeIntegration.Validation;
+using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepVectors;
+using RefraSin.TEPSolver.TimeSteppers;
 
 namespace RefraSin.TEPSolver;
 

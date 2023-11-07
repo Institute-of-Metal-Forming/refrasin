@@ -1,6 +1,6 @@
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver.TimeIntegration.Validation;
+namespace RefraSin.TEPSolver.StepValidators;
 
 public interface IStepValidator
 {

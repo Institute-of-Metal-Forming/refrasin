@@ -1,7 +1,7 @@
 using MoreLinq;
 using RefraSin.ParticleModel;
 
-namespace RefraSin.TEPSolver.TimeIntegration.StepVectors;
+namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {

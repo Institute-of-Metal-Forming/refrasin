@@ -4,7 +4,7 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Enumerables;
 using RefraSin.ParticleModel;
-using RefraSin.TEPSolver.TimeIntegration.StepVectors;
+using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using static MathNet.Numerics.Constants;
 
