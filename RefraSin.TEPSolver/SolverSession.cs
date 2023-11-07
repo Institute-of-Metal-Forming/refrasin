@@ -43,6 +43,7 @@ internal class SolverSession : ISolverSession
         Nodes = Particles.Values.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
 
         StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
+        Stepper = solver.Stepper;
     }
 
     /// <inheritdoc />
@@ -87,6 +88,8 @@ internal class SolverSession : ISolverSession
 
 
     public StepVector? LastStep { get; set; }
+
+    public IStepper Stepper { get; }
 
     public FixedStack<ISolutionState> StateMemory { get; }
 

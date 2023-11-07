@@ -4,7 +4,7 @@ using RefraSin.ParticleModel;
 
 namespace RefraSin.TEPSolver.Step;
 
-internal class StepVector : DenseVector
+public class StepVector : DenseVector
 {
     /// <inheritdoc />
     public StepVector(double[] storage, StepVectorMap stepVectorMap) : base(storage)

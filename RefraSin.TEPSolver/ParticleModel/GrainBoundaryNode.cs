@@ -5,7 +5,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Oberflächenknoten, der Teil einer Korngrenze ist.
 /// </summary>
-internal class GrainBoundaryNode : ContactNode<GrainBoundaryNode>, IGrainBoundaryNode
+public class GrainBoundaryNode : ContactNode<GrainBoundaryNode>, IGrainBoundaryNode
 {
     /// <inheritdoc />
     public GrainBoundaryNode(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession) : base(nodeSpec, particle, solverSession) { }

@@ -29,6 +29,8 @@ public class Solver
     /// </summary>
     public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
 
+    public IStepper Stepper { get; set; } = new AdamsMoultonStepper();
+
     /// <summary>
     /// Creates a new solver Session for the given process.
     /// </summary>
@@ -76,8 +78,6 @@ public class Solver
             {
                 var step = TrySolveStepWithLastStepOrGuess(session);
 
-                // step = MakeAdamsMoultonCorrection(step);
-
                 CheckForInstability(session, step);
 
                 return step;
@@ -95,13 +95,6 @@ public class Solver
         }
 
         throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
-    }
-
-    private static StepVector MakeAdamsMoultonCorrection(SolverSession session, StepVector step)
-    {
-        if (session.LastStep is not null)
-            return (step + session.LastStep) / 2;
-        return step;
     }
 
     private static void CheckForInstability(SolverSession session, StepVector step)
@@ -129,11 +122,11 @@ public class Solver
 
         try
         {
-            return lagrangianGradient.Solve(session.LastStep ?? lagrangianGradient.GuessSolution());
+            return session.Stepper.Step(session, lagrangianGradient, session.LastStep ?? lagrangianGradient.GuessSolution());
         }
         catch (NonConvergenceException e)
         {
-            return lagrangianGradient.Solve(lagrangianGradient.GuessSolution());
+            return session.Stepper.Step(session, lagrangianGradient, lagrangianGradient.GuessSolution());
         }
     }
 

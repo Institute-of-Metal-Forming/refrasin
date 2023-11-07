@@ -2,7 +2,7 @@ using RefraSin.ParticleModel;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
-internal class Neck : INeck
+public class Neck : INeck
 {
     public Neck(NeckNode lower)
     {

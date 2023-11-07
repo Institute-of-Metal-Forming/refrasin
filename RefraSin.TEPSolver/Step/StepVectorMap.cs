@@ -3,7 +3,7 @@ using RefraSin.ParticleModel;
 
 namespace RefraSin.TEPSolver.Step;
 
-internal class StepVectorMap
+public class StepVectorMap
 {
     public StepVectorMap(IEnumerable<IParticleSpec> particles, IEnumerable<INodeSpec> nodes)
     {
@@ -48,10 +48,10 @@ internal class StepVectorMap
 
     public int NodeUnknownsCount { get; }
 
-    public int GetIndex(GlobalUnknown unknown) => (int)unknown;
+    internal int GetIndex(GlobalUnknown unknown) => (int)unknown;
 
-    public int GetIndex(Guid particleId, ParticleUnknown unknown) =>
+    internal int GetIndex(Guid particleId, ParticleUnknown unknown) =>
         ParticleStartIndex + ParticleUnknownsCount * ParticleIndices[particleId] + (int)unknown;
 
-    public int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + NodeUnknownsCount * NodeIndices[nodeId] + (int)unknown;
+    internal int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + NodeUnknownsCount * NodeIndices[nodeId] + (int)unknown;
 }

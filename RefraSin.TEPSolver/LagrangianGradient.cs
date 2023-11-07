@@ -5,7 +5,7 @@ using Node = RefraSin.TEPSolver.ParticleModel.Node;
 
 namespace RefraSin.TEPSolver;
 
-internal class LagrangianGradient
+public class LagrangianGradient
 {
     private readonly ISolverSession _session;
 

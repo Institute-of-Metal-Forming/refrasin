@@ -7,7 +7,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt die Oberfläche eines Pulverpartikels als Aufzählung von Oberflächenknoten dar.
 /// </summary>
-internal class ParticleSurface : Ring<Node>
+public class ParticleSurface : Ring<Node>
 {
     /// <inheritdoc />
     public ParticleSurface(Particle particle, IEnumerable<INodeSpec> nodeSpecs, ISolverSession solverSession)

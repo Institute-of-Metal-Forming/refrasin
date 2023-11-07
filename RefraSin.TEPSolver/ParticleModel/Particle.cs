@@ -11,7 +11,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-internal class Particle : IParticle, ITreeItem<Particle>
+public class Particle : IParticle, ITreeItem<Particle>
 {
     public Particle(
         Particle? parent,
