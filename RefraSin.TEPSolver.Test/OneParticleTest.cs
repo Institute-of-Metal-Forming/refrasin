@@ -82,18 +82,6 @@ public class OneParticleTest
     private string _tempDir;
 
     [Test]
-    public void TestCreateSession()
-    {
-        var session = _solver.CreateSession(_process);
-        var particle = session.Particles.Values.First();
-
-        That(particle.Id, Is.EqualTo(_particle.Id));
-        That(particle.Material, Is.EqualTo(_material));
-        That(particle.Nodes, Has.Count.EqualTo(100));
-        That(particle, Is.TypeOf<Particle>());
-    }
-
-    [Test]
     public void TestSolution()
     {
         try

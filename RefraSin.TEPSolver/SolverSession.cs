@@ -12,7 +12,7 @@ using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 
-public class SolverSession : ISolverSession
+internal class SolverSession : ISolverSession
 {
     private readonly IMaterialRegistry _materialRegistry;
     private readonly ISolutionStorage _solutionStorage;
