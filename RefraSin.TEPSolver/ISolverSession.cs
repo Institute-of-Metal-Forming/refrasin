@@ -11,7 +11,7 @@ namespace RefraSin.TEPSolver;
 /// <summary>
 /// Interface for objects holding session data of a solution procedure.
 /// </summary>
-internal interface ISolverSession
+public interface ISolverSession
 {
     /// <summary>
     /// Time of the current step.
@@ -44,6 +44,8 @@ internal interface ISolverSession
     /// Current step width of time integration.
     /// </summary>
     public double TimeStepWidth { get; }
+
+    public StepVector? LastStep { get; }
 
     /// <summary>
     /// Registry of all particles.

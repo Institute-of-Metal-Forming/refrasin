@@ -1,6 +1,6 @@
 namespace RefraSin.TEPSolver.Step;
 
-internal class NodeView
+public class NodeView
 {
     private readonly StepVector _vector;
     private readonly Guid _nodeId;

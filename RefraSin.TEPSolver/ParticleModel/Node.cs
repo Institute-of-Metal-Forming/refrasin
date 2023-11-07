@@ -13,7 +13,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Abstract base class for particle surface nodes.
 /// </summary>
-internal abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterialProperties, IRingItem<Node>
+public abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterialProperties, IRingItem<Node>
 {
     protected Node(INode node, Particle particle, ISolverSession solverSession)
     {
