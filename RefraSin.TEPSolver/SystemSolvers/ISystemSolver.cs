@@ -1,6 +1,6 @@
 using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver;
+namespace RefraSin.TEPSolver.SystemSolvers;
 
 public interface ISystemSolver
 {

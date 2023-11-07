@@ -7,6 +7,7 @@ using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
+using RefraSin.TEPSolver.SystemSolvers;
 using RefraSin.TEPSolver.TimeSteppers;
 
 namespace RefraSin.TEPSolver;
