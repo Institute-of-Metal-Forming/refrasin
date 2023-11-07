@@ -47,6 +47,8 @@ public class SolverSession : ISolverSession
 
         StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
         TimeStepper = solver.TimeStepper;
+        StepValidators = solver.StepValidators.ToArray();
+        SystemSolver = solver.SystemSolver;
     }
 
     /// <inheritdoc />
@@ -94,10 +96,10 @@ public class SolverSession : ISolverSession
     public ITimeStepper TimeStepper { get; }
 
     /// <inheritdoc />
-    public IReadOnlyList<IStepValidator> StepValidators { get; } = new[] { new InstabilityDetector() };
+    public IReadOnlyList<IStepValidator> StepValidators { get; }
 
     /// <inheritdoc />
-    public ISystemSolver SystemSolver { get; } = new BroydenSystemSolver();
+    public ISystemSolver SystemSolver { get; }
 
     public FixedStack<ISolutionState> StateMemory { get; }
 
