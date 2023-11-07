@@ -1,7 +1,7 @@
 using MathNet.Numerics.RootFinding;
 using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver;
+namespace RefraSin.TEPSolver.SystemSolvers;
 
 public class BroydenSystemSolver : ISystemSolver
 {
