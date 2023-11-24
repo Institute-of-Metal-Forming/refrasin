@@ -1,24 +1,24 @@
 namespace RefraSin.Graphs;
 
-public class UndirectedGraph : IGraph
+public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>> where TVertex : IVertex
 {
-    private readonly Lazy<Dictionary<IVertex, IVertex[]>> _adjacenciesOf;
+    private readonly Lazy<Dictionary<TVertex, TVertex[]>> _adjacenciesOf;
 
-    internal UndirectedGraph(ISet<IVertex> vertices, ISet<IEdge> edges)
+    internal UndirectedGraph(ISet<TVertex> vertices, ISet<UndirectedEdge<TVertex>> edges)
     {
         Vertices = vertices;
         Edges = edges;
-        _adjacenciesOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitAdjacenciesOf);
+        _adjacenciesOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacenciesOf);
     }
 
-    public UndirectedGraph(IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges)
+    public UndirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<IEdge<TVertex>> edges)
     {
-        Vertices = vertices.Select(v => (IVertex)new Vertex(v)).ToHashSet();
-        Edges = edges.Select(e => (IEdge)new UndirectedEdge(e)).ToHashSet();
-        _adjacenciesOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitAdjacenciesOf);
+        Vertices = vertices.ToHashSet();
+        Edges = edges.Select(e => new UndirectedEdge<TVertex>(e)).ToHashSet();
+        _adjacenciesOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacenciesOf);
     }
 
-    private Dictionary<IVertex, IVertex[]> InitAdjacenciesOf() =>
+    private Dictionary<TVertex, TVertex[]> InitAdjacenciesOf() =>
         Edges
             .GroupBy(e => e.Start, e => e.End)
             .Concat(
@@ -33,15 +33,12 @@ public class UndirectedGraph : IGraph
     public int EdgeCount => Edges.Count;
 
     /// <inheritdoc />
-    public ISet<IVertex> Vertices { get; }
+    public ISet<TVertex> Vertices { get; }
 
     /// <inheritdoc />
-    public ISet<IEdge> Edges { get; }
+    public ISet<UndirectedEdge<TVertex>> Edges { get; }
 
-    public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
+    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _adjacenciesOf.Value[vertex];
 
-    public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
-
-    /// <inheritdoc />
-    public IRootedGraph RootTo(IVertex vertex) => new RootedUndirectedGraph(vertex, Vertices, Edges);
+    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => _adjacenciesOf.Value[vertex];
 }

@@ -1,11 +1,11 @@
 namespace RefraSin.Graphs;
 
-public sealed record UndirectedEdge(IVertex Start, IVertex End) : IEdge
+public sealed record UndirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<TVertex> where TVertex : IVertex
 {
-    public UndirectedEdge(IEdge edge) : this(edge.Start, edge.End) { }
+    public UndirectedEdge(IEdge<TVertex> edge) : this(edge.Start, edge.End) { }
 
     /// <inheritdoc />
-    public bool Equals(IEdge? other)
+    public bool Equals(IEdge<TVertex>? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -18,7 +18,7 @@ public sealed record UndirectedEdge(IVertex Start, IVertex End) : IEdge
     /// <inheritdoc />
     public bool IsDirected => false;
 
-    public bool IsEdgeFrom(IVertex from) => Start == from || End == from;
+    public bool IsEdgeFrom(TVertex from) => Start.Equals(from) || End.Equals(from);
 
-    public bool IsEdgeTo(IVertex to) => Start == to || End == to;
+    public bool IsEdgeTo(TVertex to) => IsEdgeFrom(to);
 }

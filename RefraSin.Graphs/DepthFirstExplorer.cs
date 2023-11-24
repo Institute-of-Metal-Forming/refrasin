@@ -1,33 +1,33 @@
 namespace RefraSin.Graphs;
 
-public class DepthFirstExplorer : IGraphSearch
+public class DepthFirstExplorer<TVertex> : IGraphSearch<TVertex> where TVertex : IVertex
 {
-    private readonly IEdge[] _exploredEdges;
+    private readonly DirectedEdge<TVertex>[] _exploredEdges;
 
-    public DepthFirstExplorer(IGraph graph, IVertex start)
+    public DepthFirstExplorer(IGraph<TVertex, IEdge<TVertex>> graph, TVertex start)
     {
         Start = start;
         _exploredEdges = Explore(graph).ToArray();
     }
 
-    public DepthFirstExplorer(IRootedGraph graph)
+    public DepthFirstExplorer(IRootedGraph<TVertex, IEdge<TVertex>> graph)
     {
         Start = graph.Root;
         _exploredEdges = Explore(graph).ToArray();
     }
 
-    private IEnumerable<IEdge> Explore(IGraph graph)
+    private IEnumerable<DirectedEdge<TVertex>> Explore(IGraph<TVertex, IEdge<TVertex>> graph)
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { Start };
 
-        var stack = new Stack<IVertex>();
+        var stack = new Stack<TVertex>();
         stack.Push(Start);
 
         while (stack.TryPop(out var current))
         {
             foreach (var child in graph.ChildrenOf(current).Reverse())
             {
-                yield return new DirectedEdge(current, child);
+                yield return new DirectedEdge<TVertex>(current, child);
 
                 if (verticesVisited.Contains(child))
                     continue;
@@ -39,8 +39,8 @@ public class DepthFirstExplorer : IGraphSearch
     }
 
     /// <inheritdoc />
-    public IVertex Start { get; }
+    public TVertex Start { get; }
 
     /// <inheritdoc />
-    public IEnumerable<IEdge> ExploredEdges => _exploredEdges;
+    public IEnumerable<DirectedEdge<TVertex>> ExploredEdges => _exploredEdges;
 }

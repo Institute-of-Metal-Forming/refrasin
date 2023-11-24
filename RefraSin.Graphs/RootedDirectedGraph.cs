@@ -1,19 +1,14 @@
 namespace RefraSin.Graphs;
 
-public class RootedDirectedGraph : DirectedGraph, IRootedGraph
+public class RootedDirectedGraph<TVertex> : DirectedGraph<TVertex>, IRootedGraph<TVertex, DirectedEdge<TVertex>> where TVertex : IVertex
 {
-    internal RootedDirectedGraph(IVertex root, ISet<IVertex> vertices, ISet<IEdge> edges) : base(vertices, edges)
+    public RootedDirectedGraph(TVertex root, IEnumerable<TVertex> vertices, IEnumerable<IEdge<TVertex>> edges) : base(vertices, edges)
     {
-        Root = new Vertex(root);
-    }
-
-    public RootedDirectedGraph(IVertex root, IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges) : base(vertices, edges)
-    {
-        Root = new Vertex(root);
+        Root = root;
     }
 
     /// <inheritdoc />
-    public IVertex Root { get; }
+    public TVertex Root { get; }
 
     /// <inheritdoc />
     public int Depth { get; }

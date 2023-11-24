@@ -1,11 +1,11 @@
 namespace RefraSin.Graphs;
 
-public sealed record DirectedEdge(IVertex Start, IVertex End) : IEdge
+public sealed record DirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<TVertex> where TVertex : IVertex
 {
-    public DirectedEdge(IEdge edge) : this(edge.Start, edge.End) { }
+    public DirectedEdge(IEdge<TVertex> edge) : this(edge.Start, edge.End) { }
 
     /// <inheritdoc />
-    public bool Equals(IEdge? other)
+    public bool Equals(IEdge<TVertex>? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -18,7 +18,7 @@ public sealed record DirectedEdge(IVertex Start, IVertex End) : IEdge
     /// <inheritdoc />
     public bool IsDirected => true;
 
-    public bool IsEdgeFrom(IVertex from) => Start == from;
+    public bool IsEdgeFrom(TVertex from) => Start.Equals(from);
 
-    public bool IsEdgeTo(IVertex to) => End == to;
+    public bool IsEdgeTo(TVertex to) => End.Equals(to);
 }

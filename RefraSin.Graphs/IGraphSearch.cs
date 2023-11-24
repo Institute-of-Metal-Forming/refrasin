@@ -1,8 +1,8 @@
 namespace RefraSin.Graphs;
 
-public interface IGraphSearch
+public interface IGraphSearch<TVertex> where TVertex : IVertex
 {
-    IVertex Start { get; }
+    TVertex Start { get; }
 
-    IEnumerable<IEdge> ExploredEdges { get; }
+    IEnumerable<DirectedEdge<TVertex>> ExploredEdges { get; }
 }

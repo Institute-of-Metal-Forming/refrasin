@@ -1,15 +1,15 @@
 namespace RefraSin.Graphs;
 
-public interface IEdge : IEquatable<IEdge>
+public interface IEdge<TVertex> : IEquatable<IEdge<TVertex>> where TVertex : IVertex
 {
-    IVertex Start { get; }
-    IVertex End { get; }
+    TVertex Start { get; }
+    TVertex End { get; }
 
     bool IsDirected { get; }
 
-    public bool IsEdgeFrom(IVertex from);
+    public bool IsEdgeFrom(TVertex from);
 
-    public bool IsEdgeTo(IVertex to);
+    public bool IsEdgeTo(TVertex to);
 
-    public bool IsEdgeFromTo(IVertex from, IVertex to) => IsEdgeFrom(from) && IsEdgeTo(to);
+    public bool IsEdgeFromTo(TVertex from, TVertex to) => IsEdgeFrom(from) && IsEdgeTo(to);
 }

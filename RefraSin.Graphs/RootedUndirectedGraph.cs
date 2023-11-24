@@ -1,19 +1,14 @@
 namespace RefraSin.Graphs;
 
-public class RootedUndirectedGraph : UndirectedGraph, IRootedGraph
+public class RootedUndirectedGraph<TVertex> : UndirectedGraph<TVertex>, IRootedGraph<TVertex, UndirectedEdge<TVertex>> where TVertex : IVertex
 {
-    internal RootedUndirectedGraph(IVertex root, ISet<IVertex> vertices, ISet<IEdge> edges) : base(vertices, edges)
+    public RootedUndirectedGraph(TVertex root, IEnumerable<TVertex> vertices, IEnumerable<IEdge<TVertex>> edges) : base(vertices, edges)
     {
-        Root = new Vertex(root);
-    }
-
-    public RootedUndirectedGraph(IVertex root, IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges) : base(vertices, edges)
-    {
-        Root = new Vertex(root);
+        Root = root;
     }
 
     /// <inheritdoc />
-    public IVertex Root { get; }
+    public TVertex Root { get; }
 
     /// <inheritdoc />
     public int Depth { get; }

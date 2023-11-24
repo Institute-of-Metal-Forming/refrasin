@@ -1,44 +1,44 @@
 namespace RefraSin.Graphs;
 
-public class DirectedGraph : IGraph
+public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> where TVertex : IVertex
 {
-    private readonly Lazy<Dictionary<IVertex, IVertex[]>> _childrenOf;
-    private readonly Lazy<Dictionary<IVertex, IVertex[]>> _parentsOf;
+    private readonly Lazy<Dictionary<TVertex, TVertex[]>> _childrenOf;
+    private readonly Lazy<Dictionary<TVertex, TVertex[]>> _parentsOf;
 
-    internal DirectedGraph(ISet<IVertex> vertices, ISet<IEdge> edges)
+    internal DirectedGraph(ISet<TVertex> vertices, ISet<DirectedEdge<TVertex>> edges)
     {
         Vertices = vertices;
         Edges = edges;
 
-        _childrenOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitChildrenOf);
-        _parentsOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitParentsOf);
+        _childrenOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitChildrenOf);
+        _parentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitParentsOf);
     }
 
-    public DirectedGraph(IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges)
+    public DirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<IEdge<TVertex>> edges)
     {
-        Vertices = vertices.Select(v => (IVertex)new Vertex(v)).ToHashSet();
+        Vertices = vertices.ToHashSet();
         Edges = ConvertEdges(edges).ToHashSet();
 
-        _childrenOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitChildrenOf);
-        _parentsOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitParentsOf);
+        _childrenOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitChildrenOf);
+        _parentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitParentsOf);
     }
 
-    private IEnumerable<IEdge> ConvertEdges(IEnumerable<IEdge> edges)
+    private IEnumerable<DirectedEdge<TVertex>> ConvertEdges(IEnumerable<IEdge<TVertex>> edges)
     {
         foreach (var edge in edges)
         {
-            yield return new DirectedEdge(edge);
+            yield return new DirectedEdge<TVertex>(edge);
             if (!edge.IsDirected)
-                yield return new DirectedEdge(edge.End, edge.Start);
+                yield return new DirectedEdge<TVertex>(edge.End, edge.Start);
         }
     }
 
-    private Dictionary<IVertex, IVertex[]> InitChildrenOf() =>
+    private Dictionary<TVertex, TVertex[]> InitChildrenOf() =>
         Edges
             .GroupBy(e => e.Start, e => e.End)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
-    private Dictionary<IVertex, IVertex[]> InitParentsOf() =>
+    private Dictionary<TVertex, TVertex[]> InitParentsOf() =>
         Edges
             .GroupBy(e => e.End, e => e.Start)
             .ToDictionary(g => g.Key, g => g.ToArray());
@@ -50,15 +50,12 @@ public class DirectedGraph : IGraph
     public int EdgeCount => Edges.Count;
 
     /// <inheritdoc />
-    public ISet<IVertex> Vertices { get; }
+    public ISet<TVertex> Vertices { get; }
 
     /// <inheritdoc />
-    public ISet<IEdge> Edges { get; }
+    public ISet<DirectedEdge<TVertex>> Edges { get; }
 
-    public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _childrenOf.Value[vertex];
+    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _childrenOf.Value[vertex];
 
-    public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _parentsOf.Value[vertex];
-
-    /// <inheritdoc />
-    public IRootedGraph RootTo(IVertex vertex) => new RootedDirectedGraph(vertex, Vertices, Edges);
+    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => _parentsOf.Value[vertex];
 }

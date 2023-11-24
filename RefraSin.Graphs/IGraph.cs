@@ -2,32 +2,26 @@ using MoreLinq.Extensions;
 
 namespace RefraSin.Graphs;
 
-public interface IGraph
+public interface IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IEdge<TVertex>
 {
-    ISet<IVertex> Vertices { get; }
+    ISet<TVertex> Vertices { get; }
 
-    ISet<IEdge> Edges { get; }
+    ISet<TEdge> Edges { get; }
 
-    int VertexCount => Vertices.Count();
+    int VertexCount => Vertices.Count;
 
-    int EdgeCount => Edges.Count();
+    int EdgeCount => Edges.Count;
 
-    public IEnumerable<IVertex> ParentsOf(IVertex vertex) =>
-        Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.Start == vertex ? e.End : e.Start);
+    public IEnumerable<TVertex> ParentsOf(TVertex vertex) =>
+        Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.Start.Equals(vertex) ? e.End : e.Start);
 
-    public IEnumerable<IVertex> ChildrenOf(IVertex vertex) =>
-        Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.Start == vertex ? e.End : e.Start);
-
-    public IEdge Edge(IVertex from, IVertex to) => Edges.First(e => e.Start == from && e.End == to);
-
-    public IRootedGraph RootTo(IVertex vertex);
-
-    public IRootedGraph RootOptimal() => Vertices.Select(RootTo).Minima(g => g.Depth).First();
+    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) =>
+        Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.Start.Equals(vertex) ? e.End : e.Start);
 }
 
-public interface IRootedGraph : IGraph
+public interface IRootedGraph<TVertex, TEdge> : IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IEdge<TVertex>
 {
-    IVertex Root { get; }
+    TVertex Root { get; }
 
     int Depth { get; }
 }
