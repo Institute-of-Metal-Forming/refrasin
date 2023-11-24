@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.TEPSolver.Test", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ProcessModel", "RefraSin.ProcessModel\RefraSin.ProcessModel.csproj", "{D8938CCB-4045-46E2-A46D-832F0541FD8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Graphs", "RefraSin.Graphs\RefraSin.Graphs.csproj", "{24385645-EC6B-46D4-98D0-CF5612AED935}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +92,10 @@ Global
 		{D8938CCB-4045-46E2-A46D-832F0541FD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8938CCB-4045-46E2-A46D-832F0541FD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8938CCB-4045-46E2-A46D-832F0541FD8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24385645-EC6B-46D4-98D0-CF5612AED935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24385645-EC6B-46D4-98D0-CF5612AED935}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24385645-EC6B-46D4-98D0-CF5612AED935}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24385645-EC6B-46D4-98D0-CF5612AED935}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
