@@ -4,10 +4,10 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
 {
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _adjacenciesOf;
 
-    internal UndirectedGraph(ISet<TVertex> vertices, ISet<UndirectedEdge<TVertex>> edges)
+    public UndirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<UndirectedEdge<TVertex>> edges)
     {
-        Vertices = vertices;
-        Edges = edges;
+        Vertices = vertices.ToHashSet();
+        Edges = edges.ToHashSet();
         _adjacenciesOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacenciesOf);
     }
 

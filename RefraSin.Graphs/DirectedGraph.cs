@@ -5,10 +5,10 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _childrenOf;
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _parentsOf;
 
-    internal DirectedGraph(ISet<TVertex> vertices, ISet<DirectedEdge<TVertex>> edges)
+    public DirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<DirectedEdge<TVertex>> edges)
     {
-        Vertices = vertices;
-        Edges = edges;
+        Vertices = vertices.ToHashSet();
+        Edges = edges.ToHashSet();
 
         _childrenOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitChildrenOf);
         _parentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitParentsOf);
