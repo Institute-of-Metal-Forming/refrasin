@@ -34,12 +34,6 @@ public class UndirectedGraph : IGraph
     /// <inheritdoc />
     public IEnumerable<IEdge> Edges => _edges;
 
-    /// <inheritdoc />
-    public IVertex Root { get; }
-
-    /// <inheritdoc />
-    public int Depth { get; }
-
     public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
 
     public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
