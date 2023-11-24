@@ -13,9 +13,12 @@ public interface IGraph
     IVertex Root { get; }
 
     int Depth { get; }
+
+    public IEnumerable<IVertex> ParentsOf(IVertex vertex) =>
+        Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.Start == vertex ? e.End : e.Start);
+
+    public IEnumerable<IVertex> ChildrenOf(IVertex vertex) =>
+        Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.Start == vertex ? e.End : e.Start);
 }
 
-public interface IDirectedGraph : IGraph
-{
-
-}
+public interface IDirectedGraph : IGraph { }

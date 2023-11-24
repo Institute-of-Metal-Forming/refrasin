@@ -2,11 +2,7 @@ namespace RefraSin.Graphs;
 
 public static class GraphExtensions
 {
-    public static IEnumerable<IVertex> ParentsOf(this IGraph graph, IVertex vertex) =>
-        graph.Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.Start == vertex ? e.End : e.Start);
 
-    public static IEnumerable<IVertex> ChildrenOf(this IGraph graph, IVertex vertex) =>
-        graph.Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.Start == vertex ? e.End : e.Start);
 
     public static IEnumerable<IVertex> DepthFirstSearch(this IGraph graph, IVertex start)
     {
@@ -29,7 +25,6 @@ public static class GraphExtensions
                 yield return child;
             }
         }
-
     }
 
     public static IEnumerable<IVertex> BreadthFirstSearch(this IGraph graph, IVertex start)
