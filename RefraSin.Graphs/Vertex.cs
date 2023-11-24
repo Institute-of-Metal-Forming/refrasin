@@ -1,7 +1,15 @@
 namespace RefraSin.Graphs;
 
-public record Vertex(Guid Id, string Label) : IVertex
+public record Vertex(Guid Id, string Label = "") : IVertex
 {
+    public Vertex(IVertex vertex): this(vertex.Id)
+    {
+        if (vertex is Vertex v)
+        {
+            Label = v.Label;
+        }
+    }
+
     /// <inheritdoc />
     public virtual bool Equals(IVertex? other)
     {

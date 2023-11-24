@@ -2,6 +2,8 @@ namespace RefraSin.Graphs;
 
 public record DirectedEdge(IVertex Start, IVertex End) : IEdge
 {
+    public DirectedEdge(IEdge edge) : this(edge.Start, edge.End) { }
+
     /// <inheritdoc />
     public virtual bool Equals(IEdge? other)
     {

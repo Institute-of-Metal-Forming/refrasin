@@ -2,28 +2,31 @@ namespace RefraSin.Graphs;
 
 public class UndirectedGraph : IGraph
 {
-    private Dictionary<IVertex, IVertex[]> _adjacencies;
-    private readonly IEdge[] _edges;
-    private readonly IVertex[] _vertices;
+    private readonly Lazy<Dictionary<IVertex, IVertex[]>> _adjacenciesOf;
+    private readonly HashSet<UndirectedEdge> _edges;
+    private readonly HashSet<Vertex> _vertices;
 
     public UndirectedGraph(IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges)
     {
-        _vertices = vertices.ToArray();
-        _edges = edges.ToArray();
+        _vertices = vertices.Select(v => new Vertex(v)).ToHashSet();
+        _edges = edges.Select(e => new UndirectedEdge(e)).ToHashSet();
 
-        _adjacencies = _edges
+        _adjacenciesOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitAdjacenciesOf);
+    }
+
+    private Dictionary<IVertex, IVertex[]> InitAdjacenciesOf() =>
+        _edges
             .GroupBy(e => e.Start, e => e.End)
             .Concat(
                 _edges.GroupBy(e => e.End, e => e.Start)
             )
             .ToDictionary(g => g.Key, g => g.ToArray());
-    }
 
     /// <inheritdoc />
-    public int VertexCount => _vertices.Length;
+    public int VertexCount => _vertices.Count;
 
     /// <inheritdoc />
-    public int EdgeCount => _edges.Length;
+    public int EdgeCount => _edges.Count;
 
     /// <inheritdoc />
     public IEnumerable<IVertex> Vertices => _vertices;
@@ -37,7 +40,7 @@ public class UndirectedGraph : IGraph
     /// <inheritdoc />
     public int Depth { get; }
 
-    public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _adjacencies[vertex];
+    public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
 
-    public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _adjacencies[vertex];
+    public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
 }
