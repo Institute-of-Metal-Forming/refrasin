@@ -3,36 +3,34 @@ namespace RefraSin.Graphs;
 public class UndirectedGraph : IGraph
 {
     private readonly Lazy<Dictionary<IVertex, IVertex[]>> _adjacenciesOf;
-    private readonly HashSet<UndirectedEdge> _edges;
-    private readonly HashSet<Vertex> _vertices;
 
     public UndirectedGraph(IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges)
     {
-        _vertices = vertices.Select(v => new Vertex(v)).ToHashSet();
-        _edges = edges.Select(e => new UndirectedEdge(e)).ToHashSet();
+        Vertices = vertices.Select(v => (IVertex)new Vertex(v)).ToHashSet();
+        Edges = edges.Select(e => (IEdge)new UndirectedEdge(e)).ToHashSet();
 
         _adjacenciesOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitAdjacenciesOf);
     }
 
     private Dictionary<IVertex, IVertex[]> InitAdjacenciesOf() =>
-        _edges
+        Edges
             .GroupBy(e => e.Start, e => e.End)
             .Concat(
-                _edges.GroupBy(e => e.End, e => e.Start)
+                Edges.GroupBy(e => e.End, e => e.Start)
             )
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     /// <inheritdoc />
-    public int VertexCount => _vertices.Count;
+    public int VertexCount => Vertices.Count;
 
     /// <inheritdoc />
-    public int EdgeCount => _edges.Count;
+    public int EdgeCount => Edges.Count;
 
     /// <inheritdoc />
-    public IEnumerable<IVertex> Vertices => _vertices;
+    public ISet<IVertex> Vertices { get; }
 
     /// <inheritdoc />
-    public IEnumerable<IEdge> Edges => _edges;
+    public ISet<IEdge> Edges { get; }
 
     public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
 

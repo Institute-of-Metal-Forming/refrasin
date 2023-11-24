@@ -4,19 +4,17 @@ public class DirectedGraph : IGraph
 {
     private readonly Lazy<Dictionary<IVertex, IVertex[]>> _childrenOf;
     private readonly Lazy<Dictionary<IVertex, IVertex[]>> _parentsOf;
-    private readonly HashSet<DirectedEdge> _edges;
-    private readonly HashSet<Vertex> _vertices;
 
     public DirectedGraph(IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges)
     {
-        _vertices = vertices.Select(v => new Vertex(v)).ToHashSet();
-        _edges = ConvertEdges(edges).ToHashSet();
+        Vertices = vertices.Select(v => (IVertex) new Vertex(v)).ToHashSet();
+        Edges = ConvertEdges(edges).ToHashSet();
 
         _childrenOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitChildrenOf);
         _parentsOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitParentsOf);
     }
 
-    private IEnumerable<DirectedEdge> ConvertEdges(IEnumerable<IEdge> edges)
+    private IEnumerable<IEdge> ConvertEdges(IEnumerable<IEdge> edges)
     {
         foreach (var edge in edges)
         {
@@ -27,26 +25,26 @@ public class DirectedGraph : IGraph
     }
 
     private Dictionary<IVertex, IVertex[]> InitChildrenOf() =>
-        _edges
+        Edges
             .GroupBy(e => e.Start, e => e.End)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<IVertex, IVertex[]> InitParentsOf() =>
-        _edges
+        Edges
             .GroupBy(e => e.End, e => e.Start)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     /// <inheritdoc />
-    public int VertexCount => _vertices.Count;
+    public int VertexCount => Vertices.Count;
 
     /// <inheritdoc />
-    public int EdgeCount => _edges.Count;
+    public int EdgeCount => Edges.Count;
 
     /// <inheritdoc />
-    public IEnumerable<IVertex> Vertices => _vertices;
+    public ISet<IVertex> Vertices { get; }
 
     /// <inheritdoc />
-    public IEnumerable<IEdge> Edges => _edges;
+    public ISet<IEdge> Edges { get; }
 
     public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _childrenOf.Value[vertex];
 

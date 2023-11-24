@@ -2,9 +2,9 @@ namespace RefraSin.Graphs;
 
 public interface IGraph
 {
-    IEnumerable<IVertex> Vertices { get; }
+    ISet<IVertex> Vertices { get; }
 
-    IEnumerable<IEdge> Edges { get; }
+    ISet<IEdge> Edges { get; }
 
     int VertexCount => Vertices.Count();
 
@@ -63,6 +63,7 @@ public interface IGraph
             }
         }
     }
+
 }
 
 public interface IRootedGraph : IGraph
