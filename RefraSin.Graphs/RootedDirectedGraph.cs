@@ -6,7 +6,7 @@ public class RootedDirectedGraph : DirectedGraph, IRootedGraph
     private readonly Lazy<IReadOnlyList<(IEdge, IVertex)>> _depthFirstSearchFromRoot;
 
     /// <inheritdoc />
-    internal RootedDirectedGraph(IVertex root, IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges) : base(vertices, edges)
+    internal RootedDirectedGraph(IVertex root, ISet<IVertex> vertices, ISet<IEdge> edges) : base(vertices, edges)
     {
         Root = new Vertex(root);
 

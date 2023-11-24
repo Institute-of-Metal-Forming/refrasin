@@ -1,3 +1,5 @@
+using MoreLinq.Extensions;
+
 namespace RefraSin.Graphs;
 
 public interface IGraph
@@ -64,6 +66,9 @@ public interface IGraph
         }
     }
 
+    public IRootedGraph RootTo(IVertex vertex);
+
+    public IRootedGraph RootOptimal() => Vertices.Select(RootTo).Minima(g => g.Depth).First();
 }
 
 public interface IRootedGraph : IGraph

@@ -5,9 +5,18 @@ public class DirectedGraph : IGraph
     private readonly Lazy<Dictionary<IVertex, IVertex[]>> _childrenOf;
     private readonly Lazy<Dictionary<IVertex, IVertex[]>> _parentsOf;
 
+    internal DirectedGraph(ISet<IVertex> vertices, ISet<IEdge> edges)
+    {
+        Vertices = vertices;
+        Edges = edges;
+
+        _childrenOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitChildrenOf);
+        _parentsOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitParentsOf);
+    }
+
     public DirectedGraph(IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges)
     {
-        Vertices = vertices.Select(v => (IVertex) new Vertex(v)).ToHashSet();
+        Vertices = vertices.Select(v => (IVertex)new Vertex(v)).ToHashSet();
         Edges = ConvertEdges(edges).ToHashSet();
 
         _childrenOf = new Lazy<Dictionary<IVertex, IVertex[]>>(InitChildrenOf);
@@ -49,4 +58,7 @@ public class DirectedGraph : IGraph
     public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _childrenOf.Value[vertex];
 
     public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _parentsOf.Value[vertex];
+
+    /// <inheritdoc />
+    public IRootedGraph RootTo(IVertex vertex) => new RootedDirectedGraph(vertex, Vertices, Edges);
 }

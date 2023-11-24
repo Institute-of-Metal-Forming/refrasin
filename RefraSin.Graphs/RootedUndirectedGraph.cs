@@ -6,7 +6,7 @@ public class RootedUndirectedGraph : UndirectedGraph, IRootedGraph
     private readonly Lazy<IReadOnlyList<(IEdge, IVertex)>> _depthFirstSearchFromRoot;
 
     /// <inheritdoc />
-    internal RootedUndirectedGraph(IVertex root, IEnumerable<IVertex> vertices, IEnumerable<IEdge> edges) : base(vertices, edges)
+    internal RootedUndirectedGraph(IVertex root, ISet<IVertex> vertices, ISet<IEdge> edges) : base(vertices, edges)
     {
         Root = new Vertex(root);
 
