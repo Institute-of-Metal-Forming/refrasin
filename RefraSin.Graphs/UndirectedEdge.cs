@@ -17,4 +17,8 @@ public record UndirectedEdge(IVertex Start, IVertex End) : IEdge
 
     /// <inheritdoc />
     public bool IsDirected => false;
+
+    public bool IsEdgeFrom(IVertex from) => Start == from || End == from;
+
+    public bool IsEdgeTo(IVertex to) => Start == to || End == to;
 }
