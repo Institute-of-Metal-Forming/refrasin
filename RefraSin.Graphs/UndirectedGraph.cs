@@ -40,8 +40,8 @@ public class UndirectedGraph : IGraph
 
     public IEnumerable<IVertex> ChildrenOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
 
+    public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
+
     /// <inheritdoc />
     public IRootedGraph RootTo(IVertex vertex) => new RootedUndirectedGraph(vertex, Vertices, Edges);
-
-    public IEnumerable<IVertex> ParentsOf(IVertex vertex) => _adjacenciesOf.Value[vertex];
 }

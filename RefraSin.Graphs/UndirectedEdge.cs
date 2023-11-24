@@ -1,11 +1,11 @@
 namespace RefraSin.Graphs;
 
-public record UndirectedEdge(IVertex Start, IVertex End) : IEdge
+public sealed record UndirectedEdge(IVertex Start, IVertex End) : IEdge
 {
     public UndirectedEdge(IEdge edge) : this(edge.Start, edge.End) { }
 
     /// <inheritdoc />
-    public virtual bool Equals(IEdge? other)
+    public bool Equals(IEdge? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
