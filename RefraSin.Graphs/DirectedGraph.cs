@@ -58,4 +58,11 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
     public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _childrenOf.Value[vertex];
 
     public IEnumerable<TVertex> ParentsOf(TVertex vertex) => _parentsOf.Value[vertex];
+
+    public DirectedGraph<TVertex> Reversed()
+    {
+        var reversedEdges = Edges.Select(e => new DirectedEdge<TVertex>(e.End, e.Start)).ToHashSet();
+
+        return new DirectedGraph<TVertex>(Vertices, reversedEdges);
+    }
 }
