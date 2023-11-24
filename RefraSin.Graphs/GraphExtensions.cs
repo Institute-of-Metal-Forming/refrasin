@@ -11,26 +11,25 @@ public static class GraphExtensions
     public static IEnumerable<IVertex> DepthFirstSearch(this IGraph graph, IVertex start)
     {
         var verticesVisited = graph.Vertices.ToDictionary(v => v, _ => false);
+        verticesVisited[start] = true;
 
-        return DepthFirstSearch(graph, start, verticesVisited);
-    }
+        var stack = new Stack<IVertex>();
+        stack.Push(start);
 
-    private static IEnumerable<IVertex> DepthFirstSearch(IGraph graph, IVertex current, Dictionary<IVertex, bool> verticesVisited)
-    {
-        if (verticesVisited[current])
-            yield break;
-
-        verticesVisited[current] = true;
-
-        yield return current;
-
-        foreach (var child in graph.ChildrenOf(current))
+        while (stack.TryPop(out var vertex))
         {
-            foreach (var vertex in DepthFirstSearch(graph, child, verticesVisited))
+            foreach (var child in graph.ChildrenOf(vertex).Reverse())
             {
-                yield return vertex;
+                if (verticesVisited[child])
+                    continue;
+
+                verticesVisited[child] = true;
+
+                stack.Push(child);
+                yield return child;
             }
         }
+
     }
 
     public static IEnumerable<IVertex> BreadthFirstSearch(this IGraph graph, IVertex start)
