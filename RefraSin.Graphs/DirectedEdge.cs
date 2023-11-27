@@ -13,6 +13,9 @@ public sealed record DirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<T
     }
 
     /// <inheritdoc />
+    public bool Equals(DirectedEdge<TVertex>? other) => Equals((IEdge<TVertex>?)other);
+
+    /// <inheritdoc />
     public override int GetHashCode() => HashCode.Combine(Start, End);
 
     /// <inheritdoc />
@@ -21,4 +24,7 @@ public sealed record DirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<T
     public bool IsEdgeFrom(TVertex from) => Start.Equals(from);
 
     public bool IsEdgeTo(TVertex to) => End.Equals(to);
+
+    /// <inheritdoc />
+    public IEdge<TVertex> Reversed() => new DirectedEdge<TVertex>(End, Start);
 }

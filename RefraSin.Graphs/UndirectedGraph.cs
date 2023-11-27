@@ -20,10 +20,8 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
 
     private Dictionary<TVertex, TVertex[]> InitAdjacenciesOf() =>
         Edges
+            .Concat(Edges.Select(e => e.Reversed()))
             .GroupBy(e => e.Start, e => e.End)
-            .Concat(
-                Edges.GroupBy(e => e.End, e => e.Start)
-            )
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     /// <inheritdoc />
