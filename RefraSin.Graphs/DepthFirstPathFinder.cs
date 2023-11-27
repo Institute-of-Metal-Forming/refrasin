@@ -4,23 +4,32 @@ public class DepthFirstPathFinder<TVertex> : IGraphSearch<TVertex> where TVertex
 {
     private readonly DirectedEdge<TVertex>[] _exploredEdges;
 
-    public DepthFirstPathFinder(IGraph<TVertex, IEdge<TVertex>> graph, TVertex start, TVertex target)
+
+    private DepthFirstPathFinder(TVertex start, TVertex target, DirectedEdge<TVertex>[] exploredEdges)
     {
         Start = start;
         Target = target;
-        _exploredEdges = Explore(graph);
+        _exploredEdges = exploredEdges;
     }
 
-    public DepthFirstPathFinder(IRootedGraph<TVertex, IEdge<TVertex>> graph, TVertex target)
-    {
-        Start = graph.Root;
-        Target = target;
-        _exploredEdges = Explore(graph);
-    }
+    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, TVertex target)
+        where TEdge : IEdge<TVertex> =>
+        new(
+            start,
+            target,
+            DoFindPath(graph, start, target).ToArray()
+        );
 
-    private DirectedEdge<TVertex>[] Explore(IGraph<TVertex, IEdge<TVertex>> graph)
+    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(IRootedGraph<TVertex, TEdge> graph, TVertex target) where TEdge : IEdge<TVertex> =>
+        new(
+            graph.Root,
+            target,
+            DoFindPath(graph, graph.Root, target).ToArray()
+        );
+
+    private static IEnumerable<DirectedEdge<TVertex>> DoFindPath<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, TVertex target) where TEdge : IEdge<TVertex>
     {
-        var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { Start };
+        var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
 
         IEnumerable<DirectedEdge<TVertex>>? InspectVertex(TVertex vertex)
         {
@@ -29,7 +38,9 @@ public class DepthFirstPathFinder<TVertex> : IGraphSearch<TVertex> where TVertex
                 if (verticesVisited.Contains(child))
                     continue;
 
-                if (child.Equals(Target))
+                verticesVisited.Add(child);
+
+                if (child.Equals(target))
                     return new[] { new DirectedEdge<TVertex>(vertex, child) };
 
                 var childResult = InspectVertex(child);
@@ -41,7 +52,7 @@ public class DepthFirstPathFinder<TVertex> : IGraphSearch<TVertex> where TVertex
             return null;
         }
 
-        var result = InspectVertex(Start);
+        var result = InspectVertex(start);
 
         if (result is null)
             throw new Exception("Target vertex is not reachable from start vertex.");
