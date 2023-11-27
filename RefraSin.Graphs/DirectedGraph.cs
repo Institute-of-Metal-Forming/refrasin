@@ -55,9 +55,9 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
     /// <inheritdoc />
     public ISet<DirectedEdge<TVertex>> Edges { get; }
 
-    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _childrenOf.Value[vertex];
+    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _childrenOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
 
-    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => _parentsOf.Value[vertex];
+    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => _parentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
 
     public DirectedGraph<TVertex> Reversed()
     {

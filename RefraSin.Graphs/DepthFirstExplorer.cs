@@ -4,38 +4,52 @@ public class DepthFirstExplorer<TVertex> : IGraphSearch<TVertex> where TVertex :
 {
     private readonly DirectedEdge<TVertex>[] _exploredEdges;
 
-    public DepthFirstExplorer(IGraph<TVertex, IEdge<TVertex>> graph, TVertex start)
+    private DepthFirstExplorer(TVertex start, DirectedEdge<TVertex>[] exploredEdges)
     {
         Start = start;
-        _exploredEdges = Explore(graph).ToArray();
+        _exploredEdges = exploredEdges;
     }
 
-    public DepthFirstExplorer(IRootedGraph<TVertex, IEdge<TVertex>> graph)
+    public static DepthFirstExplorer<TVertex> Explore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex> =>
+        new(
+            start,
+            DoExplore(graph, start).ToArray()
+        );
+
+    public static DepthFirstExplorer<TVertex> Explore<TEdge>(IRootedGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
+        new(
+            graph.Root,
+            DoExplore(graph, graph.Root).ToArray()
+        );
+
+    private static IEnumerable<DirectedEdge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
     {
-        Start = graph.Root;
-        _exploredEdges = Explore(graph).ToArray();
-    }
+        var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
 
-    private IEnumerable<DirectedEdge<TVertex>> Explore(IGraph<TVertex, IEdge<TVertex>> graph)
-    {
-        var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { Start };
-
-        var stack = new Stack<TVertex>();
-        stack.Push(Start);
-
-        while (stack.TryPop(out var current))
+        IEnumerable<DirectedEdge<TVertex>> InspectVertex(TVertex vertex)
         {
-            foreach (var child in graph.ChildrenOf(current).Reverse())
+            foreach (var child in graph.ChildrenOf(vertex))
             {
-                yield return new DirectedEdge<TVertex>(current, child);
+                yield return new DirectedEdge<TVertex>(vertex, child);
 
                 if (verticesVisited.Contains(child))
                     continue;
 
                 verticesVisited.Add(child);
-                stack.Push(child);
+
+                var childResult = InspectVertex(child);
+
+                foreach (var r in childResult)
+                    yield return r;
             }
         }
+
+        var result = InspectVertex(start);
+
+        if (result is null)
+            throw new Exception("Target vertex is not reachable from start vertex.");
+
+        return result.ToArray();
     }
 
     /// <inheritdoc />

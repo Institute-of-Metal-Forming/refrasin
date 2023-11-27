@@ -36,7 +36,7 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
     /// <inheritdoc />
     public ISet<UndirectedEdge<TVertex>> Edges { get; }
 
-    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _adjacenciesOf.Value[vertex];
+    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _adjacenciesOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
 
-    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => _adjacenciesOf.Value[vertex];
+    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => ChildrenOf(vertex);
 }
