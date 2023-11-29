@@ -18,6 +18,16 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
         _adjacenciesOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacenciesOf);
     }
 
+    public static UndirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
+        new(graph.Vertices, (IEnumerable<IEdge<TVertex>>)graph.Edges);
+
+    public static UndirectedGraph<TVertex> FromGraphSearch(IGraphSearch<TVertex> graphSearch)
+    {
+        var edges = graphSearch.ExploredEdges.ToArray();
+        var vertices = edges.Select(e => e.End).Prepend(graphSearch.Start);
+        return new UndirectedGraph<TVertex>(vertices, edges);
+    }
+
     private Dictionary<TVertex, TVertex[]> InitAdjacenciesOf() =>
         Edges
             .Concat(Edges.Select(e => e.Reversed()))

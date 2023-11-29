@@ -23,6 +23,16 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
         _parentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitParentsOf);
     }
 
+    public static DirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
+        new(graph.Vertices, (IEnumerable<IEdge<TVertex>>)graph.Edges);
+
+    public static DirectedGraph<TVertex> FromGraphSearch(IGraphSearch<TVertex> graphSearch)
+    {
+        var edges = graphSearch.ExploredEdges.ToArray();
+        var vertices = edges.Select(e => e.End).Prepend(graphSearch.Start);
+        return new DirectedGraph<TVertex>(vertices, edges);
+    }
+
     private IEnumerable<DirectedEdge<TVertex>> ConvertEdges(IEnumerable<IEdge<TVertex>> edges)
     {
         foreach (var edge in edges)
