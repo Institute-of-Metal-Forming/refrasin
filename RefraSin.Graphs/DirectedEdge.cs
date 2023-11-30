@@ -25,6 +25,8 @@ public sealed record DirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<T
 
     public bool IsEdgeTo(TVertex to) => End.Equals(to);
 
+    public DirectedEdge<TVertex> Reversed() => new(End, Start);
+
     /// <inheritdoc />
-    public IEdge<TVertex> Reversed() => new DirectedEdge<TVertex>(End, Start);
+    IEdge<TVertex> IEdge<TVertex>.Reversed() => Reversed();
 }

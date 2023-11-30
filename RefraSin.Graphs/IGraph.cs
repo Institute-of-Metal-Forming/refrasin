@@ -10,6 +10,15 @@ public interface IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IE
 
     int EdgeCount => Edges.Count;
 
+    public IEnumerable<TEdge> EdgesTo(TVertex vertex) =>
+        Edges.Where(e => e.IsEdgeTo(vertex));
+
+    public IEnumerable<TEdge> EdgesFrom(TVertex vertex) =>
+        Edges.Where(e => e.IsEdgeFrom(vertex));
+
+    public IEnumerable<TEdge> EdgesAt(TVertex vertex) =>
+        Edges.Where(e => e.IsEdgeAt(vertex));
+
     public IEnumerable<TVertex> ParentsOf(TVertex vertex) =>
         Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.Start.Equals(vertex) ? e.End : e.Start);
 

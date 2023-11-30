@@ -21,10 +21,14 @@ public sealed record UndirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge
     /// <inheritdoc />
     public bool IsDirected => false;
 
-    public bool IsEdgeFrom(TVertex from) => Start.Equals(from) || End.Equals(from);
+    public bool IsEdgeAt(TVertex vertex) => Start.Equals(vertex) || End.Equals(vertex);
 
-    public bool IsEdgeTo(TVertex to) => IsEdgeFrom(to);
+    public bool IsEdgeFrom(TVertex from) => IsEdgeAt(from);
+
+    public bool IsEdgeTo(TVertex to) => IsEdgeAt(to);
+
+    public UndirectedEdge<TVertex> Reversed() => new(End, Start);
 
     /// <inheritdoc />
-    public IEdge<TVertex> Reversed() => new UndirectedEdge<TVertex>(End, Start);
+    IEdge<TVertex> IEdge<TVertex>.Reversed() => Reversed();
 }
