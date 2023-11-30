@@ -2,20 +2,20 @@ namespace RefraSin.Graphs;
 
 public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>> where TVertex : IVertex
 {
-    private readonly Lazy<Dictionary<TVertex, TVertex[]>> _adjacenciesOf;
+    private readonly Lazy<Dictionary<TVertex, TVertex[]>> _adjacentsOf;
 
     public UndirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<UndirectedEdge<TVertex>> edges)
     {
         Vertices = vertices.ToHashSet();
         Edges = edges.ToHashSet();
-        _adjacenciesOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacenciesOf);
+        _adjacentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacentsOf);
     }
 
     public UndirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<IEdge<TVertex>> edges)
     {
         Vertices = vertices.ToHashSet();
         Edges = edges.Select(e => new UndirectedEdge<TVertex>(e)).ToHashSet();
-        _adjacenciesOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacenciesOf);
+        _adjacentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacentsOf);
     }
 
     public static UndirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
@@ -28,7 +28,7 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
         return new UndirectedGraph<TVertex>(vertices, edges);
     }
 
-    private Dictionary<TVertex, TVertex[]> InitAdjacenciesOf() =>
+    private Dictionary<TVertex, TVertex[]> InitAdjacentsOf() =>
         Edges
             .Concat(Edges.Select(e => e.Reversed()))
             .GroupBy(e => e.Start, e => e.End)
@@ -46,7 +46,9 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
     /// <inheritdoc />
     public ISet<UndirectedEdge<TVertex>> Edges { get; }
 
-    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _adjacenciesOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
+    public IEnumerable<TVertex> AdjacentsOf(TVertex vertex) => _adjacentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
 
-    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => ChildrenOf(vertex);
+    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => AdjacentsOf(vertex);
+    
+    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => AdjacentsOf(vertex);
 }

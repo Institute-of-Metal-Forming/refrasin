@@ -1,5 +1,3 @@
-using MoreLinq.Extensions;
-
 namespace RefraSin.Graphs;
 
 public interface IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IEdge<TVertex>
@@ -17,6 +15,17 @@ public interface IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IE
 
     public IEnumerable<TVertex> ChildrenOf(TVertex vertex) =>
         Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.Start.Equals(vertex) ? e.End : e.Start);
+
+    public IEnumerable<TVertex> AdjacentsOf(TVertex vertex)
+    {
+        var parents = ParentsOf(vertex);
+        var children = ChildrenOf(vertex);
+
+        var result = parents.ToHashSet();
+        result.UnionWith(children);
+
+        return result;
+    }
 }
 
 public interface IRootedGraph<TVertex, TEdge> : IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IEdge<TVertex>
