@@ -1,8 +1,29 @@
 namespace RefraSin.Graphs;
 
-public record DirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<TVertex> where TVertex : IVertex
+public class DirectedEdge<TVertex> : IEdge<TVertex> where TVertex : IVertex
 {
     public DirectedEdge(IEdge<TVertex> edge) : this(edge.Start, edge.End) { }
+
+    public DirectedEdge(TVertex start, TVertex end)
+    {
+        Start = start;
+        End = end;
+    }
+
+    public void Deconstruct(out TVertex start, out TVertex end)
+    {
+        start = Start;
+        end = End;
+    }
+
+    /// <inheritdoc />
+    public TVertex Start { get; }
+
+    /// <inheritdoc />
+    public TVertex End { get; }
+
+    /// <inheritdoc />
+    public bool IsDirected => true;
 
     /// <inheritdoc />
     public bool Equals(IEdge<TVertex>? other)
@@ -13,13 +34,13 @@ public record DirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<TVertex>
     }
 
     /// <inheritdoc />
-    public virtual bool Equals(DirectedEdge<TVertex>? other) => Equals((IEdge<TVertex>?)other);
+    public override bool Equals(object obj) => Equals(obj as IEdge<TVertex>);
 
     /// <inheritdoc />
     public override int GetHashCode() => HashCode.Combine(Start, End);
 
     /// <inheritdoc />
-    public bool IsDirected => true;
+    public override string ToString() => $"DirectedEdge from {Start} to {End}";
 
     public bool IsEdgeFrom(TVertex from) => Start.Equals(from);
 
