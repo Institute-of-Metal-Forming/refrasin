@@ -2,9 +2,9 @@ namespace RefraSin.Graphs;
 
 public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
 {
-    private readonly DirectedEdge<TVertex>[] _exploredEdges;
+    private readonly TraversedEdge<TVertex>[] _exploredEdges;
 
-    private BreadthFirstExplorer(TVertex start, DirectedEdge<TVertex>[] exploredEdges)
+    private BreadthFirstExplorer(TVertex start, TraversedEdge<TVertex>[] exploredEdges)
     {
         Start = start;
         _exploredEdges = exploredEdges;
@@ -22,7 +22,7 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
             DoExplore(graph, graph.Root).ToArray()
         );
 
-    private static IEnumerable<DirectedEdge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
+    private static IEnumerable<TraversedEdge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
         var edgesVisited = new HashSet<TEdge>(graph.EdgeCount);
@@ -41,10 +41,13 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
 
                 var child = edge.Start.Equals(current) ? edge.End : edge.Start;
 
-                yield return new DirectedEdge<TVertex>(current, child);
-
                 if (verticesVisited.Contains(child))
+                {
+                    yield return new TraversedEdge<TVertex>(current, child, true);
                     continue;
+                }
+
+                yield return new TraversedEdge<TVertex>(current, child, false);
 
                 verticesVisited.Add(child);
                 queue.Enqueue(child);
@@ -56,5 +59,5 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
     public TVertex Start { get; }
 
     /// <inheritdoc />
-    public IEnumerable<DirectedEdge<TVertex>> TraversedEdges => _exploredEdges;
+    public IEnumerable<TraversedEdge<TVertex>> TraversedEdges => _exploredEdges;
 }

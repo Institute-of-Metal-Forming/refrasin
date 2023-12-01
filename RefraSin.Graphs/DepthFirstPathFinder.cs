@@ -2,14 +2,14 @@ namespace RefraSin.Graphs;
 
 public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
 {
-    private readonly DirectedEdge<TVertex>[] _exploredEdges;
+    private readonly TraversedEdge<TVertex>[] _traversedEdges;
 
 
-    private DepthFirstPathFinder(TVertex start, TVertex target, DirectedEdge<TVertex>[] exploredEdges)
+    private DepthFirstPathFinder(TVertex start, TVertex target, TraversedEdge<TVertex>[] traversedEdges)
     {
         Start = start;
         Target = target;
-        _exploredEdges = exploredEdges;
+        _traversedEdges = traversedEdges;
     }
 
     public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, TVertex target)
@@ -27,11 +27,11 @@ public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex> where TVer
             DoFindPath(graph, graph.Root, target).ToArray()
         );
 
-    private static IEnumerable<DirectedEdge<TVertex>> DoFindPath<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, TVertex target) where TEdge : IEdge<TVertex>
+    private static IEnumerable<TraversedEdge<TVertex>> DoFindPath<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, TVertex target) where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
 
-        IEnumerable<DirectedEdge<TVertex>>? InspectVertex(TVertex vertex)
+        IEnumerable<TraversedEdge<TVertex>>? InspectVertex(TVertex vertex)
         {
             foreach (var child in graph.ChildrenOf(vertex))
             {
@@ -41,12 +41,12 @@ public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex> where TVer
                 verticesVisited.Add(child);
 
                 if (child.Equals(target))
-                    return new[] { new DirectedEdge<TVertex>(vertex, child) };
+                    return new[] { new TraversedEdge<TVertex>(vertex, child, false) };
 
                 var childResult = InspectVertex(child);
 
                 if (childResult is not null)
-                    return childResult.Prepend(new DirectedEdge<TVertex>(vertex, child));
+                    return childResult.Prepend(new TraversedEdge<TVertex>(vertex, child, false));
             }
 
             return null;
@@ -66,5 +66,5 @@ public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex> where TVer
     public TVertex Target { get; }
 
     /// <inheritdoc />
-    public IEnumerable<DirectedEdge<TVertex>> TraversedEdges => _exploredEdges;
+    public IEnumerable<TraversedEdge<TVertex>> TraversedEdges => _traversedEdges;
 }

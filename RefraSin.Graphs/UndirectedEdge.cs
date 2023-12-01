@@ -1,6 +1,6 @@
 namespace RefraSin.Graphs;
 
-public sealed record UndirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<TVertex> where TVertex : IVertex
+public record UndirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge<TVertex> where TVertex : IVertex
 {
     public UndirectedEdge(IEdge<TVertex> edge) : this(edge.Start, edge.End) { }
 
@@ -13,7 +13,7 @@ public sealed record UndirectedEdge<TVertex>(TVertex Start, TVertex End) : IEdge
     }
 
     /// <inheritdoc />
-    public bool Equals(UndirectedEdge<TVertex>? other) => Equals((IEdge<TVertex>?)other);
+    public virtual bool Equals(UndirectedEdge<TVertex>? other) => Equals((IEdge<TVertex>?)other);
 
     /// <inheritdoc />
     public override int GetHashCode() => Start.GetHashCode() * End.GetHashCode();
