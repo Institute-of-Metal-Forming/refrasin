@@ -25,12 +25,20 @@ public class DepthFirstExplorer<TVertex> : IGraphSearch<TVertex> where TVertex :
     private static IEnumerable<DirectedEdge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
+        var edgesVisited = new HashSet<TEdge>(graph.EdgeCount);
 
-        IEnumerable<DirectedEdge<TVertex>> InspectVertex(TVertex vertex)
+        IEnumerable<DirectedEdge<TVertex>> InspectVertex(TVertex current)
         {
-            foreach (var child in graph.ChildrenOf(vertex))
+            foreach (var edge in graph.EdgesFrom(current))
             {
-                yield return new DirectedEdge<TVertex>(vertex, child);
+                if (edgesVisited.Contains(edge))
+                    continue;
+
+                edgesVisited.Add(edge);
+
+                var child = edge.Start.Equals(current) ? edge.End : edge.Start;
+
+                yield return new DirectedEdge<TVertex>(current, child);
 
                 if (verticesVisited.Contains(child))
                     continue;

@@ -25,14 +25,22 @@ public class BreadthFirstExplorer<TVertex> : IGraphSearch<TVertex> where TVertex
     private static IEnumerable<DirectedEdge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
+        var edgesVisited = new HashSet<TEdge>(graph.EdgeCount);
 
         var queue = new Queue<TVertex>();
         queue.Enqueue(start);
 
         while (queue.TryDequeue(out var current))
         {
-            foreach (var child in graph.ChildrenOf(current))
+            foreach (var edge in graph.EdgesFrom(current))
             {
+                if (edgesVisited.Contains(edge))
+                    continue;
+
+                edgesVisited.Add(edge);
+
+                var child = edge.Start.Equals(current) ? edge.End : edge.Start;
+
                 yield return new DirectedEdge<TVertex>(current, child);
 
                 if (verticesVisited.Contains(child))
