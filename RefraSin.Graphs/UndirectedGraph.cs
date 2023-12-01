@@ -24,10 +24,10 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
     public static UndirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
         new(graph.Vertices, (IEnumerable<IEdge<TVertex>>)graph.Edges);
 
-    public static UndirectedGraph<TVertex> FromGraphSearch(IGraphSearch<TVertex> graphSearch)
+    public static UndirectedGraph<TVertex> FromGraphSearch(IGraphTraversal<TVertex> graphTraversal)
     {
-        var edges = graphSearch.ExploredEdges.ToArray();
-        var vertices = edges.Select(e => e.End).Prepend(graphSearch.Start);
+        var edges = graphTraversal.TraversedEdges.ToArray();
+        var vertices = edges.Select(e => e.End).Prepend(graphTraversal.Start);
         return new UndirectedGraph<TVertex>(vertices, edges);
     }
 

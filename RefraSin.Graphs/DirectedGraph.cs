@@ -39,10 +39,10 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
     public static DirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
         new(graph.Vertices, (IEnumerable<IEdge<TVertex>>)graph.Edges);
 
-    public static DirectedGraph<TVertex> FromGraphSearch(IGraphSearch<TVertex> graphSearch)
+    public static DirectedGraph<TVertex> FromGraphSearch(IGraphTraversal<TVertex> graphTraversal)
     {
-        var edges = graphSearch.ExploredEdges.ToArray();
-        var vertices = edges.Select(e => e.End).Prepend(graphSearch.Start);
+        var edges = graphTraversal.TraversedEdges.ToArray();
+        var vertices = edges.Select(e => e.End).Prepend(graphTraversal.Start);
         return new DirectedGraph<TVertex>(vertices, edges);
     }
 

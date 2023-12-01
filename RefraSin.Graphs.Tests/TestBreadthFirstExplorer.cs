@@ -37,7 +37,7 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        using var enm = explorer.ExploredEdges.GetEnumerator();
+        using var enm = explorer.TraversedEdges.GetEnumerator();
 
         for (int i = 0; i < 2; i++)
         {
@@ -76,7 +76,7 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        using var enm = explorer.ExploredEdges.GetEnumerator();
+        using var enm = explorer.TraversedEdges.GetEnumerator();
 
         for (int i = 0; i < 2; i++)
         {
@@ -116,7 +116,7 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        using var enm = explorer.ExploredEdges.GetEnumerator();
+        using var enm = explorer.TraversedEdges.GetEnumerator();
 
         for (int i = 0; i < 2; i++)
         {

@@ -1,6 +1,6 @@
 namespace RefraSin.Graphs;
 
-public class BreadthFirstExplorer<TVertex> : IGraphSearch<TVertex> where TVertex : IVertex
+public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
 {
     private readonly DirectedEdge<TVertex>[] _exploredEdges;
 
@@ -56,5 +56,5 @@ public class BreadthFirstExplorer<TVertex> : IGraphSearch<TVertex> where TVertex
     public TVertex Start { get; }
 
     /// <inheritdoc />
-    public IEnumerable<DirectedEdge<TVertex>> ExploredEdges => _exploredEdges;
+    public IEnumerable<DirectedEdge<TVertex>> TraversedEdges => _exploredEdges;
 }

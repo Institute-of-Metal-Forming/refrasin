@@ -41,7 +41,7 @@ public class TestDepthFirstPathFinder
         var finder = DepthFirstPathFinder<Vertex>.FindPath(graph, _vertices[0], _vertices[5]);
 
         Assert.That(
-            finder.ExploredEdges.ToArray(),
+            finder.TraversedEdges.ToArray(),
             Is.EqualTo(
                 new[]
                 {
@@ -61,7 +61,7 @@ public class TestDepthFirstPathFinder
         var finder = DepthFirstPathFinder<Vertex>.FindPath(graph, _vertices[0], _vertices[5]);
 
         Assert.That(
-            finder.ExploredEdges.ToArray(),
+            finder.TraversedEdges.ToArray(),
             Is.EqualTo(
                 new[]
                 {

@@ -1,6 +1,6 @@
 namespace RefraSin.Graphs;
 
-public class DepthFirstPathFinder<TVertex> : IGraphSearch<TVertex> where TVertex : IVertex
+public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
 {
     private readonly DirectedEdge<TVertex>[] _exploredEdges;
 
@@ -66,5 +66,5 @@ public class DepthFirstPathFinder<TVertex> : IGraphSearch<TVertex> where TVertex
     public TVertex Target { get; }
 
     /// <inheritdoc />
-    public IEnumerable<DirectedEdge<TVertex>> ExploredEdges => _exploredEdges;
+    public IEnumerable<DirectedEdge<TVertex>> TraversedEdges => _exploredEdges;
 }
