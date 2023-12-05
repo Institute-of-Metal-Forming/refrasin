@@ -40,7 +40,7 @@ internal class SolverSession : ISolverSession
 
         Logger = solver.LoggerFactory.CreateLogger<Solver>();
 
-        var particles = process.Particles.Select(ps => new Particle(null, ps, this)).ToArray();
+        var particles = process.Particles.Select(ps => new Particle(ps, this)).ToArray();
         Particles = particles.ToDictionary(p => p.Id);
         Nodes = Particles.Values.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
 

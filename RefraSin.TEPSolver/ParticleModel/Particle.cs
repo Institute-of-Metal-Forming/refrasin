@@ -12,20 +12,15 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-public class Particle : IParticle, ITreeItem<Particle>
+public class Particle : IParticle
 {
     public Particle(
-        Particle? parent,
         IParticle particle,
         ISolverSession solverSession
     )
     {
         Id = particle.Id;
-        Parent = parent;
-
         CenterCoordinates = particle.CenterCoordinates.Clone();
-
-
         RotationAngle = particle.RotationAngle;
 
         LocalCoordinateSystem = new PolarCoordinateSystem
@@ -40,7 +35,6 @@ public class Particle : IParticle, ITreeItem<Particle>
             .ToDictionary(i => i.To);
 
         Surface = new ParticleSurface(this, particle.Nodes, solverSession);
-        Children = new TreeChildrenCollection<Particle>(this);
         SolverSession = solverSession;
     }
 
@@ -93,16 +87,6 @@ public class Particle : IParticle, ITreeItem<Particle>
                                       throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
 
     INode IParticle.this[Guid nodeId] => this[nodeId];
-
-    /// <summary>
-    /// Übergeordnetes Partikel dieses Partikels in der Baumanordnung.
-    /// </summary>
-    public Particle? Parent { get; set; }
-
-    /// <summary>
-    /// Untergeordnete Partikel dieses Partikels in der Baumanordnung.
-    /// </summary>
-    public TreeChildrenCollection<Particle> Children { get; }
 
     /// <summary>
     /// Reference to the current solver session.
