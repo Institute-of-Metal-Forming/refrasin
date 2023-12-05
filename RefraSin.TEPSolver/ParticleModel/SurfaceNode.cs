@@ -8,7 +8,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 internal class SurfaceNode : Node, ISurfaceNode
 {
     /// <inheritdoc />
-    public SurfaceNode(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession) : base(nodeSpec, particle, solverSession) { }
+    public SurfaceNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
 
     /// <inheritdoc />
     public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
@@ -23,6 +23,9 @@ internal class SurfaceNode : Node, ISurfaceNode
         Particle.Material.SurfaceDiffusionCoefficient,
         Particle.Material.SurfaceDiffusionCoefficient
     );
+
+    /// <inheritdoc />
+    public override double TransferCoefficient => 0;
 
     private ToUpperToLower? _surfaceDiffusionCoefficient;
 

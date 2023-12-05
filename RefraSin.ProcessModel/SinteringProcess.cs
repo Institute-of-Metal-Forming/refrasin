@@ -13,7 +13,7 @@ public class SinteringProcess : ISinteringProcess
     /// </summary>
     /// <param name="startTime">time coordinate of the process start</param>
     /// <param name="endTime">time coordinate of the process end</param>
-    /// <param name="particleSpecs">enumerable of particle specifications</param>
+    /// <param name="particles">enumerable of particle specifications</param>
     /// <param name="materials">enumerable of materials appearing</param>
     /// <param name="materialInterfaces">enumerable of material interfaces appearing</param>
     /// <param name="temperature">the process temperature</param>
@@ -21,7 +21,7 @@ public class SinteringProcess : ISinteringProcess
     public SinteringProcess(
         double startTime,
         double endTime,
-        IEnumerable<IParticleSpec> particleSpecs,
+        IEnumerable<IParticle> particles,
         IEnumerable<IMaterial> materials,
         IEnumerable<IMaterialInterface> materialInterfaces,
         double temperature,
@@ -31,7 +31,7 @@ public class SinteringProcess : ISinteringProcess
         StartTime = startTime;
         EndTime = endTime;
         Temperature = temperature;
-        ParticleSpecs = particleSpecs.ToArray();
+        Particles = particles.ToArray();
         Materials = materials.ToArray();
         MaterialInterfaces = materialInterfaces.ToArray();
         Temperature = temperature;
@@ -45,7 +45,7 @@ public class SinteringProcess : ISinteringProcess
     public double EndTime { get; }
 
     /// <inheritdoc />
-    public IReadOnlyList<IParticleSpec> ParticleSpecs { get; }
+    public IReadOnlyList<IParticle> Particles { get; }
 
     /// <inheritdoc />
     public IReadOnlyList<IMaterial> Materials { get; }

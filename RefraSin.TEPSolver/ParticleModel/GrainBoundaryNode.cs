@@ -8,7 +8,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 internal class GrainBoundaryNode : ContactNode<GrainBoundaryNode>, IGrainBoundaryNode
 {
     /// <inheritdoc />
-    public GrainBoundaryNode(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession) : base(nodeSpec, particle, solverSession) { }
+    public GrainBoundaryNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
 
     /// <inheritdoc />
     public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
@@ -32,15 +32,6 @@ internal class GrainBoundaryNode : ContactNode<GrainBoundaryNode>, IGrainBoundar
         base.ClearCaches();
         _surfaceEnergy = null;
         _surfaceDiffusionCoefficient = null;
-    }
-
-    /// <inheritdoc cref="Node.ApplyState"/>
-    public override void ApplyState(INode state)
-    {
-        base.ApplyState(state);
-
-        _surfaceEnergy = state.SurfaceEnergy;
-        _surfaceDiffusionCoefficient = state.SurfaceDiffusionCoefficient;
     }
 
     /// <inheritdoc />

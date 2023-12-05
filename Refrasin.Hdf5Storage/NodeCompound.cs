@@ -12,69 +12,75 @@ internal struct NodeCompound
     public readonly double[] Coordinates;
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] AbsoluteCoordinates;
+    public readonly double[] AbsoluteCoordinates = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] SurfaceDistance;
+    public readonly double[] SurfaceDistance = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] SurfaceRadiusAngle;
+    public readonly double[] SurfaceRadiusAngle = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] AngleDistance;
+    public readonly double[] AngleDistance = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] Volume;
+    public readonly double[] Volume = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] SurfaceAngle;
+    public readonly double[] SurfaceAngle = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] SurfaceEnergy;
+    public readonly double[] SurfaceEnergy = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] SurfaceDiffusionCoefficient;
+    public readonly double[] SurfaceDiffusionCoefficient = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] GibbsEnergyGradient;
+    public readonly double[] GibbsEnergyGradient = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] VolumeGradient;
+    public readonly double[] VolumeGradient = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
-    public readonly string ContactedParticleId;
+    public readonly string ContactedParticleId = string.Empty;
 
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
-    public readonly string ContactedNodeId;
+    public readonly string ContactedNodeId = string.Empty;
 
-    public readonly double TransferCoefficient;
+    public readonly double TransferCoefficient = 0;
 
     public NodeCompound(INode node)
     {
         Id = node.Id.ToString();
         Coordinates = node.Coordinates.ToArray();
-        AbsoluteCoordinates = node.Coordinates.ToArray();
-        SurfaceDistance = node.SurfaceDistance.ToArray();
-        SurfaceRadiusAngle = node.SurfaceRadiusAngle.ToDoubleArray();
-        AngleDistance = node.SurfaceRadiusAngle.ToDoubleArray();
-        Volume = node.Volume.ToArray();
-        SurfaceAngle = node.SurfaceRadiusAngle.ToDoubleArray();
-        SurfaceEnergy = node.SurfaceEnergy.ToArray();
-        SurfaceDiffusionCoefficient = node.SurfaceDiffusionCoefficient.ToArray();
-        GibbsEnergyGradient = node.GibbsEnergyGradient.ToArray();
-        VolumeGradient = node.VolumeGradient.ToArray();
+
+        if (node is INodeGeometry nodeGeometry)
+        {
+            AbsoluteCoordinates = nodeGeometry.AbsoluteCoordinates.ToArray();
+            SurfaceDistance = nodeGeometry.SurfaceDistance.ToArray();
+            SurfaceRadiusAngle = nodeGeometry.SurfaceRadiusAngle.ToDoubleArray();
+            AngleDistance = nodeGeometry.SurfaceRadiusAngle.ToDoubleArray();
+            Volume = nodeGeometry.Volume.ToArray();
+            SurfaceAngle = nodeGeometry.SurfaceRadiusAngle.ToDoubleArray();
+        }
+
+        if (node is INodeMaterialProperties nodeMaterialProperties)
+        {
+            SurfaceEnergy = nodeMaterialProperties.SurfaceEnergy.ToArray();
+            SurfaceDiffusionCoefficient = nodeMaterialProperties.SurfaceDiffusionCoefficient.ToArray();
+            TransferCoefficient = nodeMaterialProperties.TransferCoefficient;
+        }
+
+        if (node is INodeGradients nodeGradients)
+        {
+            GibbsEnergyGradient = nodeGradients.GibbsEnergyGradient.ToArray();
+            VolumeGradient = nodeGradients.VolumeGradient.ToArray();
+        }
 
         if (node is IContactNode contactNode)
         {
             ContactedParticleId = contactNode.ContactedParticleId.ToString();
             ContactedNodeId = contactNode.ContactedNodeId.ToString();
-            TransferCoefficient = contactNode.TransferCoefficient;
-        }
-        else
-        {
-            ContactedParticleId = string.Empty;
-            ContactedNodeId = string.Empty;
-            TransferCoefficient = double.NaN;
         }
     }
 }

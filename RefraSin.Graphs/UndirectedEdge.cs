@@ -2,25 +2,25 @@ namespace RefraSin.Graphs;
 
 public class UndirectedEdge<TVertex> : IEdge<TVertex> where TVertex : IVertex
 {
-    public UndirectedEdge(IEdge<TVertex> edge) : this(edge.Start, edge.End) { }
+    public UndirectedEdge(IEdge<TVertex> edge) : this(edge.From, edge.To) { }
 
     public UndirectedEdge(TVertex start, TVertex end)
     {
-        Start = start;
-        End = end;
+        From = start;
+        To = end;
     }
 
     public void Deconstruct(out TVertex start, out TVertex end)
     {
-        start = Start;
-        end = End;
+        start = From;
+        end = To;
     }
 
     /// <inheritdoc />
-    public TVertex Start { get; }
+    public TVertex From { get; }
 
     /// <inheritdoc />
-    public TVertex End { get; }
+    public TVertex To { get; }
 
     /// <inheritdoc />
     public bool IsDirected => false;
@@ -30,26 +30,26 @@ public class UndirectedEdge<TVertex> : IEdge<TVertex> where TVertex : IVertex
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return (Start.Equals(other.Start) && End.Equals(other.End)) || (Start.Equals(other.End) && End.Equals(other.Start));
+        return (From.Equals(other.From) && To.Equals(other.To)) || (From.Equals(other.To) && To.Equals(other.From));
     }
 
     /// <inheritdoc />
     public override bool Equals(object obj) => Equals(obj as IEdge<TVertex>);
 
     /// <inheritdoc />
-    public override int GetHashCode() => Start.GetHashCode() * End.GetHashCode();
+    public override int GetHashCode() => From.GetHashCode() * To.GetHashCode();
 
     /// <inheritdoc />
-    public override string ToString() => $"UndirectedEdge from {Start} to {End}";
+    public override string ToString() => $"UndirectedEdge from {From} to {To}";
 
     /// <inheritdoc />
-    public bool IsEdgeAt(TVertex vertex) => Start.Equals(vertex) || End.Equals(vertex);
+    public bool IsEdgeAt(TVertex vertex) => From.Equals(vertex) || To.Equals(vertex);
 
     public bool IsEdgeFrom(TVertex from) => IsEdgeAt(from);
 
     public bool IsEdgeTo(TVertex to) => IsEdgeAt(to);
 
-    public UndirectedEdge<TVertex> Reversed() => new(End, Start);
+    public UndirectedEdge<TVertex> Reversed() => new(To, From);
 
     /// <inheritdoc />
     IEdge<TVertex> IEdge<TVertex>.Reversed() => Reversed();

@@ -2,8 +2,8 @@ namespace RefraSin.Graphs;
 
 public interface IEdge<TVertex> : IEquatable<IEdge<TVertex>> where TVertex : IVertex
 {
-    TVertex Start { get; }
-    TVertex End { get; }
+    TVertex From { get; }
+    TVertex To { get; }
 
     bool IsDirected { get; }
 

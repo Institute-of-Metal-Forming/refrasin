@@ -13,17 +13,17 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Abstract base class for particle surface nodes.
 /// </summary>
-internal abstract class Node : INode, IRingItem<Node>
+internal abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterialProperties, IRingItem<Node>
 {
-    protected Node(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession)
+    protected Node(INode node, Particle particle, ISolverSession solverSession)
     {
-        Id = nodeSpec.Id;
+        Id = node.Id;
 
-        if (nodeSpec.ParticleId != particle.Id)
+        if (node.ParticleId != particle.Id)
             throw new ArgumentException("IDs of the node spec and the given particle instance do not match.");
 
         Particle = particle;
-        Coordinates = new PolarPoint(nodeSpec.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
+        Coordinates = new PolarPoint(node.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
         SolverSession = solverSession;
     }
 
@@ -122,7 +122,7 @@ internal abstract class Node : INode, IRingItem<Node>
 
     private ToUpperToLower? _volume;
 
-    public NormalTangentialAngle SurfaceAngle => _surfaceAngle ??= new NormalTangentialAngle(
+    public NormalTangentialAngle SurfaceVectorAngle => _surfaceAngle ??= new NormalTangentialAngle(
         PI - 0.5 * SurfaceRadiusAngle.Sum,
         PI / 2 - 0.5 * SurfaceRadiusAngle.Sum
     );
@@ -136,17 +136,20 @@ internal abstract class Node : INode, IRingItem<Node>
     public abstract ToUpperToLower SurfaceDiffusionCoefficient { get; }
 
     /// <inheritdoc />
+    public abstract double TransferCoefficient { get; }
+
+    /// <inheritdoc />
     public NormalTangential GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential(
-        -(SurfaceEnergy.ToUpper + SurfaceEnergy.ToLower) * Cos(SurfaceAngle.Normal),
-        -(SurfaceEnergy.ToUpper - SurfaceEnergy.ToLower) * Cos(SurfaceAngle.Tangential)
+        -(SurfaceEnergy.ToUpper + SurfaceEnergy.ToLower) * Cos(SurfaceVectorAngle.Normal),
+        -(SurfaceEnergy.ToUpper - SurfaceEnergy.ToLower) * Cos(SurfaceVectorAngle.Tangential)
     );
 
     private NormalTangential? _gibbsEnergyGradient;
 
     /// <inheritdoc />
     public NormalTangential VolumeGradient => _volumeGradient ??= new NormalTangential(
-        0.5 * (SurfaceDistance.ToUpper + SurfaceDistance.ToLower) * Sin(SurfaceAngle.Normal),
-        0.5 * (SurfaceDistance.ToUpper - SurfaceDistance.ToLower) * Sin(SurfaceAngle.Tangential)
+        0.5 * (SurfaceDistance.ToUpper + SurfaceDistance.ToLower) * Sin(SurfaceVectorAngle.Normal),
+        0.5 * (SurfaceDistance.ToUpper - SurfaceDistance.ToLower) * Sin(SurfaceVectorAngle.Tangential)
     );
 
     private NormalTangential? _volumeGradient;
@@ -174,7 +177,7 @@ internal abstract class Node : INode, IRingItem<Node>
     {
         var fluxBalance = GuessFluxToUpper() - Lower.GuessFluxToUpper();
 
-        var displacement = 2 * fluxBalance / (SurfaceDistance.Sum * Sin(SurfaceAngle.Normal));
+        var displacement = 2 * fluxBalance / (SurfaceDistance.Sum * Sin(SurfaceVectorAngle.Normal));
         return displacement;
     }
 
@@ -192,7 +195,7 @@ internal abstract class Node : INode, IRingItem<Node>
     public virtual void ApplyTimeStep(StepVector stepVector, double timeStepWidth)
     {
         var normalDisplacement = stepVector[this].NormalDisplacement * timeStepWidth;
-        var angle = SurfaceRadiusAngle.ToUpper + SurfaceAngle.Normal;
+        var angle = SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Normal;
         var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
         var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
 

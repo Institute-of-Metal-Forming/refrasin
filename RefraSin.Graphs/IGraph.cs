@@ -20,10 +20,10 @@ public interface IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IE
         Edges.Where(e => e.IsEdgeAt(vertex));
 
     public IEnumerable<TVertex> ParentsOf(TVertex vertex) =>
-        Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.Start.Equals(vertex) ? e.End : e.Start);
+        Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.From.Equals(vertex) ? e.To : e.From);
 
     public IEnumerable<TVertex> ChildrenOf(TVertex vertex) =>
-        Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.Start.Equals(vertex) ? e.End : e.Start);
+        Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.From.Equals(vertex) ? e.To : e.From);
 
     public IEnumerable<TVertex> AdjacentsOf(TVertex vertex)
     {

@@ -1,83 +1,12 @@
-using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 
 namespace RefraSin.ParticleModel;
 
-/// <summary>
-/// Represents an immutable record of a node.
-/// </summary>
-public abstract record Node(
-    Guid Id,
-    Guid ParticleId,
-    PolarPoint Coordinates,
-    AbsolutePoint AbsoluteCoordinates,
-    ToUpperToLower SurfaceDistance,
-    ToUpperToLowerAngle SurfaceRadiusAngle,
-    ToUpperToLowerAngle AngleDistance,
-    ToUpperToLower Volume,
-    NormalTangentialAngle SurfaceAngle,
-    ToUpperToLower SurfaceEnergy,
-    ToUpperToLower SurfaceDiffusionCoefficient,
-    NormalTangential GibbsEnergyGradient,
-    NormalTangential VolumeGradient
-) : INode
+public record Node(Guid Id, Guid ParticleId, PolarPoint Coordinates) : INode
 {
-    /// <summary>
-    /// Creates a new instance by shallow copying from a template.
-    /// </summary>
-    /// <param name="template">the template to copy from</param>
-    protected Node(INode template) : this(
+    public Node(INode template) : this(
         template.Id,
         template.ParticleId,
-        new PolarPoint(template.Coordinates, template.Coordinates.System),
-        new AbsolutePoint(template.AbsoluteCoordinates.ToTuple()),
-        template.SurfaceDistance,
-        template.SurfaceRadiusAngle,
-        template.AngleDistance,
-        template.Volume,
-        template.SurfaceAngle,
-        template.SurfaceEnergy,
-        template.SurfaceDiffusionCoefficient,
-        template.GibbsEnergyGradient,
-        template.VolumeGradient
+        template.Coordinates
     ) { }
-
-    /// <inheritdoc />
-    public Guid Id { get; } = Id;
-
-    /// <inheritdoc />
-    public Guid ParticleId { get; } = ParticleId;
-
-    /// <inheritdoc />
-    public PolarPoint Coordinates { get; } = Coordinates;
-
-    /// <inheritdoc />
-    public AbsolutePoint AbsoluteCoordinates { get; } = AbsoluteCoordinates;
-
-    /// <inheritdoc />
-    public ToUpperToLower SurfaceDistance { get; } = SurfaceDistance;
-
-    /// <inheritdoc />
-    public ToUpperToLowerAngle SurfaceRadiusAngle { get; } = SurfaceRadiusAngle;
-
-    /// <inheritdoc />
-    public ToUpperToLowerAngle AngleDistance { get; } = AngleDistance;
-
-    /// <inheritdoc />
-    public ToUpperToLower Volume { get; } = Volume;
-
-    /// <inheritdoc />
-    public NormalTangentialAngle SurfaceAngle { get; } = SurfaceAngle;
-
-    /// <inheritdoc />
-    public ToUpperToLower SurfaceEnergy { get; } = SurfaceEnergy;
-
-    /// <inheritdoc />
-    public ToUpperToLower SurfaceDiffusionCoefficient { get; } = SurfaceDiffusionCoefficient;
-
-    /// <inheritdoc />
-    public NormalTangential GibbsEnergyGradient { get; } = GibbsEnergyGradient;
-
-    /// <inheritdoc />
-    public NormalTangential VolumeGradient { get; } = VolumeGradient;
 }

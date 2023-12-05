@@ -10,7 +10,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 internal class ParticleSurface : Ring<Node>
 {
     /// <inheritdoc />
-    public ParticleSurface(Particle particle, IEnumerable<INodeSpec> nodeSpecs, ISolverSession solverSession)
+    public ParticleSurface(Particle particle, IEnumerable<INode> nodeSpecs, ISolverSession solverSession)
     {
         Particle = particle;
 

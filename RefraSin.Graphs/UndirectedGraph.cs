@@ -27,20 +27,20 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, UndirectedEdge<TVertex>>
     public static UndirectedGraph<TVertex> FromGraphSearch(IGraphTraversal<TVertex> graphTraversal)
     {
         var edges = graphTraversal.TraversedEdges.ToArray();
-        var vertices = edges.Select(e => e.End).Prepend(graphTraversal.Start);
+        var vertices = edges.Select(e => e.To).Prepend(graphTraversal.Start);
         return new UndirectedGraph<TVertex>(vertices, edges);
     }
 
     private Dictionary<TVertex, TVertex[]> InitAdjacentsOf() =>
         Edges
             .Concat(Edges.Select(e => e.Reversed()))
-            .GroupBy(e => e.Start, e => e.End)
+            .GroupBy(e => e.From, e => e.To)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, UndirectedEdge<TVertex>[]> InitEdgesAt() =>
         Edges
             .Concat(Edges.Select(e => e.Reversed()))
-            .GroupBy(e => e.Start)
+            .GroupBy(e => e.From)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     /// <inheritdoc />

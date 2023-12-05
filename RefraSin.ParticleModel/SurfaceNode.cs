@@ -6,40 +6,25 @@ namespace RefraSin.ParticleModel;
 /// <summary>
 /// Represents an immutable record of a surface node.
 /// </summary>
-public record SurfaceNode : Node, ISurfaceNode
+public record SurfaceNode(Guid Id, Guid ParticleId, PolarPoint Coordinates, AbsolutePoint AbsoluteCoordinates, ToUpperToLower SurfaceDistance,
+    ToUpperToLowerAngle SurfaceRadiusAngle, ToUpperToLowerAngle AngleDistance, ToUpperToLower Volume, NormalTangentialAngle SurfaceVectorAngle,
+    NormalTangential GibbsEnergyGradient, NormalTangential VolumeGradient, ToUpperToLower SurfaceEnergy, ToUpperToLower SurfaceDiffusionCoefficient,
+    double TransferCoefficient) : Node(Id, ParticleId, Coordinates), ISurfaceNode
 {
-    /// <inheritdoc />
-    public SurfaceNode(INode template) : base(template) { }
-
-    /// <summary>
-    /// Represents an immutable record of a surface node.
-    /// </summary>
-    public SurfaceNode(Guid Id,
-        Guid ParticleId,
-        PolarPoint Coordinates,
-        AbsolutePoint AbsoluteCoordinates,
-        ToUpperToLower SurfaceDistance,
-        ToUpperToLowerAngle SurfaceRadiusAngle,
-        ToUpperToLowerAngle AngleDistance,
-        ToUpperToLower Volume,
-        NormalTangentialAngle SurfaceAngle,
-        ToUpperToLower SurfaceEnergy,
-        ToUpperToLower SurfaceDiffusionCoefficient,
-        NormalTangential GibbsEnergyGradient,
-        NormalTangential VolumeGradient
-    ) : base(
-        Id,
-        ParticleId,
-        Coordinates,
-        AbsoluteCoordinates,
-        SurfaceDistance,
-        SurfaceRadiusAngle,
-        AngleDistance,
-        Volume,
-        SurfaceAngle,
-        SurfaceEnergy,
-        SurfaceDiffusionCoefficient,
-        GibbsEnergyGradient,
-        VolumeGradient
+    public SurfaceNode(ISurfaceNode template) : this(
+        template.Id,
+        template.ParticleId,
+        template.Coordinates,
+        template.AbsoluteCoordinates,
+        template.SurfaceDistance,
+        template.SurfaceRadiusAngle,
+        template.AngleDistance,
+        template.Volume,
+        template.SurfaceVectorAngle,
+        template.GibbsEnergyGradient,
+        template.VolumeGradient,
+        template.SurfaceEnergy,
+        template.SurfaceDiffusionCoefficient,
+        template.TransferCoefficient
     ) { }
 }

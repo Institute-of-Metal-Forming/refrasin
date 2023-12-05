@@ -36,7 +36,7 @@ public class DepthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVerte
 
                 edgesVisited.Add(edge);
 
-                var child = edge.Start.Equals(current) ? edge.End : edge.Start;
+                var child = edge.From.Equals(current) ? edge.To : edge.From;
 
                 if (verticesVisited.Contains(child))
                 {
