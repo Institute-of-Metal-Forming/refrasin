@@ -1,5 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
+using RefraSin.Graphs;
 
 namespace RefraSin.ParticleModel;
 
@@ -27,4 +28,7 @@ public record ParticleSpec(Guid Id, AbsolutePoint AbsoluteCenterCoordinates, Ang
     /// <inheritdoc />
     public INodeSpec this[Guid nodeId] => NodeSpecs.FirstOrDefault(n => n.Id == nodeId) ??
                                           throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
+
+    /// <inheritdoc />
+    public virtual bool Equals(IVertex other) => other is IParticleSpec && Id == other.Id;
 }

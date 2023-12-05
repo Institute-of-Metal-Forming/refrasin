@@ -2,6 +2,7 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Enumerables;
+using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.Step;
@@ -166,4 +167,7 @@ internal class Particle : IParticle, ITreeItem<Particle>
 
     /// <inheritdoc/>
     public override string ToString() => $"{GetType().Name} {Id}";
+
+    /// <inheritdoc />
+    public virtual bool Equals(IVertex other) => other is IParticleSpec && Id == other.Id;
 }

@@ -1,6 +1,7 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
+using RefraSin.Graphs;
 
 namespace RefraSin.ParticleModel;
 
@@ -85,4 +86,7 @@ public record Particle : IParticle
                                       throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
 
     INodeSpec IParticleSpec.this[Guid nodeId] => this[nodeId];
+
+    /// <inheritdoc />
+    public virtual bool Equals(IVertex other) => other is IParticleSpec && Id == other.Id;
 }

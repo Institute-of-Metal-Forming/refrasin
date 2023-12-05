@@ -1,15 +1,11 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
+using RefraSin.Graphs;
 
 namespace RefraSin.ParticleModel;
 
-public interface IParticleSpec
+public interface IParticleSpec : IVertex
 {
-    /// <summary>
-    /// Unique ID.
-    /// </summary>
-    Guid Id { get; }
-
     /// <summary>
     /// Absolute coordinates of the particle's center.
     /// </summary>
