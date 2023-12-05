@@ -1,11 +1,13 @@
 using Microsoft.Extensions.Logging;
-using MoreLinq;
 using RefraSin.Enumerables;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.Step;
+using RefraSin.TEPSolver.RootFinding;
+using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepVectors;
+using RefraSin.TEPSolver.TimeSteppers;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
@@ -42,8 +44,10 @@ internal class SolverSession : ISolverSession
         Particles = particles.ToDictionary(p => p.Id);
         Nodes = Particles.Values.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
 
-        StepVectorMap = new StepVectorMap(Particles.Values, Nodes.Values);
         StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
+        TimeStepper = solver.TimeStepper;
+        StepValidators = solver.StepValidators.ToArray();
+        RootFinder = solver.RootFinder;
     }
 
     /// <inheritdoc />
@@ -86,9 +90,15 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public ILogger<Solver> Logger { get; }
 
-    public StepVectorMap StepVectorMap { get; }
-
     public StepVector? LastStep { get; set; }
+
+    public ITimeStepper TimeStepper { get; }
+
+    /// <inheritdoc />
+    public IReadOnlyList<IStepValidator> StepValidators { get; }
+
+    /// <inheritdoc />
+    public IRootFinder RootFinder { get; }
 
     public FixedStack<ISolutionState> StateMemory { get; }
 

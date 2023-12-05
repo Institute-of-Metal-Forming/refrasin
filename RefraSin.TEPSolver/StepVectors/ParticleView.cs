@@ -1,6 +1,6 @@
-namespace RefraSin.TEPSolver.Step;
+namespace RefraSin.TEPSolver.StepVectors;
 
-internal class ParticleView
+public class ParticleView
 {
     private readonly StepVector _vector;
     private readonly Guid _particleId;

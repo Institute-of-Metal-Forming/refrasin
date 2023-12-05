@@ -5,14 +5,14 @@ using RefraSin.Enumerables;
 using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
-using RefraSin.TEPSolver.Step;
+using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-internal class Particle : IParticle, ITreeItem<Particle>
+public class Particle : IParticle, ITreeItem<Particle>
 {
     public Particle(
         Particle? parent,

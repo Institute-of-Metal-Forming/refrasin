@@ -1,8 +1,9 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
-using RefraSin.Storage;
-using RefraSin.TEPSolver.Step;
+using RefraSin.TEPSolver.RootFinding;
+using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepVectors;
+using RefraSin.TEPSolver.TimeSteppers;
 using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
@@ -11,7 +12,7 @@ namespace RefraSin.TEPSolver;
 /// <summary>
 /// Interface for objects holding session data of a solution procedure.
 /// </summary>
-internal interface ISolverSession
+public interface ISolverSession
 {
     /// <summary>
     /// Time of the current step.
@@ -45,6 +46,8 @@ internal interface ISolverSession
     /// </summary>
     public double TimeStepWidth { get; }
 
+    public StepVector? LastStep { get; }
+
     /// <summary>
     /// Registry of all particles.
     /// </summary>
@@ -69,4 +72,10 @@ internal interface ISolverSession
     /// Factory for loggers used in the session.
     /// </summary>
     public ILogger<Solver> Logger { get; }
+
+    public ITimeStepper TimeStepper { get; }
+
+    public IReadOnlyList<IStepValidator> StepValidators { get; }
+
+    public IRootFinder RootFinder { get; }
 }

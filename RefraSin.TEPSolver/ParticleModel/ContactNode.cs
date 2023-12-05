@@ -6,7 +6,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Abstrakte Basisklasse für Oberflächenknoten eines Partikels, welche Kontakt zur Oberfläche eines anderen partiekls haben.
 /// </summary>
-internal abstract class ContactNode<TContacted> : ContactNode where TContacted : ContactNode<TContacted>
+public abstract class ContactNode<TContacted> : ContactNode where TContacted : ContactNode<TContacted>
 {
     /// <inheritdoc />
     protected ContactNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
@@ -69,7 +69,7 @@ internal abstract class ContactNode<TContacted> : ContactNode where TContacted :
 /// <summary>
 /// Abstrakte Basisklasse für Oberflächenknoten eines Partikels, welche Kontakt zur Oberfläche eines anderen partiekls haben.
 /// </summary>
-internal abstract class ContactNode : Node, IContactNode
+public abstract class ContactNode : Node, IContactNode
 {
     /// <inheritdoc />
     protected ContactNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }

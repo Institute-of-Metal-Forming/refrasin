@@ -4,7 +4,8 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Enumerables;
 using RefraSin.ParticleModel;
-using RefraSin.TEPSolver.Step;
+using RefraSin.TEPSolver.Exceptions;
+using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using static MathNet.Numerics.Constants;
 
@@ -13,7 +14,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Abstract base class for particle surface nodes.
 /// </summary>
-internal abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterialProperties, IRingItem<Node>
+public abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterialProperties, IRingItem<Node>
 {
     protected Node(INode node, Particle particle, ISolverSession solverSession)
     {

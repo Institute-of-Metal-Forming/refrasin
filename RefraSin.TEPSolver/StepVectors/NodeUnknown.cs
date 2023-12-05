@@ -1,4 +1,4 @@
-namespace RefraSin.TEPSolver.Step;
+namespace RefraSin.TEPSolver.StepVectors;
 
 internal enum NodeUnknown
 {
