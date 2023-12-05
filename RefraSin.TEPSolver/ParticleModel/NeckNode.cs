@@ -8,7 +8,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 internal class NeckNode : ContactNode<NeckNode>, INeckNode
 {
     /// <inheritdoc />
-    public NeckNode(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession) : base(nodeSpec, particle, solverSession) { }
+    public NeckNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
 
     /// <inheritdoc />
     public Guid OppositeNeckNodeId { get; }
@@ -34,15 +34,6 @@ internal class NeckNode : ContactNode<NeckNode>, INeckNode
         base.ClearCaches();
         _surfaceEnergy = null;
         _surfaceDiffusionCoefficient = null;
-    }
-
-    /// <inheritdoc cref="Node.ApplyState"/>
-    public override void ApplyState(INode state)
-    {
-        base.ApplyState(state);
-
-        _surfaceEnergy = state.SurfaceEnergy;
-        _surfaceDiffusionCoefficient = state.SurfaceDiffusionCoefficient;
     }
 
     /// <inheritdoc />

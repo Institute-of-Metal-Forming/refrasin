@@ -20,9 +20,9 @@ internal class StepVector : DenseVector
 
     public StepVectorMap StepVectorMap { get; }
 
-    public NodeView this[INodeSpec node] => new(this, node.Id);
+    public NodeView this[INode node] => new(this, node.Id);
 
-    public ParticleView this[IParticleSpec particle] => new(this, particle.Id);
+    public ParticleView this[IParticle particle] => new(this, particle.Id);
 
     public double Lambda1 => this[StepVectorMap.GetIndex(GlobalUnknown.Lambda1)];
 

@@ -1,7 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using MoreLinq;
 using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.ParticleSpecFactories;
+using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.TEPSolver.Step;
 using ScottPlot;
 
@@ -10,16 +10,16 @@ namespace RefraSin.TEPSolver.Test;
 public class MatrixStructureTest
 {
     private StepVectorMap _map;
-    private IParticleSpec[] _particles;
-    private INodeSpec[] _nodes;
+    private IParticle[] _particles;
+    private INode[] _nodes;
 
     [SetUp]
     public void Setup()
     {
-        var fac = new ShapeFunctionParticleSpecFactory(100, 0.1, 5, 0.1, Guid.Empty) { NodeCount = 20 };
+        var fac = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty) { NodeCount = 20 };
 
-        _particles = Enumerable.Range(0, 3).Select(_ => fac.GetParticleSpec()).ToArray();
-        _nodes = _particles.SelectMany(p => p.NodeSpecs).ToArray();
+        _particles = Enumerable.Range(0, 3).Select(_ => fac.GetParticle()).ToArray();
+        _nodes = _particles.SelectMany(p => p.Nodes).ToArray();
 
         _map = new StepVectorMap(_particles, _nodes);
     }
@@ -44,7 +44,7 @@ public class MatrixStructureTest
         yield return Vector<double>.Build.SparseOfIndexed(
             _map.TotalUnknownsCount,
             _particles.SelectMany(
-                p => p.NodeSpecs.SelectMany(
+                p => p.Nodes.SelectMany(
                     (n, i) =>
                         new (int, double)[]
                         {
@@ -88,7 +88,7 @@ public class MatrixStructureTest
         }
 
         foreach (var particleSpec in _particles)
-        foreach (var (i, node) in particleSpec.NodeSpecs.Index())
+        foreach (var (i, node) in particleSpec.Nodes.Index())
         {
             yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
             {

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using static MoreLinq.Extensions.IndexExtension;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.ParticleSpecFactories;
+using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using ScottPlot;
@@ -20,9 +20,9 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var endTime = 1e4;
+        var endTime = 1e2;
 
-        _particleSpec = new ShapeFunctionParticleSpecFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticleSpec();
+        _particle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
@@ -45,7 +45,7 @@ public class OneParticleTest
         };
 
         _material = new Material(
-            _particleSpec.MaterialId,
+            _particle.MaterialId,
             "Al2O3",
             1.65e-10,
             0,
@@ -66,14 +66,14 @@ public class OneParticleTest
         _process = new SinteringProcess(
             0,
             endTime,
-            new[] { _particleSpec },
+            new[] { _particle },
             new[] { _material },
             new[] { _materialInterface },
             2073
         );
     }
 
-    private IParticleSpec _particleSpec;
+    private IParticle _particle;
     private Solver _solver;
     private IMaterial _material;
     private IMaterialInterface _materialInterface;
@@ -87,7 +87,7 @@ public class OneParticleTest
         _solver.CreateSession(_process);
         var particle = _solver.Session.Particles.Values.First();
 
-        That(particle.Id, Is.EqualTo(_particleSpec.Id));
+        That(particle.Id, Is.EqualTo(_particle.Id));
         That(particle.Material, Is.EqualTo(_material));
         That(particle.Nodes, Has.Count.EqualTo(100));
         That(particle, Is.TypeOf<Particle>());
@@ -120,7 +120,7 @@ public class OneParticleTest
 
             var coordinates = state.ParticleStates[0].Nodes
                 .Append(state.ParticleStates[0].Nodes[0])
-                .Select(n => new ScottPlot.Coordinates(n.AbsoluteCoordinates.X, n.AbsoluteCoordinates.Y))
+                .Select(n => new ScottPlot.Coordinates(n.Coordinates.Absolute.X, n.Coordinates.Absolute.Y))
                 .ToArray();
             plt.Add.Scatter(coordinates);
 

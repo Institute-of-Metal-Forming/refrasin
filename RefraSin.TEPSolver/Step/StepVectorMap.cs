@@ -5,18 +5,18 @@ namespace RefraSin.TEPSolver.Step;
 
 internal class StepVectorMap
 {
-    public StepVectorMap(IEnumerable<IParticleSpec> particles, IEnumerable<INodeSpec> nodes)
+    public StepVectorMap(IEnumerable<IParticle> particles, IEnumerable<INode> nodes)
     {
         GlobalUnknownsCount = Enum.GetNames(typeof(GlobalUnknown)).Length;
 
         ParticleUnknownsCount = Enum.GetNames(typeof(ParticleUnknown)).Length;
-        Particles = particles as IParticleSpec[] ?? particles.ToArray();
+        Particles = particles as IParticle[] ?? particles.ToArray();
         ParticleCount = Particles.Length;
         ParticleStartIndex = GlobalUnknownsCount;
         ParticleIndices = Particles.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         NodeUnknownsCount = Enum.GetNames(typeof(NodeUnknown)).Length;
-        Nodes = nodes as INodeSpec[] ?? nodes.ToArray();
+        Nodes = nodes as INode[] ?? nodes.ToArray();
         NodeCount = Nodes.Length;
         NodeStartIndex = ParticleStartIndex + ParticleCount * ParticleUnknownsCount;
         NodeIndices = Nodes.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
@@ -24,9 +24,9 @@ internal class StepVectorMap
         TotalUnknownsCount = NodeStartIndex + NodeCount * NodeUnknownsCount;
     }
 
-    public INodeSpec[] Nodes { get; }
+    public INode[] Nodes { get; }
 
-    public IParticleSpec[] Particles { get; }
+    public IParticle[] Particles { get; }
 
     public int ParticleCount { get; }
 

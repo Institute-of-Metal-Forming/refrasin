@@ -9,7 +9,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 internal abstract class ContactNode<TContacted> : ContactNode where TContacted : ContactNode<TContacted>
 {
     /// <inheritdoc />
-    protected ContactNode(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession) : base(nodeSpec, particle, solverSession) { }
+    protected ContactNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
 
     private TContacted? _contactedNode = null;
 
@@ -72,16 +72,13 @@ internal abstract class ContactNode<TContacted> : ContactNode where TContacted :
 internal abstract class ContactNode : Node, IContactNode
 {
     /// <inheritdoc />
-    protected ContactNode(INodeSpec nodeSpec, Particle particle, ISolverSession solverSession) : base(nodeSpec, particle, solverSession) { }
+    protected ContactNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
 
     /// <inheritdoc />
     public abstract Guid ContactedParticleId { get; }
 
     /// <inheritdoc />
     public abstract Guid ContactedNodeId { get; }
-
-    /// <inheritdoc />
-    public abstract double TransferCoefficient { get; }
 
     /// <inheritdoc />
     protected override void CheckState(INode state)

@@ -16,19 +16,17 @@ internal class Particle : IParticle, ITreeItem<Particle>
 {
     public Particle(
         Particle? parent,
-        IParticleSpec particleSpec,
+        IParticle particle,
         ISolverSession solverSession
     )
     {
-        Id = particleSpec.Id;
+        Id = particle.Id;
         Parent = parent;
 
-        CenterCoordinates = new PolarPoint(particleSpec.AbsoluteCenterCoordinates)
-        {
-            SystemSource = () => Parent?.LocalCoordinateSystem ?? PolarCoordinateSystem.Default
-        };
+        CenterCoordinates = particle.CenterCoordinates.Clone();
 
-        RotationAngle = particleSpec.RotationAngle;
+
+        RotationAngle = particle.RotationAngle;
 
         LocalCoordinateSystem = new PolarCoordinateSystem
         {
@@ -36,12 +34,12 @@ internal class Particle : IParticle, ITreeItem<Particle>
             RotationAngleSource = () => RotationAngle
         };
 
-        Material = solverSession.MaterialRegistry.GetMaterial(particleSpec.MaterialId);
+        Material = solverSession.MaterialRegistry.GetMaterial(particle.MaterialId);
         MaterialInterfaces = solverSession.MaterialRegistry.MaterialInterfaces
-            .Where(i => i.From == particleSpec.MaterialId)
+            .Where(i => i.From == particle.MaterialId)
             .ToDictionary(i => i.To);
 
-        Surface = new ParticleSurface(this, particleSpec.NodeSpecs, solverSession);
+        Surface = new ParticleSurface(this, particle.Nodes, solverSession);
         Children = new TreeChildrenCollection<Particle>(this);
         SolverSession = solverSession;
     }
@@ -55,7 +53,7 @@ internal class Particle : IParticle, ITreeItem<Particle>
     public IMaterial Material { get; }
 
     /// <inheritdoc />
-    Guid IParticleSpec.MaterialId => Material.Id;
+    Guid IParticle.MaterialId => Material.Id;
 
     /// <summary>
     /// Dictionary of material IDs to material interface data, assuming that the current instances material is always on the from side.
@@ -70,10 +68,7 @@ internal class Particle : IParticle, ITreeItem<Particle>
     /// <summary>
     /// Koordinaten des Ursprungs des lokalen Koordinatensystem ausgedrückt im Koordinatensystem des <see cref="Parent"/>
     /// </summary>
-    public PolarPoint CenterCoordinates { get; private set; }
-
-    /// <inheritdoc />
-    public AbsolutePoint AbsoluteCenterCoordinates => CenterCoordinates.Absolute;
+    public AbsolutePoint CenterCoordinates { get; private set; }
 
     /// <summary>
     /// Drehwinkel des Partikels.
@@ -88,19 +83,16 @@ internal class Particle : IParticle, ITreeItem<Particle>
     /// <inheritdoc />
     public IReadOnlyList<INode> Nodes => Surface.ToArray();
 
-    /// <inheritdoc />
-    IReadOnlyList<INodeSpec> IParticleSpec.NodeSpecs => Nodes;
-
-    /// <inheritdoc cref="IParticleSpec.this[int]"/>
+    /// <inheritdoc cref="IParticle.this[int]"/>
     public INode this[int i] => i >= 0 ? Nodes[(i % Nodes.Count)] : Nodes[^-(i % Nodes.Count)];
 
-    INodeSpec IParticleSpec.this[int i] => this[i];
+    INode IParticle.this[int i] => this[i];
 
-    /// <inheritdoc cref="IParticleSpec.this[Guid]"/>
+    /// <inheritdoc cref="IParticle.this[Guid]"/>
     public INode this[Guid nodeId] => Nodes.FirstOrDefault(n => n.Id == nodeId) ??
                                       throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
 
-    INodeSpec IParticleSpec.this[Guid nodeId] => this[nodeId];
+    INode IParticle.this[Guid nodeId] => this[nodeId];
 
     /// <summary>
     /// Übergeordnetes Partikel dieses Partikels in der Baumanordnung.
@@ -117,10 +109,6 @@ internal class Particle : IParticle, ITreeItem<Particle>
     /// </summary>
     private ISolverSession SolverSession { get; }
 
-    public List<Neck> Necks { get; } = new();
-
-    IReadOnlyList<INeck> IParticle.Necks => Necks;
-
     public virtual void ApplyTimeStep(StepVector stepVector, double timeStepWidth)
     {
         var particleView = stepVector[this];
@@ -128,10 +116,10 @@ internal class Particle : IParticle, ITreeItem<Particle>
         var displacementVector = new PolarVector(
             particleView.AngleDisplacement * timeStepWidth,
             particleView.RadialDisplacement * timeStepWidth,
-            CenterCoordinates.System
+            LocalCoordinateSystem
         );
 
-        CenterCoordinates += displacementVector;
+        CenterCoordinates += displacementVector.Absolute;
 
         RotationAngle = (RotationAngle + particleView.RotationDisplacement * timeStepWidth).Reduce();
 
@@ -160,14 +148,11 @@ internal class Particle : IParticle, ITreeItem<Particle>
     {
         if (state.Id != Id)
             throw new InvalidOperationException("IDs of node and state do not match.");
-
-        if (state.CenterCoordinates.System != CenterCoordinates.System)
-            throw new InvalidOperationException("Current coordinates and state coordinates must be in same coordinate system.");
     }
 
     /// <inheritdoc/>
     public override string ToString() => $"{GetType().Name} {Id}";
 
     /// <inheritdoc />
-    public virtual bool Equals(IVertex other) => other is IParticleSpec && Id == other.Id;
+    public virtual bool Equals(IVertex other) => other is IParticle && Id == other.Id;
 }
