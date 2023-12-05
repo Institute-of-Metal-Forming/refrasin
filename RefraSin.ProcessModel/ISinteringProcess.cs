@@ -21,7 +21,7 @@ public interface ISinteringProcess
     /// <summary>
     /// List of particle specifications.
     /// </summary>
-    public IReadOnlyList<IParticleSpec> ParticleSpecs { get; }
+    public IReadOnlyList<IParticle> Particles { get; }
 
     /// <summary>
     /// List of materials appearing in the process.

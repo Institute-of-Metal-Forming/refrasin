@@ -1,31 +1,41 @@
+using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Polar;
+using RefraSin.Graphs;
 
 namespace RefraSin.ParticleModel;
 
-/// <summary>
-/// Interface representing a powder particle.
-/// </summary>
-public interface IParticle : IParticleSpec
+public interface IParticle : IVertex
 {
     /// <summary>
-    /// Polar coordinates of the particle's center in means of the parent's coordinate system.
+    /// Absolute coordinates of the particle's center.
     /// </summary>
-    public PolarPoint CenterCoordinates { get; }
+    public AbsolutePoint CenterCoordinates { get; }
 
     /// <summary>
-    /// List of all surface nodes.
+    /// Rotation angle of the particle's coordinate system around its center.
+    /// </summary>
+    Angle RotationAngle { get; }
+
+    /// <summary>
+    /// ID of the material.
+    /// </summary>
+    Guid MaterialId { get; }
+
+    /// <summary>
+    /// List of node specs.
     /// </summary>
     public IReadOnlyList<INode> Nodes { get; }
 
     /// <summary>
-    /// List of all necks to neighbor particles.
+    /// Returns the node on index i, while the index is considered ringwise.
     /// </summary>
-    public IReadOnlyList<INeck> Necks { get; }
+    /// <param name="i"></param>
+    public INode this[int i] { get; }
 
-    /// <inheritdoc cref="IParticleSpec.this[int]"/>
-    public new INode this[int i] { get; }
-
-    /// <inheritdoc cref="IParticleSpec.this[Guid]"/>
-    public new INode this[Guid nodeId] { get; }
+    /// <summary>
+    /// Returns the node with the given Id.
+    /// </summary>
+    /// <param name="nodeId"></param>
+    /// <exception cref="IndexOutOfRangeException">if a node with given Id is not part of this particle</exception>
+    public INode this [Guid nodeId] { get; }
 }

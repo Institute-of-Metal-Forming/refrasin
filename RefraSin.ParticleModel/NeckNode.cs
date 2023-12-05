@@ -6,54 +6,29 @@ namespace RefraSin.ParticleModel;
 /// <summary>
 /// Represents an immutable record of a neck node.
 /// </summary>
-public record NeckNode : ContactNode, INeckNode
+public record NeckNode(Guid Id, Guid ParticleId, PolarPoint Coordinates, Guid ContactedParticleId, Guid ContactedNodeId, Guid OppositeNeckNodeId,
+    AbsolutePoint AbsoluteCoordinates, ToUpperToLower SurfaceDistance, ToUpperToLowerAngle SurfaceRadiusAngle, ToUpperToLowerAngle AngleDistance,
+    ToUpperToLower Volume, NormalTangentialAngle SurfaceVectorAngle, NormalTangential GibbsEnergyGradient, NormalTangential VolumeGradient,
+    ToUpperToLower SurfaceEnergy, ToUpperToLower SurfaceDiffusionCoefficient, double TransferCoefficient) : Node(Id, ParticleId, Coordinates),
+    INeckNode
 {
-    /// <inheritdoc />
-    public NeckNode(INeckNode template) : base(template)
-    {
-        OppositeNeckNodeId = template.OppositeNeckNodeId;
-    }
-
-    /// <inheritdoc />
-    public NeckNode(Guid Id,
-        Guid ParticleId,
-        PolarPoint Coordinates,
-        AbsolutePoint AbsoluteCoordinates,
-        ToUpperToLower SurfaceDistance,
-        ToUpperToLowerAngle SurfaceRadiusAngle,
-        ToUpperToLowerAngle AngleDistance,
-        ToUpperToLower Volume,
-        NormalTangentialAngle SurfaceAngle,
-        ToUpperToLower SurfaceEnergy,
-        ToUpperToLower SurfaceDiffusionCoefficient,
-        NormalTangential GibbsEnergyGradient,
-        NormalTangential VolumeGradient,
-        Guid contactedParticleId,
-        Guid contactedNodeId,
-        double transferCoefficient,
-        Guid oppositeNeckNodeId
-    ) : base(
-        Id,
-        ParticleId,
-        Coordinates,
-        AbsoluteCoordinates,
-        SurfaceDistance,
-        SurfaceRadiusAngle,
-        AngleDistance,
-        Volume,
-        SurfaceAngle,
-        SurfaceEnergy,
-        SurfaceDiffusionCoefficient,
-        GibbsEnergyGradient,
-        VolumeGradient,
-        contactedParticleId,
-        contactedNodeId,
-        transferCoefficient
-    )
-    {
-        OppositeNeckNodeId = oppositeNeckNodeId;
-    }
-
-    /// <inheritdoc />
-    public Guid OppositeNeckNodeId { get; }
+    public NeckNode(INeckNode template) : this(
+        template.Id,
+        template.ParticleId,
+        template.Coordinates,
+        template.ContactedParticleId,
+        template.ContactedNodeId,
+        template.OppositeNeckNodeId,
+        template.AbsoluteCoordinates,
+        template.SurfaceDistance,
+        template.SurfaceRadiusAngle,
+        template.AngleDistance,
+        template.Volume,
+        template.SurfaceVectorAngle,
+        template.GibbsEnergyGradient,
+        template.VolumeGradient,
+        template.SurfaceEnergy,
+        template.SurfaceDiffusionCoefficient,
+        template.TransferCoefficient
+    ) { }
 }

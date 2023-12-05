@@ -9,22 +9,18 @@ internal struct ParticleCompound
     public string Id;
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public double[] AbsoluteCenterCoordinates;
+    public double[] CenterCoordinates;
 
     public double RotationAngle;
 
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
     public string MaterialId;
 
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public double[] CenterCoordinates;
-
     public ParticleCompound(IParticle particle)
     {
         Id = particle.Id.ToString();
-        AbsoluteCenterCoordinates = particle.AbsoluteCenterCoordinates.ToArray();
+        CenterCoordinates = particle.CenterCoordinates.ToArray();
         RotationAngle = particle.RotationAngle;
         MaterialId = particle.MaterialId.ToString();
-        CenterCoordinates = particle.CenterCoordinates.ToArray();
     }
 }

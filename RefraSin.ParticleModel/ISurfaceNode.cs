@@ -1,3 +1,3 @@
 namespace RefraSin.ParticleModel;
 
-public interface ISurfaceNode : INode { }
+public interface ISurfaceNode : INode, INodeGeometry, INodeGradients, INodeMaterialProperties { }

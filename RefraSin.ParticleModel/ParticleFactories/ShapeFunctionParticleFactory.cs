@@ -5,11 +5,11 @@ using RefraSin.Coordinates.Polar;
 using static MathNet.Numerics.Constants;
 using static System.Math;
 
-namespace RefraSin.ParticleModel.ParticleSpecFactories;
+namespace RefraSin.ParticleModel.ParticleFactories;
 
-public class ShapeFunctionParticleSpecFactory : IParticleSpecFactory
+public class ShapeFunctionParticleFactory : IParticleFactory
 {
-    public ShapeFunctionParticleSpecFactory(double baseRadius, double peakHeight, uint peakCount, double ovality, Guid materialId)
+    public ShapeFunctionParticleFactory(double baseRadius, double peakHeight, uint peakCount, double ovality, Guid materialId)
     {
         BaseRadius = baseRadius;
         PeakHeight = peakHeight;
@@ -34,12 +34,12 @@ public class ShapeFunctionParticleSpecFactory : IParticleSpecFactory
 
     public int NodeCount { get; set; } = 100;
 
-    public Func<ShapeFunctionParticleSpecFactory, int>? NodeCountFunction { get; set; }
+    public Func<ShapeFunctionParticleFactory, int>? NodeCountFunction { get; set; }
 
     public virtual double ParticleShapeFunction(double phi) => BaseRadius * (1 + PeakHeight * Cos(PeakCount * phi) + Ovality * Cos(2 * phi));
 
     /// <inheritdoc />
-    public IParticleSpec GetParticleSpec()
+    public IParticle GetParticle()
     {
         var nodeCount = NodeCountFunction?.Invoke(this) ?? NodeCount;
 
@@ -47,13 +47,13 @@ public class ShapeFunctionParticleSpecFactory : IParticleSpecFactory
         var rs = Generate.Map(phis, ParticleShapeFunction);
         var particleId = Guid.NewGuid();
 
-        return new ParticleSpec(
+        return new Particle(
             particleId,
             CenterCoordinates,
             RotationAngle,
             MaterialId,
             Generate.Map2(phis, rs,
-                (phi, r) => new NodeSpec(
+                (phi, r) => new Node(
                     Guid.NewGuid(),
                     particleId,
                     new PolarPoint(phi, r)
