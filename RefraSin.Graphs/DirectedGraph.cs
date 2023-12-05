@@ -42,7 +42,7 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
     public static DirectedGraph<TVertex> FromGraphSearch(IGraphTraversal<TVertex> graphTraversal)
     {
         var edges = graphTraversal.TraversedEdges.ToArray();
-        var vertices = edges.Select(e => e.End).Prepend(graphTraversal.Start);
+        var vertices = edges.Select(e => e.To).Prepend(graphTraversal.Start);
         return new DirectedGraph<TVertex>(vertices, edges);
     }
 
@@ -52,18 +52,18 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
         {
             yield return new DirectedEdge<TVertex>(edge);
             if (!edge.IsDirected)
-                yield return new DirectedEdge<TVertex>(edge.End, edge.Start);
+                yield return new DirectedEdge<TVertex>(edge.To, edge.From);
         }
     }
 
     private Dictionary<TVertex, TVertex[]> InitChildrenOf() =>
         Edges
-            .GroupBy(e => e.Start, e => e.End)
+            .GroupBy(e => e.From, e => e.To)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, TVertex[]> InitParentsOf() =>
         Edges
-            .GroupBy(e => e.End, e => e.Start)
+            .GroupBy(e => e.To, e => e.From)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, TVertex[]> InitAdjacentsOf() =>
@@ -76,12 +76,12 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
 
     private Dictionary<TVertex, DirectedEdge<TVertex>[]> InitEdgesFrom() =>
         Edges
-            .GroupBy(e => e.Start)
+            .GroupBy(e => e.From)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, DirectedEdge<TVertex>[]> InitEdgesTo() =>
         Edges
-            .GroupBy(e => e.End)
+            .GroupBy(e => e.To)
             .ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, DirectedEdge<TVertex>[]> InitEdgesAt() =>
@@ -121,7 +121,7 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, DirectedEdge<TVertex>> whe
 
     public DirectedGraph<TVertex> Reversed()
     {
-        var reversedEdges = Edges.Select(e => new DirectedEdge<TVertex>(e.End, e.Start)).ToHashSet();
+        var reversedEdges = Edges.Select(e => new DirectedEdge<TVertex>(e.To, e.From)).ToHashSet();
 
         return new DirectedGraph<TVertex>(Vertices, reversedEdges);
     }

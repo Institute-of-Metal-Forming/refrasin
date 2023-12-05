@@ -94,15 +94,15 @@ public class UndirectedEdgesTests
             )
         );
         Assert.That(
-            reversed.Start,
+            reversed.From,
             Is.EqualTo(
-                _edge1.End
+                _edge1.To
             )
         );
         Assert.That(
-            reversed.End,
+            reversed.To,
             Is.EqualTo(
-                _edge1.Start
+                _edge1.From
             )
         );
     }

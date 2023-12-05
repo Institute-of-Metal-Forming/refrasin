@@ -11,8 +11,8 @@ public class TraversedEdge<TVertex> : DirectedEdge<TVertex> where TVertex : IVer
 
     public void Deconstruct(out TVertex start, out TVertex end, out bool endVertexAlreadyVisited)
     {
-        start = Start;
-        end = End;
+        start = From;
+        end = To;
         endVertexAlreadyVisited = EndVertexAlreadyVisited;
     }
 
@@ -20,5 +20,5 @@ public class TraversedEdge<TVertex> : DirectedEdge<TVertex> where TVertex : IVer
 
     /// <inheritdoc />
     public override string ToString() =>
-        $"TraversedEdge from {Start} to {End}, {(EndVertexAlreadyVisited ? "end visited before" : "end not visited before")}";
+        $"TraversedEdge from {From} to {To}, {(EndVertexAlreadyVisited ? "end visited before" : "end not visited before")}";
 }
