@@ -3,7 +3,7 @@ namespace RefraSin.ParticleModel;
 /// <summary>
 /// Schnittstelle für Knoten, welche einen Kontakt herstellen.
 /// </summary>
-public interface IContactNode : INode
+public interface INodeContact
 {
     /// <summary>
     /// Id des Partikels, welches dieser Knoten berührt.

@@ -77,7 +77,7 @@ internal struct NodeCompound
             VolumeGradient = nodeGradients.VolumeGradient.ToArray();
         }
 
-        if (node is IContactNode contactNode)
+        if (node is INodeContact contactNode)
         {
             ContactedParticleId = contactNode.ContactedParticleId.ToString();
             ContactedNodeId = contactNode.ContactedNodeId.ToString();
