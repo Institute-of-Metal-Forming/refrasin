@@ -1,7 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
-using RefraSin.Enumerables;
 using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
@@ -14,8 +13,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// </summary>
 public class Particle : IParticle
 {
-    private NodeBase[] _nodesArray;
-    private Dictionary<Guid, int> _nodeIndices = null!;
+    private NodeCollection<NodeBase> _nodes;
 
     public Particle(
         IParticle particle,
@@ -38,12 +36,12 @@ public class Particle : IParticle
             .ToDictionary(i => i.To);
 
         SolverSession = solverSession;
-        _nodesArray = particle.Nodes.Select(node => (NodeBase)node switch
+        _nodes = particle.Nodes.Select(node => (NodeBase)node switch
         {
             INeckNode neckNode                   => new NeckNode(neckNode, this, solverSession),
             IGrainBoundaryNode grainBoundaryNode => new GrainBoundaryNode(grainBoundaryNode, this, solverSession),
             _                                    => (NodeBase)new SurfaceNode(node, this, solverSession),
-        }).ToArray();
+        }).ToNodeCollection();
     }
 
     private Particle(
@@ -69,7 +67,7 @@ public class Particle : IParticle
         MaterialInterfaces = materialInterfaces;
 
         SolverSession = solverSession;
-        _nodesArray = Array.Empty<NodeBase>();
+        _nodes = NodeCollection<NodeBase>.Empty;
     }
 
     /// <inheritdoc/>
@@ -103,32 +101,9 @@ public class Particle : IParticle
     /// </summary>
     public Angle RotationAngle { get; }
 
-    public IReadOnlyList<NodeBase> Nodes => _nodesArray;
+    public IReadOnlyNodeCollection<NodeBase> Nodes => _nodes;
 
-    private NodeBase[] NodesArray
-    {
-        get => _nodesArray;
-        set
-        {
-            _nodesArray = value;
-            _nodeIndices = value.Select((n, i) => (n.Id, i)).ToDictionary(t => t.Id, t => t.i);
-        }
-    }
-
-    IReadOnlyList<INode> IParticle.Nodes => Nodes;
-
-    public int GetNodeIndex(NodeBase node) => _nodeIndices[node.Id];
-
-    /// <inheritdoc cref="IParticle.this[int]"/>
-    public NodeBase this[int i] => i >= 0 ? Nodes[(i % Nodes.Count)] : Nodes[^-(i % Nodes.Count)];
-
-    INode IParticle.this[int i] => this[i];
-
-    /// <inheritdoc cref="IParticle.this[Guid]"/>
-    public NodeBase this[Guid nodeId] => Nodes.FirstOrDefault(n => n.Id == nodeId) ??
-                                         throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
-
-    INode IParticle.this[Guid nodeId] => this[nodeId];
+    IReadOnlyNodeCollection<INode> IParticle.Nodes => Nodes;
 
     /// <summary>
     /// Reference to the current solver session.
@@ -149,7 +124,7 @@ public class Particle : IParticle
 
         var particle = new Particle(Id, CenterCoordinates + displacementVector.Absolute, rotationAngle, Material, MaterialInterfaces, SolverSession);
 
-        particle.NodesArray = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToArray();
+        particle._nodes = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToNodeCollection();
         return particle;
     }
 

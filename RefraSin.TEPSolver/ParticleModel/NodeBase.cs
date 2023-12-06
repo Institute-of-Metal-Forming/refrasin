@@ -53,7 +53,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// <inheritdoc />
     public Guid ParticleId => Particle.Id;
 
-    public int Index => _index ??= Particle.GetNodeIndex(this);
+    public int Index => _index ??= Particle.Nodes.IndexOf(Id);
 
     private int? _index;
 
@@ -61,7 +61,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// A reference to the upper neighbor of this node.
     /// </summary>
     /// <exception cref="InvalidNeighborhoodException">If this node has currently no upper neighbor set.</exception>
-    public NodeBase Upper => _upper ??= Particle[Index + 1];
+    public NodeBase Upper => _upper ??= Particle.Nodes[Index + 1];
 
     private NodeBase? _upper;
 
@@ -69,7 +69,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// A reference to the lower neighbor of this node.
     /// </summary>
     /// <exception cref="InvalidNeighborhoodException">If this node has currently no lower neighbor set.</exception>
-    public NodeBase Lower => _lower ??= Particle[Index - 1];
+    public NodeBase Lower => _lower ??= Particle.Nodes[Index - 1];
 
     private NodeBase? _lower;
 

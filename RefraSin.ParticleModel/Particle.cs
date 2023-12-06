@@ -4,9 +4,10 @@ using RefraSin.Graphs;
 
 namespace RefraSin.ParticleModel;
 
-public record Particle(Guid Id, AbsolutePoint CenterCoordinates, Angle RotationAngle, Guid MaterialId, IReadOnlyList<INode> Nodes)
-    : IParticle
+public class Particle : IParticle
 {
+    private readonly NodeCollection<INode> _nodes;
+
     public Particle(IParticle template) : this(
         template.Id,
         template.CenterCoordinates,
@@ -21,12 +22,20 @@ public record Particle(Guid Id, AbsolutePoint CenterCoordinates, Angle RotationA
         }).ToArray()
     ) { }
 
-    /// <inheritdoc />
-    public INode this[int i] => i >= 0 ? Nodes[(i % Nodes.Count)] : Nodes[^-(i % Nodes.Count)];
+    public Particle(Guid id, AbsolutePoint centerCoordinates, Angle rotationAngle, Guid materialId, IReadOnlyList<INode> nodes)
+    {
+        Id = id;
+        CenterCoordinates = centerCoordinates;
+        RotationAngle = rotationAngle;
+        MaterialId = materialId;
+        _nodes = new(nodes);
+    }
 
-    /// <inheritdoc />
-    public INode this[Guid nodeId] => Nodes.FirstOrDefault(n => n.Id == nodeId) ??
-                                      throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
+    public IReadOnlyNodeCollection<INode> Nodes => _nodes;
+    public Guid Id { get; }
+    public AbsolutePoint CenterCoordinates { get; }
+    public Angle RotationAngle { get; }
+    public Guid MaterialId { get; }
 
     /// <inheritdoc />
     public bool Equals(IVertex other) => other is IParticle && Id == other.Id;

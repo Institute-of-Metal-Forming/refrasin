@@ -31,22 +31,22 @@ public class TestSpecs
     [Test]
     public void TestIndexerInt()
     {
-        That(_particle[0], Is.EqualTo(_particle.Nodes[0]));
-        That(_particle[1], Is.EqualTo(_particle.Nodes[1]));
-        That(_particle[-1], Is.EqualTo(_particle.Nodes[^1]));
-        That(_particle[_particle.Nodes.Count], Is.EqualTo(_particle.Nodes[0]));
+        That(_particle.Nodes[-1], Is.EqualTo(_particle.Nodes[^1]));
+        That(_particle.Nodes[-2], Is.EqualTo(_particle.Nodes[^2]));
+        That(_particle.Nodes[_particle.Nodes.Count], Is.EqualTo(_particle.Nodes[0]));
+        That(_particle.Nodes[_particle.Nodes.Count + 1], Is.EqualTo(_particle.Nodes[1]));
     }
 
     [Test]
     public void TestIndexerGuid()
     {
-        That(_particle[_particle.Nodes[0].Id], Is.EqualTo(_particle.Nodes[0]));
-        That(_particle[_particle.Nodes[1].Id], Is.EqualTo(_particle.Nodes[1]));
-        That(_particle[_particle.Nodes[^1].Id], Is.EqualTo(_particle.Nodes[^1]));
+        That(_particle.Nodes[_particle.Nodes[0].Id], Is.EqualTo(_particle.Nodes[0]));
+        That(_particle.Nodes[_particle.Nodes[1].Id], Is.EqualTo(_particle.Nodes[1]));
+        That(_particle.Nodes[_particle.Nodes[^1].Id], Is.EqualTo(_particle.Nodes[^1]));
 
         Throws(
-            Is.TypeOf<IndexOutOfRangeException>(),
-            () => { _ = _particle[Guid.NewGuid()]; }
+            Is.TypeOf<KeyNotFoundException>(),
+            () => { _ = _particle.Nodes[Guid.NewGuid()]; }
         );
     }
 }
