@@ -5,6 +5,7 @@ namespace RefraSin.ParticleModel;
 /// </summary>
 /// <typeparam name="TParticle"></typeparam>
 public interface IReadOnlyParticleCollection<out TParticle> : IReadOnlyList<TParticle> where TParticle : IParticle
+// IReadOnlyDictionary is not implemented, since this would break covariance
 {
     /// <summary>
     /// Returns the particle with the specified ID if present.
