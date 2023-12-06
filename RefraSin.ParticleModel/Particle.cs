@@ -6,7 +6,7 @@ namespace RefraSin.ParticleModel;
 
 public class Particle : IParticle
 {
-    private readonly NodeCollection<INode> _nodes;
+    private readonly ReadOnlyNodeCollection<INode> _nodes;
 
     public Particle(IParticle template) : this(
         template.Id,

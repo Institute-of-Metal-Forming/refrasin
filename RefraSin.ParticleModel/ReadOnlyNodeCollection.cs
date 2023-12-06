@@ -2,18 +2,18 @@ using System.Collections;
 
 namespace RefraSin.ParticleModel;
 
-public class NodeCollection<TNode> : IReadOnlyNodeCollection<TNode> where TNode : INode
+public class ReadOnlyNodeCollection<TNode> : IReadOnlyNodeCollection<TNode> where TNode : INode
 {
     private TNode[] _nodes;
     private Dictionary<Guid, int> _nodeIndices;
 
-    private NodeCollection()
+    private ReadOnlyNodeCollection()
     {
         _nodes = Array.Empty<TNode>();
         _nodeIndices = new Dictionary<Guid, int>();
     }
 
-    public NodeCollection(IEnumerable<TNode> nodes)
+    public ReadOnlyNodeCollection(IEnumerable<TNode> nodes)
     {
         _nodes = nodes.ToArray();
         _nodeIndices = _nodes.Select((n, i) => (n.Id, i)).ToDictionary(t => t.Id, t => t.i);
@@ -58,5 +58,5 @@ public class NodeCollection<TNode> : IReadOnlyNodeCollection<TNode> where TNode 
     /// <summary>
     /// Returns an empty singleton instance.
     /// </summary>
-    public static NodeCollection<TNode> Empty { get; } = new();
+    public static ReadOnlyNodeCollection<TNode> Empty { get; } = new();
 }

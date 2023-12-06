@@ -13,7 +13,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// </summary>
 public class Particle : IParticle
 {
-    private NodeCollection<NodeBase> _nodes;
+    private ReadOnlyNodeCollection<NodeBase> _nodes;
 
     public Particle(
         IParticle particle,
@@ -41,7 +41,7 @@ public class Particle : IParticle
             INeckNode neckNode                   => new NeckNode(neckNode, this, solverSession),
             IGrainBoundaryNode grainBoundaryNode => new GrainBoundaryNode(grainBoundaryNode, this, solverSession),
             _                                    => (NodeBase)new SurfaceNode(node, this, solverSession),
-        }).ToNodeCollection();
+        }).ToReadOnlyNodeCollection();
     }
 
     private Particle(
@@ -67,7 +67,7 @@ public class Particle : IParticle
         MaterialInterfaces = materialInterfaces;
 
         SolverSession = solverSession;
-        _nodes = NodeCollection<NodeBase>.Empty;
+        _nodes = ReadOnlyNodeCollection<NodeBase>.Empty;
     }
 
     /// <inheritdoc/>
@@ -124,7 +124,7 @@ public class Particle : IParticle
 
         var particle = new Particle(Id, CenterCoordinates + displacementVector.Absolute, rotationAngle, Material, MaterialInterfaces, SolverSession);
 
-        particle._nodes = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToNodeCollection();
+        particle._nodes = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToReadOnlyNodeCollection();
         return particle;
     }
 
