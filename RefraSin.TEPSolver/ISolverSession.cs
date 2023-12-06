@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
 using RefraSin.TEPSolver.TimeSteppers;
-using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
@@ -56,7 +56,7 @@ public interface ISolverSession
     /// <summary>
     /// Registry of all nodes of all particles.
     /// </summary>
-    public IReadOnlyDictionary<Guid, Node> Nodes { get; }
+    public IReadOnlyDictionary<Guid, NodeBase> Nodes { get; }
 
     /// <summary>
     /// Options for the solver.

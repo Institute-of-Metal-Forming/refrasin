@@ -14,6 +14,9 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// </summary>
 public class Particle : IParticle
 {
+    private NodeBase[] _nodesArray;
+    private Dictionary<Guid, int> _nodeIndices = null!;
+
     public Particle(
         IParticle particle,
         ISolverSession solverSession
@@ -34,8 +37,39 @@ public class Particle : IParticle
             .Where(i => i.From == particle.MaterialId)
             .ToDictionary(i => i.To);
 
-        Surface = new ParticleSurface(this, particle.Nodes, solverSession);
         SolverSession = solverSession;
+        _nodesArray = particle.Nodes.Select(node => (NodeBase)node switch
+        {
+            INeckNode neckNode                   => new NeckNode(neckNode, this, solverSession),
+            IGrainBoundaryNode grainBoundaryNode => new GrainBoundaryNode(grainBoundaryNode, this, solverSession),
+            _                                    => (NodeBase)new SurfaceNode(node, this, solverSession),
+        }).ToArray();
+    }
+
+    private Particle(
+        Guid id,
+        AbsolutePoint centerCoordinates,
+        Angle rotationAngle,
+        IMaterial material,
+        IReadOnlyDictionary<Guid, IMaterialInterface> materialInterfaces,
+        ISolverSession solverSession
+    )
+    {
+        Id = id;
+        CenterCoordinates = centerCoordinates;
+        RotationAngle = rotationAngle;
+
+        LocalCoordinateSystem = new PolarCoordinateSystem
+        {
+            OriginSource = () => CenterCoordinates,
+            RotationAngleSource = () => RotationAngle
+        };
+
+        Material = material;
+        MaterialInterfaces = materialInterfaces;
+
+        SolverSession = solverSession;
+        _nodesArray = Array.Empty<NodeBase>();
     }
 
     /// <inheritdoc/>
@@ -62,29 +96,37 @@ public class Particle : IParticle
     /// <summary>
     /// Koordinaten des Ursprungs des lokalen Koordinatensystem ausgedrückt im Koordinatensystem des <see cref="Parent"/>
     /// </summary>
-    public AbsolutePoint CenterCoordinates { get; private set; }
+    public AbsolutePoint CenterCoordinates { get; }
 
     /// <summary>
     /// Drehwinkel des Partikels.
     /// </summary>
-    public Angle RotationAngle { get; private set; }
+    public Angle RotationAngle { get; }
 
-    /// <summary>
-    /// Ring of surface nodes.
-    /// </summary>
-    public ParticleSurface Surface { get; }
+    public IReadOnlyList<NodeBase> Nodes => _nodesArray;
 
-    /// <inheritdoc />
-    public IReadOnlyList<INode> Nodes => Surface.ToArray();
+    private NodeBase[] NodesArray
+    {
+        get => _nodesArray;
+        set
+        {
+            _nodesArray = value;
+            _nodeIndices = value.Select((n, i) => (n.Id, i)).ToDictionary(t => t.Id, t => t.i);
+        }
+    }
+
+    IReadOnlyList<INode> IParticle.Nodes => Nodes;
+
+    public int GetNodeIndex(NodeBase node) => _nodeIndices[node.Id];
 
     /// <inheritdoc cref="IParticle.this[int]"/>
-    public INode this[int i] => i >= 0 ? Nodes[(i % Nodes.Count)] : Nodes[^-(i % Nodes.Count)];
+    public NodeBase this[int i] => i >= 0 ? Nodes[(i % Nodes.Count)] : Nodes[^-(i % Nodes.Count)];
 
     INode IParticle.this[int i] => this[i];
 
     /// <inheritdoc cref="IParticle.this[Guid]"/>
-    public INode this[Guid nodeId] => Nodes.FirstOrDefault(n => n.Id == nodeId) ??
-                                      throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
+    public NodeBase this[Guid nodeId] => Nodes.FirstOrDefault(n => n.Id == nodeId) ??
+                                         throw new IndexOutOfRangeException($"A node with ID {nodeId} is not present in this particle.");
 
     INode IParticle.this[Guid nodeId] => this[nodeId];
 
@@ -93,7 +135,7 @@ public class Particle : IParticle
     /// </summary>
     private ISolverSession SolverSession { get; }
 
-    public virtual void ApplyTimeStep(StepVector stepVector, double timeStepWidth)
+    public Particle ApplyTimeStep(StepVector stepVector, double timeStepWidth)
     {
         var particleView = stepVector[this];
 
@@ -103,35 +145,12 @@ public class Particle : IParticle
             LocalCoordinateSystem
         );
 
-        CenterCoordinates += displacementVector.Absolute;
+        var rotationAngle = (RotationAngle + particleView.RotationDisplacement * timeStepWidth).Reduce();
 
-        RotationAngle = (RotationAngle + particleView.RotationDisplacement * timeStepWidth).Reduce();
+        var particle = new Particle(Id, CenterCoordinates + displacementVector.Absolute, rotationAngle, Material, MaterialInterfaces, SolverSession);
 
-        foreach (var node in Surface)
-        {
-            node.ApplyTimeStep(stepVector, timeStepWidth);
-        }
-    }
-
-    public virtual void ApplyState(IParticle state)
-    {
-        CheckState(state);
-
-        CenterCoordinates = state.CenterCoordinates;
-        RotationAngle = state.RotationAngle;
-
-        var nodeStates = state.Nodes.ToDictionary(n => n.Id);
-
-        foreach (var node in Surface)
-        {
-            node.ApplyState(nodeStates[node.Id]);
-        }
-    }
-
-    protected virtual void CheckState(IParticle state)
-    {
-        if (state.Id != Id)
-            throw new InvalidOperationException("IDs of node and state do not match.");
+        particle.NodesArray = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToArray();
+        return particle;
     }
 
     /// <inheritdoc/>
@@ -139,4 +158,29 @@ public class Particle : IParticle
 
     /// <inheritdoc />
     public virtual bool Equals(IVertex other) => other is IParticle && Id == other.Id;
+
+    /// <summary>
+    /// Bestimmt die beiden einem Winkel nächstgelegenen Oberflächenknoten.
+    /// </summary>
+    /// <param name="angle">Winkel</param>
+    /// <returns></returns>
+    public (NodeBase Upper, NodeBase Lower) GetNearestNodesToAngle(Angle angle)
+    {
+        var nodes = Nodes.OrderBy(k => Angle.ReduceRadians(k.Coordinates.Phi.Radians, Angle.ReductionDomain.AllPositive)).ToArray();
+        var upper = nodes.FirstOrDefault(k => k.Coordinates.Phi.Radians > angle.Radians) ?? nodes.First();
+        var lower = upper.Lower;
+        return (upper, lower);
+    }
+
+    /// <summary>
+    /// Berechnet den zwischen den angrenzenden Knoten interpolierten Radius an einer bestimmten Winkelkoordinate.
+    /// </summary>
+    /// <param name="angle">Winkel</param>
+    /// <returns></returns>
+    public double InterpolatedRadius(Angle angle)
+    {
+        var (upper, lower) = GetNearestNodesToAngle(angle);
+        return lower.Coordinates.R + (upper.Coordinates.R - lower.Coordinates.R) /
+            (upper.Coordinates.Phi - lower.Coordinates.Phi).Reduce().Radians * (angle - lower.Coordinates.Phi).Reduce().Radians;
+    }
 }

@@ -1,14 +1,22 @@
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Helpers;
+using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
 /// <summary>
 /// Oberflächenknoten, der Teil einer Korngrenze ist.
 /// </summary>
-public class GrainBoundaryNode : ContactNode<GrainBoundaryNode>, IGrainBoundaryNode
+public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>, IGrainBoundaryNode
 {
     /// <inheritdoc />
     public GrainBoundaryNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
+
+    private GrainBoundaryNode(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession, Guid contactedNodeId,
+        Guid contactedParticleId) : base(id, r, phi, particle,
+        solverSession, contactedNodeId, contactedParticleId) { }
 
     /// <inheritdoc />
     public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
@@ -27,19 +35,16 @@ public class GrainBoundaryNode : ContactNode<GrainBoundaryNode>, IGrainBoundaryN
     private ToUpperToLower? _surfaceDiffusionCoefficient;
 
     /// <inheritdoc />
-    protected override void ClearCaches()
-    {
-        base.ClearCaches();
-        _surfaceEnergy = null;
-        _surfaceDiffusionCoefficient = null;
-    }
+    public override double TransferCoefficient => 0;
 
     /// <inheritdoc />
-    protected override void CheckState(INode state)
+    public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)
     {
-        base.CheckState(state);
+        var normalDisplacement = stepVector[this].NormalDisplacement * timeStepWidth;
+        var angle = SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Normal;
+        var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
+        var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
 
-        if (state is not IGrainBoundaryNode)
-            throw new ArgumentException($"The given state is no instance of {nameof(IGrainBoundaryNode)}", nameof(state));
+        return new GrainBoundaryNode(Id, newR, Coordinates.Phi + dPhi, particle, SolverSession, ContactedNodeId, ContactedParticleId);
     }
 }

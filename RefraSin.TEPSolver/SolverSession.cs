@@ -4,11 +4,11 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
 using RefraSin.TEPSolver.TimeSteppers;
-using Node = RefraSin.TEPSolver.ParticleModel.Node;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
@@ -42,7 +42,7 @@ internal class SolverSession : ISolverSession
 
         var particles = process.Particles.Select(ps => new Particle(ps, this)).ToArray();
         Particles = particles.ToDictionary(p => p.Id);
-        Nodes = Particles.Values.SelectMany(p => p.Surface).ToDictionary(n => n.Id);
+        Nodes = Particles.Values.SelectMany(p => p.Nodes).ToDictionary(n => n.Id);
 
         StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
         TimeStepper = solver.TimeStepper;
@@ -77,9 +77,9 @@ internal class SolverSession : ISolverSession
     IReadOnlyDictionary<Guid, Particle> ISolverSession.Particles => Particles;
 
     /// <inheritdoc cref="ISolverSession.Nodes"/>
-    public Dictionary<Guid, Node> Nodes { get; private set; }
+    public Dictionary<Guid, NodeBase> Nodes { get; private set; }
 
-    IReadOnlyDictionary<Guid, Node> ISolverSession.Nodes => Nodes;
+    IReadOnlyDictionary<Guid, NodeBase> ISolverSession.Nodes => Nodes;
 
     /// <inheritdoc />
     public ISolverOptions Options { get; }
@@ -149,17 +149,5 @@ internal class SolverSession : ISolverSession
     {
         var nextTime = CurrentTime + TimeStepWidth;
         _solutionStorage.StoreStep(new SolutionStep(CurrentTime, nextTime, particleTimeSteps));
-    }
-
-    public void ResetTo(ISolutionState state)
-    {
-        CurrentTime = state.Time;
-
-        var particleStates = state.ParticleStates.ToDictionary(n => n.Id);
-
-        foreach (var particle in Particles.Values)
-        {
-            particle.ApplyState(particleStates[particle.Id]);
-        }
     }
 }

@@ -1,14 +1,19 @@
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Helpers;
 using RefraSin.ParticleModel;
+using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
 /// <summary>
 /// Oberflächenknoten, der Teil einer freien Oberfläche ist.
 /// </summary>
-public class SurfaceNode : Node, ISurfaceNode
+public class SurfaceNode : NodeBase, ISurfaceNode
 {
     /// <inheritdoc />
     public SurfaceNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
+
+    private SurfaceNode(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession) : base(id, r, phi, particle, solverSession) { }
 
     /// <inheritdoc />
     public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
@@ -24,25 +29,19 @@ public class SurfaceNode : Node, ISurfaceNode
         Particle.Material.SurfaceDiffusionCoefficient
     );
 
-    /// <inheritdoc />
-    public override double TransferCoefficient => 0;
-
     private ToUpperToLower? _surfaceDiffusionCoefficient;
 
     /// <inheritdoc />
-    protected override void ClearCaches()
-    {
-        base.ClearCaches();
-        _surfaceEnergy = null;
-        _surfaceDiffusionCoefficient = null;
-    }
+    public override double TransferCoefficient => 0;
 
     /// <inheritdoc />
-    protected override void CheckState(INode state)
+    public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)
     {
-        base.CheckState(state);
+        var normalDisplacement = stepVector[this].NormalDisplacement * timeStepWidth;
+        var angle = SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Normal;
+        var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
+        var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
 
-        if (state is not ISurfaceNode)
-            throw new ArgumentException($"The given state is no instance of {nameof(ISurfaceNode)}", nameof(state));
+        return new SurfaceNode(Id, newR, Coordinates.Phi + dPhi, particle, SolverSession);
     }
 }

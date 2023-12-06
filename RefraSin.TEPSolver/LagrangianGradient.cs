@@ -1,6 +1,6 @@
 using MathNet.Numerics.RootFinding;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
-using Node = RefraSin.TEPSolver.ParticleModel.Node;
 
 namespace RefraSin.TEPSolver;
 
@@ -45,7 +45,7 @@ internal static class LagrangianGradient
         yield return DissipationEquality(solverSession, stepVector);
     }
 
-    private static double StateVelocityDerivative(ISolverSession solverSession, StepVector stepVector, Node node)
+    private static double StateVelocityDerivative(ISolverSession solverSession, StepVector stepVector, NodeBase node)
     {
         var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
         var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector[node].Lambda2;
@@ -53,7 +53,7 @@ internal static class LagrangianGradient
         return gibbsTerm + requiredConstraintsTerm;
     }
 
-    private static double FluxDerivative(ISolverSession solverSession, StepVector stepVector, Node node)
+    private static double FluxDerivative(ISolverSession solverSession, StepVector stepVector, NodeBase node)
     {
         var dissipationTerm =
             2 * solverSession.GasConstant * solverSession.Temperature
@@ -66,7 +66,7 @@ internal static class LagrangianGradient
         return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
     }
 
-    private static double RequiredConstraint(ISolverSession solverSession, StepVector stepVector, Node node)
+    private static double RequiredConstraint(ISolverSession solverSession, StepVector stepVector, NodeBase node)
     {
         var volumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
         var fluxTerm = stepVector[node].FluxToUpper - stepVector[node.Lower].FluxToUpper;
