@@ -35,4 +35,10 @@ public interface IReadOnlyNodeCollection<out TNode> : IReadOnlyList<TNode> where
     /// <param name="nodeId">ID of the node to return the index for</param>
     /// <returns>the index in range 0 to <see cref="IReadOnlyNodeCollection{T}.Count"/>-1</returns>
     public int IndexOf(Guid nodeId);
+
+    /// <summary>
+    /// Indicates whether a node with the specified ID is contained in the collection.
+    /// </summary>
+    /// <param name="nodeId">the ID to test for</param>
+    public bool Contains(Guid nodeId);
 }

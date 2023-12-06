@@ -37,5 +37,8 @@ public class ReadOnlyParticleCollection<TParticle> : IReadOnlyParticleCollection
     /// <inheritdoc />
     public int IndexOf(Guid particleId) => _particleIndices[particleId];
 
+    /// <inheritdoc />
+    public bool Contains(Guid particleId) => _particleIndices.ContainsKey(particleId);
+
     public static ReadOnlyParticleCollection<TParticle> Empty { get; } = new();
 }

@@ -55,6 +55,9 @@ public class ReadOnlyNodeCollection<TNode> : IReadOnlyNodeCollection<TNode> wher
     /// <inheritdoc />
     public int IndexOf(Guid nodeId) => _nodeIndices[nodeId];
 
+    /// <inheritdoc />
+    public bool Contains(Guid nodeId) => _nodeIndices.ContainsKey(nodeId);
+
     /// <summary>
     /// Returns an empty singleton instance.
     /// </summary>
