@@ -6,9 +6,9 @@ namespace RefraSin.TEPSolver;
 
 internal static class LagrangianGradient
 {
-    public static StepVector EvaluateAt(ISolverSession solverSession, StepVector stepVector)
+    public static StepVector EvaluateAt(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
     {
-        var evaluation = YieldEquations(solverSession, stepVector).ToArray();
+        var evaluation = YieldEquations(solverSession, currentState, stepVector).ToArray();
 
         if (evaluation.Any(x => !double.IsFinite(x)))
         {
@@ -18,16 +18,16 @@ internal static class LagrangianGradient
         return new StepVector(evaluation, stepVector.StepVectorMap);
     }
 
-    private static IEnumerable<double> YieldEquations(ISolverSession solverSession, StepVector stepVector)
+    private static IEnumerable<double> YieldEquations(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
     {
         // fix root particle to origin
-        var root = stepVector.StepVectorMap.Particles[0];
+        var root = currentState.Particles[0];
         yield return stepVector[root].RadialDisplacement;
         yield return stepVector[root].AngleDisplacement;
         yield return stepVector[root].RotationDisplacement;
 
         // yield particle displacement equations
-        foreach (var particle in stepVector.StepVectorMap.Particles.Skip(1))
+        foreach (var particle in currentState.Particles.Skip(1))
         {
             yield return stepVector[particle].RadialDisplacement;
             yield return stepVector[particle].AngleDisplacement;
@@ -35,14 +35,14 @@ internal static class LagrangianGradient
         }
 
         // yield node equations
-        foreach (var node in stepVector.StepVectorMap.Nodes)
+        foreach (var node in currentState.AllNodes.Values)
         {
             yield return StateVelocityDerivative(solverSession, stepVector, node);
             yield return FluxDerivative(solverSession, stepVector, node);
             yield return RequiredConstraint(solverSession, stepVector, node);
         }
 
-        yield return DissipationEquality(solverSession, stepVector);
+        yield return DissipationEquality(solverSession, currentState, stepVector);
     }
 
     private static double StateVelocityDerivative(ISolverSession solverSession, StepVector stepVector, NodeBase node)
@@ -74,14 +74,14 @@ internal static class LagrangianGradient
         return volumeTerm - fluxTerm;
     }
 
-    private static double DissipationEquality(ISolverSession solverSession, StepVector stepVector)
+    private static double DissipationEquality(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
     {
-        var dissipation = stepVector.StepVectorMap.Nodes.Select(n =>
+        var dissipation = currentState.AllNodes.Values.Select(n =>
             -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
         ).Sum();
 
         var dissipationFunction = solverSession.GasConstant * solverSession.Temperature / 2
-                                * stepVector.StepVectorMap.Nodes.Select(n =>
+                                * currentState.AllNodes.Values.Select(n =>
                                       (
                                           n.SurfaceDistance.ToUpper * Math.Pow(stepVector[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
                                         + n.SurfaceDistance.ToLower * Math.Pow(stepVector[n.Lower].FluxToUpper, 2) /

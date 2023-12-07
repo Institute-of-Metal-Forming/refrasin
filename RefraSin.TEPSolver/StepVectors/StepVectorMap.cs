@@ -10,23 +10,19 @@ public class StepVectorMap
         GlobalUnknownsCount = Enum.GetNames(typeof(GlobalUnknown)).Length;
 
         ParticleUnknownsCount = Enum.GetNames(typeof(ParticleUnknown)).Length;
-        Particles = particles as Particle[] ?? particles.ToArray();
-        ParticleCount = Particles.Length;
+        var particlesArray = particles as Particle[] ?? particles.ToArray();
+        ParticleCount = particlesArray.Length;
         ParticleStartIndex = GlobalUnknownsCount;
-        ParticleIndices = Particles.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        ParticleIndices = particlesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         NodeUnknownsCount = Enum.GetNames(typeof(NodeUnknown)).Length;
-        Nodes = nodes as NodeBase[] ?? nodes.ToArray();
-        NodeCount = Nodes.Length;
+        var nodesArray = nodes as NodeBase[] ?? nodes.ToArray();
+        NodeCount = nodesArray.Length;
         NodeStartIndex = ParticleStartIndex + ParticleCount * ParticleUnknownsCount;
-        NodeIndices = Nodes.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        NodeIndices = nodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         TotalUnknownsCount = NodeStartIndex + NodeCount * NodeUnknownsCount;
     }
-
-    public NodeBase[] Nodes { get; }
-
-    public Particle[] Particles { get; }
 
     public int ParticleCount { get; }
 

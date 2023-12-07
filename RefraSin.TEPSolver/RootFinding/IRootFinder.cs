@@ -4,5 +4,5 @@ namespace RefraSin.TEPSolver.RootFinding;
 
 public interface IRootFinder
 {
-    public StepVector FindRoot(ISolverSession solverSession, StepVector initialGuess);
+    public StepVector FindRoot(ISolverSession solverSession, SolutionState currentState, StepVector initialGuess);
 }

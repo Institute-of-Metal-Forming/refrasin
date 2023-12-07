@@ -84,7 +84,7 @@ public class Solver
 
                 foreach (var validator in session.StepValidators)
                 {
-                    validator.Validate(step, session.Options);
+                    validator.Validate(session.CurrentState, step, session.Options);
                 }
 
                 return step;
