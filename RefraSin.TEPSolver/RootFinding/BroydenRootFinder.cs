@@ -6,10 +6,10 @@ namespace RefraSin.TEPSolver.RootFinding;
 public class BroydenRootFinder : IRootFinder
 {
     /// <inheritdoc />
-    public StepVector FindRoot(ISolverSession solverSession, StepVector initialGuess)
+    public StepVector FindRoot(ISolverSession solverSession, SolutionState currentState, StepVector initialGuess)
     {
         double[] Fun(double[] vector) =>
-            LagrangianGradient.EvaluateAt(solverSession, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
+            LagrangianGradient.EvaluateAt(solverSession, currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
 
         return new StepVector(Broyden.FindRoot(
             Fun,

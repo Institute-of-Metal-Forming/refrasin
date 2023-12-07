@@ -1,4 +1,5 @@
 using System.Globalization;
+using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
@@ -8,15 +9,16 @@ using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using static MathNet.Numerics.Constants;
+using static RefraSin.Coordinates.Angle.ReductionDomain;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
 /// <summary>
 /// Abstract base class for particle surface nodes.
 /// </summary>
-public abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterialProperties, IRingItem<Node>
+public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMaterialProperties
 {
-    protected Node(INode node, Particle particle, ISolverSession solverSession)
+    protected NodeBase(INode node, Particle particle, ISolverSession solverSession)
     {
         Id = node.Id;
 
@@ -28,15 +30,20 @@ public abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterial
         SolverSession = solverSession;
     }
 
+    protected NodeBase(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession)
+    {
+        Id = id;
+        Particle = particle;
+        Coordinates = new PolarPoint(phi.Reduce(AllPositive), r, Particle.LocalCoordinateSystem);
+        SolverSession = solverSession;
+    }
+
     /// <summary>
     /// Reference to the current solver session.
     /// </summary>
     protected ISolverSession SolverSession { get; }
 
     public Guid Id { get; set; }
-
-    private Node? _lower;
-    private Node? _upper;
 
     /// <summary>
     ///     Partikel, zu dem dieser Knoten gehört.
@@ -46,39 +53,30 @@ public abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterial
     /// <inheritdoc />
     public Guid ParticleId => Particle.Id;
 
+    public int Index => _index ??= Particle.Nodes.IndexOf(Id);
+
+    private int? _index;
+
     /// <summary>
     /// A reference to the upper neighbor of this node.
     /// </summary>
     /// <exception cref="InvalidNeighborhoodException">If this node has currently no upper neighbor set.</exception>
-    public Node Upper => _upper ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Upper);
+    public NodeBase Upper => _upper ??= Particle.Nodes[Index + 1];
+
+    private NodeBase? _upper;
 
     /// <summary>
     /// A reference to the lower neighbor of this node.
     /// </summary>
     /// <exception cref="InvalidNeighborhoodException">If this node has currently no lower neighbor set.</exception>
-    public Node Lower => _lower ?? throw new InvalidNeighborhoodException(this, InvalidNeighborhoodException.Neighbor.Lower);
+    public NodeBase Lower => _lower ??= Particle.Nodes[Index - 1];
 
-    /// <inheritdoc />
-    Node? IRingItem<Node>.Upper
-    {
-        get => _upper;
-        set => _upper = value;
-    }
-
-    /// <inheritdoc />
-    Node? IRingItem<Node>.Lower
-    {
-        get => _lower;
-        set => _lower = value;
-    }
-
-    /// <inheritdoc />
-    Ring<Node>? IRingItem<Node>.Ring { get; set; }
+    private NodeBase? _lower;
 
     /// <summary>
     /// Coordinates of the node in terms of particle's local coordinate system <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
     /// </summary>
-    public PolarPoint Coordinates { get; private set; }
+    public PolarPoint Coordinates { get; }
 
     /// <inheritdoc />
     public AbsolutePoint AbsoluteCoordinates => Coordinates.Absolute;
@@ -182,66 +180,8 @@ public abstract class Node : INode, INodeGeometry, INodeGradients, INodeMaterial
         return displacement;
     }
 
-    protected virtual void ClearCaches()
-    {
-        _angleDistance = null;
-        _surfaceDistance = null;
-        _surfaceRadiusAngle = null;
-        _volume = null;
-        _surfaceAngle = null;
-        _gibbsEnergyGradient = null;
-        _volumeGradient = null;
-    }
+    public abstract NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle);
 
-    public virtual void ApplyTimeStep(StepVector stepVector, double timeStepWidth)
-    {
-        var normalDisplacement = stepVector[this].NormalDisplacement * timeStepWidth;
-        var angle = SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Normal;
-        var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
-        var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
-
-        Coordinates.R = newR;
-        Coordinates.Phi += dPhi;
-
-        ClearCaches();
-    }
-
-    public virtual void ApplyState(INode state)
-    {
-        CheckState(state);
-
-        Coordinates = new PolarPoint(state.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
-
-        ClearCaches();
-    }
-
-    protected virtual void CheckState(INode state)
-    {
-        if (state.Id != Id)
-            throw new InvalidOperationException("IDs of node and state do not match.");
-
-        if (state.Coordinates.System != Coordinates.System)
-            throw new InvalidOperationException("Current coordinates and state coordinates must be in same coordinate system.");
-    }
-
-    /// <summary>
-    ///     Gibt die Repräsentation des Knotens als String zurück.
-    ///     Format: "{Typname} {Id} of {Partikel}".
-    /// </summary>
-    /// <returns></returns>
     public override string ToString() =>
         $"{GetType().Name} {Id} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)} of {Particle}";
-
-    /// <summary>
-    ///     Gibt die Repräsentation des Knotens als String zurück.
-    ///     Format: "{Typname} {Id} of {Partikel}".
-    /// </summary>
-    /// <returns></returns>
-    public string ToString(bool shortVersion)
-    {
-        if (shortVersion)
-            return
-                $"{GetType().Name} {Id}";
-        return ToString();
-    }
 }

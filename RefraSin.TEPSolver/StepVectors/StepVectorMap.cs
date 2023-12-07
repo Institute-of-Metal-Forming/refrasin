@@ -1,32 +1,28 @@
 using MoreLinq;
-using RefraSin.ParticleModel;
+using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(IEnumerable<IParticle> particles, IEnumerable<INode> nodes)
+    public StepVectorMap(IEnumerable<Particle> particles, IEnumerable<NodeBase> nodes)
     {
         GlobalUnknownsCount = Enum.GetNames(typeof(GlobalUnknown)).Length;
 
         ParticleUnknownsCount = Enum.GetNames(typeof(ParticleUnknown)).Length;
-        Particles = particles as IParticle[] ?? particles.ToArray();
-        ParticleCount = Particles.Length;
+        var particlesArray = particles as Particle[] ?? particles.ToArray();
+        ParticleCount = particlesArray.Length;
         ParticleStartIndex = GlobalUnknownsCount;
-        ParticleIndices = Particles.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        ParticleIndices = particlesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         NodeUnknownsCount = Enum.GetNames(typeof(NodeUnknown)).Length;
-        Nodes = nodes as INode[] ?? nodes.ToArray();
-        NodeCount = Nodes.Length;
+        var nodesArray = nodes as NodeBase[] ?? nodes.ToArray();
+        NodeCount = nodesArray.Length;
         NodeStartIndex = ParticleStartIndex + ParticleCount * ParticleUnknownsCount;
-        NodeIndices = Nodes.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        NodeIndices = nodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         TotalUnknownsCount = NodeStartIndex + NodeCount * NodeUnknownsCount;
     }
-
-    public INode[] Nodes { get; }
-
-    public IParticle[] Particles { get; }
 
     public int ParticleCount { get; }
 

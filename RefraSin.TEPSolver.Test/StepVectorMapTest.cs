@@ -5,23 +5,24 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.StepVectors;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver.Test;
 
 [TestFixture]
 public class StepVectorMapTest
 {
-    private IParticle _particleSpec1;
-    private IParticle _particleSpec2;
+    private Particle _particleSpec1;
+    private Particle _particleSpec2;
     private StepVectorMap _map;
 
     [SetUp]
     public void Setup()
     {
-        _particleSpec1 = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty).GetParticle();
-        _particleSpec2 = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty)
+        _particleSpec1 = new Particle(new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty).GetParticle(), null!);
+        _particleSpec2 = new Particle(new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty)
                 { CenterCoordinates = new AbsolutePoint(200, 0) }
-            .GetParticle();
+            .GetParticle(), null!);
         var particles = new[] { _particleSpec1, _particleSpec2 };
 
         _map = new StepVectorMap(particles, particles.SelectMany(p => p.Nodes));

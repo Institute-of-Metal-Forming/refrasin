@@ -7,7 +7,7 @@ internal class AdamsMoultonTimeStepper : ITimeStepper
     /// <inheritdoc />
     public StepVector Step(ISolverSession solverSession, StepVector initialGuess)
     {
-        var step = solverSession.RootFinder.FindRoot(solverSession, initialGuess);
+        var step = solverSession.RootFinder.FindRoot(solverSession, solverSession.CurrentState, initialGuess);
 
         if (solverSession.LastStep is not null)
             return (step + solverSession.LastStep) / 2;

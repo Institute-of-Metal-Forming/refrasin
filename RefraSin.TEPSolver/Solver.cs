@@ -51,17 +51,19 @@ public class Solver
     {
         session.StoreCurrentState();
 
-        while (session.CurrentTime < session.EndTime)
+        while (session.CurrentState.Time < session.EndTime)
         {
             var stepVector = TrySolveStepUntilValid(session);
             session.LastStep = stepVector;
             var particleTimeSteps = GenerateTimeStepsFromGradientSolution(session, stepVector).ToArray();
             session.StoreStep(particleTimeSteps);
 
-            session.IncreaseCurrentTime();
-
-            foreach (var timeStep in particleTimeSteps)
-                session.Particles[timeStep.ParticleId].ApplyTimeStep(stepVector, session.TimeStepWidth);
+            session.CurrentState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
+                particleTimeSteps
+                    .Select(ts => session.CurrentState.Particles[ts.ParticleId].ApplyTimeStep(stepVector, session.TimeStepWidth))
+                    .ToReadOnlyParticleCollection()
+            );
+            session.TimeStepIndex += 1;
 
             session.StoreCurrentState();
             session.MayIncreaseTimeStepWidth();
@@ -82,7 +84,7 @@ public class Solver
 
                 foreach (var validator in session.StepValidators)
                 {
-                    validator.Validate(session, step);
+                    validator.Validate(session.CurrentState, step, session.Options);
                 }
 
                 return step;
@@ -94,7 +96,7 @@ public class Solver
 
                 if (e is InstabilityException)
                 {
-                    session.ResetTo(session.StateMemory.Pop());
+                    session.CurrentState = session.StateMemory.Pop();
                 }
             }
         }
@@ -108,7 +110,7 @@ public class Solver
         {
             return session.TimeStepper.Step(session, session.LastStep ?? LagrangianGradient.GuessSolution(session));
         }
-        catch (NonConvergenceException e)
+        catch (NonConvergenceException)
         {
             return session.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session));
         }
@@ -116,13 +118,13 @@ public class Solver
 
     private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(SolverSession session, StepVector stepVector)
     {
-        foreach (var p in session.Particles.Values)
+        foreach (var p in session.CurrentState.Particles)
             yield return new ParticleTimeStep(
                 p.Id,
                 stepVector[p].RadialDisplacement,
                 stepVector[p].AngleDisplacement,
                 stepVector[p].RotationDisplacement,
-                p.Surface.Select(n =>
+                p.Nodes.Select(n =>
                     new NodeTimeStep(n.Id,
                         stepVector[n].NormalDisplacement,
                         0,

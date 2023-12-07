@@ -1,7 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using MoreLinq;
-using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 
@@ -10,15 +10,15 @@ namespace RefraSin.TEPSolver.Test;
 public class MatrixStructureTest
 {
     private StepVectorMap _map;
-    private IParticle[] _particles;
-    private INode[] _nodes;
+    private Particle[] _particles;
+    private NodeBase[] _nodes;
 
     [SetUp]
     public void Setup()
     {
         var fac = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty) { NodeCount = 20 };
 
-        _particles = Enumerable.Range(0, 3).Select(_ => fac.GetParticle()).ToArray();
+        _particles = Enumerable.Range(0, 3).Select(_ => new Particle(fac.GetParticle(), null!)).ToArray();
         _nodes = _particles.SelectMany(p => p.Nodes).ToArray();
 
         _map = new StepVectorMap(_particles, _nodes);
@@ -50,7 +50,7 @@ public class MatrixStructureTest
                         {
                             (_map.GetIndex(n.Id, NodeUnknown.NormalDisplacement), 1),
                             (_map.GetIndex(n.Id, NodeUnknown.FluxToUpper), 2),
-                            (_map.GetIndex(p[i - 1].Id, NodeUnknown.FluxToUpper), 2)
+                            (_map.GetIndex(p.Nodes[i - 1].Id, NodeUnknown.FluxToUpper), 2)
                         }
                 )
             )
@@ -100,13 +100,13 @@ public class MatrixStructureTest
                 (_map.GetIndex(node.Id, NodeUnknown.FluxToUpper), 1),
                 (_map.GetIndex(GlobalUnknown.Lambda1), 1),
                 (_map.GetIndex(node.Id, NodeUnknown.Lambda2), 1),
-                (_map.GetIndex(particleSpec[i + 1].Id, NodeUnknown.Lambda2), 1),
+                (_map.GetIndex(particleSpec.Nodes[i + 1].Id, NodeUnknown.Lambda2), 1),
             });
             yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
             {
                 (_map.GetIndex(node.Id, NodeUnknown.NormalDisplacement), 1),
                 (_map.GetIndex(node.Id, NodeUnknown.FluxToUpper), 1),
-                (_map.GetIndex(particleSpec[i - 1].Id, NodeUnknown.FluxToUpper), 1),
+                (_map.GetIndex(particleSpec.Nodes[i - 1].Id, NodeUnknown.FluxToUpper), 1),
             });
         }
     }

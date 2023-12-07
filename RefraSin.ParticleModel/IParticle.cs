@@ -24,18 +24,5 @@ public interface IParticle : IVertex
     /// <summary>
     /// List of node specs.
     /// </summary>
-    public IReadOnlyList<INode> Nodes { get; }
-
-    /// <summary>
-    /// Returns the node on index i, while the index is considered ringwise.
-    /// </summary>
-    /// <param name="i"></param>
-    public INode this[int i] { get; }
-
-    /// <summary>
-    /// Returns the node with the given Id.
-    /// </summary>
-    /// <param name="nodeId"></param>
-    /// <exception cref="IndexOutOfRangeException">if a node with given Id is not part of this particle</exception>
-    public INode this [Guid nodeId] { get; }
+    public IReadOnlyNodeCollection<INode> Nodes { get; }
 }
