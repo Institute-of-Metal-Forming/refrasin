@@ -22,9 +22,8 @@ internal class SolverSession : ISolverSession
 
     public SolverSession(Solver solver, ISinteringProcess process)
     {
+        StartTime = process.StartTime;
         EndTime = process.EndTime;
-        CurrentTime = process.StartTime;
-        StartTime = CurrentTime;
         Temperature = process.Temperature;
         GasConstant = process.GasConstant;
         TimeStepWidth = solver.Options.InitialTimeStepWidth;
@@ -40,18 +39,13 @@ internal class SolverSession : ISolverSession
 
         Logger = solver.LoggerFactory.CreateLogger<Solver>();
 
-        var particles = process.Particles.Select(ps => new Particle(ps, this)).ToArray();
-        Particles = particles.ToDictionary(p => p.Id);
-        Nodes = Particles.Values.SelectMany(p => p.Nodes).ToDictionary(n => n.Id);
+        CurrentState = new SolutionState(StartTime, process.Particles.Select(ps => new Particle(ps, this)).ToReadOnlyParticleCollection());
 
-        StateMemory = new FixedStack<ISolutionState>(Options.SolutionMemoryCount);
+        StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
         TimeStepper = solver.TimeStepper;
         StepValidators = solver.StepValidators.ToArray();
         RootFinder = solver.RootFinder;
     }
-
-    /// <inheritdoc />
-    public double CurrentTime { get; private set; }
 
     /// <inheritdoc />
     public double StartTime { get; }
@@ -60,7 +54,7 @@ internal class SolverSession : ISolverSession
     public double EndTime { get; }
 
     /// <inheritdoc />
-    public int TimeStepIndex { get; private set; }
+    public int TimeStepIndex { get; set; }
 
     /// <inheritdoc />
     public double Temperature { get; }
@@ -71,18 +65,10 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public double TimeStepWidth { get; private set; }
 
-    /// <inheritdoc cref="ISolverSession.Particles"/>
-    public Dictionary<Guid, Particle> Particles { get; private set; }
-
-    IReadOnlyDictionary<Guid, Particle> ISolverSession.Particles => Particles;
-
-    /// <inheritdoc cref="ISolverSession.Nodes"/>
-    public Dictionary<Guid, NodeBase> Nodes { get; private set; }
-
-    IReadOnlyDictionary<Guid, NodeBase> ISolverSession.Nodes => Nodes;
-
     /// <inheritdoc />
     public ISolverOptions Options { get; }
+
+    public SolutionState CurrentState { get; set; }
 
     /// <inheritdoc />
     public IReadOnlyMaterialRegistry MaterialRegistry => _materialRegistry;
@@ -100,13 +86,7 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public IRootFinder RootFinder { get; }
 
-    public FixedStack<ISolutionState> StateMemory { get; }
-
-    public void IncreaseCurrentTime()
-    {
-        TimeStepIndex++;
-        CurrentTime += TimeStepWidth;
-    }
+    public FixedStack<SolutionState> StateMemory { get; }
 
     public void IncreaseTimeStepWidth()
     {
@@ -140,14 +120,13 @@ internal class SolverSession : ISolverSession
 
     public void StoreCurrentState()
     {
-        var solutionState = new SolutionState(CurrentTime, Particles.Values);
-        _solutionStorage.StoreState(solutionState);
-        StateMemory.Push(solutionState);
+        _solutionStorage.StoreState(CurrentState);
+        StateMemory.Push(CurrentState);
     }
 
     public void StoreStep(IEnumerable<IParticleTimeStep> particleTimeSteps)
     {
-        var nextTime = CurrentTime + TimeStepWidth;
-        _solutionStorage.StoreStep(new SolutionStep(CurrentTime, nextTime, particleTimeSteps));
+        var nextTime = CurrentState.Time + TimeStepWidth;
+        _solutionStorage.StoreStep(new SolutionStep(CurrentState.Time, nextTime, particleTimeSteps));
     }
 }

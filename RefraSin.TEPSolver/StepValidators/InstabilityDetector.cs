@@ -6,9 +6,9 @@ namespace RefraSin.TEPSolver.StepValidators;
 public class InstabilityDetector : IStepValidator
 {
     /// <inheritdoc />
-    public void Validate(ISolverSession solverSession, StepVector stepVector)
+    public void Validate(StepVector stepVector, ISolverOptions options)
     {
-        foreach (var particle in solverSession.Particles.Values)
+        foreach (var particle in stepVector.StepVectorMap.Particles)
         {
             var displacements = particle.Nodes.Select(n => stepVector[n].NormalDisplacement).ToArray();
             var differences = displacements.Zip(displacements.Skip(1).Append(displacements[0]), (current, next) => next - current).ToArray();

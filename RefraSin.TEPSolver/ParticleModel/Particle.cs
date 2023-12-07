@@ -36,7 +36,7 @@ public class Particle : IParticle
             .ToDictionary(i => i.To);
 
         SolverSession = solverSession;
-        _nodes = particle.Nodes.Select(node => (NodeBase)node switch
+        _nodes = particle.Nodes.Select(node => node switch
         {
             INeckNode neckNode                   => new NeckNode(neckNode, this, solverSession),
             IGrainBoundaryNode grainBoundaryNode => new GrainBoundaryNode(grainBoundaryNode, this, solverSession),

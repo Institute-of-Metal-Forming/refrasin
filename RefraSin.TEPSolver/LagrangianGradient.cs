@@ -21,13 +21,13 @@ internal static class LagrangianGradient
     private static IEnumerable<double> YieldEquations(ISolverSession solverSession, StepVector stepVector)
     {
         // fix root particle to origin
-        var root = solverSession.Particles.Values.First()!;
+        var root = stepVector.StepVectorMap.Particles[0];
         yield return stepVector[root].RadialDisplacement;
         yield return stepVector[root].AngleDisplacement;
         yield return stepVector[root].RotationDisplacement;
 
         // yield particle displacement equations
-        foreach (var particle in solverSession.Particles.Values.Skip(1))
+        foreach (var particle in stepVector.StepVectorMap.Particles.Skip(1))
         {
             yield return stepVector[particle].RadialDisplacement;
             yield return stepVector[particle].AngleDisplacement;
@@ -35,7 +35,7 @@ internal static class LagrangianGradient
         }
 
         // yield node equations
-        foreach (var node in solverSession.Nodes.Values)
+        foreach (var node in stepVector.StepVectorMap.Nodes)
         {
             yield return StateVelocityDerivative(solverSession, stepVector, node);
             yield return FluxDerivative(solverSession, stepVector, node);
@@ -76,12 +76,12 @@ internal static class LagrangianGradient
 
     private static double DissipationEquality(ISolverSession solverSession, StepVector stepVector)
     {
-        var dissipation = solverSession.Nodes.Values.Select(n =>
+        var dissipation = stepVector.StepVectorMap.Nodes.Select(n =>
             -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
         ).Sum();
 
         var dissipationFunction = solverSession.GasConstant * solverSession.Temperature / 2
-                                * solverSession.Nodes.Values.Select(n =>
+                                * stepVector.StepVectorMap.Nodes.Select(n =>
                                       (
                                           n.SurfaceDistance.ToUpper * Math.Pow(stepVector[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
                                         + n.SurfaceDistance.ToLower * Math.Pow(stepVector[n.Lower].FluxToUpper, 2) /
@@ -93,7 +93,8 @@ internal static class LagrangianGradient
     }
 
     public static StepVector GuessSolution(ISolverSession solverSession) =>
-        new(YieldInitialGuess(solverSession).ToArray(), new StepVectorMap(solverSession.Particles.Values, solverSession.Nodes.Values));
+        new(YieldInitialGuess(solverSession).ToArray(),
+            new StepVectorMap(solverSession.CurrentState.Particles, solverSession.CurrentState.AllNodes.Values));
 
     private static IEnumerable<double> YieldInitialGuess(ISolverSession solverSession) =>
         YieldGlobalUnknownsInitialGuess()
@@ -110,7 +111,7 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldParticleUnknownsInitialGuess(ISolverSession solverSession)
     {
-        foreach (var particle in solverSession.Particles.Values)
+        foreach (var particle in solverSession.CurrentState.Particles)
         {
             yield return 0;
             yield return 0;
@@ -120,7 +121,7 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldNodeUnknownsInitialGuess(ISolverSession solverSession)
     {
-        foreach (var node in solverSession.Nodes.Values)
+        foreach (var node in solverSession.CurrentState.AllNodes.Values)
         {
             yield return node.GuessNormalDisplacement();
             yield return node.GuessFluxToUpper();

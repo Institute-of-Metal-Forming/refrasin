@@ -4,5 +4,5 @@ namespace RefraSin.TEPSolver.StepValidators;
 
 public interface IStepValidator
 {
-    public void Validate(ISolverSession solverSession, StepVector stepVector);
+    public void Validate(StepVector stepVector, ISolverOptions options);
 }

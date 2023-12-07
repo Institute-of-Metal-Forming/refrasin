@@ -20,7 +20,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase where TConta
     /// Verbundener Knoten des anderen Partikels.
     /// </summary>
     public TContacted ContactedNode => _contactedNode ??=
-        SolverSession.Nodes[ContactedNodeId] as TContacted ??
+        SolverSession.CurrentState.AllNodes[ContactedNodeId] as TContacted ??
         throw new InvalidCastException(
             $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(TContacted)}."
         );
