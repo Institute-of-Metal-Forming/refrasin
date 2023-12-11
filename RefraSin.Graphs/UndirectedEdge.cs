@@ -4,10 +4,10 @@ public class UndirectedEdge<TVertex> : IEdge<TVertex> where TVertex : IVertex
 {
     public UndirectedEdge(IEdge<TVertex> edge) : this(edge.From, edge.To) { }
 
-    public UndirectedEdge(TVertex start, TVertex end)
+    public UndirectedEdge(TVertex from, TVertex to)
     {
-        From = start;
-        To = end;
+        From = from;
+        To = to;
     }
 
     public void Deconstruct(out TVertex start, out TVertex end)
