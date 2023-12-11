@@ -74,29 +74,52 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase where TConta
 /// </summary>
 public abstract class ContactNodeBase : NodeBase, INodeContact
 {
+    private Guid? _contactedParticleId;
+    private Guid? _contactedNodeId;
+
     /// <inheritdoc />
     protected ContactNodeBase(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession)
     {
         if (node is INodeContact nodeContact)
         {
-            ContactedNodeId = nodeContact.ContactedNodeId;
-            ContactedParticleId = nodeContact.ContactedParticleId;
+            _contactedNodeId = nodeContact.ContactedNodeId;
+            _contactedParticleId = nodeContact.ContactedParticleId;
         }
         else
-            throw new ArgumentException($"Given node does not implement {typeof(INodeContact)}.");
+        {
+            _contactedNodeId = null;
+            _contactedParticleId = null;
+        }
     }
 
     protected ContactNodeBase(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession, Guid contactedNodeId,
         Guid contactedParticleId) :
         base(id, r, phi, particle, solverSession)
     {
-        ContactedNodeId = contactedNodeId;
-        ContactedParticleId = contactedParticleId;
+        _contactedNodeId = contactedNodeId;
+        _contactedParticleId = contactedParticleId;
     }
 
     /// <inheritdoc />
-    public Guid ContactedParticleId { get; }
+    public Guid ContactedParticleId => _contactedParticleId ??= SolverSession.CurrentState.AllNodes[ContactedNodeId].ParticleId;
 
     /// <inheritdoc />
-    public Guid ContactedNodeId { get; }
+    public Guid ContactedNodeId
+    {
+        get
+        {
+            if (_contactedNodeId.HasValue)
+                return _contactedNodeId.Value;
+
+            var error = SolverSession.Options.RelativeNodeCoordinateEquivalencePrecision * Particle.MeanRadius;
+
+            var contactedNode =
+                SolverSession.CurrentState.AllNodes.Values.FirstOrDefault(n =>
+                    n.Id != Id && n.Coordinates.Absolute.Equals(Coordinates.Absolute, error)
+                );
+
+            _contactedNodeId = contactedNode?.Id ?? throw new InvalidOperationException("No corresponding node with same location could be found.");
+            return _contactedNodeId.Value;
+        }
+    }
 }

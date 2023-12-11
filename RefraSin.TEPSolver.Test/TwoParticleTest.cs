@@ -9,6 +9,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.StepValidators;
 using ScottPlot;
 using Serilog;
 using static System.Math;
@@ -23,7 +24,7 @@ public class TwoParticleTest
     [SetUp]
     public void Setup()
     {
-        var endTime = 1e2;
+        var endTime = 1e1;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6;
 
         var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticle();
@@ -61,7 +62,8 @@ public class TwoParticleTest
                 MinTimeStepWidth = 0.1,
                 TimeStepAdaptationFactor = 1.5,
             },
-            SolutionStorage = _solutionStorage
+            SolutionStorage = _solutionStorage,
+            StepValidators = new IStepValidator[]{  },
         };
 
         _material = new Material(

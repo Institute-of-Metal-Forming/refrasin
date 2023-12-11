@@ -28,6 +28,8 @@ public interface ISolverOptions
     /// </summary>
     double IterationPrecision { get; }
 
+    public double RelativeNodeCoordinateEquivalencePrecision { get; }
+
     /// <summary>
     /// Goal discretization width in space.
     /// </summary>

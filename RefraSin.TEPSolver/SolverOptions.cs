@@ -14,10 +14,13 @@ public class SolverOptions : ISolverOptions
     public int RootFindingMaxIterationCount { get; set; } = 100;
 
     /// <inheritdoc />
-    public double RootFindingAccuracy { get; } = 1e-8;
+    public double RootFindingAccuracy { get; set; } = 1e-8;
 
     /// <inheritdoc />
     public double IterationPrecision { get; set; } = 0.01;
+
+    /// <inheritdoc />
+    public double RelativeNodeCoordinateEquivalencePrecision { get; set; } = 1e-4;
 
     /// <inheritdoc />
     public double DiscretizationWidth { get; set; } = 10e-3;

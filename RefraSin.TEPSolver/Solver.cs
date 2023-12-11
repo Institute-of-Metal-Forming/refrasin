@@ -34,7 +34,7 @@ public class Solver
 
     public ITimeStepper TimeStepper { get; set; } = new AdamsMoultonTimeStepper();
 
-    public IEnumerable<IStepValidator> StepValidators { get; } = new[] { new InstabilityDetector() };
+    public IEnumerable<IStepValidator> StepValidators { get; set; } = new[] { new InstabilityDetector() };
 
     public IRootFinder RootFinder { get; } = new BroydenRootFinder();
 
