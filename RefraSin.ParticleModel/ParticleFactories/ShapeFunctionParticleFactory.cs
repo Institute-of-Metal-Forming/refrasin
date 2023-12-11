@@ -28,13 +28,13 @@ public class ShapeFunctionParticleFactory : IParticleFactory
 
     public Guid MaterialId { get; }
 
-    public AbsolutePoint CenterCoordinates { get; set; } = new();
+    public AbsolutePoint CenterCoordinates { get; init; } = new();
 
-    public Angle RotationAngle { get; } = 0;
+    public Angle RotationAngle { get; init; } = 0;
 
-    public int NodeCount { get; set; } = 100;
+    public int NodeCount { get; init; } = 100;
 
-    public Func<ShapeFunctionParticleFactory, int>? NodeCountFunction { get; set; }
+    public Func<ShapeFunctionParticleFactory, int>? NodeCountFunction { get; init; }
 
     public virtual double ParticleShapeFunction(double phi) => BaseRadius * (1 + PeakHeight * Cos(PeakCount * phi) + Ovality * Cos(2 * phi));
 
@@ -56,7 +56,8 @@ public class ShapeFunctionParticleFactory : IParticleFactory
                 (phi, r) => new Node(
                     Guid.NewGuid(),
                     particleId,
-                    new PolarPoint(phi, r)
+                    new PolarPoint(phi, r),
+                    NodeType.SurfaceNode
                 )
             )
         );

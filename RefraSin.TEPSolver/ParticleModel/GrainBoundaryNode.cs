@@ -19,6 +19,9 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>, IGrainBound
         solverSession, contactedNodeId, contactedParticleId) { }
 
     /// <inheritdoc />
+    public override NodeType Type => NodeType.GrainBoundaryNode;
+
+    /// <inheritdoc />
     public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
         MaterialInterface.InterfaceEnergy,
         MaterialInterface.InterfaceEnergy

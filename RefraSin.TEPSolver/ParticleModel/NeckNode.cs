@@ -17,6 +17,9 @@ public class NeckNode : ContactNodeBase<NeckNode>, INeckNode
         Guid contactedParticleId) : base(id, r, phi, particle,
         solverSession, contactedNodeId, contactedParticleId) { }
 
+    /// <inheritdoc />
+    public override NodeType Type => NodeType.NeckNode;
+
     public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
         Upper.SurfaceEnergy.ToLower,
         Lower.SurfaceEnergy.ToUpper

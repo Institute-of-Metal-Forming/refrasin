@@ -6,10 +6,23 @@ namespace RefraSin.ParticleModel;
 /// <summary>
 /// Represents an immutable record of a neck node.
 /// </summary>
-public record NeckNode(Guid Id, Guid ParticleId, PolarPoint Coordinates, Guid ContactedParticleId, Guid ContactedNodeId,
-    AbsolutePoint AbsoluteCoordinates, ToUpperToLower SurfaceDistance, ToUpperToLowerAngle SurfaceRadiusAngle, ToUpperToLowerAngle AngleDistance,
-    ToUpperToLower Volume, NormalTangentialAngle SurfaceVectorAngle, NormalTangential GibbsEnergyGradient, NormalTangential VolumeGradient,
-    ToUpperToLower SurfaceEnergy, ToUpperToLower SurfaceDiffusionCoefficient, double TransferCoefficient) : Node(Id, ParticleId, Coordinates),
+public record NeckNode(
+    Guid Id,
+    Guid ParticleId,
+    PolarPoint Coordinates,
+    Guid ContactedParticleId,
+    Guid ContactedNodeId,
+    AbsolutePoint AbsoluteCoordinates,
+    ToUpperToLower SurfaceDistance,
+    ToUpperToLowerAngle SurfaceRadiusAngle,
+    ToUpperToLowerAngle AngleDistance,
+    ToUpperToLower Volume,
+    NormalTangentialAngle SurfaceVectorAngle,
+    NormalTangential GibbsEnergyGradient,
+    NormalTangential VolumeGradient,
+    ToUpperToLower SurfaceEnergy,
+    ToUpperToLower SurfaceDiffusionCoefficient,
+    double TransferCoefficient) : Node(Id, ParticleId, Coordinates, NodeType.NeckNode),
     INeckNode
 {
     public NeckNode(INeckNode template) : this(

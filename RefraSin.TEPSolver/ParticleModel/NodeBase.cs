@@ -79,6 +79,9 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     public PolarPoint Coordinates { get; }
 
     /// <inheritdoc />
+    public abstract NodeType Type { get; }
+
+    /// <inheritdoc />
     public AbsolutePoint AbsoluteCoordinates => Coordinates.Absolute;
 
     /// <summary>
