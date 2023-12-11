@@ -30,6 +30,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageVersion>
+        <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     </ItemGroup>
 
 </Project>
