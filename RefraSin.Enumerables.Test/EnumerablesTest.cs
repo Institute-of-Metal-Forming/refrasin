@@ -39,22 +39,22 @@ public class EnumerablesTest
         var no4 = new RingItem("no4");
         root.InsertBelow(no4);
 
-        Assert.IsTrue(ring.Select(i => i.Name).Zip(new[] { "root", "no2", "no1", "no3", "toReplace", "no4" }, (first, second) => (first, second))
+        Assert.That(ring.Select(i => i.Name).Zip(new[] { "root", "no2", "no1", "no3", "toReplace", "no4" }, (first, second) => (first, second))
             .All(t => t.first == t.second));
 
         toReplace.Replace(new RingItem("new1"));
 
-        Assert.IsTrue(ring.Select(i => i.Name).Zip(new[] { "root", "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
+        Assert.That(ring.Select(i => i.Name).Zip(new[] { "root", "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
             .All(t => t.first == t.second));
 
         root.Replace(toReplace);
 
-        Assert.IsTrue(ring.Select(i => i.Name).Zip(new[] { "toReplace", "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
+        Assert.That(ring.Select(i => i.Name).Zip(new[] { "toReplace", "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
             .All(t => t.first == t.second));
 
         toReplace.Remove();
 
-        Assert.IsTrue(ring.Select(i => i.Name).Zip(new[] { "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
+        Assert.That(ring.Select(i => i.Name).Zip(new[] { "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
             .All(t => t.first == t.second));
 
         foreach (var item in ring)
@@ -62,7 +62,7 @@ public class EnumerablesTest
             Console.WriteLine(item);
         }
 
-        Assert.IsTrue(ring.GetSegment(no1, no4).Select(i => i.Name).Zip(new[] { "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
+        Assert.That(ring.GetSegment(no1, no4).Select(i => i.Name).Zip(new[] { "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
             .All(t => t.first == t.second));
 
         no3.Lower = no4;
@@ -73,7 +73,7 @@ public class EnumerablesTest
 
         ring = new Ring<RingItem>(ring.Select(i => new RingItem(i.Name)));
 
-        Assert.IsTrue(ring.Select(i => i.Name).Zip(new[] { "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
+        Assert.That(ring.Select(i => i.Name).Zip(new[] { "no2", "no1", "no3", "new1", "no4" }, (first, second) => (first, second))
             .All(t => t.first == t.second));
     }
 
@@ -216,7 +216,7 @@ public class EnumerablesTest
 
         foreach (var (original, mapped) in tree.Zip(result, (first, second) => (first, second)))
         {
-            Assert.AreEqual(original.Value + "*", mapped.Value);
+            Assert.That(original.Value + "*", Is.EqualTo(mapped.Value));
         }
     }
 }

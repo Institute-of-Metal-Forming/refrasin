@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
@@ -9,19 +9,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
-        <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj" />
-        <ProjectReference Include="..\RefraSin.MaterialData\RefraSin.MaterialData.csproj" />
-        <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj" />
-        <ProjectReference Include="..\RefraSin.ProcessModel\RefraSin.ProcessModel.csproj" />
-        <ProjectReference Include="..\RefraSin.Storage\RefraSin.Storage.csproj" />
+        <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj"/>
+        <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj"/>
+        <ProjectReference Include="..\RefraSin.MaterialData\RefraSin.MaterialData.csproj"/>
+        <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj"/>
+        <ProjectReference Include="..\RefraSin.ProcessModel\RefraSin.ProcessModel.csproj"/>
+        <ProjectReference Include="..\RefraSin.Storage\RefraSin.Storage.csproj"/>
     </ItemGroup>
 
-
     <ItemGroup>
-        <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
-        <PackageReference Include="morelinq" Version="4.1.0" />
+        <PackageReference Include="MathNet.Numerics"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+        <PackageReference Include="morelinq"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -32,5 +31,4 @@
             <_Parameter1>$(MSBuildProjectName).FSharp</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
-
 </Project>
