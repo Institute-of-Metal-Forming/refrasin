@@ -32,4 +32,9 @@
     <ItemGroup>
       <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="MatrixStructureTest.cs" />
+      <None Include="MatrixStructureTest.cs" />
+    </ItemGroup>
 </Project>

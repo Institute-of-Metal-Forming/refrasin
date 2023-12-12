@@ -86,22 +86,33 @@ public class Solver
         {
             var stepVector = TrySolveStepUntilValid(session);
             session.LastStep = stepVector;
-            var particleTimeSteps = GenerateTimeStepsFromGradientSolution(session, stepVector).ToArray();
-            session.StoreStep(particleTimeSteps);
 
-            session.CurrentState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
-                particleTimeSteps
-                    .Select(ts => session.CurrentState.Particles[ts.ParticleId].ApplyTimeStep(stepVector, session.TimeStepWidth))
-                    .ToReadOnlyParticleCollection(),
-                    session.CurrentState.Contacts.Keys
-            );
+            CreateNewState(session, stepVector);
             session.TimeStepIndex += 1;
-
-            session.StoreCurrentState();
             session.MayIncreaseTimeStepWidth();
         }
 
         session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", session.TimeStepIndex + 1);
+    }
+
+    private static void CreateNewState(SolverSession session, StepVector stepVector)
+    {
+        var newParticles = new Dictionary<Guid, Particle>()
+        {
+            [session.CurrentState.Particles.Root.Id] = session.CurrentState.Particles.Root.ApplyTimeStep(null, stepVector, session.TimeStepWidth)
+        };
+
+        foreach (var contact in session.CurrentState.Contacts.Values)
+        {
+            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(newParticles[contact.From.Id], stepVector, session.TimeStepWidth);
+        }
+        
+        session.CurrentState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
+            newParticles.Values,
+            session.CurrentState.Contacts.Keys
+        );
+
+        session.StoreCurrentState();
     }
 
     internal static StepVector TrySolveStepUntilValid(SolverSession session)
@@ -146,25 +157,5 @@ public class Solver
         {
             return session.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session));
         }
-    }
-
-    private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(SolverSession session, StepVector stepVector)
-    {
-        foreach (var p in session.CurrentState.Particles)
-            yield return new ParticleTimeStep(
-                p.Id,
-                stepVector[p].RadialDisplacement,
-                stepVector[p].AngleDisplacement,
-                stepVector[p].RotationDisplacement,
-                p.Nodes.Select(n =>
-                    new NodeTimeStep(n.Id,
-                        stepVector[n].NormalDisplacement,
-                        0,
-                        new ToUpperToLower(
-                            stepVector[n].FluxToUpper,
-                            -stepVector[n].FluxToUpper
-                        ),
-                        0
-                    )));
     }
 }

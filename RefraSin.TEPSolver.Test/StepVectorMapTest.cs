@@ -6,6 +6,7 @@ using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.StepVectors;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
+using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver.Test;
 
@@ -25,7 +26,7 @@ public class StepVectorMapTest
             .GetParticle(), null!);
         var particles = new[] { _particleSpec1, _particleSpec2 };
 
-        _map = new StepVectorMap(particles, particles.SelectMany(p => p.Nodes));
+        _map = new StepVectorMap(new []{new ParticleContact(_particleSpec1, _particleSpec2)}, particles.SelectMany(p => p.Nodes));
     }
 
     [Test]

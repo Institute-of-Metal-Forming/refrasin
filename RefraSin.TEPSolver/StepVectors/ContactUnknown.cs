@@ -1,6 +1,6 @@
 namespace RefraSin.TEPSolver.StepVectors;
 
-internal enum ParticleUnknown
+internal enum ContactUnknown
 {
     RadialDisplacement,
     AngleDisplacement,

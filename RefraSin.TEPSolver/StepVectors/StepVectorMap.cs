@@ -5,30 +5,33 @@ namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(IEnumerable<Particle> particles, IEnumerable<NodeBase> nodes)
+    public StepVectorMap(IEnumerable<ParticleContact> contacts, IEnumerable<NodeBase> nodes)
     {
         GlobalUnknownsCount = Enum.GetNames(typeof(GlobalUnknown)).Length;
 
-        ParticleUnknownsCount = Enum.GetNames(typeof(ParticleUnknown)).Length;
-        var particlesArray = particles as Particle[] ?? particles.ToArray();
-        ParticleCount = particlesArray.Length;
-        ParticleStartIndex = GlobalUnknownsCount;
-        ParticleIndices = particlesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        ContactUnknownsCount = Enum.GetNames(typeof(ContactUnknown)).Length;
+        var contactsArray = contacts as ParticleContact[] ?? contacts.ToArray();
+        ContactCount = contactsArray.Length;
+        ContactStartIndex = GlobalUnknownsCount;
+        ContactIndices = contactsArray.Index().ToDictionary(
+            kvp => (kvp.Value.From.Id, kvp.Value.To.Id),
+            kvp => kvp.Key
+        );
 
         NodeUnknownsCount = Enum.GetNames(typeof(NodeUnknown)).Length;
         var nodesArray = nodes as NodeBase[] ?? nodes.ToArray();
         NodeCount = nodesArray.Length;
-        NodeStartIndex = ParticleStartIndex + ParticleCount * ParticleUnknownsCount;
+        NodeStartIndex = ContactStartIndex + ContactCount * ContactUnknownsCount;
         NodeIndices = nodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         TotalUnknownsCount = NodeStartIndex + NodeCount * NodeUnknownsCount;
     }
 
-    public int ParticleCount { get; }
+    public int ContactCount { get; }
 
-    public int ParticleStartIndex { get; }
+    public int ContactStartIndex { get; }
 
-    public IReadOnlyDictionary<Guid, int> ParticleIndices { get; }
+    public IReadOnlyDictionary<(Guid from, Guid to), int> ContactIndices { get; }
 
     public int NodeCount { get; }
 
@@ -40,14 +43,14 @@ public class StepVectorMap
 
     public int GlobalUnknownsCount { get; }
 
-    public int ParticleUnknownsCount { get; }
+    public int ContactUnknownsCount { get; }
 
     public int NodeUnknownsCount { get; }
 
     internal int GetIndex(GlobalUnknown unknown) => (int)unknown;
 
-    internal int GetIndex(Guid particleId, ParticleUnknown unknown) =>
-        ParticleStartIndex + ParticleUnknownsCount * ParticleIndices[particleId] + (int)unknown;
+    internal int GetIndex(Guid fromParticleId, Guid toParticleId, ContactUnknown unknown) =>
+        ContactStartIndex + ContactUnknownsCount * ContactIndices[(fromParticleId, toParticleId)] + (int)unknown;
 
     internal int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + NodeUnknownsCount * NodeIndices[nodeId] + (int)unknown;
 }

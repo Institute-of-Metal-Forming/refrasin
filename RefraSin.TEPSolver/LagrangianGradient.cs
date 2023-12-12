@@ -20,18 +20,12 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldEquations(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
     {
-        // fix root particle to origin
-        var root = currentState.Particles[0];
-        yield return stepVector[root].RadialDisplacement;
-        yield return stepVector[root].AngleDisplacement;
-        yield return stepVector[root].RotationDisplacement;
-
         // yield particle displacement equations
-        foreach (var particle in currentState.Particles.Skip(1))
+        foreach (var contact in currentState.Contacts.Values)
         {
-            yield return stepVector[particle].RadialDisplacement;
-            yield return stepVector[particle].AngleDisplacement;
-            yield return stepVector[particle].RotationDisplacement;
+            yield return stepVector[contact].RadialDisplacement;
+            yield return stepVector[contact].AngleDisplacement;
+            yield return stepVector[contact].RotationDisplacement;
         }
 
         // yield node equations
@@ -94,7 +88,7 @@ internal static class LagrangianGradient
 
     public static StepVector GuessSolution(ISolverSession solverSession) =>
         new(YieldInitialGuess(solverSession).ToArray(),
-            new StepVectorMap(solverSession.CurrentState.Particles, solverSession.CurrentState.AllNodes.Values));
+            new StepVectorMap(solverSession.CurrentState.Contacts.Values, solverSession.CurrentState.AllNodes.Values));
 
     private static IEnumerable<double> YieldInitialGuess(ISolverSession solverSession) =>
         YieldGlobalUnknownsInitialGuess()
@@ -111,7 +105,7 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldParticleUnknownsInitialGuess(ISolverSession solverSession)
     {
-        foreach (var particle in solverSession.CurrentState.Particles)
+        foreach (var contact in solverSession.CurrentState.Contacts)
         {
             yield return 0;
             yield return 0;
