@@ -39,8 +39,6 @@ internal class SolverSession : ISolverSession
 
         Logger = solver.LoggerFactory.CreateLogger<Solver>();
 
-        CurrentState = new SolutionState(StartTime, process.Particles.Select(ps => new Particle(ps, this)).ToReadOnlyParticleCollection());
-
         StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
         TimeStepper = solver.TimeStepper;
         StepValidators = solver.StepValidators.ToArray();

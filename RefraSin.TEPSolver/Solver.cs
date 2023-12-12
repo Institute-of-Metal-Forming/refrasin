@@ -1,14 +1,19 @@
 using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using RefraSin.Graphs;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
 using RefraSin.TEPSolver.TimeSteppers;
+using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
+using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver;
 
@@ -44,13 +49,39 @@ public class Solver
     public void Solve(ISinteringProcess process)
     {
         var session = new SolverSession(this, process);
+
+        InitCurrentState(process, session);
         DoTimeIntegration(session);
+    }
+
+    private static void InitCurrentState(ISinteringProcess process, SolverSession session)
+    {
+        var particles = process.Particles.Select(ps => new Particle(ps, session)).ToArray();
+        session.CurrentState = new SolutionState(
+            session.StartTime,
+            particles,
+            Array.Empty<(Guid, Guid)>()
+        );
+        session.CurrentState = new SolutionState(
+            session.StartTime,
+            particles,
+            GetParticleContacts(particles)
+        );
+        session.StoreCurrentState();
+    }
+
+    private static (Guid from, Guid to)[] GetParticleContacts(Particle[] particles)
+    {
+        var edges = particles.SelectMany(p => p.Nodes.OfType<NeckNode>())
+            .Select(n => new UndirectedEdge<Particle>(n.Particle, n.ContactedNode.Particle));
+        var graph = new UndirectedGraph<Particle>(particles, edges);
+        var explorer = BreadthFirstExplorer<Particle>.Explore(graph, particles[0]);
+
+        return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
     }
 
     private static void DoTimeIntegration(SolverSession session)
     {
-        session.StoreCurrentState();
-
         while (session.CurrentState.Time < session.EndTime)
         {
             var stepVector = TrySolveStepUntilValid(session);
@@ -61,7 +92,8 @@ public class Solver
             session.CurrentState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
                 particleTimeSteps
                     .Select(ts => session.CurrentState.Particles[ts.ParticleId].ApplyTimeStep(stepVector, session.TimeStepWidth))
-                    .ToReadOnlyParticleCollection()
+                    .ToReadOnlyParticleCollection(),
+                    session.CurrentState.Contacts.Keys
             );
             session.TimeStepIndex += 1;
 
