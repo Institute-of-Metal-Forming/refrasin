@@ -23,8 +23,13 @@ public record GrainBoundaryNode(
     NormalTangential<double> VolumeGradient,
     ToUpperToLower<double> SurfaceEnergy,
     ToUpperToLower<double> SurfaceDiffusionCoefficient,
-    double TransferCoefficient) : Node(Id, ParticleId, Coordinates, NodeType.GrainBoundaryNode),
-    IGrainBoundaryNode
+    double TransferCoefficient,
+    double ContactDistance,
+    Angle ContactDirection,
+    NormalTangentialRotation<Angle> CenterShiftVectorDirection,
+    NormalTangentialRotation<double> ContactDistanceGradient,
+    NormalTangentialRotation<double> ContactDirectionGradient
+) : Node(Id, ParticleId, Coordinates, NodeType.GrainBoundaryNode), IGrainBoundaryNode
 {
     public GrainBoundaryNode(IGrainBoundaryNode template) : this(
         template.Id,
@@ -42,6 +47,11 @@ public record GrainBoundaryNode(
         template.VolumeGradient,
         template.SurfaceEnergy,
         template.SurfaceDiffusionCoefficient,
-        template.TransferCoefficient
+        template.TransferCoefficient,
+        template.ContactDistance,
+        template.ContactDirection,
+        template.CenterShiftVectorDirection,
+        template.ContactDistanceGradient,
+        template.ContactDirectionGradient
     ) { }
 }

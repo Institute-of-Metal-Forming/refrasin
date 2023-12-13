@@ -1,6 +1,9 @@
 using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using static System.Math;
+using static MathNet.Numerics.Constants;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -37,36 +40,43 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase where TConta
     /// <inheritdoc />
     public override double TransferCoefficient => MaterialInterface.TransferCoefficient;
 
-    /// <summary>
-    /// Stellt eine Verbindung zwischen zwei Knoten her (setzt die gegenseitigen <see cref="ContactedNode"/>).
-    /// </summary>
-    /// <param name="other">anderer Knoten</param>
-    public virtual void Connect(TContacted other)
-    {
-        _contactedNode = other;
-        other._contactedNode = (TContacted)this;
-    }
+    /// <inheritdoc />
+    public override double ContactDistance => _contactDistance ??= Particle.CenterCoordinates.DistanceTo(ContactedNode.Particle.CenterCoordinates);
 
-    /// <summary>
-    /// Löst eine Verbindung zwischen zwei Knoten (setzt die gegenseitigen <see cref="ContactedNode"/>).
-    /// </summary>
-    public virtual void Disconnect()
-    {
-        ContactedNode._contactedNode = null;
-        _contactedNode = null;
-    }
+    private double? _contactDistance;
 
-    public class NotConnectedException : InvalidOperationException
-    {
-        public NotConnectedException(ContactNodeBase<TContacted> sourceNode)
-        {
-            SourceNode = sourceNode;
-            Message = $"Contact node {sourceNode} is not connected another node.";
-        }
+    /// <inheritdoc />
+    public override Angle ContactDirection => _contactDirection ??=
+        new PolarVector(Particle.CenterCoordinates - ContactedNode.Particle.CenterCoordinates, Particle.LocalCoordinateSystem).Phi;
 
-        public override string Message { get; }
-        public ContactNodeBase<TContacted> SourceNode { get; }
-    }
+    private Angle? _contactDirection;
+
+    /// <inheritdoc />
+    public override NormalTangentialRotation<Angle> CenterShiftVectorDirection => _centerShiftVectorDirection ??= new NormalTangentialRotation<Angle>(
+        Pi - (Coordinates.Phi - ContactDirection) + (Pi - SurfaceVectorAngle.Normal - SurfaceRadiusAngle.ToLower),
+        -(Coordinates.Phi - ContactDirection) + (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToLower),
+        -(Coordinates.Phi - ContactDirection) + PiOver2 // -δω/2 is missing here, is added in LagrangianGradient
+    );
+
+    private NormalTangentialRotation<Angle>? _centerShiftVectorDirection;
+
+    /// <inheritdoc />
+    public override NormalTangentialRotation<double> ContactDistanceGradient => _contactDistanceGradient ??= new NormalTangentialRotation<double>(
+        -Cos(CenterShiftVectorDirection.Normal),
+        -Cos(CenterShiftVectorDirection.Tangential),
+        -Cos(CenterShiftVectorDirection.Rotation)
+    );
+
+    private NormalTangentialRotation<double>? _contactDistanceGradient;
+
+    /// <inheritdoc />
+    public override NormalTangentialRotation<double> ContactDirectionGradient => _contactDirectionGradient ??= new NormalTangentialRotation<double>(
+        Sin(CenterShiftVectorDirection.Normal) / ContactDistance,
+        Sin(CenterShiftVectorDirection.Tangential) / ContactDistance,
+        Sin(CenterShiftVectorDirection.Rotation) / ContactDistance
+    );
+
+    private NormalTangentialRotation<double>? _contactDirectionGradient;
 }
 
 /// <summary>
@@ -122,4 +132,19 @@ public abstract class ContactNodeBase : NodeBase, INodeContact
             return _contactedNodeId.Value;
         }
     }
+
+    /// <inheritdoc />
+    public abstract double ContactDistance { get; }
+
+    /// <inheritdoc />
+    public abstract Angle ContactDirection { get; }
+
+    /// <inheritdoc />
+    public abstract NormalTangentialRotation<Angle> CenterShiftVectorDirection { get; }
+
+    /// <inheritdoc />
+    public abstract NormalTangentialRotation<double> ContactDistanceGradient { get; }
+
+    /// <inheritdoc />
+    public abstract NormalTangentialRotation<double> ContactDirectionGradient { get; }
 }

@@ -23,8 +23,13 @@ public record NeckNode(
     NormalTangential<double> VolumeGradient,
     ToUpperToLower<double> SurfaceEnergy,
     ToUpperToLower<double> SurfaceDiffusionCoefficient,
-    double TransferCoefficient) : Node(Id, ParticleId, Coordinates, NodeType.NeckNode),
-    INeckNode
+    double TransferCoefficient,
+    double ContactDistance,
+    Angle ContactDirection,
+    NormalTangentialRotation<Angle> CenterShiftVectorDirection,
+    NormalTangentialRotation<double> ContactDistanceGradient,
+    NormalTangentialRotation<double> ContactDirectionGradient
+) : Node(Id, ParticleId, Coordinates, NodeType.NeckNode), INeckNode
 {
     public NeckNode(INeckNode template) : this(
         template.Id,
@@ -42,6 +47,11 @@ public record NeckNode(
         template.VolumeGradient,
         template.SurfaceEnergy,
         template.SurfaceDiffusionCoefficient,
-        template.TransferCoefficient
+        template.TransferCoefficient,
+        template.ContactDistance,
+        template.ContactDirection,
+        template.CenterShiftVectorDirection,
+        template.ContactDistanceGradient,
+        template.ContactDirectionGradient
     ) { }
 }
