@@ -25,12 +25,12 @@ public class StepVectorMap
         NodeIndices = nodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         ContactNodeUnknownsCount = Enum.GetNames(typeof(ContactNodeUnknown)).Length;
-        var contactNodesArray = contactsArray.SelectMany(c => c.From.Nodes.OfType<ContactNodeBase>().Where(n=> n.ContactedParticleId == c.To.Id)).ToArray();
+        var contactNodesArray = nodesArray.OfType<ContactNodeBase>().ToArray();
         ContactNodeCount = contactNodesArray.Length;
         ContactNodeStartIndex = NodeStartIndex + NodeCount * NodeUnknownsCount;
         ContactNodeIndices = contactNodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
-        TotalUnknownsCount = ContactStartIndex + ContactNodeCount * ContactNodeUnknownsCount;
+        TotalUnknownsCount = ContactNodeStartIndex + ContactNodeCount * ContactNodeUnknownsCount;
     }
 
     public int ContactCount { get; }

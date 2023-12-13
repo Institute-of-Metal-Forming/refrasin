@@ -26,16 +26,19 @@ internal static class LagrangianGradient
         foreach (var contact in currentState.Contacts.Values)
         {
             var involvedNodes = contact.From.Nodes.OfType<ContactNodeBase>().Where(n => n.ContactedParticleId == contact.To.Id).ToArray();
-            
+
             foreach (var contactNode in involvedNodes)
             {
                 var constraints = ContactConstraints(solverSession, stepVector, contact, contactNode);
                 yield return constraints.distance;
                 yield return constraints.direction;
+                yield return stepVector[contactNode].LambdaContactDistance - stepVector[contactNode.ContactedNode].LambdaContactDistance;
+                yield return stepVector[contactNode].LambdaContactDirection - stepVector[contactNode.ContactedNode].LambdaContactDirection;
             }
 
             yield return involvedNodes.Sum(n => stepVector[n].LambdaContactDistance);
             yield return involvedNodes.Sum(n => stepVector[n].LambdaContactDirection);
+            // TODO: yield derivative for rotation
         }
 
         // yield node equations
@@ -121,8 +124,8 @@ internal static class LagrangianGradient
     private static (double distance, double direction) ContactConstraints(ISolverSession solverSession, StepVector stepVector,
         ParticleContact contact, ContactNodeBase node)
     {
-        var normalShift = stepVector[node].NormalDisplacement + stepVector[node.ContactedNodeBase].NormalDisplacement;
-        var tangentialShift = stepVector[node].TangentialDisplacement + stepVector[node.ContactedNodeBase].TangentialDisplacement;
+        var normalShift = stepVector[node].NormalDisplacement + stepVector[node.ContactedNode].NormalDisplacement;
+        var tangentialShift = stepVector[node].TangentialDisplacement + stepVector[node.ContactedNode].TangentialDisplacement;
         var rotationShift = node.Coordinates.R / Sin((Pi - stepVector[contact].RotationDisplacement) / 2) *
                             Sin(stepVector[contact].RotationDisplacement);
         var rotationDirection = -(node.Coordinates.Phi - node.ContactDirection) + (PiOver2 - stepVector[contact].RotationDisplacement) / 2;
@@ -141,10 +144,13 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldInitialGuess(ISolverSession solverSession) =>
         YieldGlobalUnknownsInitialGuess()
-            .Concat(YieldParticleUnknownsInitialGuess(solverSession)
+            .Concat(
+                YieldContactUnknownsInitialGuess(solverSession)
             )
             .Concat(
                 YieldNodeUnknownsInitialGuess(solverSession)
+            ).Concat(
+                YieldContactNodeUnknownsInitialGuess(solverSession)
             );
 
     private static IEnumerable<double> YieldGlobalUnknownsInitialGuess()
@@ -152,9 +158,9 @@ internal static class LagrangianGradient
         yield return 1;
     }
 
-    private static IEnumerable<double> YieldParticleUnknownsInitialGuess(ISolverSession solverSession)
+    private static IEnumerable<double> YieldContactUnknownsInitialGuess(ISolverSession solverSession)
     {
-        foreach (var contact in solverSession.CurrentState.Contacts)
+        foreach (var _ in solverSession.CurrentState.Contacts.Values)
         {
             yield return 0;
             yield return 0;
@@ -168,6 +174,16 @@ internal static class LagrangianGradient
         {
             yield return node.GuessNormalDisplacement();
             yield return node.GuessFluxToUpper();
+            yield return 1;
+        }
+    }
+
+    private static IEnumerable<double> YieldContactNodeUnknownsInitialGuess(ISolverSession solverSession)
+    {
+        foreach (var _ in solverSession.CurrentState.AllNodes.Values.OfType<ContactNodeBase>())
+        {
+            yield return 0;
+            yield return 1;
             yield return 1;
         }
     }

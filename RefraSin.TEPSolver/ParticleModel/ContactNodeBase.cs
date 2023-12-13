@@ -22,7 +22,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase where TConta
     /// <summary>
     /// Verbundener Knoten des anderen Partikels.
     /// </summary>
-    public TContacted ContactedNode => _contactedNode ??=
+    public new TContacted ContactedNode => _contactedNode ??=
         SolverSession.CurrentState.AllNodes[ContactedNodeId] as TContacted ??
         throw new InvalidCastException(
             $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(TContacted)}."
@@ -130,13 +130,13 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
         }
     }
 
-    public ContactNodeBase ContactedNodeBase => _contactedNodeBase ??=
+    public ContactNodeBase ContactedNode => _contactedNode ??=
         SolverSession.CurrentState.AllNodes[ContactedNodeId] as ContactNodeBase ??
         throw new InvalidCastException(
             $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(ContactNodeBase)}."
         );
 
-    private ContactNodeBase? _contactedNodeBase;
+    private ContactNodeBase? _contactedNode;
 
     /// <inheritdoc />
     public abstract double ContactDistance { get; }
