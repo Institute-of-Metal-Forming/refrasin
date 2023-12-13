@@ -22,9 +22,9 @@ public interface INodeContact
     
     public Angle ContactDirection { get; }
     
-    public NormalTangentialRotation<Angle> CenterShiftVectorDirection { get; }
+    public NormalTangential<Angle> CenterShiftVectorDirection { get; }
     
-    public NormalTangentialRotation<double> ContactDistanceGradient { get; }
+    public NormalTangential<double> ContactDistanceGradient { get; }
     
-    public NormalTangentialRotation<double> ContactDirectionGradient { get; }
+    public NormalTangential<double> ContactDirectionGradient { get; }
 }

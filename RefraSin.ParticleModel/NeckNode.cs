@@ -26,9 +26,9 @@ public record NeckNode(
     double TransferCoefficient,
     double ContactDistance,
     Angle ContactDirection,
-    NormalTangentialRotation<Angle> CenterShiftVectorDirection,
-    NormalTangentialRotation<double> ContactDistanceGradient,
-    NormalTangentialRotation<double> ContactDirectionGradient
+    NormalTangential<Angle> CenterShiftVectorDirection,
+    NormalTangential<double> ContactDistanceGradient,
+    NormalTangential<double> ContactDirectionGradient
 ) : Node(Id, ParticleId, Coordinates, NodeType.NeckNode), INeckNode
 {
     public NeckNode(INeckNode template) : this(

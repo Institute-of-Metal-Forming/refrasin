@@ -1,6 +1,8 @@
 using MathNet.Numerics.RootFinding;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using static System.Math;
+using static MathNet.Numerics.Constants;
 
 namespace RefraSin.TEPSolver;
 
@@ -23,15 +25,27 @@ internal static class LagrangianGradient
         // yield contact equations
         foreach (var contact in currentState.Contacts.Values)
         {
-            yield return stepVector[contact].RadialDisplacement;
-            yield return stepVector[contact].AngleDisplacement;
-            yield return stepVector[contact].RotationDisplacement;
+            var involvedNodes = contact.From.Nodes.OfType<ContactNodeBase>().Where(n => n.ContactedParticleId == contact.To.Id).ToArray();
+            
+            foreach (var contactNode in involvedNodes)
+            {
+                var constraints = ContactConstraints(solverSession, stepVector, contact, contactNode);
+                yield return constraints.distance;
+                yield return constraints.direction;
+            }
+
+            yield return involvedNodes.Sum(n => stepVector[n].LambdaContactDistance);
+            yield return involvedNodes.Sum(n => stepVector[n].LambdaContactDirection);
         }
 
         // yield node equations
         foreach (var node in currentState.AllNodes.Values)
         {
-            yield return StateVelocityDerivative(solverSession, stepVector, node);
+            yield return StateVelocityDerivativeNormal(solverSession, stepVector, node);
+
+            if (node is ContactNodeBase contactNode)
+                yield return StateVelocityDerivativeTangential(solverSession, stepVector, contactNode);
+
             yield return FluxDerivative(solverSession, stepVector, node);
             yield return RequiredConstraint(solverSession, stepVector, node);
         }
@@ -39,12 +53,30 @@ internal static class LagrangianGradient
         yield return DissipationEquality(solverSession, currentState, stepVector);
     }
 
-    private static double StateVelocityDerivative(ISolverSession solverSession, StepVector stepVector, NodeBase node)
+    private static double StateVelocityDerivativeNormal(ISolverSession solverSession, StepVector stepVector, NodeBase node)
     {
         var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
-        var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector[node].Lambda2;
+        var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector[node].LambdaVolume;
 
-        return gibbsTerm + requiredConstraintsTerm;
+        double contactTerm = 0;
+
+        if (node is ContactNodeBase contactNode)
+        {
+            contactTerm = contactNode.ContactDistanceGradient.Normal * stepVector[contactNode].LambdaContactDistance +
+                          contactNode.ContactDirectionGradient.Normal * stepVector[contactNode].LambdaContactDirection;
+        }
+
+        return gibbsTerm + requiredConstraintsTerm - contactTerm;
+    }
+
+    private static double StateVelocityDerivativeTangential(ISolverSession solverSession, StepVector stepVector, ContactNodeBase node)
+    {
+        var gibbsTerm = -node.GibbsEnergyGradient.Tangential * (1 + stepVector.Lambda1);
+        var requiredConstraintsTerm = node.VolumeGradient.Tangential * stepVector[node].LambdaVolume;
+        var contactTerm = node.ContactDistanceGradient.Tangential * stepVector[node].LambdaContactDistance +
+                          node.ContactDirectionGradient.Tangential * stepVector[node].LambdaContactDirection;
+
+        return gibbsTerm + requiredConstraintsTerm - contactTerm;
     }
 
     private static double FluxDerivative(ISolverSession solverSession, StepVector stepVector, NodeBase node)
@@ -54,8 +86,8 @@ internal static class LagrangianGradient
           / (node.Particle.Material.MolarVolume * node.Particle.Material.EquilibriumVacancyConcentration)
           * node.SurfaceDistance.ToUpper * stepVector[node].FluxToUpper / node.SurfaceDiffusionCoefficient.ToUpper
           * stepVector.Lambda1;
-        var thisRequiredConstraintsTerm = stepVector[node].Lambda2;
-        var upperRequiredConstraintsTerm = stepVector[node.Upper].Lambda2;
+        var thisRequiredConstraintsTerm = stepVector[node].LambdaVolume;
+        var upperRequiredConstraintsTerm = stepVector[node.Upper].LambdaVolume;
 
         return -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm;
     }
@@ -84,6 +116,23 @@ internal static class LagrangianGradient
                                   ).Sum();
 
         return dissipation - dissipationFunction;
+    }
+
+    private static (double distance, double direction) ContactConstraints(ISolverSession solverSession, StepVector stepVector,
+        ParticleContact contact, ContactNodeBase node)
+    {
+        var normalShift = stepVector[node].NormalDisplacement + stepVector[node.ContactedNodeBase].NormalDisplacement;
+        var tangentialShift = stepVector[node].TangentialDisplacement + stepVector[node.ContactedNodeBase].TangentialDisplacement;
+        var rotationShift = node.Coordinates.R / Sin((Pi - stepVector[contact].RotationDisplacement) / 2) *
+                            Sin(stepVector[contact].RotationDisplacement);
+        var rotationDirection = -(node.Coordinates.Phi - node.ContactDirection) + (PiOver2 - stepVector[contact].RotationDisplacement) / 2;
+
+        return (
+            stepVector[contact].RadialDisplacement - node.ContactDistanceGradient.Normal * normalShift -
+            node.ContactDistanceGradient.Tangential * tangentialShift + Cos(rotationDirection) * rotationShift,
+            stepVector[contact].AngleDisplacement - node.ContactDirectionGradient.Normal * normalShift -
+            node.ContactDirectionGradient.Tangential * tangentialShift - Sin(rotationDirection) / contact.Distance * rotationShift
+        );
     }
 
     public static StepVector GuessSolution(ISolverSession solverSession) =>

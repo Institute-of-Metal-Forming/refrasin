@@ -52,37 +52,34 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase where TConta
     private Angle? _contactDirection;
 
     /// <inheritdoc />
-    public override NormalTangentialRotation<Angle> CenterShiftVectorDirection => _centerShiftVectorDirection ??= new NormalTangentialRotation<Angle>(
+    public override NormalTangential<Angle> CenterShiftVectorDirection => _centerShiftVectorDirection ??= new NormalTangential<Angle>(
         Pi - (Coordinates.Phi - ContactDirection) + (Pi - SurfaceVectorAngle.Normal - SurfaceRadiusAngle.ToLower),
-        -(Coordinates.Phi - ContactDirection) + (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToLower),
-        -(Coordinates.Phi - ContactDirection) + PiOver2 // -δω/2 is missing here, is added in LagrangianGradient
+        -(Coordinates.Phi - ContactDirection) + (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToLower)
     );
 
-    private NormalTangentialRotation<Angle>? _centerShiftVectorDirection;
+    private NormalTangential<Angle>? _centerShiftVectorDirection;
 
     /// <inheritdoc />
-    public override NormalTangentialRotation<double> ContactDistanceGradient => _contactDistanceGradient ??= new NormalTangentialRotation<double>(
+    public override NormalTangential<double> ContactDistanceGradient => _contactDistanceGradient ??= new NormalTangential<double>(
         -Cos(CenterShiftVectorDirection.Normal),
-        -Cos(CenterShiftVectorDirection.Tangential),
-        -Cos(CenterShiftVectorDirection.Rotation)
+        -Cos(CenterShiftVectorDirection.Tangential)
     );
 
-    private NormalTangentialRotation<double>? _contactDistanceGradient;
+    private NormalTangential<double>? _contactDistanceGradient;
 
     /// <inheritdoc />
-    public override NormalTangentialRotation<double> ContactDirectionGradient => _contactDirectionGradient ??= new NormalTangentialRotation<double>(
+    public override NormalTangential<double> ContactDirectionGradient => _contactDirectionGradient ??= new NormalTangential<double>(
         Sin(CenterShiftVectorDirection.Normal) / ContactDistance,
-        Sin(CenterShiftVectorDirection.Tangential) / ContactDistance,
-        Sin(CenterShiftVectorDirection.Rotation) / ContactDistance
+        Sin(CenterShiftVectorDirection.Tangential) / ContactDistance
     );
 
-    private NormalTangentialRotation<double>? _contactDirectionGradient;
+    private NormalTangential<double>? _contactDirectionGradient;
 }
 
 /// <summary>
 /// Abstrakte Basisklasse für Oberflächenknoten eines Partikels, welche Kontakt zur Oberfläche eines anderen partiekls haben.
 /// </summary>
-public abstract class ContactNodeBase : NodeBase, INodeContact
+public abstract class ContactNodeBase : NodeBase, IContactNode
 {
     private Guid? _contactedParticleId;
     private Guid? _contactedNodeId;
@@ -133,6 +130,14 @@ public abstract class ContactNodeBase : NodeBase, INodeContact
         }
     }
 
+    public ContactNodeBase ContactedNodeBase => _contactedNodeBase ??=
+        SolverSession.CurrentState.AllNodes[ContactedNodeId] as ContactNodeBase ??
+        throw new InvalidCastException(
+            $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(ContactNodeBase)}."
+        );
+
+    private ContactNodeBase? _contactedNodeBase;
+
     /// <inheritdoc />
     public abstract double ContactDistance { get; }
 
@@ -140,11 +145,11 @@ public abstract class ContactNodeBase : NodeBase, INodeContact
     public abstract Angle ContactDirection { get; }
 
     /// <inheritdoc />
-    public abstract NormalTangentialRotation<Angle> CenterShiftVectorDirection { get; }
+    public abstract NormalTangential<Angle> CenterShiftVectorDirection { get; }
 
     /// <inheritdoc />
-    public abstract NormalTangentialRotation<double> ContactDistanceGradient { get; }
+    public abstract NormalTangential<double> ContactDistanceGradient { get; }
 
     /// <inheritdoc />
-    public abstract NormalTangentialRotation<double> ContactDirectionGradient { get; }
+    public abstract NormalTangential<double> ContactDirectionGradient { get; }
 }

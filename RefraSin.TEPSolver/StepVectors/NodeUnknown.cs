@@ -4,5 +4,5 @@ internal enum NodeUnknown
 {
     NormalDisplacement,
     FluxToUpper,
-    Lambda2
+    LambdaVolume,
 }

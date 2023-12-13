@@ -24,7 +24,13 @@ public class StepVectorMap
         NodeStartIndex = ContactStartIndex + ContactCount * ContactUnknownsCount;
         NodeIndices = nodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
-        TotalUnknownsCount = NodeStartIndex + NodeCount * NodeUnknownsCount;
+        ContactNodeUnknownsCount = Enum.GetNames(typeof(ContactNodeUnknown)).Length;
+        var contactNodesArray = contactsArray.SelectMany(c => c.From.Nodes.OfType<ContactNodeBase>().Where(n=> n.ContactedParticleId == c.To.Id)).ToArray();
+        ContactNodeCount = contactNodesArray.Length;
+        ContactNodeStartIndex = NodeStartIndex + NodeCount * NodeUnknownsCount;
+        ContactNodeIndices = contactNodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+
+        TotalUnknownsCount = ContactStartIndex + ContactNodeCount * ContactNodeUnknownsCount;
     }
 
     public int ContactCount { get; }
@@ -39,6 +45,12 @@ public class StepVectorMap
 
     public IReadOnlyDictionary<Guid, int> NodeIndices { get; }
 
+    public int ContactNodeCount { get; }
+
+    public int ContactNodeStartIndex { get; }
+
+    public Dictionary<Guid, int> ContactNodeIndices { get; }
+
     public int TotalUnknownsCount { get; }
 
     public int GlobalUnknownsCount { get; }
@@ -47,10 +59,14 @@ public class StepVectorMap
 
     public int NodeUnknownsCount { get; }
 
+    public int ContactNodeUnknownsCount { get; }
+
     internal int GetIndex(GlobalUnknown unknown) => (int)unknown;
 
     internal int GetIndex(Guid fromParticleId, Guid toParticleId, ContactUnknown unknown) =>
         ContactStartIndex + ContactUnknownsCount * ContactIndices[(fromParticleId, toParticleId)] + (int)unknown;
 
     internal int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + NodeUnknownsCount * NodeIndices[nodeId] + (int)unknown;
+    
+    internal int GetIndex(Guid nodeId, ContactNodeUnknown unknown) => ContactNodeStartIndex + ContactNodeUnknownsCount * ContactNodeIndices[nodeId] + (int)unknown;
 }

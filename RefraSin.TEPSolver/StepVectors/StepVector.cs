@@ -21,6 +21,8 @@ public class StepVector : DenseVector
     public StepVectorMap StepVectorMap { get; }
 
     public NodeView this[INode node] => new(this, node.Id);
+    
+    public ContactNodeView this[IContactNode node] => new(this, node.Id);
 
     public ContactView this[IParticleContact contact] => new(this, contact.From.Id, contact.To.Id);
     public ContactView this[IParticle from, IParticle to] => new(this, from.Id, to.Id);
