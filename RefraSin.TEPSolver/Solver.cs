@@ -1,6 +1,7 @@
 using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Graphs;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
@@ -106,13 +107,60 @@ public class Solver
         {
             newParticles[contact.To.Id] = contact.To.ApplyTimeStep(newParticles[contact.From.Id], stepVector, session.TimeStepWidth);
         }
-        
-        session.CurrentState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
+
+        var newState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
             newParticles.Values,
             session.CurrentState.Contacts.Keys
         );
 
+        StoreSolutionStep(session, stepVector, newState);
+
+        session.CurrentState = newState;
         session.StoreCurrentState();
+    }
+
+    private static void StoreSolutionStep(SolverSession session, StepVector stepVector, SolutionState newState)
+    {
+        var solutionStep = new SolutionStep(
+            session.CurrentState.Time,
+            newState.Time,
+            session.CurrentState.Particles.Zip(newState.Particles).Select(t =>
+            {
+                var (current, next) = t;
+
+                var centerShift = next.CenterCoordinates - current.CenterCoordinates;
+
+                return new ParticleTimeStep(
+                    current.Id,
+                    centerShift.X,
+                    centerShift.Y,
+                    next.RotationAngle - current.RotationAngle,
+                    current.Nodes.Select(n =>
+                    {
+                        if (n is ContactNodeBase contactNode)
+                        {
+                            return new NodeTimeStep(
+                                n.Id,
+                                stepVector[n].NormalDisplacement,
+                                stepVector[contactNode].TangentialDisplacement,
+                                new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                                0
+                            );
+                        }
+
+                        return new NodeTimeStep(
+                            n.Id,
+                            stepVector[n].NormalDisplacement,
+                            0,
+                            new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                            0
+                        );
+                    })
+                );
+            })
+        );
+
+        session.StoreStep(solutionStep);
     }
 
     internal static StepVector TrySolveStepUntilValid(SolverSession session)

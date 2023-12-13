@@ -122,9 +122,8 @@ internal class SolverSession : ISolverSession
         StateMemory.Push(CurrentState);
     }
 
-    public void StoreStep(IEnumerable<IParticleTimeStep> particleTimeSteps)
+    public void StoreStep(ISolutionStep step)
     {
-        var nextTime = CurrentState.Time + TimeStepWidth;
-        _solutionStorage.StoreStep(new SolutionStep(CurrentState.Time, nextTime, particleTimeSteps));
+        _solutionStorage.StoreStep(step);
     }
 }
