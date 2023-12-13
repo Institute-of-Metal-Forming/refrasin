@@ -1,3 +1,5 @@
+using MathNet.Numerics.Distributions;
+
 namespace RefraSin.ParticleModel;
 
 /// <summary>

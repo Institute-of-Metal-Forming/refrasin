@@ -19,20 +19,20 @@ public class SurfaceNode : NodeBase, ISurfaceNode
     public override NodeType Type => NodeType.SurfaceNode;
 
     /// <inheritdoc />
-    public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
+    public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(
         Particle.Material.SurfaceEnergy,
         Particle.Material.SurfaceEnergy
     );
 
-    private ToUpperToLower? _surfaceEnergy;
+    private ToUpperToLower<double>? _surfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower(
+    public override ToUpperToLower<double> SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
         Particle.Material.SurfaceDiffusionCoefficient,
         Particle.Material.SurfaceDiffusionCoefficient
     );
 
-    private ToUpperToLower? _surfaceDiffusionCoefficient;
+    private ToUpperToLower<double>? _surfaceDiffusionCoefficient;
 
     /// <inheritdoc />
     public override double TransferCoefficient => 0;

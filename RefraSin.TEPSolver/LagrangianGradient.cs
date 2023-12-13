@@ -20,7 +20,7 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldEquations(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
     {
-        // yield particle displacement equations
+        // yield contact equations
         foreach (var contact in currentState.Contacts.Values)
         {
             yield return stepVector[contact].RadialDisplacement;

@@ -87,74 +87,74 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// <summary>
     ///     Winkeldistanz zu den Nachbarknoten (Größe des kürzesten Winkels).
     /// </summary>
-    public ToUpperToLowerAngle AngleDistance => _angleDistance ??= new ToUpperToLowerAngle(
+    public ToUpperToLower<Angle> AngleDistance => _angleDistance ??= new ToUpperToLower<Angle>(
         Coordinates.AngleTo(Upper.Coordinates),
         Coordinates.AngleTo(Lower.Coordinates)
     );
 
-    private ToUpperToLowerAngle? _angleDistance;
+    private ToUpperToLower<Angle>? _angleDistance;
 
     /// <summary>
     ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
     /// </summary>
-    public ToUpperToLower SurfaceDistance => _surfaceDistance ??= new ToUpperToLower(
+    public ToUpperToLower<double> SurfaceDistance => _surfaceDistance ??= new ToUpperToLower<double>(
         CosLaw.C(Upper.Coordinates.R, Coordinates.R, AngleDistance.ToUpper),
         CosLaw.C(Lower.Coordinates.R, Coordinates.R, AngleDistance.ToLower)
     );
 
-    private ToUpperToLower? _surfaceDistance;
+    private ToUpperToLower<double>? _surfaceDistance;
 
     /// <summary>
     ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
     /// </summary>
-    public ToUpperToLowerAngle SurfaceRadiusAngle => _surfaceRadiusAngle ??= new ToUpperToLowerAngle(
+    public ToUpperToLower<Angle> SurfaceRadiusAngle => _surfaceRadiusAngle ??= new ToUpperToLower<Angle>(
         CosLaw.Gamma(SurfaceDistance.ToUpper, Coordinates.R, Upper.Coordinates.R),
         CosLaw.Gamma(SurfaceDistance.ToLower, Coordinates.R, Lower.Coordinates.R)
     );
 
-    private ToUpperToLowerAngle? _surfaceRadiusAngle;
+    private ToUpperToLower<Angle>? _surfaceRadiusAngle;
 
     /// <summary>
     ///     Gesamtes Volumen der an den Knoten angrenzenden Elemente.
     /// </summary>
-    public ToUpperToLower Volume => _volume ??= new ToUpperToLower(
+    public ToUpperToLower<double> Volume => _volume ??= new ToUpperToLower<double>(
         0.5 * Coordinates.R * Upper.Coordinates.R * Sin(AngleDistance.ToUpper),
         0.5 * Coordinates.R * Lower.Coordinates.R * Sin(AngleDistance.ToLower)
     );
 
-    private ToUpperToLower? _volume;
+    private ToUpperToLower<double>? _volume;
 
-    public NormalTangentialAngle SurfaceVectorAngle => _surfaceAngle ??= new NormalTangentialAngle(
-        PI - 0.5 * SurfaceRadiusAngle.Sum,
-        PI / 2 - 0.5 * SurfaceRadiusAngle.Sum
+    public NormalTangential<Angle> SurfaceVectorAngle => _surfaceAngle ??= new NormalTangential<Angle>(
+        PI - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower),
+        PI / 2 - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower)
     );
 
-    private NormalTangentialAngle? _surfaceAngle;
+    private NormalTangential<Angle>? _surfaceAngle;
 
     /// <inheritdoc />
-    public abstract ToUpperToLower SurfaceEnergy { get; }
+    public abstract ToUpperToLower<double> SurfaceEnergy { get; }
 
     /// <inheritdoc />
-    public abstract ToUpperToLower SurfaceDiffusionCoefficient { get; }
+    public abstract ToUpperToLower<double> SurfaceDiffusionCoefficient { get; }
 
     /// <inheritdoc />
     public abstract double TransferCoefficient { get; }
 
     /// <inheritdoc />
-    public NormalTangential GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential(
+    public NormalTangential<double> GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential<double>(
         -(SurfaceEnergy.ToUpper + SurfaceEnergy.ToLower) * Cos(SurfaceVectorAngle.Normal),
         -(SurfaceEnergy.ToUpper - SurfaceEnergy.ToLower) * Cos(SurfaceVectorAngle.Tangential)
     );
 
-    private NormalTangential? _gibbsEnergyGradient;
+    private NormalTangential<double>? _gibbsEnergyGradient;
 
     /// <inheritdoc />
-    public NormalTangential VolumeGradient => _volumeGradient ??= new NormalTangential(
+    public NormalTangential<double> VolumeGradient => _volumeGradient ??= new NormalTangential<double>(
         0.5 * (SurfaceDistance.ToUpper + SurfaceDistance.ToLower) * Sin(SurfaceVectorAngle.Normal),
         0.5 * (SurfaceDistance.ToUpper - SurfaceDistance.ToLower) * Sin(SurfaceVectorAngle.Tangential)
     );
 
-    private NormalTangential? _volumeGradient;
+    private NormalTangential<double>? _volumeGradient;
 
     public double GuessFluxToUpper()
     {
@@ -165,7 +165,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
         var y3 = Upper.Coordinates.R * Cos(AngleDistance.ToUpper);
 
         var curvature = -(x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3) / (Pow(x1, 2) * x3 - x1 * Pow(x3, 2));
-        var curvatureGibbs = GibbsEnergyGradient.Normal / SurfaceDistance.Sum / SurfaceEnergy.ToUpper;
+        var curvatureGibbs = GibbsEnergyGradient.Normal / (SurfaceDistance.ToUpper + SurfaceDistance.ToLower) / SurfaceEnergy.ToUpper;
 
         var vacancyConcentrationGradient = -Particle.Material.EquilibriumVacancyConcentration
                                          / (SolverSession.GasConstant * SolverSession.Temperature)
@@ -179,7 +179,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     {
         var fluxBalance = GuessFluxToUpper() - Lower.GuessFluxToUpper();
 
-        var displacement = 2 * fluxBalance / (SurfaceDistance.Sum * Sin(SurfaceVectorAngle.Normal));
+        var displacement = 2 * fluxBalance / ((SurfaceDistance.ToUpper + SurfaceDistance.ToLower) * Sin(SurfaceVectorAngle.Normal));
         return displacement;
     }
 

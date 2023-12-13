@@ -20,7 +20,7 @@ public interface INodeTimeStep
     /// <summary>
     /// Diffusional flow to/from the neighbor nodes.
     /// </summary>
-    public ToUpperToLower DiffusionalFlow { get; }
+    public ToUpperToLower<double> DiffusionalFlow { get; }
 
     /// <summary>
     /// Diffusional flow to/from the environment (e.g. matrix, neighbor particle).

@@ -1,3 +1,4 @@
+using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 
@@ -13,15 +14,15 @@ public record GrainBoundaryNode(
     Guid ContactedParticleId,
     Guid ContactedNodeId,
     AbsolutePoint AbsoluteCoordinates,
-    ToUpperToLower SurfaceDistance,
-    ToUpperToLowerAngle SurfaceRadiusAngle,
-    ToUpperToLowerAngle AngleDistance,
-    ToUpperToLower Volume,
-    NormalTangentialAngle SurfaceVectorAngle,
-    NormalTangential GibbsEnergyGradient,
-    NormalTangential VolumeGradient,
-    ToUpperToLower SurfaceEnergy,
-    ToUpperToLower SurfaceDiffusionCoefficient,
+    ToUpperToLower<double> SurfaceDistance,
+    ToUpperToLower<Angle> SurfaceRadiusAngle,
+    ToUpperToLower<Angle> AngleDistance,
+    ToUpperToLower<double> Volume,
+    NormalTangential<Angle> SurfaceVectorAngle,
+    NormalTangential<double> GibbsEnergyGradient,
+    NormalTangential<double> VolumeGradient,
+    ToUpperToLower<double> SurfaceEnergy,
+    ToUpperToLower<double> SurfaceDiffusionCoefficient,
     double TransferCoefficient) : Node(Id, ParticleId, Coordinates, NodeType.GrainBoundaryNode),
     IGrainBoundaryNode
 {

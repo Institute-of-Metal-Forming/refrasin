@@ -75,7 +75,7 @@ public class Tests
                     Guid.NewGuid(),
                     1,
                     2,
-                    new ToUpperToLower(1, -1),
+                    new ToUpperToLower<double>(1, -1),
                     1.11
                 )
             }
