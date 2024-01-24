@@ -27,10 +27,6 @@ internal static class LagrangianGradient
         foreach (var node in currentState.AllNodes.Values)
         {
             yield return StateVelocityDerivativeNormal(conditions, stepVector, node);
-
-            if (node is ContactNodeBase contactNode)
-                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
-
             yield return FluxDerivative(conditions, stepVector, node);
             yield return RequiredConstraint(conditions, stepVector, node);
         }
@@ -42,6 +38,9 @@ internal static class LagrangianGradient
 
             foreach (var contactNode in involvedNodes)
             {
+                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
+                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode.ContactedNode);
+                
                 var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
                 yield return constraints.distance;
                 yield return constraints.direction;
