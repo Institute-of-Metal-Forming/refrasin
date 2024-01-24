@@ -1,4 +1,5 @@
 using System.Globalization;
+using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
 using RefraSin.Coordinates.Absolute;
@@ -10,6 +11,7 @@ using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 using Serilog;
 using static System.Math;
@@ -26,8 +28,11 @@ public class TwoParticleTest
     {
         var endTime = 1e1;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6;
+        var nodeCountPerParticle = 20;
 
-        var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticle();
+        var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
+                { NodeCount = nodeCountPerParticle }
+            .GetParticle();
         var nodes1 = baseParticle1.Nodes.Skip(1).Concat(new[]
         {
             new Node(Guid.NewGuid(), baseParticle1.Id, new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)), NodeType.NeckNode),
@@ -36,7 +41,9 @@ public class TwoParticleTest
         }).ToArray();
         _particle1 = new RefraSin.ParticleModel.Particle(baseParticle1.Id, new(0, 0), 0, baseParticle1.MaterialId, nodes1);
 
-        var baseParticle2 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, _particle1.MaterialId).GetParticle();
+        var baseParticle2 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, _particle1.MaterialId)
+                { NodeCount = nodeCountPerParticle }
+            .GetParticle();
         var nodes2 = baseParticle2.Nodes.Skip(1).Concat(new[]
         {
             new Node(Guid.NewGuid(), baseParticle2.Id, new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)), NodeType.NeckNode),
@@ -44,7 +51,7 @@ public class TwoParticleTest
             new Node(Guid.NewGuid(), baseParticle2.Id, new PolarPoint(new AbsolutePoint(120e-6, initialNeck)), NodeType.NeckNode),
         }).ToArray();
         _particle2 = new RefraSin.ParticleModel.Particle(baseParticle2.Id, new(240e-6, 0), PI, baseParticle2.MaterialId, nodes2);
-        
+
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
@@ -63,7 +70,7 @@ public class TwoParticleTest
                 TimeStepAdaptationFactor = 1.5,
             },
             SolutionStorage = _solutionStorage,
-            StepValidators = new IStepValidator[]{  },
+            StepValidators = new IStepValidator[] { },
         };
 
         _material = new Material(
@@ -103,6 +110,38 @@ public class TwoParticleTest
     private ISinteringProcess _process;
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
+
+    [Test]
+    public void PlotJacobianStructure()
+    {
+        var session = new SolverSession(_solver, _process);
+        var initialState = session.CurrentState;
+        var guess = LagrangianGradient.GuessSolution(initialState);
+
+        var matrix = Matrix<double>.Build.DenseOfColumns(YieldJacobianColumns(session, initialState, guess)).PointwiseSign();
+
+        var plt = new Plot();
+
+        plt.Add.Heatmap(matrix.ToArray());
+        plt.Layout.Frameless();
+        plt.Axes.Margins(0, 0);
+
+        plt.SavePng(Path.Combine(_tempDir, "jacobian.png"), matrix.ColumnCount, matrix.RowCount);
+    }
+
+    private IEnumerable<Vector<double>> YieldJacobianColumns(SolverSession session, SolutionState state, StepVector guess)
+    {
+        var zero = LagrangianGradient.EvaluateAt(session, state, guess);
+
+        for (int i = 0; i < guess.Count; i++)
+        {
+            var step = guess.Copy();
+            step[i] += 1;
+            var current = LagrangianGradient.EvaluateAt(session, state, step);
+
+            yield return current - zero;
+        }
+    }
 
     [Test]
     public void TestSolution()

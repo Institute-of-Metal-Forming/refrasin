@@ -1,3 +1,6 @@
 namespace RefraSin.ProcessModel;
 
-record ProcessConditions(double Temperature, double GasConstant) : IProcessConditions { }
+public record ProcessConditions(
+    double Temperature,
+    double GasConstant = 8.31446261815324
+) : IProcessConditions { }

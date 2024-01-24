@@ -50,36 +50,11 @@ public class Solver
     public void Solve(ISinteringProcess process)
     {
         var session = new SolverSession(this, process);
-
-        InitCurrentState(process, session);
+        session.StoreCurrentState();
         DoTimeIntegration(session);
     }
 
-    private static void InitCurrentState(ISinteringProcess process, SolverSession session)
-    {
-        var particles = process.Particles.Select(ps => new Particle(ps, session)).ToArray();
-        session.CurrentState = new SolutionState(
-            session.StartTime,
-            particles,
-            Array.Empty<(Guid, Guid)>()
-        );
-        session.CurrentState = new SolutionState(
-            session.StartTime,
-            particles,
-            GetParticleContacts(particles)
-        );
-        session.StoreCurrentState();
-    }
-
-    private static (Guid from, Guid to)[] GetParticleContacts(Particle[] particles)
-    {
-        var edges = particles.SelectMany(p => p.Nodes.OfType<NeckNode>())
-            .Select(n => new UndirectedEdge<Particle>(n.Particle, n.ContactedNode.Particle));
-        var graph = new UndirectedGraph<Particle>(particles, edges);
-        var explorer = BreadthFirstExplorer<Particle>.Explore(graph, particles[0]);
-
-        return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
-    }
+  
 
     private static void DoTimeIntegration(SolverSession session)
     {

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.Enumerables;
+using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
@@ -9,6 +10,7 @@ using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
 using RefraSin.TEPSolver.TimeSteppers;
+using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
@@ -43,6 +45,28 @@ internal class SolverSession : ISolverSession
         TimeStepper = solver.TimeStepper;
         StepValidators = solver.StepValidators.ToArray();
         RootFinder = solver.RootFinder;
+
+        var particles = process.Particles.Select(ps => new Particle(ps, this)).ToArray();
+        CurrentState = new SolutionState(
+            StartTime,
+            particles,
+            Array.Empty<(Guid, Guid)>()
+        );
+        CurrentState = new SolutionState(
+            StartTime,
+            particles,
+            GetParticleContacts(particles)
+        );
+    }
+
+    private static (Guid from, Guid to)[] GetParticleContacts(Particle[] particles)
+    {
+        var edges = particles.SelectMany(p => p.Nodes.OfType<NeckNode>())
+            .Select(n => new UndirectedEdge<Particle>(n.Particle, n.ContactedNode.Particle));
+        var graph = new UndirectedGraph<Particle>(particles, edges);
+        var explorer = BreadthFirstExplorer<Particle>.Explore(graph, particles[0]);
+
+        return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
     }
 
     /// <inheritdoc />
