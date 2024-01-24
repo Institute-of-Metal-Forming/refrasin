@@ -12,7 +12,8 @@ public class ContactView
         _fromParticleId = fromParticleId;
         _toParticleId = toParticleId;
     }
-    public double RadialDisplacement => _vector[_vector.StepVectorMap.GetIndex(_fromParticleId, _toParticleId, ContactUnknown.RadialDisplacement)];
-    public double AngleDisplacement => _vector[_vector.StepVectorMap.GetIndex(_fromParticleId, _toParticleId, ContactUnknown.AngleDisplacement)];
-    public double RotationDisplacement => _vector[_vector.StepVectorMap.GetIndex(_fromParticleId, _toParticleId, ContactUnknown.RotationDisplacement)];
+
+    public double RadialDisplacement => _vector[_vector.StepVectorMap[_fromParticleId, _toParticleId, ContactUnknown.RadialDisplacement]];
+    public double AngleDisplacement => _vector[_vector.StepVectorMap[_fromParticleId, _toParticleId, ContactUnknown.AngleDisplacement]];
+    public double RotationDisplacement => _vector[_vector.StepVectorMap[_fromParticleId, _toParticleId, ContactUnknown.RotationDisplacement]];
 }

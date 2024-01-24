@@ -11,7 +11,7 @@ public class NodeView
         _nodeId = nodeId;
     }
 
-    public double NormalDisplacement => _vector[_vector.StepVectorMap.GetIndex(_nodeId, NodeUnknown.NormalDisplacement)];
-    public double FluxToUpper => _vector[_vector.StepVectorMap.GetIndex(_nodeId, NodeUnknown.FluxToUpper)];
-    public double LambdaVolume => _vector[_vector.StepVectorMap.GetIndex(_nodeId, NodeUnknown.LambdaVolume)];
+    public double NormalDisplacement => _vector[_vector.StepVectorMap[_nodeId, NodeUnknown.NormalDisplacement]];
+    public double FluxToUpper => _vector[_vector.StepVectorMap[_nodeId, NodeUnknown.FluxToUpper]];
+    public double LambdaVolume => _vector[_vector.StepVectorMap[_nodeId, NodeUnknown.LambdaVolume]];
 }

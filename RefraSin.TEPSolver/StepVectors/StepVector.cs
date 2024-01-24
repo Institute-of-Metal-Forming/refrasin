@@ -27,7 +27,7 @@ public class StepVector : DenseVector
     public ContactView this[IParticleContact contact] => new(this, contact.From.Id, contact.To.Id);
     public ContactView this[IParticle from, IParticle to] => new(this, from.Id, to.Id);
 
-    public double Lambda1 => this[StepVectorMap.GetIndex(GlobalUnknown.Lambda1)];
+    public double Lambda1 => this[StepVectorMap[GlobalUnknown.Lambda1]];
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) => new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);
     public static StepVector operator -(StepVector leftSide, StepVector rightSide) => new((DenseVector)leftSide - rightSide, leftSide.StepVectorMap);
