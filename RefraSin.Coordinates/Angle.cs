@@ -57,7 +57,7 @@ public readonly struct Angle : IFormattable
         {
             case None:
                 return radians;
-                
+
             case AllPositive:
             {
                 radians %= Pi2;
@@ -95,7 +95,7 @@ public readonly struct Angle : IFormattable
         {
             case None:
                 return degrees;
-                
+
             case AllPositive:
             {
                 degrees %= 360;
@@ -133,7 +133,7 @@ public readonly struct Angle : IFormattable
         {
             case None:
                 return gradians;
-                
+
             case AllPositive:
             {
                 gradians %= 400;
@@ -182,7 +182,7 @@ public readonly struct Angle : IFormattable
         {
             case None:
                 return true;
-                
+
             case AllPositive:
             {
                 if (Radians >= Pi2 || Radians < 0)
@@ -496,6 +496,46 @@ public readonly struct Angle : IFormattable
     public bool AlmostEqual(Angle other, int decimalPlaces) => (Radians - other.Radians).AlmostEqual(0, decimalPlaces);
 
     /// <summary>
+    /// Constant of full angle (2 Pi or 360°).
+    /// </summary>
+    public static readonly Angle Full = new(Pi2);
+
+    /// <summary>
+    /// Constant of full angle (2 Pi or 360°).
+    /// </summary>
+    public static readonly Angle Zero = new(0);
+
+    /// <summary>
+    /// Constant of half angle (Pi or 180°). Equivalent to <see cref="Straight"/>.
+    /// </summary>
+    public static readonly Angle Half = new(Pi);
+
+    /// <summary>
+    /// Constant of straight angle (Pi or 180°). Equivalent to <see cref="Half"/>.
+    /// </summary>
+    public static readonly Angle Straight = Half;
+
+    /// <summary>
+    /// Constant of half angle (0.5 Pi or 90°). Equivalent to <see cref="Right"/>.
+    /// </summary>
+    public static readonly Angle Quarter = new(PiOver2);
+
+    /// <summary>
+    /// Constant of half angle (Pi/2 or 90°). Equivalent to <see cref="Quarter"/>.
+    /// </summary>
+    public static readonly Angle Right = Quarter;
+
+    /// <summary>
+    /// Constant of eighth angle (Pi/4 or 45°). Equivalent to <see cref="HalfRight"/>.
+    /// </summary>
+    public static readonly Angle Eighth = new(PiOver4);
+
+    /// <summary>
+    /// Constant of half right angle (Pi/4 or 45°). Equivalent to <see cref="Eighth"/>.
+    /// </summary>
+    public static readonly Angle HalfRight = Eighth;
+
+    /// <summary>
     ///     Represents a domain of an angle to be reduced to.
     /// </summary>
     public enum ReductionDomain
@@ -504,7 +544,7 @@ public readonly struct Angle : IFormattable
         /// No reduction.
         /// </summary>
         None,
-            
+
         /// <summary>
         ///     Domain [0, 2π] resp. [0, 360°] resp. [0, 400 gon].
         /// </summary>
