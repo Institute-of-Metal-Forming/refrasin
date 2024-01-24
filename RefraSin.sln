@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RefraSin.Analysis", "RefraSin.Analysis\RefraSin.Analysis.fsproj", "{04942B55-D968-4A9B-92E7-6C4024964644}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Coordinates", "RefraSin.Coordinates\RefraSin.Coordinates.csproj", "{9295D188-EBFE-4D7E-9808-1D9FDDAACE5C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Enumerables", "RefraSin.Enumerables\RefraSin.Enumerables.csproj", "{419166CB-1D2F-4800-9306-1725E48BD39F}"
@@ -38,10 +36,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{04942B55-D968-4A9B-92E7-6C4024964644}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04942B55-D968-4A9B-92E7-6C4024964644}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04942B55-D968-4A9B-92E7-6C4024964644}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04942B55-D968-4A9B-92E7-6C4024964644}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9295D188-EBFE-4D7E-9808-1D9FDDAACE5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9295D188-EBFE-4D7E-9808-1D9FDDAACE5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9295D188-EBFE-4D7E-9808-1D9FDDAACE5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
