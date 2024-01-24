@@ -39,8 +39,6 @@ internal class SolverSession : ISolverSession
 
         Logger = solver.LoggerFactory.CreateLogger<Solver>();
 
-        CurrentState = new SolutionState(StartTime, process.Particles.Select(ps => new Particle(ps, this)).ToReadOnlyParticleCollection());
-
         StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
         TimeStepper = solver.TimeStepper;
         StepValidators = solver.StepValidators.ToArray();
@@ -124,9 +122,8 @@ internal class SolverSession : ISolverSession
         StateMemory.Push(CurrentState);
     }
 
-    public void StoreStep(IEnumerable<IParticleTimeStep> particleTimeSteps)
+    public void StoreStep(ISolutionStep step)
     {
-        var nextTime = CurrentState.Time + TimeStepWidth;
-        _solutionStorage.StoreStep(new SolutionStep(CurrentState.Time, nextTime, particleTimeSteps));
+        _solutionStorage.StoreStep(step);
     }
 }

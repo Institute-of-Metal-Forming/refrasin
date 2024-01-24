@@ -39,6 +39,8 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
 
         Hdf5.WriteCompounds(stateId, "Particles", state.ParticleStates.Select(p => new ParticleCompound(p)).ToArray(),
             new Dictionary<string, List<string>>());
+        Hdf5.WriteCompounds(stateId, "Contacts", state.ParticleContacts.Select(c => new ContactCompound(c)).ToArray(),
+            new Dictionary<string, List<string>>());
 
         var nodesGroupId = Hdf5.CreateOrOpenGroup(stateId, "Nodes");
 

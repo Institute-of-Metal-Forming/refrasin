@@ -26,4 +26,9 @@ public interface IReadOnlyParticleCollection<out TParticle> : IReadOnlyList<TPar
     /// </summary>
     /// <param name="particleId">the ID to test for</param>
     public bool Contains(Guid particleId);
+    
+    /// <summary>
+    /// Gets the root particle.
+    /// </summary>
+    public TParticle Root { get; }
 }

@@ -3,24 +3,16 @@ using RefraSin.ParticleModel;
 
 namespace Refrasin.HDF5Storage;
 
-internal struct ParticleCompound
+internal struct ParticleCompound(IParticle particle)
 {
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
-    public string Id;
+    public string Id = particle.Id.ToString();
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public double[] CenterCoordinates;
+    public double[] CenterCoordinates = particle.CenterCoordinates.ToArray();
 
-    public double RotationAngle;
+    public double RotationAngle = particle.RotationAngle;
 
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
-    public string MaterialId;
-
-    public ParticleCompound(IParticle particle)
-    {
-        Id = particle.Id.ToString();
-        CenterCoordinates = particle.CenterCoordinates.ToArray();
-        RotationAngle = particle.RotationAngle;
-        MaterialId = particle.MaterialId.ToString();
-    }
+    public string MaterialId = particle.MaterialId.ToString();
 }

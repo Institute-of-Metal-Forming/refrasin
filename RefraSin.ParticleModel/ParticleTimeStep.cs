@@ -4,20 +4,20 @@ namespace RefraSin.ParticleModel;
 
 public record ParticleTimeStep : IParticleTimeStep
 {
-    public ParticleTimeStep(Guid particleId, double radialDisplacement, Angle angleDisplacement, Angle rotationDisplacement,
+    public ParticleTimeStep(Guid particleId, double horizontalDisplacement, double verticalDisplacement, Angle rotationDisplacement,
         IEnumerable<INodeTimeStep> nodeTimeSteps)
     {
         ParticleId = particleId;
-        RadialDisplacement = radialDisplacement;
-        AngleDisplacement = angleDisplacement;
+        HorizontalDisplacement = horizontalDisplacement;
+        VerticalDisplacement = verticalDisplacement;
         RotationDisplacement = rotationDisplacement;
         NodeTimeSteps = nodeTimeSteps.Select(ns => ns as NodeTimeStep ?? new NodeTimeStep(ns)).ToDictionary(ns => ns.NodeId);
     }
 
     public ParticleTimeStep(IParticleTimeStep template) : this(
         template.ParticleId,
-        template.RadialDisplacement,
-        template.AngleDisplacement,
+        template.HorizontalDisplacement,
+        template.VerticalDisplacement,
         template.RotationDisplacement,
         template.NodeTimeSteps.Values
     ) { }
@@ -26,10 +26,10 @@ public record ParticleTimeStep : IParticleTimeStep
     public Guid ParticleId { get; }
 
     /// <inheritdoc />
-    public double RadialDisplacement { get; }
+    public double HorizontalDisplacement { get; }
 
     /// <inheritdoc />
-    public Angle AngleDisplacement { get; }
+    public double VerticalDisplacement { get; }
 
     /// <inheritdoc />
     public Angle RotationDisplacement { get; }

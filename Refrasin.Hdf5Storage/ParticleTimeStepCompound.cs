@@ -17,8 +17,8 @@ internal struct ParticleTimeStepCompound
     public ParticleTimeStepCompound(IParticleTimeStep particleTimeStep)
     {
         ParticleId = particleTimeStep.ParticleId.ToString();
-        RadialDisplacement = particleTimeStep.RadialDisplacement;
-        AngleDisplacement = particleTimeStep.AngleDisplacement;
+        RadialDisplacement = particleTimeStep.HorizontalDisplacement;
+        AngleDisplacement = particleTimeStep.VerticalDisplacement;
         RotationDisplacement = particleTimeStep.RotationDisplacement;
     }
 }

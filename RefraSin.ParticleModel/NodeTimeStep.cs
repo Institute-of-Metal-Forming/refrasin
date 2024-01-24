@@ -3,10 +3,11 @@ namespace RefraSin.ParticleModel;
 /// <summary>
 /// Represents an immutable record of a node's times step.
 /// </summary>
-public record NodeTimeStep(Guid NodeId,
+public record NodeTimeStep(
+    Guid NodeId,
     double NormalDisplacement,
     double TangentialDisplacement,
-    ToUpperToLower DiffusionalFlow,
+    ToUpperToLower<double> DiffusionalFlow,
     double OuterDiffusionalFlow) : INodeTimeStep
 {
     public NodeTimeStep(INodeTimeStep template) : this(
@@ -27,7 +28,7 @@ public record NodeTimeStep(Guid NodeId,
     public double TangentialDisplacement { get; } = TangentialDisplacement;
 
     /// <inheritdoc />
-    public ToUpperToLower DiffusionalFlow { get; } = DiffusionalFlow;
+    public ToUpperToLower<double> DiffusionalFlow { get; } = DiffusionalFlow;
 
     /// <inheritdoc />
     public double OuterDiffusionalFlow { get; } = OuterDiffusionalFlow;

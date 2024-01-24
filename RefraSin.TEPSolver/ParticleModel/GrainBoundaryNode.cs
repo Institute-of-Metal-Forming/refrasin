@@ -19,20 +19,23 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>, IGrainBound
         solverSession, contactedNodeId, contactedParticleId) { }
 
     /// <inheritdoc />
-    public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
+    public override NodeType Type => NodeType.GrainBoundaryNode;
+
+    /// <inheritdoc />
+    public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(
         MaterialInterface.InterfaceEnergy,
         MaterialInterface.InterfaceEnergy
     );
 
-    private ToUpperToLower? _surfaceEnergy;
+    private ToUpperToLower<double>? _surfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower(
+    public override ToUpperToLower<double> SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
         MaterialInterface.DiffusionCoefficient,
         MaterialInterface.DiffusionCoefficient
     );
 
-    private ToUpperToLower? _surfaceDiffusionCoefficient;
+    private ToUpperToLower<double>? _surfaceDiffusionCoefficient;
 
     /// <inheritdoc />
     public override double TransferCoefficient => 0;

@@ -14,11 +14,18 @@ public class ParticleContact : UndirectedEdge<IParticle>, IParticleContact
     }
 
     /// <inheritdoc />
-    public ParticleContact(IParticle start, IParticle end, double distance, Angle directionFrom, Angle directionTo) : base(start, end)
+    public ParticleContact(IParticle from, IParticle to, double distance, Angle directionFrom, Angle directionTo) : base(from, to)
     {
         Distance = distance;
         DirectionFrom = directionFrom;
         DirectionTo = directionTo;
+    }
+
+    public ParticleContact(IParticleContact template) : base(template.From, template.To)
+    {
+        Distance = template.Distance;
+        DirectionFrom = template.DirectionFrom;
+        DirectionTo = template.DirectionTo;
     }
 
     /// <inheritdoc />

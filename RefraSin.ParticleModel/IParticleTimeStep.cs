@@ -11,14 +11,14 @@ public interface IParticleTimeStep
     public Guid ParticleId { get; }
 
     /// <summary>
-    /// Displacement of the particle center in radial direction.
+    /// Displacement of the particle center in horizontal (x) direction.
     /// </summary>
-    public double RadialDisplacement { get; }
+    public double HorizontalDisplacement { get; }
 
     /// <summary>
-    /// Displacement of the particle center in angle direction.
+    /// Displacement of the particle center in vertical (y) direction.
     /// </summary>
-    public Angle AngleDisplacement { get; }
+    public double VerticalDisplacement { get; }
 
     /// <summary>
     /// Rotational displacement of the particle around its center.

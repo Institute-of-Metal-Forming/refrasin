@@ -5,10 +5,10 @@ public interface INodeGradients
     /// <summary>
     /// Gradient of Gibbs energy for node shifting in normal and tangential direction.
     /// </summary>
-    public NormalTangential GibbsEnergyGradient { get; }
+    public NormalTangential<double> GibbsEnergyGradient { get; }
 
     /// <summary>
     /// Gradient of volume for node shifting in normal and tangential direction.
     /// </summary>
-    public NormalTangential VolumeGradient { get; }
+    public NormalTangential<double> VolumeGradient { get; }
 }

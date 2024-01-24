@@ -1,14 +1,20 @@
 using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using RefraSin.Coordinates.Polar;
+using RefraSin.Graphs;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
 using RefraSin.TEPSolver.TimeSteppers;
+using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
+using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver;
 
@@ -34,7 +40,7 @@ public class Solver
 
     public ITimeStepper TimeStepper { get; set; } = new AdamsMoultonTimeStepper();
 
-    public IEnumerable<IStepValidator> StepValidators { get; } = new[] { new InstabilityDetector() };
+    public IEnumerable<IStepValidator> StepValidators { get; set; } = new[] { new InstabilityDetector() };
 
     public IRootFinder RootFinder { get; } = new BroydenRootFinder();
 
@@ -44,32 +50,117 @@ public class Solver
     public void Solve(ISinteringProcess process)
     {
         var session = new SolverSession(this, process);
+
+        InitCurrentState(process, session);
         DoTimeIntegration(session);
+    }
+
+    private static void InitCurrentState(ISinteringProcess process, SolverSession session)
+    {
+        var particles = process.Particles.Select(ps => new Particle(ps, session)).ToArray();
+        session.CurrentState = new SolutionState(
+            session.StartTime,
+            particles,
+            Array.Empty<(Guid, Guid)>()
+        );
+        session.CurrentState = new SolutionState(
+            session.StartTime,
+            particles,
+            GetParticleContacts(particles)
+        );
+        session.StoreCurrentState();
+    }
+
+    private static (Guid from, Guid to)[] GetParticleContacts(Particle[] particles)
+    {
+        var edges = particles.SelectMany(p => p.Nodes.OfType<NeckNode>())
+            .Select(n => new UndirectedEdge<Particle>(n.Particle, n.ContactedNode.Particle));
+        var graph = new UndirectedGraph<Particle>(particles, edges);
+        var explorer = BreadthFirstExplorer<Particle>.Explore(graph, particles[0]);
+
+        return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
     }
 
     private static void DoTimeIntegration(SolverSession session)
     {
-        session.StoreCurrentState();
-
         while (session.CurrentState.Time < session.EndTime)
         {
             var stepVector = TrySolveStepUntilValid(session);
             session.LastStep = stepVector;
-            var particleTimeSteps = GenerateTimeStepsFromGradientSolution(session, stepVector).ToArray();
-            session.StoreStep(particleTimeSteps);
 
-            session.CurrentState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
-                particleTimeSteps
-                    .Select(ts => session.CurrentState.Particles[ts.ParticleId].ApplyTimeStep(stepVector, session.TimeStepWidth))
-                    .ToReadOnlyParticleCollection()
-            );
+            CreateNewState(session, stepVector);
             session.TimeStepIndex += 1;
-
-            session.StoreCurrentState();
             session.MayIncreaseTimeStepWidth();
         }
 
         session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", session.TimeStepIndex + 1);
+    }
+
+    private static void CreateNewState(SolverSession session, StepVector stepVector)
+    {
+        var newParticles = new Dictionary<Guid, Particle>()
+        {
+            [session.CurrentState.Particles.Root.Id] = session.CurrentState.Particles.Root.ApplyTimeStep(null, stepVector, session.TimeStepWidth)
+        };
+
+        foreach (var contact in session.CurrentState.Contacts.Values)
+        {
+            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(newParticles[contact.From.Id], stepVector, session.TimeStepWidth);
+        }
+
+        var newState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
+            newParticles.Values,
+            session.CurrentState.Contacts.Keys
+        );
+
+        StoreSolutionStep(session, stepVector, newState);
+
+        session.CurrentState = newState;
+        session.StoreCurrentState();
+    }
+
+    private static void StoreSolutionStep(SolverSession session, StepVector stepVector, SolutionState newState)
+    {
+        var solutionStep = new SolutionStep(
+            session.CurrentState.Time,
+            newState.Time,
+            session.CurrentState.Particles.Zip(newState.Particles).Select(t =>
+            {
+                var (current, next) = t;
+
+                var centerShift = next.CenterCoordinates - current.CenterCoordinates;
+
+                return new ParticleTimeStep(
+                    current.Id,
+                    centerShift.X,
+                    centerShift.Y,
+                    next.RotationAngle - current.RotationAngle,
+                    current.Nodes.Select(n =>
+                    {
+                        if (n is ContactNodeBase contactNode)
+                        {
+                            return new NodeTimeStep(
+                                n.Id,
+                                stepVector[n].NormalDisplacement,
+                                stepVector[contactNode].TangentialDisplacement,
+                                new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                                0
+                            );
+                        }
+
+                        return new NodeTimeStep(
+                            n.Id,
+                            stepVector[n].NormalDisplacement,
+                            0,
+                            new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                            0
+                        );
+                    })
+                );
+            })
+        );
+
+        session.StoreStep(solutionStep);
     }
 
     internal static StepVector TrySolveStepUntilValid(SolverSession session)
@@ -114,25 +205,5 @@ public class Solver
         {
             return session.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session));
         }
-    }
-
-    private static IEnumerable<IParticleTimeStep> GenerateTimeStepsFromGradientSolution(SolverSession session, StepVector stepVector)
-    {
-        foreach (var p in session.CurrentState.Particles)
-            yield return new ParticleTimeStep(
-                p.Id,
-                stepVector[p].RadialDisplacement,
-                stepVector[p].AngleDisplacement,
-                stepVector[p].RotationDisplacement,
-                p.Nodes.Select(n =>
-                    new NodeTimeStep(n.Id,
-                        stepVector[n].NormalDisplacement,
-                        0,
-                        new ToUpperToLower(
-                            stepVector[n].FluxToUpper,
-                            -stepVector[n].FluxToUpper
-                        ),
-                        0
-                    )));
     }
 }

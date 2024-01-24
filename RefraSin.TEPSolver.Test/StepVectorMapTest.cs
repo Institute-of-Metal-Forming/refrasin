@@ -6,6 +6,7 @@ using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.StepVectors;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
+using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver.Test;
 
@@ -25,7 +26,7 @@ public class StepVectorMapTest
             .GetParticle(), null!);
         var particles = new[] { _particleSpec1, _particleSpec2 };
 
-        _map = new StepVectorMap(particles, particles.SelectMany(p => p.Nodes));
+        _map = new StepVectorMap(new []{new ParticleContact(_particleSpec1, _particleSpec2)}, particles.SelectMany(p => p.Nodes));
     }
 
     [Test]
@@ -42,33 +43,33 @@ public class StepVectorMapTest
         // first node
         Assert.That(_map.GetIndex(_particleSpec1.Nodes[0].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(1));
         Assert.That(_map.GetIndex(_particleSpec1.Nodes[0].Id, NodeUnknown.FluxToUpper), Is.EqualTo(2));
-        Assert.That(_map.GetIndex(_particleSpec1.Nodes[0].Id, NodeUnknown.Lambda2), Is.EqualTo(3));
+        Assert.That(_map.GetIndex(_particleSpec1.Nodes[0].Id, NodeUnknown.LambdaVolume), Is.EqualTo(3));
 
         // second node
         Assert.That(_map.GetIndex(_particleSpec1.Nodes[1].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(4));
         Assert.That(_map.GetIndex(_particleSpec1.Nodes[1].Id, NodeUnknown.FluxToUpper), Is.EqualTo(5));
-        Assert.That(_map.GetIndex(_particleSpec1.Nodes[1].Id, NodeUnknown.Lambda2), Is.EqualTo(6));
+        Assert.That(_map.GetIndex(_particleSpec1.Nodes[1].Id, NodeUnknown.LambdaVolume), Is.EqualTo(6));
 
         // last node
         Assert.That(_map.GetIndex(_particleSpec1.Nodes[99].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(298));
         Assert.That(_map.GetIndex(_particleSpec1.Nodes[99].Id, NodeUnknown.FluxToUpper), Is.EqualTo(299));
-        Assert.That(_map.GetIndex(_particleSpec1.Nodes[99].Id, NodeUnknown.Lambda2), Is.EqualTo(300));
+        Assert.That(_map.GetIndex(_particleSpec1.Nodes[99].Id, NodeUnknown.LambdaVolume), Is.EqualTo(300));
 
         // second particle
 
         // first node
         Assert.That(_map.GetIndex(_particleSpec2.Nodes[0].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(301));
         Assert.That(_map.GetIndex(_particleSpec2.Nodes[0].Id, NodeUnknown.FluxToUpper), Is.EqualTo(302));
-        Assert.That(_map.GetIndex(_particleSpec2.Nodes[0].Id, NodeUnknown.Lambda2), Is.EqualTo(303));
+        Assert.That(_map.GetIndex(_particleSpec2.Nodes[0].Id, NodeUnknown.LambdaVolume), Is.EqualTo(303));
 
         // second node
         Assert.That(_map.GetIndex(_particleSpec2.Nodes[1].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(304));
         Assert.That(_map.GetIndex(_particleSpec2.Nodes[1].Id, NodeUnknown.FluxToUpper), Is.EqualTo(305));
-        Assert.That(_map.GetIndex(_particleSpec2.Nodes[1].Id, NodeUnknown.Lambda2), Is.EqualTo(306));
+        Assert.That(_map.GetIndex(_particleSpec2.Nodes[1].Id, NodeUnknown.LambdaVolume), Is.EqualTo(306));
 
         // last node
         Assert.That(_map.GetIndex(_particleSpec2.Nodes[99].Id, NodeUnknown.NormalDisplacement), Is.EqualTo(598));
         Assert.That(_map.GetIndex(_particleSpec2.Nodes[99].Id, NodeUnknown.FluxToUpper), Is.EqualTo(599));
-        Assert.That(_map.GetIndex(_particleSpec2.Nodes[99].Id, NodeUnknown.Lambda2), Is.EqualTo(600));
+        Assert.That(_map.GetIndex(_particleSpec2.Nodes[99].Id, NodeUnknown.LambdaVolume), Is.EqualTo(600));
     }
 }

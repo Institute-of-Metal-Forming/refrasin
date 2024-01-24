@@ -1,3 +1,4 @@
+using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 
 namespace RefraSin.ParticleModel;
@@ -12,25 +13,25 @@ public interface INodeGeometry
     /// <summary>
     /// Length of the surface lines to neighbor nodes.
     /// </summary>
-    public ToUpperToLower SurfaceDistance { get; }
+    public ToUpperToLower<double> SurfaceDistance { get; }
 
     /// <summary>
     /// Angle between radial vector and surface line.
     /// </summary>
-    public ToUpperToLowerAngle SurfaceRadiusAngle { get; }
+    public ToUpperToLower<Angle> SurfaceRadiusAngle { get; }
 
     /// <summary>
     /// Angle distance to neighbor nodes.
     /// </summary>
-    public ToUpperToLowerAngle AngleDistance { get; }
+    public ToUpperToLower<Angle> AngleDistance { get; }
 
     /// <summary>
     /// Volume of the adjacent elements.
     /// </summary>
-    public ToUpperToLower Volume { get; }
+    public ToUpperToLower<double> Volume { get; }
 
     /// <summary>
     /// Angle between surface line and surface normal resp. tangent.
     /// </summary>
-    public NormalTangentialAngle SurfaceVectorAngle { get; }
+    public NormalTangential<Angle> SurfaceVectorAngle { get; }
 }

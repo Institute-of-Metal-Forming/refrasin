@@ -5,6 +5,7 @@ using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using static System.Math;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -14,6 +15,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class Particle : IParticle
 {
     private ReadOnlyNodeCollection<NodeBase> _nodes;
+    private double? _meanRadius;
 
     public Particle(
         IParticle particle,
@@ -40,6 +42,8 @@ public class Particle : IParticle
         {
             INeckNode neckNode                   => new NeckNode(neckNode, this, solverSession),
             IGrainBoundaryNode grainBoundaryNode => new GrainBoundaryNode(grainBoundaryNode, this, solverSession),
+            { Type: NodeType.GrainBoundaryNode } => new GrainBoundaryNode(node, this, solverSession),
+            { Type: NodeType.NeckNode }          => new NeckNode(node, this, solverSession),
             _                                    => (NodeBase)new SurfaceNode(node, this, solverSession),
         }).ToReadOnlyNodeCollection();
     }
@@ -110,19 +114,30 @@ public class Particle : IParticle
     /// </summary>
     private ISolverSession SolverSession { get; }
 
-    public Particle ApplyTimeStep(StepVector stepVector, double timeStepWidth)
+    public double MeanRadius => _meanRadius ??= Sqrt(Nodes.Sum(n => n.Volume.ToUpper)) / PI;
+
+    public Particle ApplyTimeStep(Particle? parent, StepVector stepVector, double timeStepWidth)
     {
-        var particleView = stepVector[this];
+        Particle particle;
 
-        var displacementVector = new PolarVector(
-            particleView.AngleDisplacement * timeStepWidth,
-            particleView.RadialDisplacement * timeStepWidth,
-            LocalCoordinateSystem
-        );
+        if (parent is null) // is root particle
+        {
+            particle = new Particle(Id, CenterCoordinates, RotationAngle, Material, MaterialInterfaces, SolverSession);
+        }
+        else
+        {
+            var contactView = stepVector[parent, this];
 
-        var rotationAngle = (RotationAngle + particleView.RotationDisplacement * timeStepWidth).Reduce();
+            var displacementVector = new PolarVector(
+                contactView.AngleDisplacement * timeStepWidth,
+                contactView.RadialDisplacement * timeStepWidth,
+                parent.LocalCoordinateSystem
+            );
 
-        var particle = new Particle(Id, CenterCoordinates + displacementVector.Absolute, rotationAngle, Material, MaterialInterfaces, SolverSession);
+            var rotationAngle = (RotationAngle + contactView.RotationDisplacement * timeStepWidth).Reduce();
+
+            particle = new Particle(Id, CenterCoordinates + displacementVector.Absolute, rotationAngle, Material, MaterialInterfaces, SolverSession);
+        }
 
         particle._nodes = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToReadOnlyNodeCollection();
         return particle;
@@ -132,7 +147,7 @@ public class Particle : IParticle
     public override string ToString() => $"{GetType().Name} {Id}";
 
     /// <inheritdoc />
-    public virtual bool Equals(IVertex other) => other is IParticle && Id == other.Id;
+    public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;
 
     /// <summary>
     /// Bestimmt die beiden einem Winkel nächstgelegenen Oberflächenknoten.

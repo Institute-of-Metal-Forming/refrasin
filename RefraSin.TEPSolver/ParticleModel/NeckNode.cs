@@ -17,20 +17,23 @@ public class NeckNode : ContactNodeBase<NeckNode>, INeckNode
         Guid contactedParticleId) : base(id, r, phi, particle,
         solverSession, contactedNodeId, contactedParticleId) { }
 
-    public override ToUpperToLower SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower(
+    /// <inheritdoc />
+    public override NodeType Type => NodeType.NeckNode;
+
+    public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(
         Upper.SurfaceEnergy.ToLower,
         Lower.SurfaceEnergy.ToUpper
     );
 
-    private ToUpperToLower? _surfaceEnergy;
+    private ToUpperToLower<double>? _surfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower(
+    public override ToUpperToLower<double> SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
         Upper.SurfaceDiffusionCoefficient.ToLower,
         Lower.SurfaceDiffusionCoefficient.ToUpper
     );
 
-    private ToUpperToLower? _surfaceDiffusionCoefficient;
+    private ToUpperToLower<double>? _surfaceDiffusionCoefficient;
 
     /// <inheritdoc />
     public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)

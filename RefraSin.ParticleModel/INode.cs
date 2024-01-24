@@ -19,4 +19,9 @@ public interface INode
     /// Polar coordinates in the particle's coordinate system.
     /// </summary>
     public PolarPoint Coordinates { get; }
+
+    /// <summary>
+    /// Type of the node.
+    /// </summary>
+    public NodeType Type { get; }
 }

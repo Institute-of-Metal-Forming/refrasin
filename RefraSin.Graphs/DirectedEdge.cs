@@ -34,7 +34,7 @@ public class DirectedEdge<TVertex> : IEdge<TVertex> where TVertex : IVertex
     }
 
     /// <inheritdoc />
-    public override bool Equals(object obj) => Equals(obj as IEdge<TVertex>);
+    public override bool Equals(object? obj) => Equals(obj as IEdge<TVertex>);
 
     /// <inheritdoc />
     public override int GetHashCode() => HashCode.Combine(From, To);

@@ -21,7 +21,13 @@ public class MatrixStructureTest
         _particles = Enumerable.Range(0, 3).Select(_ => new Particle(fac.GetParticle(), null!)).ToArray();
         _nodes = _particles.SelectMany(p => p.Nodes).ToArray();
 
-        _map = new StepVectorMap(_particles, _nodes);
+        _map = new StepVectorMap(new[]
+            {
+                new ParticleContact(_particles[0], _particles[1]), 
+                new ParticleContact(_particles[0], _particles[2]),
+                new ParticleContact(_particles[1], _particles[2])
+            },
+            _nodes);
     }
 
     [Test]
@@ -59,15 +65,15 @@ public class MatrixStructureTest
         var first = _particles[0];
         yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
         {
-            (_map.GetIndex(first.Id, ParticleUnknown.RadialDisplacement), 1),
+            (_map.GetIndex(first.Id, ContactUnknown.RadialDisplacement), 1),
         });
         yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
         {
-            (_map.GetIndex(first.Id, ParticleUnknown.AngleDisplacement), 1),
+            (_map.GetIndex(first.Id, ContactUnknown.AngleDisplacement), 1),
         });
         yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
         {
-            (_map.GetIndex(first.Id, ParticleUnknown.RotationDisplacement), 1),
+            (_map.GetIndex(first.Id, ContactUnknown.RotationDisplacement), 1),
         });
 
         // yield particle displacement equations
@@ -75,15 +81,15 @@ public class MatrixStructureTest
         {
             yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
             {
-                (_map.GetIndex(particle.Id, ParticleUnknown.RadialDisplacement), 1),
+                (_map.GetIndex(particle.Id, ContactUnknown.RadialDisplacement), 1),
             });
             yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
             {
-                (_map.GetIndex(particle.Id, ParticleUnknown.AngleDisplacement), 1),
+                (_map.GetIndex(particle.Id, ContactUnknown.AngleDisplacement), 1),
             });
             yield return Vector<double>.Build.SparseOfIndexed(_map.TotalUnknownsCount, new (int, double)[]
             {
-                (_map.GetIndex(particle.Id, ParticleUnknown.RotationDisplacement), 1),
+                (_map.GetIndex(particle.Id, ContactUnknown.RotationDisplacement), 1),
             });
         }
 

@@ -16,4 +16,9 @@ public interface ISolutionState
     /// List of all particles.
     /// </summary>
     IReadOnlyList<IParticle> ParticleStates { get; }
+    
+    /// <summary>
+    /// List of all contacts.
+    /// </summary>
+    IReadOnlyList<IParticleContact> ParticleContacts { get; }
 }
