@@ -23,6 +23,18 @@ internal static class LagrangianGradient
 
     public static IEnumerable<double> YieldEquations(IProcessConditions conditions, SolutionState currentState, StepVector stepVector)
     {
+        // yield node equations
+        foreach (var node in currentState.AllNodes.Values)
+        {
+            yield return StateVelocityDerivativeNormal(conditions, stepVector, node);
+
+            if (node is ContactNodeBase contactNode)
+                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
+
+            yield return FluxDerivative(conditions, stepVector, node);
+            yield return RequiredConstraint(conditions, stepVector, node);
+        }
+
         // yield contact equations
         foreach (var contact in currentState.Contacts.Values)
         {
@@ -45,21 +57,11 @@ internal static class LagrangianGradient
             yield return involvedNodes.Sum(n =>
             {
                 var angleDifference = (n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection).Reduce(Angle.ReductionDomain.WithNegative);
-                return -n.ContactedNode.Coordinates.R * Sin(stepVector[contact].RotationDisplacement + angleDifference) * stepVector[n].LambdaContactDistance
-                     + n.ContactedNode.Coordinates.R / contact.Distance * Cos(stepVector[contact].RotationDisplacement + angleDifference) * stepVector[n].LambdaContactDirection;
+                return -n.ContactedNode.Coordinates.R * Sin(stepVector[contact].RotationDisplacement + angleDifference) *
+                       stepVector[n].LambdaContactDistance
+                     + n.ContactedNode.Coordinates.R / contact.Distance * Cos(stepVector[contact].RotationDisplacement + angleDifference) *
+                       stepVector[n].LambdaContactDirection;
             });
-        }
-
-        // yield node equations
-        foreach (var node in currentState.AllNodes.Values)
-        {
-            yield return StateVelocityDerivativeNormal(conditions, stepVector, node);
-
-            if (node is ContactNodeBase contactNode)
-                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
-
-            yield return FluxDerivative(conditions, stepVector, node);
-            yield return RequiredConstraint(conditions, stepVector, node);
         }
 
         yield return DissipationEquality(conditions, currentState, stepVector);
@@ -136,7 +138,8 @@ internal static class LagrangianGradient
         var normalShift = stepVector[node].NormalDisplacement + stepVector[node.ContactedNode].NormalDisplacement;
         var tangentialShift = stepVector[node].TangentialDisplacement + stepVector[node.ContactedNode].TangentialDisplacement;
         var rotationShift = 2 * node.ContactedNode.Coordinates.R * Sin(stepVector[contact].RotationDisplacement / 2);
-        var rotationDirection = -(node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection) + (Pi - stepVector[contact].RotationDisplacement) / 2;
+        var rotationDirection = -(node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection) +
+                                (Pi - stepVector[contact].RotationDisplacement) / 2;
 
         return (
             stepVector[contact].RadialDisplacement - node.ContactDistanceGradient.Normal * normalShift -
