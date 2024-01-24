@@ -18,7 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
-    <PackageVersion Include="ScottPlot" Version="5.0.10-beta" />
+    <PackageVersion Include="ScottPlot" Version="5.0.20" />
     <PackageVersion Include="HDF5-CSharp" Version="1.19.0" />
   </ItemGroup>
 </Project>

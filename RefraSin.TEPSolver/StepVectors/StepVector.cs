@@ -34,4 +34,6 @@ public class StepVector : DenseVector
     public static StepVector operator *(StepVector leftSide, double rightSide) => new((DenseVector)leftSide * rightSide, leftSide.StepVectorMap);
     public static StepVector operator *(double leftSide, StepVector rightSide) => rightSide * leftSide;
     public static StepVector operator /(StepVector leftSide, double rightSide) => new((DenseVector)leftSide / rightSide, leftSide.StepVectorMap);
+
+    public StepVector Copy() => new(Build.DenseOfVector(this), StepVectorMap);
 }

@@ -1,11 +1,13 @@
 using MoreLinq;
+using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.ParticleModel;
+using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(IEnumerable<ParticleContact> contacts, IEnumerable<NodeBase> nodes)
+    public StepVectorMap(IEnumerable<IParticleContact> contacts, IEnumerable<INode> nodes)
     {
         GlobalUnknownsCount = Enum.GetNames(typeof(GlobalUnknown)).Length;
 
