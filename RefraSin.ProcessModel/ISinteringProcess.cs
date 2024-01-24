@@ -6,7 +6,7 @@ namespace RefraSin.ProcessModel;
 /// <summary>
 /// Interface that defines a data structure representing a sintering process.
 /// </summary>
-public interface ISinteringProcess
+public interface ISinteringProcess : IProcessConditions
 {
     /// <summary>
     /// Time coordinate of the process start.
@@ -32,14 +32,4 @@ public interface ISinteringProcess
     /// List of material interfaces appearing in the process.
     /// </summary>
     public IReadOnlyList<IMaterialInterface> MaterialInterfaces { get; }
-
-    /// <summary>
-    /// Constant process temperature.
-    /// </summary>
-    public double Temperature { get; }
-
-    /// <summary>
-    /// Universal gas constant R.
-    /// </summary>
-    public double GasConstant { get; }
 }

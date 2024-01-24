@@ -199,11 +199,11 @@ public class Solver
     {
         try
         {
-            return session.TimeStepper.Step(session, session.LastStep ?? LagrangianGradient.GuessSolution(session));
+            return session.TimeStepper.Step(session, session.LastStep ?? LagrangianGradient.GuessSolution(session.CurrentState));
         }
         catch (NonConvergenceException)
         {
-            return session.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session));
+            return session.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session.CurrentState));
         }
     }
 }

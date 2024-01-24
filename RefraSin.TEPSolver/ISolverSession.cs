@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
+using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
@@ -13,7 +14,7 @@ namespace RefraSin.TEPSolver;
 /// <summary>
 /// Interface for objects holding session data of a solution procedure.
 /// </summary>
-public interface ISolverSession
+public interface ISolverSession : IProcessConditions
 {
     /// <summary>
     /// Time where the solution started.
@@ -26,16 +27,6 @@ public interface ISolverSession
     public double EndTime { get; }
 
     public int TimeStepIndex { get; }
-
-    /// <summary>
-    /// Constant process temperature.
-    /// </summary>
-    public double Temperature { get; }
-
-    /// <summary>
-    /// Universal gas constant R.
-    /// </summary>
-    public double GasConstant { get; }
 
     /// <summary>
     /// Current step width of time integration.
