@@ -1,4 +1,4 @@
-using MathNet.Numerics.RootFinding;
+using RefraSin.Coordinates;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
@@ -20,7 +20,7 @@ internal static class LagrangianGradient
         return new StepVector(evaluation, stepVector.StepVectorMap);
     }
 
-    private static IEnumerable<double> YieldEquations(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
+    public static IEnumerable<double> YieldEquations(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
     {
         // yield contact equations
         foreach (var contact in currentState.Contacts.Values)
@@ -32,13 +32,21 @@ internal static class LagrangianGradient
                 var constraints = ContactConstraints(solverSession, stepVector, contact, contactNode);
                 yield return constraints.distance;
                 yield return constraints.direction;
+
+                // lambdas of contact must be equal for both connected nodes
                 yield return stepVector[contactNode].LambdaContactDistance - stepVector[contactNode.ContactedNode].LambdaContactDistance;
                 yield return stepVector[contactNode].LambdaContactDirection - stepVector[contactNode.ContactedNode].LambdaContactDirection;
             }
 
+            // derivatives for aux variables
             yield return involvedNodes.Sum(n => stepVector[n].LambdaContactDistance);
             yield return involvedNodes.Sum(n => stepVector[n].LambdaContactDirection);
-            // TODO: yield derivative for rotation
+            yield return involvedNodes.Sum(n =>
+            {
+                var angleDifference = (n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection).Reduce(Angle.ReductionDomain.WithNegative);
+                return -n.ContactedNode.Coordinates.R * Sin(stepVector[contact].RotationDisplacement + angleDifference) * stepVector[n].LambdaContactDistance
+                     + n.ContactedNode.Coordinates.R / contact.Distance * Cos(stepVector[contact].RotationDisplacement + angleDifference) * stepVector[n].LambdaContactDirection;
+            });
         }
 
         // yield node equations
@@ -126,9 +134,8 @@ internal static class LagrangianGradient
     {
         var normalShift = stepVector[node].NormalDisplacement + stepVector[node.ContactedNode].NormalDisplacement;
         var tangentialShift = stepVector[node].TangentialDisplacement + stepVector[node.ContactedNode].TangentialDisplacement;
-        var rotationShift = node.Coordinates.R / Sin((Pi - stepVector[contact].RotationDisplacement) / 2) *
-                            Sin(stepVector[contact].RotationDisplacement);
-        var rotationDirection = -(node.Coordinates.Phi - node.ContactDirection) + (PiOver2 - stepVector[contact].RotationDisplacement) / 2;
+        var rotationShift = 2 * node.ContactedNode.Coordinates.R * Sin(stepVector[contact].RotationDisplacement / 2);
+        var rotationDirection = -(node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection) + (Pi - stepVector[contact].RotationDisplacement) / 2;
 
         return (
             stepVector[contact].RadialDisplacement - node.ContactDistanceGradient.Normal * normalShift -

@@ -47,7 +47,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase where TConta
 
     /// <inheritdoc />
     public override Angle ContactDirection => _contactDirection ??=
-        new PolarVector(Particle.CenterCoordinates - ContactedNode.Particle.CenterCoordinates, Particle.LocalCoordinateSystem).Phi;
+        new PolarVector(ContactedNode.Particle.CenterCoordinates - Particle.CenterCoordinates, Particle.LocalCoordinateSystem).Phi;
 
     private Angle? _contactDirection;
 
