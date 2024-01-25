@@ -136,7 +136,7 @@ public class TwoParticleTest
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
-            step[i] += 1;
+            step[i] += 1e-3;
             var current = LagrangianGradient.EvaluateAt(session, state, step);
 
             yield return current - zero;

@@ -40,7 +40,7 @@ internal static class LagrangianGradient
             {
                 yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
                 yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode.ContactedNode);
-                
+
                 var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
                 yield return constraints.distance;
                 yield return constraints.direction;
@@ -153,14 +153,14 @@ internal static class LagrangianGradient
             new StepVectorMap(currentState.ParticleContacts, currentState.AllNodes.Values));
 
     private static IEnumerable<double> YieldInitialGuess(SolutionState currentState) =>
-        YieldGlobalUnknownsInitialGuess()
+        YieldNodeUnknownsInitialGuess(currentState)
             .Concat(
-                YieldContactUnknownsInitialGuess(currentState)
+                YieldContactNodeUnknownsInitialGuess(currentState)
             )
             .Concat(
-                YieldNodeUnknownsInitialGuess(currentState)
+                YieldContactUnknownsInitialGuess(currentState)
             ).Concat(
-                YieldContactNodeUnknownsInitialGuess(currentState)
+                YieldGlobalUnknownsInitialGuess()
             );
 
     private static IEnumerable<double> YieldGlobalUnknownsInitialGuess()

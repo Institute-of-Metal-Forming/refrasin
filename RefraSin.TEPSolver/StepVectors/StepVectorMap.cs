@@ -6,17 +6,17 @@ public class StepVectorMap
 {
     public StepVectorMap(IEnumerable<IParticleContact> contacts, IEnumerable<INode> nodes)
     {
-        _index = Enum.GetNames(typeof(GlobalUnknown)).Length;
-        
-        foreach (var contact in contacts)
-        {
-            AddContactUnknown(contact, ContactUnknown.RadialDisplacement);
-            AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
-            AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
-        }
+        _index = 0;
 
         var nodesArray = nodes as INode[] ?? nodes.ToArray();
-        
+
+        foreach (var node in nodesArray)
+        {
+            AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
+            AddNodeUnknown(node, NodeUnknown.FluxToUpper);
+            AddNodeUnknown(node, NodeUnknown.LambdaVolume);
+        }
+
         foreach (var contactNode in nodesArray.OfType<IContactNode>())
         {
             AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
@@ -24,11 +24,11 @@ public class StepVectorMap
             AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
         }
 
-        foreach (var node in nodesArray)
+        foreach (var contact in contacts)
         {
-            AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
-            AddNodeUnknown(node, NodeUnknown.FluxToUpper);
-            AddNodeUnknown(node, NodeUnknown.LambdaVolume);
+            AddContactUnknown(contact, ContactUnknown.RadialDisplacement);
+            AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
+            AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
         }
     }
 
@@ -48,7 +48,7 @@ public class StepVectorMap
     private readonly Dictionary<(Guid, NodeUnknown), int> _nodeUnknownIndices = new();
     private readonly Dictionary<(Guid, Guid, ContactUnknown), int> _contactUnknownIndices = new();
 
-    public int this[GlobalUnknown unknown] => (int)unknown;
+    public int this[GlobalUnknown unknown] => _index + (int)unknown;
 
     public int this[INode node, NodeUnknown unknown] => _nodeUnknownIndices[(node.Id, unknown)];
 
