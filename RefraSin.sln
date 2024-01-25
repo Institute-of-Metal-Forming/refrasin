@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Graphs", "RefraSin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Graphs.Tests", "RefraSin.Graphs.Tests\RefraSin.Graphs.Tests.csproj", "{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RefraSin.TEPSolver.EquationSystem", "RefraSin.TEPSolver.EquationSystem\RefraSin.TEPSolver.EquationSystem.fsproj", "{2FE821F9-D18D-48ED-8256-C3204B5C4D64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,10 @@ Global
 		{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FE821F9-D18D-48ED-8256-C3204B5C4D64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FE821F9-D18D-48ED-8256-C3204B5C4D64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FE821F9-D18D-48ED-8256-C3204B5C4D64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FE821F9-D18D-48ED-8256-C3204B5C4D64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
