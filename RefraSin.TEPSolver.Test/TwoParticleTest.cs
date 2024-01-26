@@ -61,17 +61,17 @@ public class TwoParticleTest
         var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
 
         _solver = new Solver
-        {
-            LoggerFactory = loggerFactory,
-            Options = new SolverOptions
+        (
+            _solutionStorage,
+            loggerFactory,
+            SolverDefaults.Routines,
+            new SolverOptions
             {
                 InitialTimeStepWidth = 1,
                 MinTimeStepWidth = 0.1,
                 TimeStepAdaptationFactor = 1.5,
-            },
-            SolutionStorage = _solutionStorage,
-            StepValidators = new IStepValidator[] { },
-        };
+            }
+        );
 
         _material = new Material(
             _particle1.MaterialId,

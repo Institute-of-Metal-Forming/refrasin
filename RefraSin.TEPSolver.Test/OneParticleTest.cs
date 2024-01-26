@@ -31,18 +31,17 @@ public class OneParticleTest
 
         var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
 
-        _solver = new Solver
-        {
-            LoggerFactory = loggerFactory,
-            Options = new SolverOptions
+        _solver = new Solver(
+            _solutionStorage,
+            loggerFactory,
+            SolverDefaults.Routines,
+            new SolverOptions
             {
                 InitialTimeStepWidth = 1,
                 MinTimeStepWidth = 0.1,
-                // MaxTimeStepWidth = 5,
                 TimeStepAdaptationFactor = 1.5,
-            },
-            SolutionStorage = _solutionStorage
-        };
+            }
+        );
 
         _material = new Material(
             _particle.MaterialId,

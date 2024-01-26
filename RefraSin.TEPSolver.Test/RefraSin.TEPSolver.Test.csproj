@@ -26,6 +26,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj" />
+      <ProjectReference Include="..\RefraSin.TEPSolver.Defaults\RefraSin.TEPSolver.Defaults.csproj" />
       <ProjectReference Include="..\RefraSin.TEPSolver\RefraSin.TEPSolver.csproj" />
     </ItemGroup>
 
