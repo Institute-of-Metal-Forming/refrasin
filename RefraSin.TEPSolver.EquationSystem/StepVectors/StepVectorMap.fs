@@ -4,21 +4,20 @@ open System
 open RefraSin.ParticleModel
 
 type NodeUnknown =
-    | NormalDisplacement = 0
-    | TangentialDisplacement = 1
-    | FluxToUpper = 2
-    | LambdaVolume = 3
-    | LambdaContactDistance = 4
-    | LambdaContactDirection = 5
+    | NormalDisplacement
+    | TangentialDisplacement
+    | FluxToUpper
+    | LambdaVolume
+    | LambdaContactDistance
+    | LambdaContactDirection
 
-type GlobalUnknown =
-    | Lambda1 = 0
+type GlobalUnknown = | Lambda1
 
 
 type ContactUnknown =
-    | RadialDisplacement = 0
-    | AngleDisplacement = 1
-    | RotationDisplacement = 2
+    | RadialDisplacement
+    | AngleDisplacement
+    | RotationDisplacement
 
 
 type StepVectorMap(contacts: IParticleContact seq, nodes: INode seq) =
@@ -57,7 +56,10 @@ type StepVectorMap(contacts: IParticleContact seq, nodes: INode seq) =
         |> makeMap
 
     member this.Item
-        with get (unknown: GlobalUnknown) = _index + LanguagePrimitives.EnumToValue unknown
+        with get (unknown: GlobalUnknown) =
+            _index
+            + match unknown with
+              | Lambda1 -> 0
 
     member this.Item
         with get (node: INode, unknown: NodeUnknown) = _nodeUnknownIndices[(node.Id, unknown)]
