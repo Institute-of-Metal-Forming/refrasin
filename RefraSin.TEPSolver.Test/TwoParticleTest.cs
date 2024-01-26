@@ -168,7 +168,7 @@ public class TwoParticleTest
         {
             var plt = new Plot();
 
-            foreach (var particle in state.ParticleStates)
+            foreach (var particle in state.Particles)
             {
                 var coordinates = particle.Nodes
                     .Append(particle.Nodes[0])
@@ -226,16 +226,16 @@ public class TwoParticleTest
         var plt = new Plot();
 
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.X)
+            new ScottPlot.Coordinates(s.Time, s.Particles[0].CenterCoordinates.Absolute.X)
         ).ToArray());
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.Y)
+            new ScottPlot.Coordinates(s.Time, s.Particles[0].CenterCoordinates.Absolute.Y)
         ).ToArray());
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[1].CenterCoordinates.Absolute.X)
+            new ScottPlot.Coordinates(s.Time, s.Particles[1].CenterCoordinates.Absolute.X)
         ).ToArray());
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[1].CenterCoordinates.Absolute.Y)
+            new ScottPlot.Coordinates(s.Time, s.Particles[1].CenterCoordinates.Absolute.Y)
         ).ToArray());
 
         plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);

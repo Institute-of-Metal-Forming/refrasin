@@ -78,14 +78,14 @@ public class Solver
             [session.CurrentState.Particles.Root.Id] = session.CurrentState.Particles.Root.ApplyTimeStep(null, stepVector, session.TimeStepWidth)
         };
 
-        foreach (var contact in session.CurrentState.Contacts.Values)
+        foreach (var contact in session.CurrentState.Contacts)
         {
             newParticles[contact.To.Id] = contact.To.ApplyTimeStep(newParticles[contact.From.Id], stepVector, session.TimeStepWidth);
         }
 
         var newState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
             newParticles.Values,
-            session.CurrentState.Contacts.Keys
+            session.CurrentState.Contacts.Select(c=> (c.From.Id, c.To.Id))
         );
 
         StoreSolutionStep(session, stepVector, newState);

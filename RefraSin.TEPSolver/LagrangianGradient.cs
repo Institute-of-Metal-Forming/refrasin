@@ -24,7 +24,7 @@ internal static class LagrangianGradient
     public static IEnumerable<double> YieldEquations(IProcessConditions conditions, SolutionState currentState, StepVector stepVector)
     {
         // yield node equations
-        foreach (var node in currentState.AllNodes.Values)
+        foreach (var node in currentState.Nodes)
         {
             yield return StateVelocityDerivativeNormal(conditions, stepVector, node);
             yield return FluxDerivative(conditions, stepVector, node);
@@ -32,7 +32,7 @@ internal static class LagrangianGradient
         }
 
         // yield contact equations
-        foreach (var contact in currentState.Contacts.Values)
+        foreach (var contact in currentState.Contacts)
         {
             var involvedNodes = contact.From.Nodes.OfType<ContactNodeBase>().Where(n => n.ContactedParticleId == contact.To.Id).ToArray();
 
@@ -122,16 +122,16 @@ internal static class LagrangianGradient
 
     private static double DissipationEquality(IProcessConditions conditions, SolutionState currentState, StepVector stepVector)
     {
-        var dissipationNormal = currentState.AllNodes.Values.Select(n =>
+        var dissipationNormal = currentState.Nodes.Select(n =>
             -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
         ).Sum();
         
-        var dissipationTangential = currentState.AllNodes.Values.OfType<ContactNodeBase>().Select(n =>
+        var dissipationTangential = currentState.Nodes.OfType<ContactNodeBase>().Select(n =>
             -n.GibbsEnergyGradient.Tangential * stepVector[n].TangentialDisplacement
         ).Sum();
 
         var dissipationFunction = conditions.GasConstant * conditions.Temperature / 2
-                                * currentState.AllNodes.Values.Select(n =>
+                                * currentState.Nodes.Select(n =>
                                       (
                                           n.SurfaceDistance.ToUpper * Math.Pow(stepVector[n].FluxToUpper, 2) / n.SurfaceDiffusionCoefficient.ToUpper
                                         + n.SurfaceDistance.ToLower * Math.Pow(stepVector[n.Lower].FluxToUpper, 2) /
@@ -161,7 +161,7 @@ internal static class LagrangianGradient
 
     public static StepVector GuessSolution(SolutionState currentState) =>
         new(YieldInitialGuess(currentState).ToArray(),
-            new StepVectorMap(currentState.ParticleContacts, currentState.AllNodes.Values));
+            new StepVectorMap(currentState.Contacts, currentState.Nodes));
 
     private static IEnumerable<double> YieldInitialGuess(SolutionState currentState) =>
         YieldNodeUnknownsInitialGuess(currentState)
@@ -181,7 +181,7 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldContactUnknownsInitialGuess(SolutionState currentState)
     {
-        foreach (var _ in currentState.ParticleContacts)
+        foreach (var _ in currentState.Contacts)
         {
             yield return 0;
             yield return 0;
@@ -191,7 +191,7 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldNodeUnknownsInitialGuess(SolutionState currentState)
     {
-        foreach (var node in currentState.AllNodes.Values)
+        foreach (var node in currentState.Nodes)
         {
             yield return node.GuessNormalDisplacement();
             yield return node.GuessFluxToUpper();
@@ -201,7 +201,7 @@ internal static class LagrangianGradient
 
     private static IEnumerable<double> YieldContactNodeUnknownsInitialGuess(SolutionState currentState)
     {
-        foreach (var _ in currentState.AllNodes.Values.OfType<ContactNodeBase>())
+        foreach (var _ in currentState.Nodes.OfType<ContactNodeBase>())
         {
             yield return 0;
             yield return 1;

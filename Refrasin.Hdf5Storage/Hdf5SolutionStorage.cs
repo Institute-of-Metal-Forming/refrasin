@@ -37,14 +37,14 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
         var stateId = Hdf5.CreateOrOpenGroup(StatesGroupId, _stateIndex.ToString());
         Hdf5.WriteAttribute(stateId, nameof(state.Time), state.Time);
 
-        Hdf5.WriteCompounds(stateId, "Particles", state.ParticleStates.Select(p => new ParticleCompound(p)).ToArray(),
+        Hdf5.WriteCompounds(stateId, "Particles", state.Particles.Select(p => new ParticleCompound(p)).ToArray(),
             new Dictionary<string, List<string>>());
-        Hdf5.WriteCompounds(stateId, "Contacts", state.ParticleContacts.Select(c => new ContactCompound(c)).ToArray(),
+        Hdf5.WriteCompounds(stateId, "Contacts", state.Contacts.Select(c => new ContactCompound(c)).ToArray(),
             new Dictionary<string, List<string>>());
 
         var nodesGroupId = Hdf5.CreateOrOpenGroup(stateId, "Nodes");
 
-        foreach (var particleState in state.ParticleStates)
+        foreach (var particleState in state.Particles)
         {
             Hdf5.WriteCompounds(
                 nodesGroupId,

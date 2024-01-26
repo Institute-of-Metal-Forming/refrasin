@@ -106,8 +106,8 @@ public class OneParticleTest
         {
             var plt = new Plot();
 
-            var coordinates = state.ParticleStates[0].Nodes
-                .Append(state.ParticleStates[0].Nodes[0])
+            var coordinates = state.Particles[0].Nodes
+                .Append(state.Particles[0].Nodes[0])
                 .Select(n => new ScottPlot.Coordinates(n.Coordinates.Absolute.X, n.Coordinates.Absolute.Y))
                 .ToArray();
             plt.Add.Scatter(coordinates);
@@ -158,10 +158,10 @@ public class OneParticleTest
         var plt = new Plot();
 
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.X)
+            new ScottPlot.Coordinates(s.Time, s.Particles[0].CenterCoordinates.Absolute.X)
         ).ToArray());
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.Y)
+            new ScottPlot.Coordinates(s.Time, s.Particles[0].CenterCoordinates.Absolute.Y)
         ).ToArray());
 
         plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);

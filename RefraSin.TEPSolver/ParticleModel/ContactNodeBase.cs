@@ -23,7 +23,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase where TConta
     /// Verbundener Knoten des anderen Partikels.
     /// </summary>
     public new TContacted ContactedNode => _contactedNode ??=
-        SolverSession.CurrentState.AllNodes[ContactedNodeId] as TContacted ??
+        SolverSession.CurrentState.Nodes[ContactedNodeId] as TContacted ??
         throw new InvalidCastException(
             $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(TContacted)}."
         );
@@ -108,7 +108,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
     }
 
     /// <inheritdoc />
-    public Guid ContactedParticleId => _contactedParticleId ??= SolverSession.CurrentState.AllNodes[ContactedNodeId].ParticleId;
+    public Guid ContactedParticleId => _contactedParticleId ??= SolverSession.CurrentState.Nodes[ContactedNodeId].ParticleId;
 
     /// <inheritdoc />
     public Guid ContactedNodeId
@@ -121,7 +121,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
             var error = SolverSession.Options.RelativeNodeCoordinateEquivalencePrecision * Particle.MeanRadius;
 
             var contactedNode =
-                SolverSession.CurrentState.AllNodes.Values.FirstOrDefault(n =>
+                SolverSession.CurrentState.Nodes.FirstOrDefault(n =>
                     n.Id != Id && n.Coordinates.Absolute.IsClose(Coordinates.Absolute, error)
                 );
 
@@ -131,7 +131,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
     }
 
     public ContactNodeBase ContactedNode => _contactedNode ??=
-        SolverSession.CurrentState.AllNodes[ContactedNodeId] as ContactNodeBase ??
+        SolverSession.CurrentState.Nodes[ContactedNodeId] as ContactNodeBase ??
         throw new InvalidCastException(
             $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(ContactNodeBase)}."
         );

@@ -14,7 +14,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// </summary>
 public class Particle : IParticle
 {
-    private ReadOnlyNodeCollection<NodeBase> _nodes;
+    private ReadOnlyParticleSurface<NodeBase> _nodes;
     private double? _meanRadius;
 
     public Particle(
@@ -45,7 +45,7 @@ public class Particle : IParticle
             { Type: NodeType.GrainBoundaryNode } => new GrainBoundaryNode(node, this, solverSession),
             { Type: NodeType.NeckNode }          => new NeckNode(node, this, solverSession),
             _                                    => (NodeBase)new SurfaceNode(node, this, solverSession),
-        }).ToReadOnlyNodeCollection();
+        }).ToParticleSurface();
     }
 
     private Particle(
@@ -71,7 +71,7 @@ public class Particle : IParticle
         MaterialInterfaces = materialInterfaces;
 
         SolverSession = solverSession;
-        _nodes = ReadOnlyNodeCollection<NodeBase>.Empty;
+        _nodes = ReadOnlyParticleSurface<NodeBase>.Empty;
     }
 
     /// <inheritdoc/>
@@ -105,9 +105,9 @@ public class Particle : IParticle
     /// </summary>
     public Angle RotationAngle { get; }
 
-    public IReadOnlyNodeCollection<NodeBase> Nodes => _nodes;
+    public IReadOnlyParticleSurface<NodeBase> Nodes => _nodes;
 
-    IReadOnlyNodeCollection<INode> IParticle.Nodes => Nodes;
+    IReadOnlyParticleSurface<INode> IParticle.Nodes => Nodes;
 
     /// <summary>
     /// Reference to the current solver session.
@@ -139,7 +139,7 @@ public class Particle : IParticle
             particle = new Particle(Id, CenterCoordinates + displacementVector.Absolute, rotationAngle, Material, MaterialInterfaces, SolverSession);
         }
 
-        particle._nodes = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToReadOnlyNodeCollection();
+        particle._nodes = Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, particle)).ToParticleSurface();
         return particle;
     }
 

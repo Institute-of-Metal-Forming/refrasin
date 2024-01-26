@@ -10,26 +10,39 @@ namespace RefraSin.TEPSolver;
 
 public class SolutionState : ISolutionState
 {
-    public SolutionState(double time, IEnumerable<Particle> particles, IEnumerable<(Guid from, Guid to)> contacts)
+    public SolutionState(double time, IEnumerable<Particle> particles, IEnumerable<(Guid from, Guid to)>? contacts = null)
     {
         Time = time;
         Particles = particles as IReadOnlyParticleCollection<Particle> ?? new ReadOnlyParticleCollection<Particle>(particles);
-        AllNodes = Particles.SelectMany(p => p.Nodes).ToDictionaryById();
-        Contacts = contacts.ToDictionary(c => (c.from, c.to), c => new ParticleContact(Particles[c.from], Particles[c.to]));
+        Nodes = Particles.SelectMany(p => p.Nodes).ToNodeCollection();
+
+        contacts ??= GetParticleContacts();
+        Contacts = contacts.Select(t => new ParticleContact(Particles[t.from], Particles[t.to])).ToParticleContactCollection();
+    }
+
+    private IEnumerable<(Guid from, Guid to)> GetParticleContacts()
+    {
+        var edges = Particles.SelectMany(p => p.Nodes.OfType<NeckNode>())
+            .Select(n => new UndirectedEdge<Particle>(n.Particle, n.ContactedNode.Particle));
+        var graph = new UndirectedGraph<Particle>(Particles, edges);
+        var explorer = BreadthFirstExplorer<Particle>.Explore(graph, Particles[0]);
+
+        return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
     }
 
     /// <inheritdoc />
     public double Time { get; }
 
+    /// <inheritdoc cref="ISolutionState.Nodes"/>>
+    public IReadOnlyNodeCollection<NodeBase> Nodes { get; }
+
+    /// <inheritdoc cref="ISolutionState.Particles"/>>
     public IReadOnlyParticleCollection<Particle> Particles { get; }
 
-    public IReadOnlyDictionary<Guid, NodeBase> AllNodes { get; }
+    /// <inheritdoc cref="ISolutionState.Contacts" />
+    public IReadOnlyParticleContactCollection<ParticleContact> Contacts { get; }
 
-    public IReadOnlyDictionary<(Guid from, Guid to), ParticleContact> Contacts { get; }
-
-    /// <inheritdoc />
-    IReadOnlyList<IParticle> ISolutionState.ParticleStates => Particles;
-
-    /// <inheritdoc />
-    public IReadOnlyList<IParticleContact> ParticleContacts => Contacts.Values.ToArray();
+    IReadOnlyNodeCollection<INode> ISolutionState.Nodes => Nodes;
+    IReadOnlyParticleCollection<IParticle> ISolutionState.Particles => Particles;
+    IReadOnlyParticleContactCollection<IParticleContact> ISolutionState.Contacts => Contacts;
 }
