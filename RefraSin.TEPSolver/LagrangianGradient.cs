@@ -107,16 +107,27 @@ internal static class LagrangianGradient
 
     private static double RequiredConstraint(IProcessConditions conditions, StepVector stepVector, NodeBase node)
     {
-        var volumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
+        var normalVolumeTerm = node.VolumeGradient.Normal * stepVector[node].NormalDisplacement;
+        var tangentialVolumeTerm = 0.0;
+
+        if (node is ContactNodeBase contactNode)
+        {
+            tangentialVolumeTerm = node.VolumeGradient.Tangential * stepVector[contactNode].TangentialDisplacement;
+        }
+
         var fluxTerm = stepVector[node].FluxToUpper - stepVector[node.Lower].FluxToUpper;
 
-        return volumeTerm - fluxTerm;
+        return normalVolumeTerm + tangentialVolumeTerm - fluxTerm;
     }
 
     private static double DissipationEquality(IProcessConditions conditions, SolutionState currentState, StepVector stepVector)
     {
-        var dissipation = currentState.AllNodes.Values.Select(n =>
+        var dissipationNormal = currentState.AllNodes.Values.Select(n =>
             -n.GibbsEnergyGradient.Normal * stepVector[n].NormalDisplacement
+        ).Sum();
+        
+        var dissipationTangential = currentState.AllNodes.Values.OfType<ContactNodeBase>().Select(n =>
+            -n.GibbsEnergyGradient.Tangential * stepVector[n].TangentialDisplacement
         ).Sum();
 
         var dissipationFunction = conditions.GasConstant * conditions.Temperature / 2
@@ -128,7 +139,7 @@ internal static class LagrangianGradient
                                       ) / (n.Particle.Material.MolarVolume * n.Particle.Material.EquilibriumVacancyConcentration)
                                   ).Sum();
 
-        return dissipation - dissipationFunction;
+        return dissipationNormal + dissipationTangential - dissipationFunction;
     }
 
     private static (double distance, double direction) ContactConstraints(IProcessConditions conditions, StepVector stepVector,
