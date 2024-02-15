@@ -7,7 +7,7 @@ type LagrangianGradient() =
     interface ILagrangianGradient with
         member this.EvaluateAt(conditions, currentState, currentEstimation) =
             let evaluation =
-                Lagrangian.YieldEquations conditions currentState currentEstimation
+                Lagrangian.FullEquationSet conditions currentState currentEstimation
                 |> Helper.CheckFinitenesses
                 |> Array.ofSeq
                 

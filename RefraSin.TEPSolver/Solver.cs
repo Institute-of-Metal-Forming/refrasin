@@ -121,18 +121,18 @@ public class Solver
                         {
                             return new NodeTimeStep(
                                 n.Id,
-                                stepVector[n].NormalDisplacement,
-                                stepVector[contactNode].TangentialDisplacement,
-                                new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                                stepVector.NormalDisplacement(n),
+                                stepVector.TangentialDisplacement(contactNode),
+                                new ToUpperToLower<double>(stepVector.FluxToUpper(n), stepVector.FluxToUpper(n.Lower)),
                                 0
                             );
                         }
 
                         return new NodeTimeStep(
                             n.Id,
-                            stepVector[n].NormalDisplacement,
+                            stepVector.NormalDisplacement(n),
                             0,
-                            new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                            new ToUpperToLower<double>(stepVector.FluxToUpper(n), stepVector.FluxToUpper(n)),
                             0
                         );
                     })

@@ -126,15 +126,13 @@ public class Particle : IParticle
         }
         else
         {
-            var contactView = stepVector[parent, this];
-
             var displacementVector = new PolarVector(
-                contactView.AngleDisplacement * timeStepWidth,
-                contactView.RadialDisplacement * timeStepWidth,
+                stepVector.AngleDisplacement(parent, this) * timeStepWidth,
+                stepVector.RadialDisplacement(parent, this) * timeStepWidth,
                 parent.LocalCoordinateSystem
             );
 
-            var rotationAngle = (RotationAngle + contactView.RotationDisplacement * timeStepWidth).Reduce();
+            var rotationAngle = (RotationAngle + stepVector.RotationDisplacement(parent, this) * timeStepWidth).Reduce();
 
             particle = new Particle(Id, CenterCoordinates + displacementVector.Absolute, rotationAngle, Material, MaterialInterfaces, SolverSession);
         }
