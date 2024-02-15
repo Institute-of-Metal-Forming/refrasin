@@ -8,8 +8,4 @@
         <RootNamespace>RefraSin.Coordinates</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="MathNet.Numerics"/>
-    </ItemGroup>
-
 </Project>

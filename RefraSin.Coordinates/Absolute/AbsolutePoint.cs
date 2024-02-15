@@ -1,5 +1,3 @@
-using System;
-using MathNet.Numerics;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
@@ -8,7 +6,7 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a point in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsolutePoint : AbsoluteCoordinates, IPoint, ICloneable<AbsolutePoint>, IPrecisionEquatable<AbsolutePoint>
+public class AbsolutePoint : AbsoluteCoordinates, IPoint, ICloneable<AbsolutePoint>, IIsClose<AbsolutePoint>
 {
     /// <summary>
     ///     Creates the absolute point (0,0).
@@ -61,13 +59,7 @@ public class AbsolutePoint : AbsoluteCoordinates, IPoint, ICloneable<AbsolutePoi
     }
 
     /// <inheritdoc />
-    public bool Equals(AbsolutePoint other, double precision) => X.AlmostEqual(other.X, precision) && Y.AlmostEqual(other.Y, precision);
-
-    /// <inheritdoc />
-    public bool Equals(AbsolutePoint other, int digits) => X.AlmostEqual(other.X, digits) && Y.AlmostEqual(other.Y, digits);
-
-    /// <inheritdoc />
-    public bool Equals(AbsolutePoint? other) => other != null && X.AlmostEqual(other.X) && Y.AlmostEqual(other.Y);
+    public bool IsClose(AbsolutePoint other, double precision = 1e-8) => X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
 
     /// <summary>
     ///     Computes the point halfway on the straight line between two points.

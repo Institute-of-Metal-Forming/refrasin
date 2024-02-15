@@ -1,5 +1,4 @@
-using System;
-using MathNet.Numerics;
+using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
 namespace RefraSin.Coordinates.Cartesian;
@@ -124,35 +123,4 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
 
     /// <inheritdoc />
     public override double[] ToArray() => new[] { X, Y };
-
-    /// <summary>
-    ///     Base implementation of Equals() with precision.
-    /// </summary>
-    protected bool Equals(CartesianCoordinates other, double precision)
-    {
-        if (System.Equals(other.System))
-            return X.AlmostEqual(other.X, precision) && Y.AlmostEqual(other.Y, precision);
-        return Equals((IPoint)other);
-    }
-
-    /// <summary>
-    ///     Base implementation of Equals() with precision.
-    /// </summary>
-    protected bool Equals(CartesianCoordinates other, int digits)
-    {
-        if (System.Equals(other.System))
-            return X.AlmostEqual(other.X, digits) && Y.AlmostEqual(other.Y, digits);
-        return Equals((IPoint)other);
-    }
-
-    /// <summary>
-    ///     Base implementation of Equals().
-    /// </summary>
-    protected bool Equals(CartesianCoordinates? other)
-    {
-        if (other == null) return false;
-        if (System.Equals(other.System))
-            return X.AlmostEqual(other.X) && Y.AlmostEqual(other.Y);
-        return Equals((IPoint)other);
-    }
 }

@@ -23,22 +23,21 @@ public static class Extensions
     public static double Cubed(this double x) => Pow(x, 3);
 
     /// <summary>
-    ///     Berechnet das ugf. Integral einer Funktion, die nur als Wertetabelle gegeben ist. Dabei wird zwischen zwei
-    ///     Wertepaaren immer die Trapezregel angewendet.
+    /// Determines if two double values are equal within a precision.
     /// </summary>
-    /// <param name="values">Wertetabelle</param>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <param name="precision">absolute precision</param>
     /// <returns></returns>
-    public static double Integrate(this IEnumerable<(double x, double y)> values)
+    public static bool IsClose(this double self, double other, double precision)
     {
-        (double x, double y)? lastTuple = null;
-        var integral = 0.0;
-        foreach (var tuple in values)
-        {
-            if (lastTuple.HasValue) integral += 0.5 * (tuple.y + lastTuple.Value.y) * (tuple.x - lastTuple.Value.x);
+        if (double.IsInfinity(self) || double.IsInfinity(other))
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            return self == other;
 
-            lastTuple = tuple;
-        }
-
-        return integral;
+        if (double.IsNaN(self) || double.IsNaN(other))
+            return false;
+        
+        return Abs(self - other) < precision;
     }
 }

@@ -1,4 +1,4 @@
-using MathNet.Numerics;
+using RefraSin.Coordinates;
 using RefraSin.ParticleModel.ParticleFactories;
 using static NUnit.Framework.Assert;
 
@@ -25,7 +25,7 @@ public class TestSpecs
     [Test]
     public void TestShapeFunctionSpecFactory()
     {
-        That((double)_particle.Nodes[^1].Coordinates.Phi - Constants.Pi2, Is.Not.EqualTo(0.0));
+        That((double)_particle.Nodes[^1].Coordinates.Phi - Constants.TwoPi, Is.Not.EqualTo(0.0));
     }
 
     [Test]

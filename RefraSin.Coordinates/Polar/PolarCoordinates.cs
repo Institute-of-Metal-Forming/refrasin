@@ -1,5 +1,4 @@
-using System;
-using MathNet.Numerics;
+using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
 namespace RefraSin.Coordinates.Polar;
@@ -169,39 +168,5 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
     public override void RotateBy(Angle angle)
     {
         Phi += angle;
-    }
-
-    /// <summary>
-    ///     Base implementation of Equals().
-    /// </summary>
-    protected bool Equals(PolarCoordinates? other)
-    {
-        if (other == null) return false;
-        if (R.AlmostEqual(0)) return other.R.AlmostEqual(0);
-        if (System.Equals(other.System))
-            return R.AlmostEqual(other.R) && Phi.Radians.AlmostEqual(other.Phi.Radians);
-        return Equals((IVector)other);
-    }
-
-    /// <summary>
-    ///     Base implementation of Equals() with precision.
-    /// </summary>
-    protected bool Equals(PolarCoordinates other, double precision)
-    {
-        if (R.AlmostEqual(0, precision)) return other.R.AlmostEqual(0, precision);
-        if (System.Equals(other.System))
-            return R.AlmostEqual(other.R, precision) && Phi.Radians.AlmostEqual(other.Phi.Radians, precision);
-        return Equals((IVector)other);
-    }
-
-    /// <summary>
-    ///     Base implementation of Equals() with precision.
-    /// </summary>
-    protected bool Equals(PolarCoordinates other, int digits)
-    {
-        if (R.AlmostEqual(0, digits)) return other.R.AlmostEqual(0, digits);
-        if (System.Equals(other.System))
-            return R.AlmostEqual(other.R, digits) && Phi.Radians.AlmostEqual(other.Phi.Radians, digits);
-        return Equals((IVector)other);
     }
 }

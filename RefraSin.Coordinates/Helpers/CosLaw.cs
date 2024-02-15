@@ -1,4 +1,4 @@
-using static MathNet.Numerics.Constants;
+using static RefraSin.Coordinates.Constants;
 using static System.Math;
 using static RefraSin.Coordinates.Helpers.MathExt;
 
