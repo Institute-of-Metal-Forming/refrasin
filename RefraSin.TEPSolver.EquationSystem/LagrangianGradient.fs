@@ -5,7 +5,7 @@ open RefraSin.TEPSolver
 open RefraSin.TEPSolver.StepVectors
 open MathNet.Numerics.LinearAlgebra
 
-type LagrangianGradient =
+type LagrangianGradient() =
     interface ILagrangianGradient with
         member this.EvaluateAt(conditions, currentState, currentEstimation) =
             let evaluation =
