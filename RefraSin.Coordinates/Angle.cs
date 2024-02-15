@@ -404,9 +404,34 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
     public static Angle operator +(Angle a1, Angle a2) => new(a1.Radians + a2.Radians);
 
     /// <summary>
+    ///     Addition.
+    /// </summary>
+    public static Angle operator +(Angle a, double d) => new(a.Radians + d);
+
+    /// <summary>
+    ///     Addition.
+    /// </summary>
+    public static Angle operator +(double d, Angle a) => new(a.Radians + d);
+
+    /// <summary>
     ///     Subtraction.
     /// </summary>
     public static Angle operator -(Angle a1, Angle a2) => new(a1.Radians - a2.Radians);
+
+    /// <summary>
+    ///     Subtraction.
+    /// </summary>
+    public static Angle operator -(Angle a, double d) => new(a.Radians - d);
+
+    /// <summary>
+    ///     Negation.
+    /// </summary>
+    public static Angle operator -(Angle a) => new(-a.Radians);
+
+    /// <summary>
+    ///     Subtraction.
+    /// </summary>
+    public static Angle operator -(double d, Angle a) => new(d - a.Radians);
 
     /// <summary>
     ///     Scalar multiplication.

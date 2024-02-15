@@ -1,17 +1,15 @@
 module RefraSin.TEPSolver.EquationSystem.Lagrangian
 
-open RefraSin.ParticleModel
+open Microsoft.FSharp.Core
+open RefraSin.Coordinates
 open RefraSin.ProcessModel
 open RefraSin.TEPSolver
 open RefraSin.TEPSolver.ParticleModel
 open RefraSin.TEPSolver.StepVectors
 open System.Linq
+open System
 
-let StateVelocityDerivativeNormal
-    (conditions: IProcessConditions)
-    (currentEstimation: StepVector)
-    (node: NodeBase)
-    : float =
+let StateVelocityDerivativeNormal (currentEstimation: StepVector) (node: NodeBase) : float =
 
     let gibbsTerm = -node.GibbsEnergyGradient.Normal * (1.0 + currentEstimation.Lambda1)
 
@@ -28,11 +26,7 @@ let StateVelocityDerivativeNormal
 
     gibbsTerm + contactTerm + requiredConstraintsTerm
 
-let StateVelocityDerivativeTangential
-    (conditions: IProcessConditions)
-    (currentEstimation: StepVector)
-    (node: ContactNodeBase)
-    : float =
+let StateVelocityDerivativeTangential (currentEstimation: StepVector) (node: ContactNodeBase) : float =
 
     let gibbsTerm = -node.GibbsEnergyGradient.Normal * (1.0 + currentEstimation.Lambda1)
 
@@ -50,8 +44,8 @@ let StateVelocityDerivativeTangential
 let FluxDerivative (conditions: IProcessConditions) (currentEstimation: StepVector) (node: NodeBase) : float =
     let dissipationTerm =
         2.0 * conditions.GasConstant * conditions.Temperature
-        / (node.Particle.Material.MolarVolume
-           * node.Particle.Material.EquilibriumVacancyConcentration)
+        / node.Particle.Material.MolarVolume
+        / node.Particle.Material.EquilibriumVacancyConcentration
         * node.SurfaceDistance.ToUpper
         * currentEstimation[node].FluxToUpper
         / node.SurfaceDiffusionCoefficient.ToUpper
@@ -62,7 +56,7 @@ let FluxDerivative (conditions: IProcessConditions) (currentEstimation: StepVect
 
     -dissipationTerm - thisRequiredConstraintsTerm + upperRequiredConstraintsTerm
 
-let RequiredConstraint (conditions: IProcessConditions) (currentEstimation: StepVector) (node: NodeBase) : float =
+let RequiredConstraint (currentEstimation: StepVector) (node: NodeBase) : float =
     let normalVolumeTerm = node.VolumeGradient.Normal * currentEstimation[node].NormalDisplacement
 
     let tangentialVolumeTerm =
@@ -74,18 +68,49 @@ let RequiredConstraint (conditions: IProcessConditions) (currentEstimation: Step
 
     normalVolumeTerm + tangentialVolumeTerm - fluxTerm
 
+let ContactConstraints (currentEstimation: StepVector) (contact: ParticleContact) (node: ContactNodeBase) : float seq =
+    let normalShift =
+        currentEstimation[node].NormalDisplacement
+        + currentEstimation[node.ContactedNode].NormalDisplacement
+
+    let tangentialShift =
+        currentEstimation[node].TangentialDisplacement
+        + currentEstimation[node.ContactedNode].TangentialDisplacement
+
+    let rotationShift =
+        2.0
+        * node.ContactedNode.Coordinates.R
+        * Math.Sin(currentEstimation[contact].RotationDisplacement / 2.0)
+
+    let rotationDirection =
+        -(node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection)
+        + (Math.PI - currentEstimation[contact].RotationDisplacement) / 2.0
+
+    seq {
+        yield
+            currentEstimation[contact].RadialDisplacement
+            - node.ContactDistanceGradient.Normal * normalShift
+            - node.ContactDistanceGradient.Tangential * tangentialShift
+            + Math.Cos(rotationDirection) * rotationShift
+
+        yield
+            currentEstimation[contact].AngleDisplacement
+            - node.ContactDirectionGradient.Normal * normalShift
+            - node.ContactDirectionGradient.Tangential * tangentialShift
+            - Math.Sin(rotationDirection) / contact.Distance * rotationShift
+    }
+
 let ContactNodeEquations
-    (conditions: IProcessConditions)
     (currentEstimation: StepVector)
     (contact: ParticleContact)
     (involvedNodes: ContactNodeBase seq)
     : float seq =
     seq {
         for n in involvedNodes do
-            yield StateVelocityDerivativeTangential conditions currentEstimation n
-            yield StateVelocityDerivativeTangential conditions currentEstimation n.ContactedNode
+            yield StateVelocityDerivativeTangential currentEstimation n
+            yield StateVelocityDerivativeTangential currentEstimation n.ContactedNode
 
-            yield! ContactConstraints conditions currentEstimation contact n
+            yield! ContactConstraints currentEstimation contact n
 
             yield
                 currentEstimation[n].LambdaContactDistance
@@ -96,6 +121,39 @@ let ContactNodeEquations
                 - currentEstimation[n.ContactedNode].LambdaContactDirection
     }
 
+let ContactDistanceDerivative (currentEstimation: StepVector) (involvedNodes: ContactNodeBase seq) : float =
+    query {
+        for n in involvedNodes do
+            sumBy currentEstimation[n].LambdaContactDistance
+    }
+
+let ContactDirectionDerivative (currentEstimation: StepVector) (involvedNodes: ContactNodeBase seq) : float =
+    query {
+        for n in involvedNodes do
+            sumBy currentEstimation[n].LambdaContactDirection
+    }
+
+let ContactRotationDerivative
+    (currentEstimation: StepVector)
+    (contact: ParticleContact)
+    (involvedNodes: ContactNodeBase seq)
+    : float =
+    query {
+        for n in involvedNodes do
+            let angleDifference =
+                (n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection)
+                    .Reduce(Angle.ReductionDomain.WithNegative)
+
+            sumBy (
+                -n.ContactedNode.Coordinates.R
+                * Math.Sin(currentEstimation[contact].RotationDisplacement + angleDifference |> float)
+                * currentEstimation[n].LambdaContactDistance
+                + n.ContactedNode.Coordinates.R / contact.Distance
+                  * Math.Cos(currentEstimation[contact].RotationDisplacement + angleDifference |> float)
+                  * currentEstimation[n].LambdaContactDirection
+            )
+    }
+
 let NodeEquations
     (conditions: IProcessConditions)
     (currentState: SolutionState)
@@ -104,16 +162,12 @@ let NodeEquations
 
     seq {
         for n in currentState.Nodes do
-            yield StateVelocityDerivativeNormal conditions currentEstimation n
+            yield StateVelocityDerivativeNormal currentEstimation n
             yield FluxDerivative conditions currentEstimation n
-            yield RequiredConstraint conditions currentEstimation n
+            yield RequiredConstraint currentEstimation n
     }
 
-let ContactEquations
-    (conditions: IProcessConditions)
-    (currentState: SolutionState)
-    (currentEstimation: StepVector)
-    : float seq =
+let ContactEquations (currentState: SolutionState) (currentEstimation: StepVector) : float seq =
 
     seq {
         for c in currentState.Contacts do
@@ -124,11 +178,11 @@ let ContactEquations
                         select n
                 }
 
-            yield! ContactNodeEquations conditions currentEstimation c involvedNodes
+            yield! ContactNodeEquations currentEstimation c involvedNodes
 
-            yield ContactDistanceDerivative conditions currentEstimation c involvedNodes
-            yield ContactDistanceDerivative conditions currentEstimation c involvedNodes
-            yield ContactDistanceDerivative conditions currentEstimation c involvedNodes
+            yield ContactDistanceDerivative currentEstimation involvedNodes
+            yield ContactDirectionDerivative currentEstimation involvedNodes
+            yield ContactRotationDerivative currentEstimation c involvedNodes
     }
 
 let DissipationEquality
@@ -175,6 +229,6 @@ let YieldEquations
     : float seq =
     seq {
         yield! NodeEquations conditions currentState currentEstimation
-        yield! ContactEquations conditions currentState currentEstimation
+        yield! ContactEquations currentState currentEstimation
         yield DissipationEquality conditions currentState currentEstimation
     }
