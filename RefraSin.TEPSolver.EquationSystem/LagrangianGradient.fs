@@ -13,11 +13,3 @@ type LagrangianGradient() =
                 
 
             StepVector(evaluation, currentEstimation.StepVectorMap)
-
-
-        member this.EvaluateJacobianAt(conditions, currentState, currentEstimation) =
-            let evaluation =
-                Jacobian.YieldRows conditions currentState currentEstimation
-                |> Array.ofSeq
-                
-            matrix evaluation

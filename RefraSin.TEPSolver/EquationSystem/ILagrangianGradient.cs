@@ -6,7 +6,5 @@ namespace RefraSin.TEPSolver.EquationSystem;
 
 public interface ILagrangianGradient
 {
-    StepVector EvaluateAt(IProcessConditions conditions, SolutionState currentState, StepVector currentEstimation);
-
-    Matrix<double> EvaluateJacobianAt(IProcessConditions conditions, SolutionState currentState, StepVector currentEstimation);
+    Vector<double> EvaluateAt(IProcessConditions conditions, SolutionState currentState, StepVector currentEstimation);
 }

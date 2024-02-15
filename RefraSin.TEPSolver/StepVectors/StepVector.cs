@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using Microsoft.VisualBasic.CompilerServices;
 using RefraSin.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
@@ -59,4 +60,22 @@ public class StepVector : DenseVector
     public static StepVector operator /(StepVector leftSide, double rightSide) => new((DenseVector)leftSide / rightSide, leftSide.StepVectorMap);
 
     public StepVector Copy() => new(Build.DenseOfVector(this), StepVectorMap);
+
+    public void UpdateParticleBlock(IParticle particle, double[] data)
+    {
+        var block = StepVectorMap[particle];
+
+        if (data.Length != block.length)
+            throw new InvalidOperationException("'data' must have exactly the length of the particle block.");
+
+        data.CopyTo(Values, block.start);
+    }
+
+    public void UpdateBorder(double[] data)
+    {
+        if (data.Length != StepVectorMap.BorderLength)
+            throw new InvalidOperationException("'data' must have exactly the length of the particle block.");
+
+        data.CopyTo(Values, StepVectorMap.BorderStart);
+    }
 }

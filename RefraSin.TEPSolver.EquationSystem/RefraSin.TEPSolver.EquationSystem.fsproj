@@ -18,7 +18,6 @@
     <ItemGroup>
         <Compile Include="Helper.fs" />
         <Compile Include="Lagrangian.fs" />
-        <Compile Include="Jacobian.fs" />
         <Compile Include="LagrangianGradient.fs"/>
         <Compile Include="StepEstimator.fs" />
     </ItemGroup>

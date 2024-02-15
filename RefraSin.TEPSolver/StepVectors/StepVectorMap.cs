@@ -9,12 +9,21 @@ public class StepVectorMap
     {
         _index = 0;
 
-        foreach (var node in currentState.Nodes)
+        foreach (var particle in currentState.Particles)
         {
-            AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
-            AddNodeUnknown(node, NodeUnknown.FluxToUpper);
-            AddNodeUnknown(node, NodeUnknown.LambdaVolume);
+            var startIndex = _index;
+            
+            foreach (var node in particle.Nodes)
+            {
+                AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
+                AddNodeUnknown(node, NodeUnknown.FluxToUpper);
+                AddNodeUnknown(node, NodeUnknown.LambdaVolume);
+            }
+
+            _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
         }
+
+        BorderStart = _index;
 
         foreach (var contactNode in currentState.Nodes.OfType<IContactNode>())
         {
@@ -29,6 +38,8 @@ public class StepVectorMap
             AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
             AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
         }
+
+        BorderLength = _index - BorderStart;
     }
 
     private void AddNodeUnknown(INode node, NodeUnknown unknown)
@@ -46,6 +57,7 @@ public class StepVectorMap
     private int _index;
     private readonly Dictionary<(Guid, NodeUnknown), int> _nodeUnknownIndices = new();
     private readonly Dictionary<(Guid, Guid, ContactUnknown), int> _contactUnknownIndices = new();
+    private readonly Dictionary<Guid, (int start, int length)> _particleBlocks = new();
 
     public int this[GlobalUnknown unknown] => _index + (int)unknown;
 
@@ -56,4 +68,10 @@ public class StepVectorMap
     public int this[IParticleContact contact, ContactUnknown unknown] => _contactUnknownIndices[(contact.From.Id, contact.To.Id, unknown)];
 
     public int this[Guid fromId, Guid toId, ContactUnknown unknown] => _contactUnknownIndices[(fromId, toId, unknown)];
+
+    public (int start, int length) this[IParticle particle] => _particleBlocks[particle.Id];
+    
+    public int BorderStart { get; }
+    
+    public int BorderLength { get; }
 }
