@@ -10,13 +10,9 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
-using Serilog;
 using static System.Math;
-using static NUnit.Framework.Assert;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver.Test;
 
@@ -39,7 +35,7 @@ public class TwoParticleTest
             new Node(Guid.NewGuid(), baseParticle1.Id, new PolarPoint(new AbsolutePoint(120e-6, 0)), NodeType.GrainBoundaryNode),
             new Node(Guid.NewGuid(), baseParticle1.Id, new PolarPoint(new AbsolutePoint(120e-6, initialNeck)), NodeType.NeckNode),
         }).ToArray();
-        _particle1 = new RefraSin.ParticleModel.Particle(baseParticle1.Id, new(0, 0), 0, baseParticle1.MaterialId, nodes1);
+        _particle1 = new Particle(baseParticle1.Id, new(0, 0), 0, baseParticle1.MaterialId, nodes1);
 
         var baseParticle2 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, _particle1.MaterialId)
                 { NodeCount = nodeCountPerParticle }
@@ -50,7 +46,7 @@ public class TwoParticleTest
             new Node(Guid.NewGuid(), baseParticle2.Id, new PolarPoint(new AbsolutePoint(120e-6, 0)), NodeType.GrainBoundaryNode),
             new Node(Guid.NewGuid(), baseParticle2.Id, new PolarPoint(new AbsolutePoint(120e-6, initialNeck)), NodeType.NeckNode),
         }).ToArray();
-        _particle2 = new RefraSin.ParticleModel.Particle(baseParticle2.Id, new(240e-6, 0), PI, baseParticle2.MaterialId, nodes2);
+        _particle2 = new Particle(baseParticle2.Id, new(240e-6, 0), PI, baseParticle2.MaterialId, nodes2);
 
         _solutionStorage = new InMemorySolutionStorage();
 
@@ -116,7 +112,7 @@ public class TwoParticleTest
     {
         var session = new SolverSession(_solver, _process);
         var initialState = session.CurrentState;
-        var guess = LagrangianGradient.GuessSolution(initialState);
+        var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
         var matrix = Matrix<double>.Build.DenseOfColumns(YieldJacobianColumns(session, initialState, guess)).PointwiseSign();
 
@@ -131,13 +127,13 @@ public class TwoParticleTest
 
     private IEnumerable<Vector<double>> YieldJacobianColumns(SolverSession session, SolutionState state, StepVector guess)
     {
-        var zero = LagrangianGradient.EvaluateAt(session, state, guess);
+        var zero = session.Routines.LagrangianGradient.EvaluateAt(session, state, guess);
 
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
             step[i] += 1e-3;
-            var current = LagrangianGradient.EvaluateAt(session, state, step);
+            var current = session.Routines.LagrangianGradient.EvaluateAt(session, state, step);
 
             yield return current - zero;
         }

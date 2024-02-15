@@ -20,10 +20,7 @@
         <Compile Include="Lagrangian.fs" />
         <Compile Include="Jacobian.fs" />
         <Compile Include="LagrangianGradient.fs"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageVersion Update="MathNet.Numerics.FSharp" Version="5.0.0" />
+        <Compile Include="StepEstimator.fs" />
     </ItemGroup>
 
 </Project>

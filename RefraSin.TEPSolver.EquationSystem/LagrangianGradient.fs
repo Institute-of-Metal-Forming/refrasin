@@ -1,7 +1,5 @@
 namespace RefraSin.TEPSolver.EquationSystem
 
-open System
-open RefraSin.TEPSolver
 open RefraSin.TEPSolver.StepVectors
 open MathNet.Numerics.LinearAlgebra
 

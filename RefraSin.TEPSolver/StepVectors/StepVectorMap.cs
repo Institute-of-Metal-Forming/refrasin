@@ -1,30 +1,29 @@
 using RefraSin.ParticleModel;
+using RefraSin.Storage;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(IEnumerable<IParticleContact> contacts, IEnumerable<INode> nodes)
+    public StepVectorMap(ISolutionState currentState)
     {
         _index = 0;
 
-        var nodesArray = nodes as INode[] ?? nodes.ToArray();
-
-        foreach (var node in nodesArray)
+        foreach (var node in currentState.Nodes)
         {
             AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
             AddNodeUnknown(node, NodeUnknown.FluxToUpper);
             AddNodeUnknown(node, NodeUnknown.LambdaVolume);
         }
 
-        foreach (var contactNode in nodesArray.OfType<IContactNode>())
+        foreach (var contactNode in currentState.Nodes.OfType<IContactNode>())
         {
             AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
             AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
             AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
         }
 
-        foreach (var contact in contacts)
+        foreach (var contact in currentState.Contacts)
         {
             AddContactUnknown(contact, ContactUnknown.RadialDisplacement);
             AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
