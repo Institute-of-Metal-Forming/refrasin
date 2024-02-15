@@ -31,4 +31,9 @@
             <_Parameter1>$(MSBuildProjectName).FSharp</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="LagrangianGradient.cs" />
+      <None Include="LagrangianGradient.cs" />
+    </ItemGroup>
 </Project>

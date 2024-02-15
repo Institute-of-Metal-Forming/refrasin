@@ -7,7 +7,7 @@ using static MathNet.Numerics.Constants;
 
 namespace RefraSin.TEPSolver;
 
-internal static class LagrangianGradient
+public static class LagrangianGradient
 {
     public static StepVector EvaluateAt(IProcessConditions conditions, SolutionState currentState, StepVector stepVector)
     {

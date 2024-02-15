@@ -1,7 +1,7 @@
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver;
+namespace RefraSin.TEPSolver.EquationSystem;
 
 public interface IStepEstimator
 {

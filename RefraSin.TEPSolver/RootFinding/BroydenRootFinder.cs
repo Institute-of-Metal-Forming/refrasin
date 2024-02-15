@@ -9,7 +9,7 @@ public class BroydenRootFinder : IRootFinder
     public StepVector FindRoot(ISolverSession solverSession, SolutionState currentState, StepVector initialGuess)
     {
         double[] Fun(double[] vector) =>
-            LagrangianGradient.EvaluateAt(solverSession, currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
+            solverSession.Routines.LagrangianGradient.EvaluateAt(solverSession, currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
 
         return new StepVector(Broyden.FindRoot(
             Fun,

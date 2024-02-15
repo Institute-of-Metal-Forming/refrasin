@@ -179,11 +179,12 @@ public class Solver
     {
         try
         {
-            return session.Routines.TimeStepper.Step(session, session.LastStep ?? LagrangianGradient.GuessSolution(session.CurrentState));
+            return session.Routines.TimeStepper.Step(session,
+                session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, session.CurrentState));
         }
         catch (NonConvergenceException)
         {
-            return session.Routines.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session.CurrentState));
+            return session.Routines.TimeStepper.Step(session, session.Routines.StepEstimator.EstimateStep(session, session.CurrentState));
         }
     }
 }
