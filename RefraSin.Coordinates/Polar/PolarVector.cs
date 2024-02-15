@@ -8,7 +8,7 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Stellt einen Vektor in Polarkoordinaten dar.
 /// </summary>
-public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, IPrecisionEquatable<PolarVector>
+public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, IIsClose<PolarVector>
 {
     /// <summary>
     ///     Creates the vector (0, 0).
@@ -54,13 +54,12 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, I
     public PolarVector Clone() => new(Phi, R, System);
 
     /// <inheritdoc />
-    public bool Equals(PolarVector? other) => Equals((PolarCoordinates?) other);
-
-    /// <inheritdoc />
-    public bool Equals(PolarVector other, double precision) => Equals((PolarCoordinates) other, precision);
-
-    /// <inheritdoc />
-    public bool Equals(PolarVector other, int digits) => Equals((PolarCoordinates) other, digits);
+    public bool IsClose(PolarVector other, double precision = 1e-8)
+    {
+        if (System.Equals(other.System))
+            return R.IsClose(other.R, precision) && Phi.IsClose(other.Phi, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
 
     /// <inheritdoc />
     public AbsoluteVector Absolute =>
@@ -127,8 +126,7 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, I
             var y = v1.R * Sin(v1.Phi) + v2.R * Sin(v2.Phi);
 
             var r = Sqrt(Pow(x, 2) + Pow(y, 2));
-            var phi = y > 0 ? Acos(x / r) : y < 0 ? PI + Acos(-x / r) : x >= 0 ? 0 : PI;
-
+            var phi = double.Atan2(y, x);
             return new PolarVector(phi, r, v1.System);
         }
 

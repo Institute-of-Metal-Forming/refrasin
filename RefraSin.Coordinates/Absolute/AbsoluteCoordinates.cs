@@ -1,5 +1,4 @@
-using System;
-using MathNet.Numerics;
+using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
 namespace RefraSin.Coordinates.Absolute;
@@ -121,23 +120,4 @@ public abstract class AbsoluteCoordinates : Coordinates, IFormattable
 
     /// <inheritdoc />
     public override double[] ToArray() => new[] { X, Y };
-
-    /// <summary>
-    ///     Base implementation of Equals() with precision.
-    /// </summary>
-    protected bool Equals(AbsoluteCoordinates other, double precision) => X.AlmostEqual(other.X, precision) && Y.AlmostEqual(other.Y, precision);
-
-    /// <summary>
-    ///     Base implementation of Equals() with precision.
-    /// </summary>
-    protected bool Equals(AbsoluteCoordinates other, int digits) => X.AlmostEqual(other.X, digits) && Y.AlmostEqual(other.Y, digits);
-
-    /// <summary>
-    ///     Base implementation of Equals().
-    /// </summary>
-    protected bool Equals(AbsoluteCoordinates? other)
-    {
-        if (other == null) return false;
-        return X.AlmostEqual(other.X) && Y.AlmostEqual(other.Y);
-    }
 }

@@ -8,7 +8,7 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Represents a point in cartesian coordinate system.
 /// </summary>
-public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<CartesianPoint>, IPrecisionEquatable<CartesianPoint>
+public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<CartesianPoint>, IIsClose<CartesianPoint>
 {
     /// <summary>
     ///     Creates the point (0, 0) in the default system.
@@ -98,13 +98,12 @@ public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<Cartesian
     }
 
     /// <inheritdoc />
-    public bool Equals(CartesianPoint other, double precision) => Equals((CartesianCoordinates) other, precision);
-
-    /// <inheritdoc />
-    public bool Equals(CartesianPoint other, int digits) => Equals((CartesianCoordinates) other, digits);
-
-    /// <inheritdoc />
-    public bool Equals(CartesianPoint? other) => Equals((CartesianCoordinates?) other);
+    public bool IsClose(CartesianPoint other, double precision = 1e-8)
+    {
+        if (System.Equals(other.System))
+            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
 
     /// <summary>
     ///     Computes the point halfway on the straight line between two points.

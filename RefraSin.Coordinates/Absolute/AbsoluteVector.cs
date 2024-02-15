@@ -1,5 +1,3 @@
-using System;
-using MathNet.Numerics;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
@@ -8,7 +6,7 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a vector in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsoluteVector : AbsoluteCoordinates, IVector, IPrecisionEquatable<AbsoluteVector>, ICloneable<AbsoluteVector>
+public class AbsoluteVector : AbsoluteCoordinates, IVector, IIsClose<AbsoluteVector>, ICloneable<AbsoluteVector>
 {
     /// <summary>
     ///     Creates the absolute vector (0,0).
@@ -32,13 +30,7 @@ public class AbsoluteVector : AbsoluteCoordinates, IVector, IPrecisionEquatable<
     public AbsoluteVector Clone() => new(X, Y);
 
     /// <inheritdoc />
-    public bool Equals(AbsoluteVector other, double precision) => X.AlmostEqual(other.X, precision) && Y.AlmostEqual(other.Y, precision);
-
-    /// <inheritdoc />
-    public bool Equals(AbsoluteVector other, int digits) => X.AlmostEqual(other.X, digits) && Y.AlmostEqual(other.Y, digits);
-
-    /// <inheritdoc />
-    public bool Equals(AbsoluteVector? other) => other != null && X.AlmostEqual(other.X) && Y.AlmostEqual(other.Y);
+    public bool IsClose(AbsoluteVector other, double precision = 1e-8) => X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
 
     /// <inheritdoc />
     public AbsoluteVector Absolute => this;

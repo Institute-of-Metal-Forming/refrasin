@@ -1,4 +1,3 @@
-using MathNet.Numerics.Distributions;
 using RefraSin.Coordinates;
 
 namespace RefraSin.ParticleModel;

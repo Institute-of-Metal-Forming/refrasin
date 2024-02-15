@@ -122,7 +122,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
 
             var contactedNode =
                 SolverSession.CurrentState.AllNodes.Values.FirstOrDefault(n =>
-                    n.Id != Id && n.Coordinates.Absolute.Equals(Coordinates.Absolute, error)
+                    n.Id != Id && n.Coordinates.Absolute.IsClose(Coordinates.Absolute, error)
                 );
 
             _contactedNodeId = contactedNode?.Id ?? throw new InvalidOperationException("No corresponding node with same location could be found.");

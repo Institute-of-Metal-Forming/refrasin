@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Intrinsics.X86;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
@@ -8,7 +9,7 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Stellt einen Punkt in Polarkoordinaten dar.
 /// </summary>
-public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IPrecisionEquatable<PolarPoint>
+public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsClose<PolarPoint>
 {
     /// <summary>
     ///     Creates the point (0, 0).
@@ -93,13 +94,12 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IPre
     }
 
     /// <inheritdoc />
-    public bool Equals(PolarPoint? other) => Equals((PolarCoordinates?) other);
-
-    /// <inheritdoc />
-    public bool Equals(PolarPoint other, double precision) => Equals((PolarCoordinates) other, precision);
-
-    /// <inheritdoc />
-    public bool Equals(PolarPoint other, int digits) => Equals((PolarCoordinates) other, digits);
+    public bool IsClose(PolarPoint other, double precision = 1e-8)
+    {
+        if (System.Equals(other.System))
+            return R.IsClose(other.R, precision) && Phi.IsClose(other.Phi, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
 
     /// <summary>
     ///     Computes the point halfway on the straight line between two points.

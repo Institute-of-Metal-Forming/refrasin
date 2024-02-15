@@ -1,14 +1,13 @@
-using System;
-using MathNet.Numerics;
+using RefraSin.Coordinates.Helpers;
 using static RefraSin.Coordinates.Angle.ReductionDomain;
-using static MathNet.Numerics.Constants;
+using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.Coordinates;
 
 /// <summary>
 ///     Represents an angle. Can be implicitly converted from and to double (always in radians).
 /// </summary>
-public readonly struct Angle : IFormattable
+public readonly struct Angle : IFormattable, IIsClose<Angle>
 {
     /// <summary>
     ///     Constructs an angle from its value given in radians.
@@ -60,21 +59,21 @@ public readonly struct Angle : IFormattable
 
             case AllPositive:
             {
-                radians %= Pi2;
-                if (radians >= Pi2)
-                    radians -= Pi2;
+                radians %= TwoPi;
+                if (radians >= TwoPi)
+                    radians -= TwoPi;
                 else if (radians < 0)
-                    radians += Pi2;
+                    radians += TwoPi;
                 return radians;
             }
 
             case WithNegative:
             {
-                radians %= Pi2;
+                radians %= TwoPi;
                 if (radians >= Pi)
-                    radians -= Pi2;
+                    radians -= TwoPi;
                 else if (radians < -Pi)
-                    radians += Pi2;
+                    radians += TwoPi;
                 return radians;
             }
             default:
@@ -185,7 +184,7 @@ public readonly struct Angle : IFormattable
 
             case AllPositive:
             {
-                if (Radians >= Pi2 || Radians < 0)
+                if (Radians >= TwoPi || Radians < 0)
                     return false;
                 return true;
             }
@@ -461,7 +460,7 @@ public readonly struct Angle : IFormattable
     /// <param name="a1"></param>
     /// <param name="a2"></param>
     /// <returns></returns>
-    public static bool operator >=(Angle a1, Angle a2) => a1.AlmostEqual(a2) || a1 > a2;
+    public static bool operator >=(Angle a1, Angle a2) => a1.IsClose(a2) || a1 > a2;
 
     /// <summary>
     ///     Smaller or equal. Determines if <paramref name="a1" /> is in the half circle below <paramref name="a2" />.
@@ -470,35 +469,20 @@ public readonly struct Angle : IFormattable
     /// <param name="a1"></param>
     /// <param name="a2"></param>
     /// <returns></returns>
-    public static bool operator <=(Angle a1, Angle a2) => a1.AlmostEqual(a2) || a1 < a2;
-
-    /// <summary>
-    ///     Compares if almost equal.
-    /// </summary>
-    /// <param name="other"></param>
-    /// <returns></returns>
-    public bool AlmostEqual(Angle other) => (Radians - other.Radians).AlmostEqual(0);
+    public static bool operator <=(Angle a1, Angle a2) => a1.IsClose(a2) || a1 < a2;
 
     /// <summary>
     ///     Compares if equal within maximum error.
     /// </summary>
     /// <param name="other"></param>
-    /// <param name="maximumAbsoluteError"></param>
+    /// <param name="precision"></param>
     /// <returns></returns>
-    public bool AlmostEqual(Angle other, double maximumAbsoluteError) => (Radians - other.Radians).AlmostEqual(0, maximumAbsoluteError);
-
-    /// <summary>
-    ///     Compares if equal within accuracy of <paramref name="decimalPlaces" /> digits.
-    /// </summary>
-    /// <param name="other"></param>
-    /// <param name="decimalPlaces"></param>
-    /// <returns></returns>
-    public bool AlmostEqual(Angle other, int decimalPlaces) => (Radians - other.Radians).AlmostEqual(0, decimalPlaces);
+    public bool IsClose(Angle other, double precision = 1e-8) => (Radians - other.Radians).IsClose(0, precision);
 
     /// <summary>
     /// Constant of full angle (2 Pi or 360°).
     /// </summary>
-    public static readonly Angle Full = new(Pi2);
+    public static readonly Angle Full = new(TwoPi);
 
     /// <summary>
     /// Constant of full angle (2 Pi or 360°).
@@ -518,7 +502,7 @@ public readonly struct Angle : IFormattable
     /// <summary>
     /// Constant of half angle (0.5 Pi or 90°). Equivalent to <see cref="Right"/>.
     /// </summary>
-    public static readonly Angle Quarter = new(PiOver2);
+    public static readonly Angle Quarter = new(HalfOfPi);
 
     /// <summary>
     /// Constant of half angle (Pi/2 or 90°). Equivalent to <see cref="Quarter"/>.
@@ -528,7 +512,7 @@ public readonly struct Angle : IFormattable
     /// <summary>
     /// Constant of eighth angle (Pi/4 or 45°). Equivalent to <see cref="HalfRight"/>.
     /// </summary>
-    public static readonly Angle Eighth = new(PiOver4);
+    public static readonly Angle Eighth = new(QuarterOfPi);
 
     /// <summary>
     /// Constant of half right angle (Pi/4 or 45°). Equivalent to <see cref="Eighth"/>.

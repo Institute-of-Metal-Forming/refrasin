@@ -8,7 +8,7 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Stellt einen Vektor im kartesischen Koordinatensystem dar.
 /// </summary>
-public class CartesianVector : CartesianCoordinates, IVector, IPrecisionEquatable<CartesianVector>, ICloneable<CartesianVector>
+public class CartesianVector : CartesianCoordinates, IVector, IIsClose<CartesianVector>, ICloneable<CartesianVector>
 {
     /// <summary>
     ///     Creates the vector (0, 0) in the default system.
@@ -56,13 +56,12 @@ public class CartesianVector : CartesianCoordinates, IVector, IPrecisionEquatabl
     public CartesianVector Clone() => new(X, Y, System);
 
     /// <inheritdoc />
-    public bool Equals(CartesianVector other, double precision) => Equals((CartesianCoordinates) other, precision);
-
-    /// <inheritdoc />
-    public bool Equals(CartesianVector other, int digits) => Equals((CartesianCoordinates) other, digits);
-
-    /// <inheritdoc />
-    public bool Equals(CartesianVector? other) => Equals((CartesianCoordinates?) other);
+    public bool IsClose(CartesianVector other, double precision)
+    {
+        if (System.Equals(other.System))
+            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
 
     /// <inheritdoc />
     public AbsoluteVector Absolute
