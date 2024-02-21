@@ -1,5 +1,6 @@
 using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.RootFinding;
+using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.TimeSteppers;
 
@@ -12,8 +13,8 @@ public record SolverRoutines(
     IRootFinder RootFinder
 ) : ISolverRoutines
 {
-    public static SolverRoutines Default = new SolverRoutines(
-        null,
+    public static SolverRoutines Default = new(
+        new StepEstimator(),
         new AdamsMoultonTimeStepper(),
         new[]
         {

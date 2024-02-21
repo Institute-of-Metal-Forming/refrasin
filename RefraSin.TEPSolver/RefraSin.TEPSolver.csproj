@@ -32,11 +32,4 @@
         </AssemblyAttribute>
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="LagrangianGradient.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Include="EquationSystem\LagrangianGradient.cs" />
-    </ItemGroup>
 </Project>
