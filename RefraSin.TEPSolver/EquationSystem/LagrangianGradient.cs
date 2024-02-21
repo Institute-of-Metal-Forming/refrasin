@@ -1,9 +1,12 @@
 using RefraSin.Coordinates;
+using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using static MathNet.Numerics.Constants;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
+using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver.EquationSystem;
 
@@ -21,48 +24,89 @@ public static class LagrangianGradient
         return new StepVector(evaluation, stepVector.StepVectorMap);
     }
 
-    public static IEnumerable<double> YieldEquations(IProcessConditions conditions, SolutionState currentState, StepVector stepVector)
+    public static IEnumerable<double> YieldEquations(IProcessConditions conditions, SolutionState currentState, StepVector stepVector) =>
+        JoinEquations(
+            YieldNodeEquations(conditions, currentState.Nodes, stepVector),
+            YieldContactsEquations(conditions, currentState.Contacts, stepVector),
+            YieldGlobalEquations(conditions, currentState, stepVector)
+        );
+
+    public static IEnumerable<double> YieldParticleBlockEquations(IProcessConditions conditions, Particle particle, StepVector stepVector) =>
+        YieldNodeEquations(conditions, particle.Nodes, stepVector);
+
+    public static IEnumerable<double> YieldFunctionalBlockEquations(IProcessConditions conditions, SolutionState currentState,
+        StepVector stepVector) =>
+        JoinEquations(
+            YieldContactsEquations(conditions, currentState.Contacts, stepVector),
+            YieldGlobalEquations(conditions, currentState, stepVector)
+        );
+
+    public static IEnumerable<double> YieldNodeEquations(IProcessConditions conditions, IEnumerable<NodeBase> nodes, StepVector stepVector)
     {
-        // yield node equations
-        foreach (var node in currentState.Nodes)
+        foreach (var node in nodes)
         {
             yield return StateVelocityDerivativeNormal(conditions, stepVector, node);
             yield return FluxDerivative(conditions, stepVector, node);
             yield return RequiredConstraint(conditions, stepVector, node);
         }
+    }
 
-        // yield contact equations
-        foreach (var contact in currentState.Contacts)
+    public static IEnumerable<double> YieldContactsEquations(IProcessConditions conditions, IEnumerable<ParticleContact> contacts,
+        StepVector stepVector) =>
+        contacts.SelectMany(contact =>
         {
             var involvedNodes = contact.From.Nodes.OfType<ContactNodeBase>().Where(n => n.ContactedParticleId == contact.To.Id).ToArray();
 
-            foreach (var contactNode in involvedNodes)
-            {
-                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
-                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode.ContactedNode);
+            return JoinEquations(
+                YieldContactNodesEquations(conditions, stepVector, involvedNodes, contact),
+                YieldContactAuxiliaryDerivatives(stepVector, involvedNodes, contact)
+            );
+        });
 
-                var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
-                yield return constraints.distance;
-                yield return constraints.direction;
+    private static IEnumerable<double> YieldContactNodesEquations(IProcessConditions conditions, StepVector stepVector,
+        IEnumerable<ContactNodeBase> involvedNodes, IParticleContact contact)
+    {
+        foreach (var contactNode in involvedNodes)
+        {
+            yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
+            yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode.ContactedNode);
 
-                // lambdas of contact must be equal for both connected nodes
-                yield return stepVector.LambdaContactDistance(contactNode) - stepVector.LambdaContactDistance(contactNode.ContactedNode);
-                yield return stepVector.LambdaContactDirection(contactNode) - stepVector.LambdaContactDirection(contactNode.ContactedNode);
-            }
+            var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
+            yield return constraints.distance;
+            yield return constraints.direction;
 
-            // derivatives for aux variables
-            yield return involvedNodes.Sum(stepVector.LambdaContactDistance);
-            yield return involvedNodes.Sum(stepVector.LambdaContactDirection);
-            yield return involvedNodes.Sum(n =>
-            {
-                var angleDifference = (n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection).Reduce(Angle.ReductionDomain.WithNegative);
-                return -n.ContactedNode.Coordinates.R * Sin(stepVector.RotationDisplacement(contact) + angleDifference) *
-                       stepVector.LambdaContactDistance(n)
-                     + n.ContactedNode.Coordinates.R / contact.Distance * Cos(stepVector.RotationDisplacement(contact) + angleDifference) *
-                       stepVector.LambdaContactDirection(n);
-            });
+            // lambdas of contact must be equal for both connected nodes
+            yield return stepVector.LambdaContactDistance(contactNode) - stepVector.LambdaContactDistance(contactNode.ContactedNode);
+            yield return stepVector.LambdaContactDirection(contactNode) - stepVector.LambdaContactDirection(contactNode.ContactedNode);
         }
+    }
 
+    private static IEnumerable<double> YieldContactAuxiliaryDerivatives(StepVector stepVector, IList<ContactNodeBase> involvedNodes,
+        IParticleContact contact)
+    {
+        yield return ParticleRadialDisplacementDerivative(stepVector, involvedNodes);
+        yield return ParticleAngleDisplacementDerivative(stepVector, involvedNodes);
+        yield return ParticleRotationDerivative(stepVector, involvedNodes, contact);
+    }
+
+    private static double ParticleRadialDisplacementDerivative(StepVector stepVector, IEnumerable<ContactNodeBase> involvedNodes) =>
+        involvedNodes.Sum(stepVector.LambdaContactDistance);
+
+    private static double ParticleAngleDisplacementDerivative(StepVector stepVector, IEnumerable<ContactNodeBase> involvedNodes) =>
+        involvedNodes.Sum(stepVector.LambdaContactDirection);
+
+    private static double ParticleRotationDerivative(StepVector stepVector, IEnumerable<ContactNodeBase> involvedNodes, IParticleContact contact) =>
+        involvedNodes.Sum(n =>
+        {
+            var angleDifference = (n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection).Reduce(Angle.ReductionDomain.WithNegative);
+            return -n.ContactedNode.Coordinates.R * Sin(stepVector.RotationDisplacement(contact) + angleDifference) *
+                   stepVector.LambdaContactDistance(n)
+                 + n.ContactedNode.Coordinates.R / contact.Distance * Cos(stepVector.RotationDisplacement(contact) + angleDifference) *
+                   stepVector.LambdaContactDirection(n);
+        });
+
+    public static IEnumerable<double> YieldGlobalEquations(IProcessConditions conditions, SolutionState currentState, StepVector stepVector)
+    {
         yield return DissipationEquality(conditions, currentState, stepVector);
     }
 
@@ -125,7 +169,7 @@ public static class LagrangianGradient
         var dissipationNormal = currentState.Nodes.Select(n =>
             -n.GibbsEnergyGradient.Normal * stepVector.NormalDisplacement(n)
         ).Sum();
-        
+
         var dissipationTangential = currentState.Nodes.OfType<ContactNodeBase>().Select(n =>
             -n.GibbsEnergyGradient.Tangential * stepVector.TangentialDisplacement(n)
         ).Sum();
@@ -143,7 +187,7 @@ public static class LagrangianGradient
     }
 
     private static (double distance, double direction) ContactConstraints(IProcessConditions conditions, StepVector stepVector,
-        ParticleContact contact, ContactNodeBase node)
+        IParticleContact contact, ContactNodeBase node)
     {
         var normalShift = stepVector.NormalDisplacement(node) + stepVector.NormalDisplacement(node.ContactedNode);
         var tangentialShift = stepVector.TangentialDisplacement(node) + stepVector.TangentialDisplacement(node.ContactedNode);
@@ -159,4 +203,5 @@ public static class LagrangianGradient
         );
     }
 
+    public static IEnumerable<double> JoinEquations(params IEnumerable<double>[] equations) => equations.SelectMany(e => e);
 }
