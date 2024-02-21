@@ -6,9 +6,19 @@ using RefraSin.TEPSolver.TimeSteppers;
 namespace RefraSin.TEPSolver;
 
 public record SolverRoutines(
-    ILagrangianGradient LagrangianGradient,
     IStepEstimator StepEstimator,
     ITimeStepper TimeStepper,
     IEnumerable<IStepValidator> StepValidators,
     IRootFinder RootFinder
-) : ISolverRoutines { }
+) : ISolverRoutines
+{
+    public static SolverRoutines Default = new SolverRoutines(
+        null,
+        new AdamsMoultonTimeStepper(),
+        new[]
+        {
+            new InstabilityDetector()
+        },
+        new BroydenRootFinder()
+    );
+}

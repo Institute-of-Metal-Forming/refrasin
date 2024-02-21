@@ -34,7 +34,7 @@ public class OneParticleTest
         _solver = new Solver(
             _solutionStorage,
             loggerFactory,
-            SolverDefaults.Routines,
+            SolverRoutines.Default,
             new SolverOptions
             {
                 InitialTimeStepWidth = 1,

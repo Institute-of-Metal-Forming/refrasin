@@ -8,11 +8,6 @@ namespace RefraSin.TEPSolver;
 public interface ISolverRoutines
 {
     /// <summary>
-    /// Subroutine for evaluating the Lagrangian gradient and its Jacobian.
-    /// </summary>
-    ILagrangianGradient LagrangianGradient { get; }
-    
-    /// <summary>
     /// Subroutine for estimating a time step as initial value.
     /// </summary>
     IStepEstimator StepEstimator { get; }

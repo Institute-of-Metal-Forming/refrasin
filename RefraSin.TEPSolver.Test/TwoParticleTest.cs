@@ -10,6 +10,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 using static System.Math;
@@ -60,7 +61,7 @@ public class TwoParticleTest
         (
             _solutionStorage,
             loggerFactory,
-            SolverDefaults.Routines,
+            SolverRoutines.Default,
             new SolverOptions
             {
                 InitialTimeStepWidth = 1,
@@ -127,13 +128,13 @@ public class TwoParticleTest
 
     private IEnumerable<Vector<double>> YieldJacobianColumns(SolverSession session, SolutionState state, StepVector guess)
     {
-        var zero = session.Routines.LagrangianGradient.EvaluateAt(session, state, guess);
+        var zero = LagrangianGradient.EvaluateAt(session, state, guess);
 
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
             step[i] += 1e-3;
-            var current = session.Routines.LagrangianGradient.EvaluateAt(session, state, step);
+            var current = LagrangianGradient.EvaluateAt(session, state, step);
 
             yield return current - zero;
         }

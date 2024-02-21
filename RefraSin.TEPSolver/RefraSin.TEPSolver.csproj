@@ -34,6 +34,9 @@
 
     <ItemGroup>
       <Compile Remove="LagrangianGradient.cs" />
-      <None Include="LagrangianGradient.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="EquationSystem\LagrangianGradient.cs" />
     </ItemGroup>
 </Project>
