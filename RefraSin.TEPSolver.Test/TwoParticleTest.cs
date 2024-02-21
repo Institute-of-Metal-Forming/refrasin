@@ -128,13 +128,13 @@ public class TwoParticleTest
 
     private IEnumerable<Vector<double>> YieldJacobianColumns(SolverSession session, SolutionState state, StepVector guess)
     {
-        var zero = LagrangianGradient.EvaluateAt(session, state, guess);
+        var zero = Lagrangian.EvaluateAt(session, state, guess);
 
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
             step[i] += 1e-3;
-            var current = LagrangianGradient.EvaluateAt(session, state, step);
+            var current = Lagrangian.EvaluateAt(session, state, step);
 
             yield return current - zero;
         }

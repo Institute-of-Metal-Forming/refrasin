@@ -4,13 +4,14 @@ using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
-using static MathNet.Numerics.Constants;
+using static RefraSin.Coordinates.Constants;
+using static RefraSin.TEPSolver.EquationSystem.Helper;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver.EquationSystem;
 
-public static class LagrangianGradient
+public static class Lagrangian
 {
     public static StepVector EvaluateAt(
         IProcessConditions conditions,
@@ -35,7 +36,7 @@ public static class LagrangianGradient
         SolutionState currentState,
         StepVector stepVector
     ) =>
-        JoinEquations(
+        Join(
             YieldNodeEquations(conditions, currentState.Nodes, stepVector),
             YieldContactsEquations(conditions, currentState.Contacts, stepVector),
             YieldGlobalEquations(conditions, currentState, stepVector)
@@ -52,7 +53,7 @@ public static class LagrangianGradient
         SolutionState currentState,
         StepVector stepVector
     ) =>
-        JoinEquations(
+        Join(
             YieldContactsEquations(conditions, currentState.Contacts, stepVector),
             YieldGlobalEquations(conditions, currentState, stepVector)
         );
@@ -83,7 +84,7 @@ public static class LagrangianGradient
                 .Where(n => n.ContactedParticleId == contact.To.Id)
                 .ToArray();
 
-            return JoinEquations(
+            return Join(
                 YieldContactNodesEquations(conditions, stepVector, involvedNodes, contact),
                 YieldContactAuxiliaryDerivatives(stepVector, involvedNodes, contact)
             );
@@ -267,17 +268,11 @@ public static class LagrangianGradient
         var dissipationFunction =
             conditions.GasConstant
             * conditions.Temperature
-            / 2
             * currentState
                 .Nodes.Select(n =>
-                    (
-                        n.SurfaceDistance.ToUpper
-                            * Pow(stepVector.FluxToUpper(n), 2)
-                            / n.SurfaceDiffusionCoefficient.ToUpper
-                        + n.SurfaceDistance.ToLower
-                            * Pow(stepVector.FluxToUpper(n.Lower), 2)
-                            / n.SurfaceDiffusionCoefficient.ToLower
-                    )
+                    n.SurfaceDistance.ToUpper
+                    * Pow(stepVector.FluxToUpper(n), 2)
+                    / n.SurfaceDiffusionCoefficient.ToUpper
                     / (
                         n.Particle.Material.MolarVolume
                         * n.Particle.Material.EquilibriumVacancyConcentration
@@ -326,6 +321,4 @@ public static class LagrangianGradient
         return (distance, direction);
     }
 
-    public static IEnumerable<double> JoinEquations(params IEnumerable<double>[] equations) =>
-        equations.SelectMany(e => e);
 }
