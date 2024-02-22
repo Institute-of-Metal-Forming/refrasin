@@ -7,8 +7,8 @@ public class NewtonRaphsonRootFinder(
     int maxIterattionCount = 100,
     double absoluteTolerance = 1e-8,
     double averageDecreaseRateFactor = 1e-4,
-    double minStepFraction = 0.1,
-    double maxStepFraction = 0.5
+    double minStepFactor = 0.1,
+    double maxStepFactor = 0.5
 ) : IRootFinder
 {
     /// <inheritdoc />
@@ -22,7 +22,7 @@ public class NewtonRaphsonRootFinder(
 
         var x = initialGuess;
         var y = function(x);
-            var f = 0.5 * y * y;
+        var f = 0.5 * y * y;
 
         for (i = 0; i < MaxIterationCount; i++)
         {
@@ -32,8 +32,13 @@ public class NewtonRaphsonRootFinder(
             }
 
             var jac = jacobian(x);
-            var dx = jac.LU().Solve(y * -1);
-            var gradf = -f / dx;
+            var dx = jac.LU().Solve(-y);
+
+            if (!dx.ForAll(double.IsFinite))
+                throw new UncriticalIterationInterceptedException(nameof(NewtonRaphsonRootFinder), InterceptReason.InvalidStateOccured, i,
+                    furtherInformation: "Infinite step occured.");
+
+            var gradf = -y * y / dx;
 
             var xnew = x + dx;
             var ynew = function(xnew);
@@ -42,13 +47,11 @@ public class NewtonRaphsonRootFinder(
             if (fnew > f + AverageDecreaseRateFactor * gradf * (xnew - x))
             {
                 var gprime0 = gradf * dx;
-                var g0 = f;
-                var g1 = fnew;
 
-                var stepFactor = gprime0 / (2 * (g1 - g0 - gprime0));
+                var stepFactor = gprime0 / (2 * (fnew - f - gprime0));
 
-                if (stepFactor > MaxStepFraction) stepFactor = MaxStepFraction;
-                else if (stepFactor < MinStepFraction) stepFactor = MinStepFraction;
+                if (stepFactor > MaxStepFactor) stepFactor = MaxStepFactor;
+                else if (stepFactor < MinStepFactor) stepFactor = MinStepFactor;
 
                 dx *= stepFactor;
                 xnew = x + dx;
@@ -70,7 +73,7 @@ public class NewtonRaphsonRootFinder(
 
     public double AverageDecreaseRateFactor { get; } = averageDecreaseRateFactor;
 
-    public double MinStepFraction { get; } = minStepFraction;
+    public double MinStepFactor { get; } = minStepFactor;
 
-    public double MaxStepFraction { get; } = maxStepFraction;
+    public double MaxStepFactor { get; } = maxStepFactor;
 }

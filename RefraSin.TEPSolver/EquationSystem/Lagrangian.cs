@@ -150,11 +150,11 @@ public static class Lagrangian
                 n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection
             ).Reduce(Angle.ReductionDomain.WithNegative);
             return -n.ContactedNode.Coordinates.R
-                    * Sin(stepVector.RotationDisplacement(contact) + angleDifference)
+                    * Sin(angleDifference)
                     * stepVector.LambdaContactDistance(n)
                 + n.ContactedNode.Coordinates.R
                     / contact.Distance
-                    * Cos(stepVector.RotationDisplacement(contact) + angleDifference)
+                    * Cos( angleDifference)
                     * stepVector.LambdaContactDirection(n);
         });
 
@@ -173,7 +173,7 @@ public static class Lagrangian
         NodeBase node
     )
     {
-        var gibbsTerm = -node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
+        var gibbsTerm = node.GibbsEnergyGradient.Normal * (1 + stepVector.Lambda1);
         var requiredConstraintsTerm = node.VolumeGradient.Normal * stepVector.LambdaVolume(node);
 
         double contactTerm = 0;
@@ -187,7 +187,7 @@ public static class Lagrangian
                     * stepVector.LambdaContactDirection(contactNode);
         }
 
-        return gibbsTerm + requiredConstraintsTerm - contactTerm;
+        return -gibbsTerm + requiredConstraintsTerm - contactTerm;
     }
 
     private static double StateVelocityDerivativeTangential(
@@ -196,14 +196,14 @@ public static class Lagrangian
         ContactNodeBase node
     )
     {
-        var gibbsTerm = -node.GibbsEnergyGradient.Tangential * (1 + stepVector.Lambda1);
+        var gibbsTerm = node.GibbsEnergyGradient.Tangential * (1 + stepVector.Lambda1);
         var requiredConstraintsTerm =
             node.VolumeGradient.Tangential * stepVector.LambdaVolume(node);
         var contactTerm =
             node.ContactDistanceGradient.Tangential * stepVector.LambdaContactDistance(node)
             + node.ContactDirectionGradient.Tangential * stepVector.LambdaContactDirection(node);
 
-        return gibbsTerm + requiredConstraintsTerm - contactTerm;
+        return -gibbsTerm + requiredConstraintsTerm - contactTerm;
     }
 
     private static double FluxDerivative(
@@ -302,9 +302,9 @@ public static class Lagrangian
             * node.ContactedNode.Coordinates.R
             * Sin(stepVector.RotationDisplacement(contact) / 2);
 
-        var rotationDirection =
+        var rotationDirection =(
             -(node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection)
-            + (Pi - stepVector.RotationDisplacement(contact)) / 2;
+            + (Pi - stepVector.RotationDisplacement(contact)) / 2).Reduce();
 
         var distance =
             stepVector.RadialDisplacement(contact)

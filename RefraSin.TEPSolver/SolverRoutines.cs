@@ -1,4 +1,4 @@
-using RefraSin.TEPSolver.EquationSystem;
+using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
@@ -20,6 +20,8 @@ public record SolverRoutines(
         {
             new InstabilityDetector()
         },
-        new BroydenBackedTearingLagrangianRootFinder()
+        new TearingLagrangianRootFinder(
+            new NewtonRaphsonRootFinder()
+        )
     );
 }

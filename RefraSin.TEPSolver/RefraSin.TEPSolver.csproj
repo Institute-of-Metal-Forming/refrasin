@@ -12,6 +12,7 @@
         <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj"/>
         <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj"/>
         <ProjectReference Include="..\RefraSin.MaterialData\RefraSin.MaterialData.csproj"/>
+        <ProjectReference Include="..\RefraSin.Numerics\RefraSin.Numerics.csproj" />
         <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj"/>
         <ProjectReference Include="..\RefraSin.ProcessModel\RefraSin.ProcessModel.csproj"/>
         <ProjectReference Include="..\RefraSin.Storage\RefraSin.Storage.csproj"/>

@@ -67,6 +67,7 @@ public class TwoParticleTest
                 InitialTimeStepWidth = 1,
                 MinTimeStepWidth = 0.1,
                 TimeStepAdaptationFactor = 1.5,
+                RootFindingAccuracy = 1e-6,
             }
         );
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Graphs;
+using RefraSin.Numerics.Exceptions;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
