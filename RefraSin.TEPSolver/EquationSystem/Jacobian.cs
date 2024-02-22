@@ -378,7 +378,7 @@ public static class Jacobian
             )
             * node.SurfaceDistance.ToUpper
             / node.SurfaceDiffusionCoefficient.ToUpper
-            * stepVector.FluxToUpper(node);
+            * stepVector.Lambda1;
 
         return new[]
         {
