@@ -19,22 +19,28 @@ public class TearingLagrangianRootFinder(IRootFinder subsystemRootFinder) : ILag
     {
         var stepVector = initialGuess.Copy();
 
-        double[] Fun(double[] vector)
-        {
-            stepVector.UpdateBorderBlock(vector);
-            var result = TearAndEvaluateFunctionalBlock(solverSession, currentState, stepVector);
-            return result;
-        }
-
-        var solution = Broyden.FindRoot(
+        var solution = SubsystemRootFinder.FindRoot(
             Fun,
-            initialGuess: stepVector.BorderBlock(),
-            accuracy: solverSession.Options.RootFindingAccuracy,
-            maxIterations: solverSession.Options.RootFindingMaxIterationCount
+            Jac,
+            new DenseVector(stepVector.BorderBlock())
         );
 
-        stepVector.UpdateBorderBlock(solution);
+        stepVector.UpdateBorderBlock(solution.AsArray());
         return stepVector;
+
+        Vector<double> Fun(Vector<double> vector)
+        {
+            stepVector.UpdateBorderBlock(vector.AsArray());
+            var result = TearAndEvaluateFunctionalBlock(solverSession, currentState, stepVector);
+            return new DenseVector(result);
+        }
+
+        Matrix<double> Jac(Vector<double> vector)
+        {
+            stepVector.UpdateBorderBlock(vector.AsArray());
+            var result = Jacobian.FunctionalBlock(solverSession, currentState, stepVector);
+            return result;
+        }
     }
 
     private double[] TearAndEvaluateFunctionalBlock(

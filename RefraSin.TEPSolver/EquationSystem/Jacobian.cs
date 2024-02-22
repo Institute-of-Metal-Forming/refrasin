@@ -21,10 +21,15 @@ public static class Jacobian
     )
     {
         var rows = YieldFunctionalBlockRows(conditions, currentState, stepVector).ToArray();
-        return Matrix<double>.Build.SparseOfRows(rows);
+        var size = rows.Length;
+        return Matrix<double>.Build.SparseOfIndexed(
+            size,
+            size,
+            rows.SelectMany((r, i) => r.Select(c => (i, c.colIndex, c.value)))
+        );
     }
 
-    private static IEnumerable<Vector<double>> YieldFunctionalBlockRows(
+    private static IEnumerable<IEnumerable<(int colIndex, double value)>> YieldFunctionalBlockRows(
         IProcessConditions conditions,
         SolutionState currentState,
         StepVector stepVector
@@ -34,7 +39,7 @@ public static class Jacobian
             YieldGlobalEquations(conditions, currentState, stepVector)
         );
 
-    public static IEnumerable<Vector<double>> YieldContactsEquations(
+    public static IEnumerable<IEnumerable<(int colIndex, double value)>> YieldContactsEquations(
         IProcessConditions conditions,
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
@@ -52,33 +57,29 @@ public static class Jacobian
             );
         });
 
-    private static Vector<double> ParticleRadialDisplacementDerivative(
+    private static IEnumerable<(int colIndex, double value)> ParticleRadialDisplacementDerivative(
         StepVector stepVector,
         IEnumerable<ContactNodeBase> involvedNodes
     ) =>
-        involvedNodes
-            .Select(node =>
-                (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance], 1.0)
-            )
-            .ToBorderRowVector(stepVector);
+        involvedNodes.Select(node =>
+            (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance], 1.0)
+        );
 
-    private static Vector<double> ParticleAngleDisplacementDerivative(
+    private static IEnumerable<(int colIndex, double value)> ParticleAngleDisplacementDerivative(
         StepVector stepVector,
         IEnumerable<ContactNodeBase> involvedNodes
     ) =>
-        involvedNodes
-            .Select(node =>
-                (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection], 1.0)
-            )
-            .ToBorderRowVector(stepVector);
+        involvedNodes.Select(node =>
+            (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection], 1.0)
+        );
 
-    private static Vector<double> ParticleRotationDerivative(
+    private static IEnumerable<(int colIndex, double value)> ParticleRotationDerivative(
         StepVector stepVector,
         IList<ContactNodeBase> involvedNodes,
         IParticleContact contact
     )
     {
-        return Components().ToBorderRowVector(stepVector);
+        return Components();
 
         IEnumerable<(int, double)> Components()
         {
@@ -117,7 +118,7 @@ public static class Jacobian
         }
     }
 
-    public static IEnumerable<Vector<double>> YieldGlobalEquations(
+    public static IEnumerable<IEnumerable<(int colIndex, double value)>> YieldGlobalEquations(
         IProcessConditions conditions,
         SolutionState currentState,
         StepVector stepVector
@@ -126,13 +127,13 @@ public static class Jacobian
         yield return DissipationEquality(conditions, currentState, stepVector);
     }
 
-    private static Vector<double> StateVelocityDerivativeTangential(
+    private static IEnumerable<(int colIndex, double value)> StateVelocityDerivativeTangential(
         IProcessConditions conditions,
         StepVector stepVector,
         ContactNodeBase node
     )
     {
-        return Components().ToBorderRowVector(stepVector);
+        return Components();
 
         IEnumerable<(int, double)> Components()
         {
@@ -155,13 +156,13 @@ public static class Jacobian
         }
     }
 
-    private static Vector<double> DissipationEquality(
+    private static IEnumerable<(int colIndex, double value)> DissipationEquality(
         IProcessConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
     {
-        return Components().ToBorderRowVector(stepVector);
+        return Components();
 
         IEnumerable<(int, double)> Components()
         {
@@ -200,7 +201,10 @@ public static class Jacobian
         }
     }
 
-    private static (Vector<double> distance, Vector<double> direction) ContactConstraints(
+    private static (
+        IEnumerable<(int colIndex, double value)> distance,
+        IEnumerable<(int colIndex, double value)> direction
+    ) ContactConstraints(
         IProcessConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
@@ -264,13 +268,12 @@ public static class Jacobian
             );
         }
 
-        return (
-            DistanceComponents().ToBorderRowVector(stepVector),
-            DirectionComponents().ToBorderRowVector(stepVector)
-        );
+        return (DistanceComponents(), DirectionComponents());
     }
 
-    private static IEnumerable<Vector<double>> YieldContactNodesEquations(
+    private static IEnumerable<
+        IEnumerable<(int colIndex, double value)>
+    > YieldContactNodesEquations(
         IProcessConditions conditions,
         StepVector stepVector,
         IEnumerable<ContactNodeBase> involvedNodes,
@@ -295,16 +298,18 @@ public static class Jacobian
             {
                 (stepVector.StepVectorMap[contactNode, NodeUnknown.LambdaContactDistance], 1.0),
                 (stepVector.StepVectorMap[contactNode, NodeUnknown.LambdaContactDistance], -1.0)
-            }.ToBorderRowVector(stepVector);
+            };
             yield return new[]
             {
                 (stepVector.StepVectorMap[contactNode, NodeUnknown.LambdaContactDirection], 1.0),
                 (stepVector.StepVectorMap[contactNode, NodeUnknown.LambdaContactDirection], -1.0)
-            }.ToBorderRowVector(stepVector);
+            };
         }
     }
 
-    private static IEnumerable<Vector<double>> YieldContactAuxiliaryDerivatives(
+    private static IEnumerable<
+        IEnumerable<(int colIndex, double value)>
+    > YieldContactAuxiliaryDerivatives(
         StepVector stepVector,
         IList<ContactNodeBase> involvedNodes,
         IParticleContact contact
