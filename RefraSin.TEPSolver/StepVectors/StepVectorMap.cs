@@ -39,7 +39,7 @@ public class StepVectorMap
             AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
         }
 
-        BorderLength = _index - BorderStart;
+        BorderLength = _index - BorderStart + 1;
     }
 
     private void AddNodeUnknown(INode node, NodeUnknown unknown)

@@ -25,5 +25,5 @@ public interface ISolverRoutines
     /// <summary>
     /// Subroutine to calculate the root of the Lagrangian gradient.
     /// </summary>
-    IRootFinder RootFinder { get; }
+    ILagrangianRootFinder LagrangianRootFinder { get; }
 }

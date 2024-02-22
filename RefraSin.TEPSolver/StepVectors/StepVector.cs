@@ -61,6 +61,15 @@ public class StepVector : DenseVector
 
     public StepVector Copy() => new(Build.DenseOfVector(this), StepVectorMap);
 
+    public double[] ParticleBlock(IParticle particle)
+    {
+        var block = StepVectorMap[particle];
+
+        return Values[block.start .. (block.start + block.length)];
+    }
+
+    public double[] BorderBlock() => Values[StepVectorMap.BorderStart ..];
+
     public void UpdateParticleBlock(IParticle particle, double[] data)
     {
         var block = StepVectorMap[particle];
@@ -71,7 +80,7 @@ public class StepVector : DenseVector
         data.CopyTo(Values, block.start);
     }
 
-    public void UpdateBorder(double[] data)
+    public void UpdateBorderBlock(double[] data)
     {
         if (data.Length != StepVectorMap.BorderLength)
             throw new InvalidOperationException("'data' must have exactly the length of the particle block.");

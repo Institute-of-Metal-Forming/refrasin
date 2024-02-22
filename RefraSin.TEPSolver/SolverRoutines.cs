@@ -10,7 +10,7 @@ public record SolverRoutines(
     IStepEstimator StepEstimator,
     ITimeStepper TimeStepper,
     IEnumerable<IStepValidator> StepValidators,
-    IRootFinder RootFinder
+    ILagrangianRootFinder LagrangianRootFinder
 ) : ISolverRoutines
 {
     public static SolverRoutines Default = new(
@@ -20,6 +20,6 @@ public record SolverRoutines(
         {
             new InstabilityDetector()
         },
-        new BroydenRootFinder()
+        new BroydenBackedTearingLagrangianRootFinder()
     );
 }

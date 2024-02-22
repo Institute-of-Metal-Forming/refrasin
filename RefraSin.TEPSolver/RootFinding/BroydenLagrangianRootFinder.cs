@@ -4,13 +4,17 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.RootFinding;
 
-public class BroydenRootFinder : IRootFinder
+public class BroydenLagrangianRootFinder : ILagrangianRootFinder
 {
     /// <inheritdoc />
-    public StepVector FindRoot(ISolverSession solverSession, SolutionState currentState, StepVector initialGuess)
+    public StepVector FindRoot(
+        ISolverSession solverSession,
+        SolutionState currentState,
+        StepVector initialGuess
+    )
     {
         double[] Fun(double[] vector) =>
-            LagrangianGradient.EvaluateAt(solverSession, currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
+            Lagrangian.EvaluateAt(solverSession, currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
 
         return new StepVector(Broyden.FindRoot(
             Fun,
