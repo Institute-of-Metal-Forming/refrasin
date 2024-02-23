@@ -15,9 +15,9 @@ public class StepVectorMap
             
             foreach (var node in particle.Nodes)
             {
-                AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
-                AddNodeUnknown(node, NodeUnknown.FluxToUpper);
                 AddNodeUnknown(node, NodeUnknown.LambdaVolume);
+                AddNodeUnknown(node, NodeUnknown.FluxToUpper);
+                AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
             }
 
             _particleBlocks[particle.Id] = (startIndex, _index - startIndex);

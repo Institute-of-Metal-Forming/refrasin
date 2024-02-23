@@ -1,9 +1,14 @@
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.LinearAlgebra.Solvers;
 using RefraSin.Numerics.Exceptions;
 
 namespace RefraSin.Numerics.RootFinding;
 
 public class NewtonRaphsonRootFinder(
+    IIterativeSolver<double> jacobianStepSolver,
+    Iterator<double> jacobianStepSolverIterator,
+    IPreconditioner<double> jacobianStepSolverPreconditioner,
     int maxIterattionCount = 100,
     double absoluteTolerance = 1e-8,
     double averageDecreaseRateFactor = 1e-4,
@@ -32,7 +37,9 @@ public class NewtonRaphsonRootFinder(
             }
 
             var jac = jacobian(x);
-            var dx = jac.LU().Solve(-y);
+            var dx = new DenseVector(x.Count);
+            JacobianStepSolverIterator.Reset();
+            JacobianStepSolver.Solve(jac, -y, dx, JacobianStepSolverIterator, JacobianStepSolverPreconditioner);
 
             if (!dx.ForAll(double.IsFinite))
                 throw new UncriticalIterationInterceptedException(nameof(NewtonRaphsonRootFinder), InterceptReason.InvalidStateOccured, i,
@@ -76,4 +83,10 @@ public class NewtonRaphsonRootFinder(
     public double MinStepFactor { get; } = minStepFactor;
 
     public double MaxStepFactor { get; } = maxStepFactor;
+
+    public IIterativeSolver<double> JacobianStepSolver { get; } = jacobianStepSolver;
+
+    public Iterator<double> JacobianStepSolverIterator { get; } = jacobianStepSolverIterator;
+    
+    public IPreconditioner<double> JacobianStepSolverPreconditioner { get; } = jacobianStepSolverPreconditioner;
 }

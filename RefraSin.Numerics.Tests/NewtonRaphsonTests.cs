@@ -1,5 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.LinearAlgebra.Double.Solvers;
+using MathNet.Numerics.LinearAlgebra.Solvers;
 using RefraSin.Numerics.RootFinding;
 using static System.Math;
 
@@ -32,7 +34,7 @@ public class NewtonRaphsonTests
             });
         }
 
-        var solver = new NewtonRaphsonRootFinder();
+        var solver = new NewtonRaphsonRootFinder(new MlkBiCgStab(), new Iterator<double>(), new UnitPreconditioner<double>());
 
         var solution = solver.FindRoot(Function, Jacobian, new DenseVector([2.0, 2.0, 1.0]));
 
