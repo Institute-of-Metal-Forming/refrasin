@@ -25,7 +25,7 @@ public class TwoParticleTest
     {
         var endTime = 1e1;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6;
-        var nodeCountPerParticle = 20;
+        var nodeCountPerParticle = 100;
 
         var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
                 { NodeCount = nodeCountPerParticle }
@@ -110,7 +110,49 @@ public class TwoParticleTest
     private string _tempDir;
 
     [Test]
-    public void PlotJacobianStructure()
+    public void PlotJacobianStructureAnalytical()
+    {
+        var session = new SolverSession(_solver, _process);
+        var initialState = session.CurrentState;
+        var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
+
+        var particleBlocks = initialState.Particles.Select(p => Jacobian.ParticleBlock(session, p, guess)).ToArray();
+        var functionalBlock = Jacobian.FunctionalBlock(session, initialState, guess);
+        var size = particleBlocks.Length + 1;
+
+        var array = new Matrix<double>[size, size];
+
+        for (int i = 0; i < particleBlocks.Length; i++)
+        {
+            for (int j = 0; j < particleBlocks.Length; j++)
+            {
+                array[i, j] = Matrix<double>.Build.Sparse(particleBlocks[i].RowCount, particleBlocks[j].ColumnCount);
+            }
+            array[i, particleBlocks.Length] = Matrix<double>.Build.Sparse(particleBlocks[i].RowCount, functionalBlock.ColumnCount);
+
+            array[i, i] = particleBlocks[i].PointwiseSign();
+        }
+
+        for (int j = 0; j < particleBlocks.Length; j++)
+        {
+            array[particleBlocks.Length, j] = Matrix<double>.Build.Sparse(functionalBlock.RowCount, particleBlocks[j].ColumnCount);
+        }
+
+        array[particleBlocks.Length, particleBlocks.Length] = functionalBlock.PointwiseSign();
+
+        var matrix = Matrix<double>.Build.SparseOfMatrixArray(array);
+
+        var plt = new Plot();
+
+        plt.Add.Heatmap(matrix.ToArray());
+        plt.Layout.Frameless();
+        plt.Axes.Margins(0, 0);
+
+        plt.SavePng(Path.Combine(_tempDir, "jacobian.png"), matrix.ColumnCount, matrix.RowCount);
+    }
+
+    [Test]
+    public void PlotJacobianStructureNumerical()
     {
         var session = new SolverSession(_solver, _process);
         var initialState = session.CurrentState;

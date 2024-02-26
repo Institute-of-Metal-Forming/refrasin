@@ -1,4 +1,5 @@
 using System.Globalization;
+using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
 using static MoreLinq.Extensions.IndexExtension;
@@ -7,10 +8,9 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.EquationSystem;
+using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
-using Serilog;
-using static NUnit.Framework.Assert;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver.Test;
 
@@ -79,6 +79,81 @@ public class OneParticleTest
     private ISinteringProcess _process;
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
+
+    [Test]
+    public void PlotJacobianStructureAnalytical()
+    {
+        var session = new SolverSession(_solver, _process);
+        var initialState = session.CurrentState;
+        var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
+
+        var particleBlocks = initialState.Particles.Select(p => Jacobian.ParticleBlock(session, p, guess)).ToArray();
+        var functionalBlock = Jacobian.FunctionalBlock(session, initialState, guess);
+        var size = particleBlocks.Length + 1;
+
+        var array = new Matrix<double>[size, size];
+
+        for (int i = 0; i < particleBlocks.Length; i++)
+        {
+            for (int j = 0; j < particleBlocks.Length; j++)
+            {
+                array[i, j] = Matrix<double>.Build.Sparse(particleBlocks[i].RowCount, particleBlocks[j].ColumnCount);
+            }
+
+            array[i, particleBlocks.Length] = Matrix<double>.Build.Sparse(particleBlocks[i].RowCount, functionalBlock.ColumnCount);
+
+            array[i, i] = particleBlocks[i].PointwiseSign();
+        }
+
+        for (int j = 0; j < particleBlocks.Length; j++)
+        {
+            array[particleBlocks.Length, j] = Matrix<double>.Build.Sparse(functionalBlock.RowCount, particleBlocks[j].ColumnCount);
+        }
+
+        array[particleBlocks.Length, particleBlocks.Length] = functionalBlock.PointwiseSign();
+
+        var matrix = Matrix<double>.Build.SparseOfMatrixArray(array);
+
+        var plt = new Plot();
+
+        plt.Add.Heatmap(matrix.ToArray());
+        plt.Layout.Frameless();
+        plt.Axes.Margins(0, 0);
+
+        plt.SavePng(Path.Combine(_tempDir, "jacobian.png"), matrix.ColumnCount, matrix.RowCount);
+    }
+
+    [Test]
+    public void PlotJacobianStructureNumerical()
+    {
+        var session = new SolverSession(_solver, _process);
+        var initialState = session.CurrentState;
+        var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
+
+        var matrix = Matrix<double>.Build.DenseOfColumns(YieldJacobianColumns(session, initialState, guess)).PointwiseSign();
+
+        var plt = new Plot();
+
+        plt.Add.Heatmap(matrix.ToArray());
+        plt.Layout.Frameless();
+        plt.Axes.Margins(0, 0);
+
+        plt.SavePng(Path.Combine(_tempDir, "jacobian.png"), matrix.ColumnCount, matrix.RowCount);
+    }
+
+    private IEnumerable<Vector<double>> YieldJacobianColumns(SolverSession session, SolutionState state, StepVector guess)
+    {
+        var zero = Lagrangian.EvaluateAt(session, state, guess);
+
+        for (int i = 0; i < guess.Count; i++)
+        {
+            var step = guess.Copy();
+            step[i] += 1e-3;
+            var current = Lagrangian.EvaluateAt(session, state, step);
+
+            yield return current - zero;
+        }
+    }
 
     [Test]
     public void TestSolution()

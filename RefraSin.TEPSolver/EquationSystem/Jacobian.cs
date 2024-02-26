@@ -21,11 +21,12 @@ public static class Jacobian
     )
     {
         var rows = YieldFunctionalBlockRows(conditions, currentState, stepVector).ToArray();
-        var size = rows.Length;
+        var startIndex = stepVector.StepVectorMap.BorderStart;
+        var size = stepVector.StepVectorMap.BorderLength;
         return Matrix<double>.Build.SparseOfIndexed(
             size,
             size,
-            rows.SelectMany((r, i) => r.Select(c => (i, c.colIndex, c.value)))
+            rows.SelectMany((r, i) => r.Select(c => (i, c.colIndex - startIndex, c.value)))
         );
     }
 
@@ -326,12 +327,12 @@ public static class Jacobian
         StepVector stepVector
     )
     {
-        var rows = YieldParticleBlockEquations(conditions, particle, stepVector).ToArray();
-        var size = rows.Length;
+        var rows = YieldParticleBlockEquations(conditions, particle, stepVector).Select(r => r.ToArray()).ToArray();
+        var (startIndex, size) = stepVector.StepVectorMap[particle];
         return Matrix<double>.Build.SparseOfIndexed(
             size,
             size,
-            rows.SelectMany((r, i) => r.Select(c => (i, c.colIndex, c.value)))
+            rows.SelectMany((r, i) => r.Select(c => (i, c.colIndex - startIndex, c.value)))
         );
     }
 
