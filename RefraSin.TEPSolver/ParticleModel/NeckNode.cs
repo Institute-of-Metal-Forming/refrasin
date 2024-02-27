@@ -1,5 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
+using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
@@ -38,10 +39,12 @@ public class NeckNode : ContactNodeBase<NeckNode>, INeckNode
     /// <inheritdoc />
     public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)
     {
-        var normalDisplacement = stepVector.NormalDisplacement(this) * timeStepWidth;
-        var angle = SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Normal;
-        var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
-        var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
+        var normalDisplacement = new PolarVector(SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Normal, stepVector.NormalDisplacement(this) * timeStepWidth);
+        var tangentialDisplacement = new PolarVector(SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Tangential, stepVector.TangentialDisplacement(this) * timeStepWidth);
+        var totalDisplacement = normalDisplacement + tangentialDisplacement;
+        
+        var newR = CosLaw.C(Coordinates.R, totalDisplacement.R, totalDisplacement.Phi);
+        var dPhi = SinLaw.Alpha(totalDisplacement.R, newR, totalDisplacement.Phi);
 
         return new NeckNode(Id, newR, Coordinates.Phi + dPhi, particle, SolverSession, ContactedNodeId, ContactedParticleId);
     }

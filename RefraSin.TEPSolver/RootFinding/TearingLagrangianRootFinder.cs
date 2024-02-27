@@ -8,7 +8,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.RootFinding;
 
-public class TearingLagrangianRootFinder(IRootFinder subsystemRootFinder) : ILagrangianRootFinder
+public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IRootFinder borderBlockRootFinder) : ILagrangianRootFinder
 {
     /// <inheritdoc />
     public StepVector FindRoot(
@@ -19,7 +19,7 @@ public class TearingLagrangianRootFinder(IRootFinder subsystemRootFinder) : ILag
     {
         var stepVector = initialGuess.Copy();
 
-        var solution = SubsystemRootFinder.FindRoot(
+        var solution = BorderBlockRootFinder.FindRoot(
             Fun,
             Jac,
             new DenseVector(stepVector.BorderBlock())
@@ -66,7 +66,7 @@ public class TearingLagrangianRootFinder(IRootFinder subsystemRootFinder) : ILag
         StepVector stepVector
     )
     {
-        var solution = SubsystemRootFinder.FindRoot(
+        var solution = ParticleBlockRootFinder.FindRoot(
             Fun,
             Jac,
             new DenseVector(stepVector.ParticleBlock(particle))
@@ -89,5 +89,7 @@ public class TearingLagrangianRootFinder(IRootFinder subsystemRootFinder) : ILag
         }
     }
 
-    public IRootFinder SubsystemRootFinder { get; } = subsystemRootFinder;
+    public IRootFinder ParticleBlockRootFinder { get; } = particleBlockRootFinder;
+    
+    public IRootFinder BorderBlockRootFinder { get; } = borderBlockRootFinder;
 }

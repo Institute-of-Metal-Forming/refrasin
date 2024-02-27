@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra.Double.Solvers;
 using MathNet.Numerics.LinearAlgebra.Solvers;
+using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
@@ -23,10 +24,14 @@ public record SolverRoutines(
             new InstabilityDetector()
         },
         new TearingLagrangianRootFinder(
+            new NewtonRaphsonRootFinder(new IterativeSolver(
+                    new MlkBiCgStab(),
+                    new Iterator<double>(),
+                    new MILU0Preconditioner()
+                )
+            ),
             new NewtonRaphsonRootFinder(
-                new MlkBiCgStab(),
-                new Iterator<double>(),
-                new MILU0Preconditioner()
+                new LUSolver()
             )
         )
     );
