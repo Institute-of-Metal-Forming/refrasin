@@ -38,7 +38,7 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
         Matrix<double> Jac(Vector<double> vector)
         {
             stepVector.UpdateBorderBlock(vector.AsArray());
-            var result = Jacobian.FunctionalBlock(solverSession, currentState, stepVector);
+            var result = Jacobian.BorderBlock(solverSession, currentState, stepVector);
             return result;
         }
     }

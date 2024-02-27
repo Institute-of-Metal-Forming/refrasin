@@ -88,7 +88,7 @@ public class OneParticleTest
         var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
         var particleBlocks = initialState.Particles.Select(p => Jacobian.ParticleBlock(session, p, guess)).ToArray();
-        var functionalBlock = Jacobian.FunctionalBlock(session, initialState, guess);
+        var functionalBlock = Jacobian.BorderBlock(session, initialState, guess);
         var size = particleBlocks.Length + 1;
 
         var array = new Matrix<double>[size, size];
