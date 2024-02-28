@@ -17,6 +17,9 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
         Distance = from.CenterCoordinates.DistanceTo(to.CenterCoordinates);
         DirectionFrom = new PolarVector(to.CenterCoordinates - from.CenterCoordinates, from.LocalCoordinateSystem).Phi;
         DirectionTo = new PolarVector(from.CenterCoordinates - to.CenterCoordinates, to.LocalCoordinateSystem).Phi;
+
+        FromNodes = from.Nodes.OfType<ContactNodeBase>().Where(n=> n.ContactedParticleId == To.Id).ToArray();
+        ToNodes = FromNodes.Select(n => n.ContactedNode).ToArray();
     }
 
     /// <inheritdoc />
@@ -50,4 +53,8 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
 
     /// <inheritdoc />
     IEdge<IParticle> IEdge<IParticle>.Reversed() => new DirectedEdge<IParticle>(To, From);
+    
+    public IList<ContactNodeBase> FromNodes { get; }
+    
+    public IList<ContactNodeBase> ToNodes { get; }
 }

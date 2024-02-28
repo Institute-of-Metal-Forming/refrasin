@@ -79,25 +79,19 @@ public static class Lagrangian
     ) =>
         contacts.SelectMany(contact =>
         {
-            var involvedNodes = contact
-                .From.Nodes.OfType<ContactNodeBase>()
-                .Where(n => n.ContactedParticleId == contact.To.Id)
-                .ToArray();
-
             return Join(
-                YieldContactNodesEquations(conditions, stepVector, involvedNodes, contact),
-                YieldContactAuxiliaryDerivatives(stepVector, involvedNodes, contact)
+                YieldContactNodesEquations(conditions, stepVector, contact),
+                YieldContactAuxiliaryDerivatives(stepVector, contact)
             );
         });
 
     private static IEnumerable<double> YieldContactNodesEquations(
         IProcessConditions conditions,
         StepVector stepVector,
-        IEnumerable<ContactNodeBase> involvedNodes,
-        IParticleContact contact
+        ParticleContact contact
     )
     {
-        foreach (var contactNode in involvedNodes)
+        foreach (var contactNode in contact.FromNodes)
         {
             yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
             yield return StateVelocityDerivativeTangential(
@@ -120,31 +114,29 @@ public static class Lagrangian
 
     private static IEnumerable<double> YieldContactAuxiliaryDerivatives(
         StepVector stepVector,
-        IList<ContactNodeBase> involvedNodes,
-        IParticleContact contact
+        ParticleContact contact
     )
     {
-        yield return ParticleRadialDisplacementDerivative(stepVector, involvedNodes);
-        yield return ParticleAngleDisplacementDerivative(stepVector, involvedNodes);
-        yield return ParticleRotationDerivative(stepVector, involvedNodes, contact);
+        yield return ParticleRadialDisplacementDerivative(stepVector, contact);
+        yield return ParticleAngleDisplacementDerivative(stepVector, contact);
+        yield return ParticleRotationDerivative(stepVector, contact);
     }
 
     private static double ParticleRadialDisplacementDerivative(
         StepVector stepVector,
-        IEnumerable<ContactNodeBase> involvedNodes
-    ) => involvedNodes.Sum(stepVector.LambdaContactDistance);
+        ParticleContact contact
+    ) => contact.FromNodes.Sum(stepVector.LambdaContactDistance);
 
     private static double ParticleAngleDisplacementDerivative(
         StepVector stepVector,
-        IEnumerable<ContactNodeBase> involvedNodes
-    ) => involvedNodes.Sum(stepVector.LambdaContactDirection);
+        ParticleContact contact
+    ) => contact.FromNodes.Sum(stepVector.LambdaContactDirection);
 
     private static double ParticleRotationDerivative(
         StepVector stepVector,
-        IEnumerable<ContactNodeBase> involvedNodes,
-        IParticleContact contact
+        ParticleContact contact
     ) =>
-        involvedNodes.Sum(n =>
+        contact.FromNodes.Sum(n =>
         {
             var angleDifference = (
                 n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection

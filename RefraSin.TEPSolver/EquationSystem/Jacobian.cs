@@ -47,44 +47,38 @@ public static class Jacobian
     ) =>
         contacts.SelectMany(contact =>
         {
-            var involvedNodes = contact
-                .From.Nodes.OfType<ContactNodeBase>()
-                .Where(n => n.ContactedParticleId == contact.To.Id)
-                .ToArray();
-
             return Join(
-                YieldContactNodesEquations(conditions, stepVector, involvedNodes, contact),
-                YieldContactAuxiliaryDerivatives(stepVector, involvedNodes, contact)
+                YieldContactNodesEquations(conditions, stepVector, contact),
+                YieldContactAuxiliaryDerivatives(stepVector, contact)
             );
         });
 
     private static IEnumerable<(int colIndex, double value)> ParticleRadialDisplacementDerivative(
         StepVector stepVector,
-        IEnumerable<ContactNodeBase> involvedNodes
+        ParticleContact contact
     ) =>
-        involvedNodes.Select(node =>
+        contact.FromNodes.Select(node =>
             (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance], 1.0)
         );
 
     private static IEnumerable<(int colIndex, double value)> ParticleAngleDisplacementDerivative(
         StepVector stepVector,
-        IEnumerable<ContactNodeBase> involvedNodes
+        ParticleContact contact
     ) =>
-        involvedNodes.Select(node =>
+        contact.FromNodes.Select(node =>
             (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection], 1.0)
         );
 
     private static IEnumerable<(int colIndex, double value)> ParticleRotationDerivative(
         StepVector stepVector,
-        IList<ContactNodeBase> involvedNodes,
-        IParticleContact contact
+        ParticleContact contact
     )
     {
         return Components();
 
         IEnumerable<(int, double)> Components()
         {
-            foreach (var node in involvedNodes)
+            foreach (var node in contact.FromNodes)
             {
                 var angleDifference = (
                     node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection
@@ -104,7 +98,7 @@ public static class Jacobian
 
             yield return (
                 stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
-                involvedNodes.Sum(node =>
+                contact.FromNodes.Sum(node =>
                 {
                     var angleDifference = (
                         node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection
@@ -232,11 +226,10 @@ public static class Jacobian
     > YieldContactNodesEquations(
         IProcessConditions conditions,
         StepVector stepVector,
-        IEnumerable<ContactNodeBase> involvedNodes,
-        IParticleContact contact
+        ParticleContact contact
     )
     {
-        foreach (var contactNode in involvedNodes)
+        foreach (var contactNode in contact.FromNodes)
         {
             yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
             yield return StateVelocityDerivativeTangential(
@@ -267,13 +260,12 @@ public static class Jacobian
         IEnumerable<(int colIndex, double value)>
     > YieldContactAuxiliaryDerivatives(
         StepVector stepVector,
-        IList<ContactNodeBase> involvedNodes,
-        IParticleContact contact
+        ParticleContact contact
     )
     {
-        yield return ParticleRadialDisplacementDerivative(stepVector, involvedNodes);
-        yield return ParticleAngleDisplacementDerivative(stepVector, involvedNodes);
-        yield return ParticleRotationDerivative(stepVector, involvedNodes, contact);
+        yield return ParticleRadialDisplacementDerivative(stepVector, contact);
+        yield return ParticleAngleDisplacementDerivative(stepVector, contact);
+        yield return ParticleRotationDerivative(stepVector, contact);
     }
 
     public static Matrix<double> ParticleBlock(
