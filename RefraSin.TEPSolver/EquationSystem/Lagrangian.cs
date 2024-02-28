@@ -103,12 +103,6 @@ public static class Lagrangian
             var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
             yield return constraints.distance;
             yield return constraints.direction;
-
-            // lambdas of contact must be equal for both connected nodes
-            yield return stepVector.LambdaContactDistance(contactNode)
-                - stepVector.LambdaContactDistance(contactNode.ContactedNode);
-            yield return stepVector.LambdaContactDirection(contactNode)
-                - stepVector.LambdaContactDirection(contactNode.ContactedNode);
         }
     }
 

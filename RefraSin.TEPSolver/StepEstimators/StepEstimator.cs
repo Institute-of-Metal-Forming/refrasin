@@ -13,9 +13,6 @@ class StepEstimator : IStepEstimator
     private static IEnumerable<double> YieldInitialGuess(IProcessConditions conditions, SolutionState currentState) =>
         YieldNodeUnknownsInitialGuess(conditions, currentState)
             .Concat(
-                YieldContactNodeUnknownsInitialGuess(currentState)
-            )
-            .Concat(
                 YieldContactUnknownsInitialGuess(currentState)
             ).Concat(
                 YieldGlobalUnknownsInitialGuess()
@@ -28,11 +25,23 @@ class StepEstimator : IStepEstimator
 
     private static IEnumerable<double> YieldContactUnknownsInitialGuess(SolutionState currentState)
     {
-        foreach (var _ in currentState.Contacts)
+        foreach (var contact in currentState.Contacts)
         {
             yield return 0;
             yield return 0;
             yield return 0;
+
+            foreach (var _ in contact.FromNodes)
+            {
+               yield return 0;
+               yield return 1;
+               yield return 1;
+            }
+            
+            foreach (var _ in contact.ToNodes)
+            {
+               yield return 0;
+            }
         }
     }
 
@@ -62,15 +71,5 @@ class StepEstimator : IStepEstimator
                                          * node.Particle.Material.MolarVolume
                                          / Math.Pow(node.SurfaceDistance.ToUpper, 2);
         return -node.SurfaceDiffusionCoefficient.ToUpper * vacancyConcentrationGradient;
-    }
-
-    private static IEnumerable<double> YieldContactNodeUnknownsInitialGuess(SolutionState currentState)
-    {
-        foreach (var _ in currentState.Nodes.OfType<ContactNodeBase>())
-        {
-            yield return 0;
-            yield return 1;
-            yield return 1;
-        }
     }
 }

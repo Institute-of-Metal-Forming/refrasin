@@ -241,18 +241,6 @@ public static class Jacobian
             var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
             yield return constraints.distance;
             yield return constraints.direction;
-
-            // lambdas of contact must be equal for both connected nodes
-            yield return new[]
-            {
-                (stepVector.StepVectorMap[contactNode, NodeUnknown.LambdaContactDistance], 1.0),
-                (stepVector.StepVectorMap[contactNode.ContactedNode, NodeUnknown.LambdaContactDistance], -1.0)
-            };
-            yield return new[]
-            {
-                (stepVector.StepVectorMap[contactNode, NodeUnknown.LambdaContactDirection], 1.0),
-                (stepVector.StepVectorMap[contactNode.ContactedNode, NodeUnknown.LambdaContactDirection], -1.0)
-            };
         }
     }
 

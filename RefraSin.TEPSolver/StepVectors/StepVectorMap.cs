@@ -5,14 +5,14 @@ namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(ISolutionState currentState)
+    public StepVectorMap(SolutionState currentState)
     {
         _index = 0;
 
         foreach (var particle in currentState.Particles)
         {
             var startIndex = _index;
-            
+
             foreach (var node in particle.Nodes)
             {
                 AddNodeUnknown(node, NodeUnknown.LambdaVolume);
@@ -25,18 +25,25 @@ public class StepVectorMap
 
         BorderStart = _index;
 
-        foreach (var contactNode in currentState.Nodes.OfType<IContactNode>())
-        {
-            AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
-            AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
-            AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
-        }
-
         foreach (var contact in currentState.Contacts)
         {
             AddContactUnknown(contact, ContactUnknown.RadialDisplacement);
             AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
             AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
+            
+            foreach (var contactNode in contact.FromNodes)
+            {
+                AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
+                AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
+                AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
+            }
+            
+            foreach (var contactNode in contact.ToNodes)
+            {
+                AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
+                LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
+                LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
+            }
         }
 
         BorderLength = _index - BorderStart + 1;
@@ -53,6 +60,13 @@ public class StepVectorMap
         _contactUnknownIndices[(contact.From.Id, contact.To.Id, unknown)] = _index;
         _index++;
     }
+    
+    
+    private void LinkCommonNodeUnknown(IContactNode childsNode, NodeUnknown unknown)
+    {
+        _nodeUnknownIndices[(childsNode.Id, unknown)] = _nodeUnknownIndices[(childsNode.ContactedNodeId, unknown)];
+    }
+
 
     private int _index;
     private readonly Dictionary<(Guid, NodeUnknown), int> _nodeUnknownIndices = new();
@@ -70,8 +84,8 @@ public class StepVectorMap
     public int this[Guid fromId, Guid toId, ContactUnknown unknown] => _contactUnknownIndices[(fromId, toId, unknown)];
 
     public (int start, int length) this[IParticle particle] => _particleBlocks[particle.Id];
-    
+
     public int BorderStart { get; }
-    
+
     public int BorderLength { get; }
 }
