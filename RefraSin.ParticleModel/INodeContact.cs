@@ -16,14 +16,16 @@ public interface INodeContact
     /// Id des Partikels, welches dieser Knoten berührt.
     /// </summary>
     public Guid ContactedNodeId { get; }
-    
+
     public double ContactDistance { get; }
-    
+
     public Angle ContactDirection { get; }
-    
+
+    public Angle AngleDistanceFromContactDirection { get; }
+
     public NormalTangential<Angle> CenterShiftVectorDirection { get; }
-    
+
     public NormalTangential<double> ContactDistanceGradient { get; }
-    
+
     public NormalTangential<double> ContactDirectionGradient { get; }
 }

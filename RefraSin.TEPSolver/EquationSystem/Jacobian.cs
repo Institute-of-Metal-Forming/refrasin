@@ -1,11 +1,9 @@
 using MathNet.Numerics.LinearAlgebra;
-using RefraSin.Coordinates;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
-using static RefraSin.Coordinates.Constants;
 using static RefraSin.TEPSolver.EquationSystem.Helper;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
@@ -45,13 +43,10 @@ public static class Jacobian
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
     ) =>
-        contacts.SelectMany(contact =>
-        {
-            return Join(
-                YieldContactNodesEquations(conditions, stepVector, contact),
-                YieldContactAuxiliaryDerivatives(stepVector, contact)
-            );
-        });
+        contacts.SelectMany(contact => Join(
+            YieldContactNodesEquations(conditions, stepVector, contact),
+            YieldContactAuxiliaryDerivatives(stepVector, contact)
+        ));
 
     private static IEnumerable<(int colIndex, double value)> ParticleRadialDisplacementDerivative(
         StepVector stepVector,
@@ -80,36 +75,18 @@ public static class Jacobian
         {
             foreach (var node in contact.FromNodes)
             {
-                var angleDifference = (
-                    node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection
-                ).Reduce(Angle.ReductionDomain.WithNegative);
                 yield return (
                     stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
-                    -node.ContactedNode.Coordinates.R
-                  * Sin(stepVector.RotationDisplacement(contact) + angleDifference)
+                    node.ContactedNode.Coordinates.R
+                        * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
                 );
                 yield return (
                     stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
-                    node.ContactedNode.Coordinates.R
-                  / contact.Distance
-                  * Cos(stepVector.RotationDisplacement(contact) + angleDifference)
+                    -node.ContactedNode.Coordinates.R
+                        / contact.Distance
+                        * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
                 );
             }
-
-            yield return (
-                stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
-                contact.FromNodes.Sum(node =>
-                {
-                    var angleDifference = (
-                        node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection
-                    ).Reduce(Angle.ReductionDomain.WithNegative);
-                    return -node.ContactedNode.Coordinates.R
-                         * Cos(stepVector.RotationDisplacement(contact) + angleDifference)
-                         - node.ContactedNode.Coordinates.R
-                         / contact.Distance
-                         * Sin(stepVector.RotationDisplacement(contact) + angleDifference);
-                })
-            );
         }
     }
 
@@ -128,23 +105,18 @@ public static class Jacobian
         ContactNodeBase node
     )
     {
-        return Components();
-
-        IEnumerable<(int, double)> Components()
+        return new[]
         {
-            yield return (
-                stepVector.StepVectorMap[GlobalUnknown.Lambda1],
-                -node.GibbsEnergyGradient.Tangential
-            );
-            yield return (
+            (stepVector.StepVectorMap[GlobalUnknown.Lambda1], -node.GibbsEnergyGradient.Tangential),
+            (
                 stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
                 node.ContactDistanceGradient.Tangential
-            );
-            yield return (
+            ),
+            (
                 stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
                 node.ContactDirectionGradient.Tangential
-            );
-        }
+            )
+        };
     }
 
     private static IEnumerable<(int colIndex, double value)> DissipationEquality(
@@ -170,17 +142,13 @@ public static class Jacobian
     private static (
         IEnumerable<(int colIndex, double value)> distance,
         IEnumerable<(int colIndex, double value)> direction
-        ) ContactConstraints(
-            IProcessConditions conditions,
-            StepVector stepVector,
-            IParticleContact contact,
-            ContactNodeBase node
-        )
+    ) ContactConstraints(
+        IProcessConditions conditions,
+        StepVector stepVector,
+        IParticleContact contact,
+        ContactNodeBase node
+    )
     {
-        var angleDifference = (
-            node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection
-        ).Reduce(Angle.ReductionDomain.WithNegative);
-
         IEnumerable<(int, double)> DistanceComponents()
         {
             yield return (
@@ -197,7 +165,8 @@ public static class Jacobian
             );
             yield return (
                 stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
-                -node.ContactedNode.Coordinates.R * Sin(angleDifference)
+                node.ContactedNode.Coordinates.R
+              * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
             );
         }
 
@@ -214,7 +183,9 @@ public static class Jacobian
             yield return (stepVector.StepVectorMap[contact, ContactUnknown.AngleDisplacement], 1.0);
             yield return (
                 stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
-                -node.ContactedNode.Coordinates.R / node.ContactDistance * Cos(angleDifference)
+                -node.ContactedNode.Coordinates.R
+              / contact.Distance
+              * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
             );
         }
 
@@ -246,10 +217,7 @@ public static class Jacobian
 
     private static IEnumerable<
         IEnumerable<(int colIndex, double value)>
-    > YieldContactAuxiliaryDerivatives(
-        StepVector stepVector,
-        ParticleContact contact
-    )
+    > YieldContactAuxiliaryDerivatives(StepVector stepVector, ParticleContact contact)
     {
         yield return ParticleRadialDisplacementDerivative(stepVector, contact);
         yield return ParticleAngleDisplacementDerivative(stepVector, contact);
@@ -262,7 +230,9 @@ public static class Jacobian
         StepVector stepVector
     )
     {
-        var rows = YieldParticleBlockEquations(conditions, particle, stepVector).Select(r => r.ToArray()).ToArray();
+        var rows = YieldParticleBlockEquations(conditions, particle, stepVector)
+            .Select(r => r.ToArray())
+            .ToArray();
         var (startIndex, size) = stepVector.StepVectorMap[particle];
         return Matrix<double>.Build.SparseOfIndexed(
             size,
@@ -311,15 +281,15 @@ public static class Jacobian
     {
         var fluxToUpper =
             -2
-          * conditions.GasConstant
-          * conditions.Temperature
-          / (
+            * conditions.GasConstant
+            * conditions.Temperature
+            / (
                 node.Particle.Material.MolarVolume
-              * node.Particle.Material.EquilibriumVacancyConcentration
+                * node.Particle.Material.EquilibriumVacancyConcentration
             )
-          * node.SurfaceDistance.ToUpper
-          / node.SurfaceDiffusionCoefficient.ToUpper
-          * stepVector.Lambda1;
+            * node.SurfaceDistance.ToUpper
+            / node.SurfaceDiffusionCoefficient.ToUpper
+            * stepVector.Lambda1;
 
         return new[]
         {

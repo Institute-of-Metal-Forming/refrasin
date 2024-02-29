@@ -1,10 +1,8 @@
-using RefraSin.Coordinates;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
-using static RefraSin.Coordinates.Constants;
 using static RefraSin.TEPSolver.EquationSystem.Helper;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
@@ -131,18 +129,14 @@ public static class Lagrangian
         ParticleContact contact
     ) =>
         contact.FromNodes.Sum(n =>
-        {
-            var angleDifference = (
-                n.ContactedNode.Coordinates.Phi - n.ContactedNode.ContactDirection
-            ).Reduce(Angle.ReductionDomain.WithNegative);
-            return -n.ContactedNode.Coordinates.R
-                    * Sin(angleDifference)
-                    * stepVector.LambdaContactDistance(n)
-                + n.ContactedNode.Coordinates.R
-                    / contact.Distance
-                    * Cos( angleDifference)
-                    * stepVector.LambdaContactDirection(n);
-        });
+            n.ContactedNode.Coordinates.R
+                * Sin(n.ContactedNode.AngleDistanceFromContactDirection)
+                * stepVector.LambdaContactDistance(n)
+            - n.ContactedNode.Coordinates.R
+                / contact.Distance
+                * Cos(n.ContactedNode.AngleDistanceFromContactDirection)
+                * stepVector.LambdaContactDirection(n)
+        );
 
     public static IEnumerable<double> YieldGlobalEquations(
         IProcessConditions conditions,
@@ -283,28 +277,23 @@ public static class Lagrangian
             stepVector.TangentialDisplacement(node)
             + stepVector.TangentialDisplacement(node.ContactedNode);
 
-        var rotationShift =
-            2
-            * node.ContactedNode.Coordinates.R
-            * Sin(stepVector.RotationDisplacement(contact) / 2);
-
-        var rotationDirection =(
-            -(node.ContactedNode.Coordinates.Phi - node.ContactedNode.ContactDirection)
-            + (Pi - stepVector.RotationDisplacement(contact)) / 2).Reduce();
-
         var distance =
             stepVector.RadialDisplacement(contact)
             - node.ContactDistanceGradient.Normal * normalShift
             - node.ContactDistanceGradient.Tangential * tangentialShift
-            + Cos(rotationDirection) * rotationShift;
+            + node.ContactedNode.Coordinates.R
+                * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
+                * stepVector.RotationDisplacement(contact);
 
         var direction =
             stepVector.AngleDisplacement(contact)
             - node.ContactDirectionGradient.Normal * normalShift
             - node.ContactDirectionGradient.Tangential * tangentialShift
-            - Sin(rotationDirection) / contact.Distance * rotationShift;
+            - node.ContactedNode.Coordinates.R
+                / contact.Distance
+                * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
+                * stepVector.RotationDisplacement(contact);
 
         return (distance, direction);
     }
-
 }

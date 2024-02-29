@@ -26,32 +26,35 @@ public record GrainBoundaryNode(
     double TransferCoefficient,
     double ContactDistance,
     Angle ContactDirection,
+    Angle AngleDistanceFromContactDirection,
     NormalTangential<Angle> CenterShiftVectorDirection,
     NormalTangential<double> ContactDistanceGradient,
     NormalTangential<double> ContactDirectionGradient
 ) : Node(Id, ParticleId, Coordinates, NodeType.GrainBoundaryNode), IGrainBoundaryNode
 {
-    public GrainBoundaryNode(IGrainBoundaryNode template) : this(
-        template.Id,
-        template.ParticleId,
-        template.Coordinates,
-        template.ContactedParticleId,
-        template.ContactedNodeId,
-        template.AbsoluteCoordinates,
-        template.SurfaceDistance,
-        template.SurfaceRadiusAngle,
-        template.AngleDistance,
-        template.Volume,
-        template.SurfaceVectorAngle,
-        template.GibbsEnergyGradient,
-        template.VolumeGradient,
-        template.SurfaceEnergy,
-        template.SurfaceDiffusionCoefficient,
-        template.TransferCoefficient,
-        template.ContactDistance,
-        template.ContactDirection,
-        template.CenterShiftVectorDirection,
-        template.ContactDistanceGradient,
-        template.ContactDirectionGradient
-    ) { }
+    public GrainBoundaryNode(IGrainBoundaryNode template)
+        : this(
+            template.Id,
+            template.ParticleId,
+            template.Coordinates,
+            template.ContactedParticleId,
+            template.ContactedNodeId,
+            template.AbsoluteCoordinates,
+            template.SurfaceDistance,
+            template.SurfaceRadiusAngle,
+            template.AngleDistance,
+            template.Volume,
+            template.SurfaceVectorAngle,
+            template.GibbsEnergyGradient,
+            template.VolumeGradient,
+            template.SurfaceEnergy,
+            template.SurfaceDiffusionCoefficient,
+            template.TransferCoefficient,
+            template.ContactDistance,
+            template.ContactDirection,
+            template.AngleDistanceFromContactDirection,
+            template.CenterShiftVectorDirection,
+            template.ContactDistanceGradient,
+            template.ContactDirectionGradient
+        ) { }
 }
