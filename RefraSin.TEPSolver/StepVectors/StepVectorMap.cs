@@ -1,5 +1,4 @@
 using RefraSin.ParticleModel;
-using RefraSin.Storage;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
@@ -30,17 +29,19 @@ public class StepVectorMap
             AddContactUnknown(contact, ContactUnknown.RadialDisplacement);
             AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
             AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
-            
+
             foreach (var contactNode in contact.FromNodes)
             {
-                AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
+                if (contactNode is ParticleModel.NeckNode)
+                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
                 AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
                 AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
             }
-            
+
             foreach (var contactNode in contact.ToNodes)
             {
-                AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
+                if (contactNode is ParticleModel.NeckNode)
+                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
                 LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
                 LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
             }
@@ -60,13 +61,11 @@ public class StepVectorMap
         _contactUnknownIndices[(contact.From.Id, contact.To.Id, unknown)] = _index;
         _index++;
     }
-    
-    
+
     private void LinkCommonNodeUnknown(IContactNode childsNode, NodeUnknown unknown)
     {
         _nodeUnknownIndices[(childsNode.Id, unknown)] = _nodeUnknownIndices[(childsNode.ContactedNodeId, unknown)];
     }
-
 
     private int _index;
     private readonly Dictionary<(Guid, NodeUnknown), int> _nodeUnknownIndices = new();

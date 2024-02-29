@@ -27,20 +27,29 @@ public class NewtonRaphsonRootFinder(
         var x = initialGuess;
         var y = function(x);
         var f = 0.5 * y * y;
+        var dxold = Vector<double>.Build.Dense(x.Count, double.NaN);
 
         for (i = 0; i < MaxIterationCount; i++)
         {
             if (y.L2Norm() <= AbsoluteTolerance)
-            {
                 return x;
-            }
 
             var jac = jacobian(x);
             var dx = JacobianStepSolver.Solve(jac, -y);
 
             if (!dx.ForAll(double.IsFinite))
-                throw new UncriticalIterationInterceptedException(nameof(NewtonRaphsonRootFinder), InterceptReason.InvalidStateOccured, i,
-                    furtherInformation: "Infinite step occured.");
+                throw new UncriticalIterationInterceptedException(
+                    nameof(NewtonRaphsonRootFinder),
+                    InterceptReason.InvalidStateOccured,
+                    i,
+                    furtherInformation: "Infinite step occured."
+                );
+
+            if (
+                (dx - dxold).L2Norm() < AbsoluteTolerance
+                || (dx + dxold).L2Norm() < AbsoluteTolerance
+            )
+                return x;
 
             var gradf = -y * y / dx;
 
@@ -54,8 +63,10 @@ public class NewtonRaphsonRootFinder(
 
                 var stepFactor = gprime0 / (2 * (fnew - f - gprime0));
 
-                if (stepFactor > MaxStepFactor) stepFactor = MaxStepFactor;
-                else if (stepFactor < MinStepFactor) stepFactor = MinStepFactor;
+                if (stepFactor > MaxStepFactor)
+                    stepFactor = MaxStepFactor;
+                else if (stepFactor < MinStepFactor)
+                    stepFactor = MinStepFactor;
 
                 dx *= stepFactor;
                 xnew = x + dx;
@@ -66,9 +77,14 @@ public class NewtonRaphsonRootFinder(
             x = xnew;
             y = ynew;
             f = fnew;
+            dxold = dx;
         }
 
-        throw new UncriticalIterationInterceptedException(nameof(NewtonRaphsonRootFinder), InterceptReason.MaxIterationCountExceeded, i);
+        throw new UncriticalIterationInterceptedException(
+            nameof(NewtonRaphsonRootFinder),
+            InterceptReason.MaxIterationCountExceeded,
+            i
+        );
     }
 
     public int MaxIterationCount { get; } = maxIterattionCount;

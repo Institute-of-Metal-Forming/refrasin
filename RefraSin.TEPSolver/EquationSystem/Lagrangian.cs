@@ -4,6 +4,7 @@ using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using static RefraSin.TEPSolver.EquationSystem.Helper;
+using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
@@ -91,12 +92,15 @@ public static class Lagrangian
     {
         foreach (var contactNode in contact.FromNodes)
         {
-            yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
-            yield return StateVelocityDerivativeTangential(
-                conditions,
-                stepVector,
-                contactNode.ContactedNode
-            );
+            if (contactNode is NeckNode)
+            {
+                yield return StateVelocityDerivativeTangential(conditions, stepVector, contactNode);
+                yield return StateVelocityDerivativeTangential(
+                    conditions,
+                    stepVector,
+                    contactNode.ContactedNode
+                );
+            }
 
             var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
             yield return constraints.distance;
@@ -219,11 +223,9 @@ public static class Lagrangian
         var normalVolumeTerm = node.VolumeGradient.Normal * stepVector.NormalDisplacement(node);
         var tangentialVolumeTerm = 0.0;
 
-        if (node is ContactNodeBase contactNode)
-        {
+        if (node is NeckNode neckNode)
             tangentialVolumeTerm =
-                node.VolumeGradient.Tangential * stepVector.TangentialDisplacement(contactNode);
-        }
+                node.VolumeGradient.Tangential * stepVector.TangentialDisplacement(neckNode);
 
         var fluxTerm = stepVector.FluxToUpper(node) - stepVector.FluxToUpper(node.Lower);
 
@@ -241,7 +243,7 @@ public static class Lagrangian
             .Sum();
 
         var dissipationTangential = currentState
-            .Nodes.OfType<ContactNodeBase>()
+            .Nodes.OfType<NeckNode>()
             .Select(n => -n.GibbsEnergyGradient.Tangential * stepVector.TangentialDisplacement(n))
             .Sum();
 
@@ -273,9 +275,12 @@ public static class Lagrangian
         var normalShift =
             stepVector.NormalDisplacement(node) + stepVector.NormalDisplacement(node.ContactedNode);
 
-        var tangentialShift =
-            stepVector.TangentialDisplacement(node)
-            + stepVector.TangentialDisplacement(node.ContactedNode);
+        var tangentialShift = 0.0;
+
+        if (node is NeckNode)
+            tangentialShift =
+                stepVector.TangentialDisplacement(node)
+                + stepVector.TangentialDisplacement(node.ContactedNode);
 
         var distance =
             stepVector.RadialDisplacement(contact)
