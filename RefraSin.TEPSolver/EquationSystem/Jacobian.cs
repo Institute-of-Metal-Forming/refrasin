@@ -8,6 +8,8 @@ using static RefraSin.TEPSolver.EquationSystem.Helper;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
+using JacobianRow = System.Collections.Generic.IEnumerable<(int colIndex, double value)>;
+using JacobianRows = System.Collections.Generic.IEnumerable<System.Collections.Generic.IEnumerable<(int colIndex, double value)>>;
 
 namespace RefraSin.TEPSolver.EquationSystem;
 
@@ -29,7 +31,7 @@ public static class Jacobian
         );
     }
 
-    private static IEnumerable<IEnumerable<(int colIndex, double value)>> YieldBorderBlockRows(
+    private static JacobianRows YieldBorderBlockRows(
         IProcessConditions conditions,
         SolutionState currentState,
         StepVector stepVector
@@ -39,7 +41,7 @@ public static class Jacobian
             YieldGlobalEquations(conditions, currentState, stepVector)
         );
 
-    public static IEnumerable<IEnumerable<(int colIndex, double value)>> YieldContactsEquations(
+    public static JacobianRows YieldContactsEquations(
         IProcessConditions conditions,
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
@@ -51,7 +53,7 @@ public static class Jacobian
             )
         );
 
-    private static IEnumerable<(int colIndex, double value)> ParticleRadialDisplacementDerivative(
+    private static JacobianRow ParticleRadialDisplacementDerivative(
         StepVector stepVector,
         ParticleContact contact
     ) =>
@@ -59,7 +61,7 @@ public static class Jacobian
             (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance], 1.0)
         );
 
-    private static IEnumerable<(int colIndex, double value)> ParticleAngleDisplacementDerivative(
+    private static JacobianRow ParticleAngleDisplacementDerivative(
         StepVector stepVector,
         ParticleContact contact
     ) =>
@@ -67,7 +69,7 @@ public static class Jacobian
             (stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection], 1.0)
         );
 
-    private static IEnumerable<(int colIndex, double value)> ParticleRotationDerivative(
+    private static JacobianRow ParticleRotationDerivative(
         StepVector stepVector,
         ParticleContact contact
     )
@@ -88,7 +90,7 @@ public static class Jacobian
         }
     }
 
-    public static IEnumerable<IEnumerable<(int colIndex, double value)>> YieldGlobalEquations(
+    public static JacobianRows YieldGlobalEquations(
         IProcessConditions conditions,
         SolutionState currentState,
         StepVector stepVector
@@ -97,7 +99,7 @@ public static class Jacobian
         yield return DissipationEquality(conditions, currentState, stepVector);
     }
 
-    private static IEnumerable<(int colIndex, double value)> StateVelocityDerivativeTangential(
+    private static JacobianRow StateVelocityDerivativeTangential(
         IProcessConditions conditions,
         StepVector stepVector,
         ContactNodeBase node
@@ -117,7 +119,7 @@ public static class Jacobian
         );
     }
 
-    private static IEnumerable<(int colIndex, double value)> DissipationEquality(
+    private static JacobianRow DissipationEquality(
         IProcessConditions conditions,
         SolutionState currentState,
         StepVector stepVector
@@ -131,7 +133,7 @@ public static class Jacobian
                 )
             );
 
-    private static IEnumerable<(int colIndex, double value)> ContactConstraintDistance(
+    private static JacobianRow ContactConstraintDistance(
         IProcessConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
@@ -158,7 +160,7 @@ public static class Jacobian
         );
     }
 
-    private static IEnumerable<(int colIndex, double value)> ContactConstraintDirection(
+    private static JacobianRow ContactConstraintDirection(
         IProcessConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
@@ -186,9 +188,7 @@ public static class Jacobian
         );
     }
 
-    private static IEnumerable<
-        IEnumerable<(int colIndex, double value)>
-    > YieldContactNodesEquations(
+    private static JacobianRows YieldContactNodesEquations(
         IProcessConditions conditions,
         StepVector stepVector,
         ParticleContact contact
@@ -211,9 +211,7 @@ public static class Jacobian
         }
     }
 
-    private static IEnumerable<
-        IEnumerable<(int colIndex, double value)>
-    > YieldContactAuxiliaryDerivatives(StepVector stepVector, ParticleContact contact)
+    private static JacobianRows YieldContactAuxiliaryDerivatives(StepVector stepVector, ParticleContact contact)
     {
         yield return ParticleRadialDisplacementDerivative(stepVector, contact);
         yield return ParticleAngleDisplacementDerivative(stepVector, contact);
@@ -237,15 +235,13 @@ public static class Jacobian
         );
     }
 
-    private static IEnumerable<
-        IEnumerable<(int colIndex, double value)>
-    > YieldParticleBlockEquations(
+    private static JacobianRows YieldParticleBlockEquations(
         IProcessConditions conditions,
         Particle particle,
         StepVector stepVector
     ) => YieldNodeEquations(conditions, particle.Nodes, stepVector);
 
-    private static IEnumerable<IEnumerable<(int colIndex, double value)>> YieldNodeEquations(
+    private static JacobianRows YieldNodeEquations(
         IProcessConditions conditions,
         IEnumerable<NodeBase> nodes,
         StepVector stepVector
@@ -259,7 +255,7 @@ public static class Jacobian
         }
     }
 
-    private static IEnumerable<(int colIndex, double value)> StateVelocityDerivativeNormal(
+    private static JacobianRow StateVelocityDerivativeNormal(
         IProcessConditions conditions,
         StepVector stepVector,
         NodeBase node
@@ -271,7 +267,7 @@ public static class Jacobian
         );
     }
 
-    private static IEnumerable<(int colIndex, double value)> FluxDerivative(
+    private static JacobianRow FluxDerivative(
         IProcessConditions conditions,
         StepVector stepVector,
         NodeBase node
@@ -294,7 +290,7 @@ public static class Jacobian
         yield return (stepVector.StepVectorMap[node.Upper, NodeUnknown.LambdaVolume], 1);
     }
 
-    private static IEnumerable<(int colIndex, double value)> RequiredConstraint(
+    private static JacobianRow RequiredConstraint(
         IProcessConditions conditions,
         StepVector stepVector,
         NodeBase node
