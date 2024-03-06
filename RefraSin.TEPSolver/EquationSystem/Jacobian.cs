@@ -72,24 +72,19 @@ public static class Jacobian
         ParticleContact contact
     )
     {
-        return Components();
-
-        IEnumerable<(int, double)> Components()
+        foreach (var node in contact.FromNodes)
         {
-            foreach (var node in contact.FromNodes)
-            {
-                yield return (
-                    stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
-                    node.ContactedNode.Coordinates.R
-                        * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
-                );
-                yield return (
-                    stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
-                    -node.ContactedNode.Coordinates.R
-                        / contact.Distance
-                        * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
-                );
-            }
+            yield return (
+                stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
+                node.ContactedNode.Coordinates.R
+                    * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
+            );
+            yield return (
+                stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
+                -node.ContactedNode.Coordinates.R
+                    / contact.Distance
+                    * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
+            );
         }
     }
 
@@ -108,105 +103,87 @@ public static class Jacobian
         ContactNodeBase node
     )
     {
-        return new[]
-        {
-            (stepVector.StepVectorMap[GlobalUnknown.Lambda1], -node.GibbsEnergyGradient.Tangential),
-            (
-                stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
-                node.ContactDistanceGradient.Tangential
-            ),
-            (
-                stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
-                node.ContactDirectionGradient.Tangential
-            )
-        };
+        yield return (
+            stepVector.StepVectorMap[GlobalUnknown.Lambda1],
+            -node.GibbsEnergyGradient.Tangential
+        );
+        yield return (
+            stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
+            node.ContactDistanceGradient.Tangential
+        );
+        yield return (
+            stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
+            node.ContactDirectionGradient.Tangential
+        );
     }
 
     private static IEnumerable<(int colIndex, double value)> DissipationEquality(
         IProcessConditions conditions,
         SolutionState currentState,
         StepVector stepVector
-    )
-    {
-        return Components();
-
-        IEnumerable<(int, double)> Components()
-        {
-            foreach (var node in currentState.Nodes.OfType<NeckNode>())
-            {
-                yield return (
+    ) =>
+        currentState
+            .Nodes.OfType<NeckNode>()
+            .Select(node =>
+                (
                     stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
                     -node.GibbsEnergyGradient.Tangential
-                );
-            }
-        }
-    }
+                )
+            );
 
-    private static (
-        IEnumerable<(int colIndex, double value)> distance,
-        IEnumerable<(int colIndex, double value)> direction
-    ) ContactConstraints(
+    private static IEnumerable<(int colIndex, double value)> ContactConstraintDistance(
         IProcessConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
         ContactNodeBase node
     )
     {
-        IEnumerable<(int, double)> DistanceComponents()
+        if (node is NeckNode)
         {
-            if (node is NeckNode)
-            {
-                yield return (
-                    stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
-                    -node.ContactDistanceGradient.Tangential
-                );
-                yield return (
-                    stepVector.StepVectorMap[
-                        node.ContactedNode,
-                        NodeUnknown.TangentialDisplacement
-                    ],
-                    -node.ContactDistanceGradient.Tangential
-                );
-            }
-
             yield return (
-                stepVector.StepVectorMap[contact, ContactUnknown.RadialDisplacement],
-                1.0
+                stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
+                -node.ContactDistanceGradient.Tangential
             );
             yield return (
-                stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
-                node.ContactedNode.Coordinates.R
-                    * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
+                stepVector.StepVectorMap[node.ContactedNode, NodeUnknown.TangentialDisplacement],
+                -node.ContactDistanceGradient.Tangential
             );
         }
 
-        IEnumerable<(int, double)> DirectionComponents()
-        {
-            if (node is NeckNode)
-            {
-                yield return (
-                    stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
-                    -node.ContactDirectionGradient.Tangential
-                );
-                yield return (
-                    stepVector.StepVectorMap[
-                        node.ContactedNode,
-                        NodeUnknown.TangentialDisplacement
-                    ],
-                    -node.ContactDirectionGradient.Tangential
-                );
-            }
+        yield return (stepVector.StepVectorMap[contact, ContactUnknown.RadialDisplacement], 1.0);
+        yield return (
+            stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
+            node.ContactedNode.Coordinates.R
+                * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
+        );
+    }
 
-            yield return (stepVector.StepVectorMap[contact, ContactUnknown.AngleDisplacement], 1.0);
+    private static IEnumerable<(int colIndex, double value)> ContactConstraintDirection(
+        IProcessConditions conditions,
+        StepVector stepVector,
+        IParticleContact contact,
+        ContactNodeBase node
+    )
+    {
+        if (node is NeckNode)
+        {
             yield return (
-                stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
-                -node.ContactedNode.Coordinates.R
-                    / contact.Distance
-                    * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
+                stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
+                -node.ContactDirectionGradient.Tangential
+            );
+            yield return (
+                stepVector.StepVectorMap[node.ContactedNode, NodeUnknown.TangentialDisplacement],
+                -node.ContactDirectionGradient.Tangential
             );
         }
 
-        return (DistanceComponents(), DirectionComponents());
+        yield return (stepVector.StepVectorMap[contact, ContactUnknown.AngleDisplacement], 1.0);
+        yield return (
+            stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
+            -node.ContactedNode.Coordinates.R
+                / contact.Distance
+                * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
+        );
     }
 
     private static IEnumerable<
@@ -229,9 +206,8 @@ public static class Jacobian
                 );
             }
 
-            var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
-            yield return constraints.distance;
-            yield return constraints.direction;
+            yield return ContactConstraintDistance(conditions, stepVector, contact, contactNode);
+            yield return ContactConstraintDirection(conditions, stepVector, contact, contactNode);
         }
     }
 
@@ -287,11 +263,13 @@ public static class Jacobian
         IProcessConditions conditions,
         StepVector stepVector,
         NodeBase node
-    ) =>
-        new[]
-        {
-            (stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume], node.VolumeGradient.Normal),
-        };
+    )
+    {
+        yield return (
+            stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume],
+            node.VolumeGradient.Normal
+        );
+    }
 
     private static IEnumerable<(int colIndex, double value)> FluxDerivative(
         IProcessConditions conditions,
@@ -311,26 +289,22 @@ public static class Jacobian
             / node.SurfaceDiffusionCoefficient.ToUpper
             * stepVector.Lambda1;
 
-        return new[]
-        {
-            (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], fluxToUpper),
-            (stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume], -1),
-            (stepVector.StepVectorMap[node.Upper, NodeUnknown.LambdaVolume], 1),
-        };
+        yield return (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], fluxToUpper);
+        yield return (stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume], -1);
+        yield return (stepVector.StepVectorMap[node.Upper, NodeUnknown.LambdaVolume], 1);
     }
 
     private static IEnumerable<(int colIndex, double value)> RequiredConstraint(
         IProcessConditions conditions,
         StepVector stepVector,
         NodeBase node
-    ) =>
-        new[]
-        {
-            (
-                stepVector.StepVectorMap[node, NodeUnknown.NormalDisplacement],
-                node.VolumeGradient.Normal
-            ),
-            (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], -1),
-            (stepVector.StepVectorMap[node.Lower, NodeUnknown.FluxToUpper], 1),
-        };
+    )
+    {
+        yield return (
+            stepVector.StepVectorMap[node, NodeUnknown.NormalDisplacement],
+            node.VolumeGradient.Normal
+        );
+        yield return (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], -1);
+        yield return (stepVector.StepVectorMap[node.Lower, NodeUnknown.FluxToUpper], 1);
+    }
 }
