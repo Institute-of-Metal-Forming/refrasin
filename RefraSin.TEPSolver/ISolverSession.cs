@@ -52,9 +52,8 @@ public interface ISolverSession : IProcessConditions
     /// </summary>
     public ILogger<Solver> Logger { get; }
 
-    public ITimeStepper TimeStepper { get; }
-
-    public IReadOnlyList<IStepValidator> StepValidators { get; }
-
-    public IRootFinder RootFinder { get; }
+    /// <summary>
+    /// COllection of solver routines to use.
+    /// </summary>
+    public ISolverRoutines Routines { get; }
 }

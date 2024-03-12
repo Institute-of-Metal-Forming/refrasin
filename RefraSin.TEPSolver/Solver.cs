@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Graphs;
+using RefraSin.Numerics.Exceptions;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
@@ -23,26 +24,33 @@ namespace RefraSin.TEPSolver;
 /// </summary>
 public class Solver
 {
+    public Solver(ISolutionStorage solutionStorage, ILoggerFactory loggerFactory, ISolverRoutines routines, ISolverOptions options)
+    {
+        SolutionStorage = solutionStorage;
+        LoggerFactory = loggerFactory;
+        Routines = routines;
+        Options = options;
+    }
+
     /// <summary>
     /// Numeric options to control solver behavior.
     /// </summary>
-    public ISolverOptions Options { get; set; } = new SolverOptions();
+    public ISolverOptions Options { get; }
 
     /// <summary>
     /// Storage for solution data.
     /// </summary>
-    public ISolutionStorage SolutionStorage { get; set; } = new InMemorySolutionStorage();
+    public ISolutionStorage SolutionStorage { get; }
 
     /// <summary>
     /// Factory for loggers used in the Session.
     /// </summary>
-    public ILoggerFactory LoggerFactory { get; set; } = new NullLoggerFactory();
+    public ILoggerFactory LoggerFactory { get; }
 
-    public ITimeStepper TimeStepper { get; set; } = new AdamsMoultonTimeStepper();
-
-    public IEnumerable<IStepValidator> StepValidators { get; set; } = new[] { new InstabilityDetector() };
-
-    public IRootFinder RootFinder { get; } = new BroydenRootFinder();
+    /// <summary>
+    /// Collection of subroutines to use.
+    /// </summary>
+    public ISolverRoutines Routines { get; }
 
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
@@ -53,8 +61,6 @@ public class Solver
         session.StoreCurrentState();
         DoTimeIntegration(session);
     }
-
-  
 
     private static void DoTimeIntegration(SolverSession session)
     {
@@ -78,14 +84,14 @@ public class Solver
             [session.CurrentState.Particles.Root.Id] = session.CurrentState.Particles.Root.ApplyTimeStep(null, stepVector, session.TimeStepWidth)
         };
 
-        foreach (var contact in session.CurrentState.Contacts.Values)
+        foreach (var contact in session.CurrentState.Contacts)
         {
             newParticles[contact.To.Id] = contact.To.ApplyTimeStep(newParticles[contact.From.Id], stepVector, session.TimeStepWidth);
         }
 
         var newState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
             newParticles.Values,
-            session.CurrentState.Contacts.Keys
+            session.CurrentState.Contacts.Select(c => (c.From.Id, c.To.Id))
         );
 
         StoreSolutionStep(session, stepVector, newState);
@@ -116,18 +122,18 @@ public class Solver
                         {
                             return new NodeTimeStep(
                                 n.Id,
-                                stepVector[n].NormalDisplacement,
-                                stepVector[contactNode].TangentialDisplacement,
-                                new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                                stepVector.NormalDisplacement(n),
+                                stepVector.TangentialDisplacement(contactNode),
+                                new ToUpperToLower<double>(stepVector.FluxToUpper(n), stepVector.FluxToUpper(n.Lower)),
                                 0
                             );
                         }
 
                         return new NodeTimeStep(
                             n.Id,
-                            stepVector[n].NormalDisplacement,
+                            stepVector.NormalDisplacement(n),
                             0,
-                            new ToUpperToLower<double>(stepVector[n].FluxToUpper, stepVector[n.Lower].FluxToUpper),
+                            new ToUpperToLower<double>(stepVector.FluxToUpper(n), stepVector.FluxToUpper(n)),
                             0
                         );
                     })
@@ -148,7 +154,7 @@ public class Solver
             {
                 var step = TrySolveStepWithLastStepOrGuess(session);
 
-                foreach (var validator in session.StepValidators)
+                foreach (var validator in session.Routines.StepValidators)
                 {
                     validator.Validate(session.CurrentState, step, session.Options);
                 }
@@ -174,11 +180,12 @@ public class Solver
     {
         try
         {
-            return session.TimeStepper.Step(session, session.LastStep ?? LagrangianGradient.GuessSolution(session.CurrentState));
+            return session.Routines.TimeStepper.Step(session,
+                session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, session.CurrentState));
         }
         catch (NonConvergenceException)
         {
-            return session.TimeStepper.Step(session, LagrangianGradient.GuessSolution(session.CurrentState));
+            return session.Routines.TimeStepper.Step(session, session.Routines.StepEstimator.EstimateStep(session, session.CurrentState));
         }
     }
 }

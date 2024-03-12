@@ -42,9 +42,7 @@ internal class SolverSession : ISolverSession
         Logger = solver.LoggerFactory.CreateLogger<Solver>();
 
         StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
-        TimeStepper = solver.TimeStepper;
-        StepValidators = solver.StepValidators.ToArray();
-        RootFinder = solver.RootFinder;
+        Routines = solver.Routines;
 
         var particles = process.Particles.Select(ps => new Particle(ps, this)).ToArray();
         CurrentState = new SolutionState(
@@ -98,15 +96,10 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public ILogger<Solver> Logger { get; }
 
+    /// <inheritdoc />
+    public ISolverRoutines Routines { get; }
+
     public StepVector? LastStep { get; set; }
-
-    public ITimeStepper TimeStepper { get; }
-
-    /// <inheritdoc />
-    public IReadOnlyList<IStepValidator> StepValidators { get; }
-
-    /// <inheritdoc />
-    public IRootFinder RootFinder { get; }
 
     public FixedStack<SolutionState> StateMemory { get; }
 

@@ -28,29 +28,11 @@ public class ReadOnlyNodeCollection<TNode> : IReadOnlyNodeCollection<TNode> wher
     /// <inheritdoc />
     public int Count => _nodes.Length;
 
-    private int ReduceIndex(int index) => index >= 0 ? index % Count : Count + (index % Count);
-
-    private TNode[] GetSlice(int start, int end)
-    {
-        var startIndex = ReduceIndex(start);
-        var endIndex = ReduceIndex(end) + 1;
-
-        return endIndex >= startIndex
-            ? _nodes[startIndex..endIndex]
-            : _nodes[startIndex..].Concat(_nodes[..endIndex]).ToArray();
-    }
-
     /// <inheritdoc />
-    public TNode this[int nodeIndex] => _nodes[ReduceIndex(nodeIndex)];
+    public TNode this[int nodeIndex] => _nodes[nodeIndex];
 
     /// <inheritdoc />
     public TNode this[Guid nodeId] => _nodes[_nodeIndices[nodeId]];
-
-    /// <inheritdoc />
-    public IReadOnlyList<TNode> this[int start, int end] => GetSlice(start, end);
-
-    /// <inheritdoc />
-    public IReadOnlyList<TNode> this[Guid start, Guid end] => GetSlice(_nodeIndices[start], _nodeIndices[end]);
 
     /// <inheritdoc />
     public int IndexOf(Guid nodeId) => _nodeIndices[nodeId];

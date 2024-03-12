@@ -1,6 +1,6 @@
 namespace RefraSin.TEPSolver.StepVectors;
 
-internal enum GlobalUnknown
+public enum GlobalUnknown
 {
     Lambda1
 }

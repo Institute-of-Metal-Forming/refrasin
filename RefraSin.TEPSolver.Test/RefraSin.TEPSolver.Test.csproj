@@ -30,6 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+      <Compile Remove="StepVectorMapTest.cs" />
+      <None Include="StepVectorMapTest.cs" />
     </ItemGroup>
 </Project>

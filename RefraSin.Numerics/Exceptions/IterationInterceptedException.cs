@@ -1,4 +1,4 @@
-namespace RefraSin.TEPSolver.Exceptions;
+namespace RefraSin.Numerics.Exceptions;
 
 /// <summary>
 /// Exception raised when an iteration procedure was intercepted.

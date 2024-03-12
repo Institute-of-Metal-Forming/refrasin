@@ -1,3 +1,5 @@
+using RefraSin.Numerics.Exceptions;
+
 namespace RefraSin.TEPSolver.Exceptions;
 
 public class StepRejectedException : NumericException

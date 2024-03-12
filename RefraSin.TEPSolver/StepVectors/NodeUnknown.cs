@@ -1,8 +1,11 @@
 namespace RefraSin.TEPSolver.StepVectors;
 
-internal enum NodeUnknown
+public enum NodeUnknown
 {
     NormalDisplacement,
+    TangentialDisplacement,
     FluxToUpper,
     LambdaVolume,
+    LambdaContactDistance,
+    LambdaContactDirection
 }

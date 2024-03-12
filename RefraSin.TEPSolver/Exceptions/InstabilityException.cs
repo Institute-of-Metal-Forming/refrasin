@@ -1,3 +1,5 @@
+using RefraSin.Numerics.Exceptions;
+
 namespace RefraSin.TEPSolver.Exceptions;
 
 /// <summary>

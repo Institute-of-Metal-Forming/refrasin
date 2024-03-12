@@ -18,7 +18,7 @@ public interface IReadOnlyParticleCollection<out TParticle> : IReadOnlyList<TPar
     /// Returns the index of the specified particle.
     /// </summary>
     /// <param name="particleId">ID of the particle to return the index for</param>
-    /// <returns>the index in range 0 to <see cref="IReadOnlyNodeCollection{T}.Count"/>-1</returns>
+    /// <returns>the index in range 0 to <see cref="IReadOnlyParticleSurface{TNode}.Count"/>-1</returns>
     public int IndexOf(Guid particleId);
 
     /// <summary>

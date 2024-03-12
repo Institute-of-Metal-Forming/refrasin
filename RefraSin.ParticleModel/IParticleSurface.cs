@@ -1,6 +1,6 @@
 namespace RefraSin.ParticleModel;
 
-public interface INodeCollection<TNode> : IReadOnlyNodeCollection<TNode> where TNode : INode
+public interface IParticleSurface<TNode> : IReadOnlyParticleSurface<TNode> where TNode : INode
 {
     /// <summary>
     /// Insert a node above a specified position.

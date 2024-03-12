@@ -15,10 +15,15 @@ public interface ISolutionState
     /// <summary>
     /// List of all particles.
     /// </summary>
-    IReadOnlyList<IParticle> ParticleStates { get; }
-    
+    IReadOnlyParticleCollection<IParticle> Particles { get; }
+
+    /// <summary>
+    /// List of all nodes.
+    /// </summary>
+    IReadOnlyNodeCollection<INode> Nodes { get; }
+
     /// <summary>
     /// List of all contacts.
     /// </summary>
-    IReadOnlyList<IParticleContact> ParticleContacts { get; }
+    IReadOnlyParticleContactCollection<IParticleContact> Contacts { get; }
 }

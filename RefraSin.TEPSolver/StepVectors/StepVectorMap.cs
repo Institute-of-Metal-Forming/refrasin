@@ -1,74 +1,90 @@
-using MoreLinq;
 using RefraSin.ParticleModel;
-using RefraSin.TEPSolver.ParticleModel;
-using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(IEnumerable<IParticleContact> contacts, IEnumerable<INode> nodes)
+    public StepVectorMap(SolutionState currentState)
     {
-        GlobalUnknownsCount = Enum.GetNames(typeof(GlobalUnknown)).Length;
+        _index = 0;
 
-        ContactUnknownsCount = Enum.GetNames(typeof(ContactUnknown)).Length;
-        var contactsArray = contacts as ParticleContact[] ?? contacts.ToArray();
-        ContactCount = contactsArray.Length;
-        ContactStartIndex = GlobalUnknownsCount;
-        ContactIndices = contactsArray.Index().ToDictionary(
-            kvp => (kvp.Value.From.Id, kvp.Value.To.Id),
-            kvp => kvp.Key
-        );
+        foreach (var particle in currentState.Particles)
+        {
+            var startIndex = _index;
 
-        NodeUnknownsCount = Enum.GetNames(typeof(NodeUnknown)).Length;
-        var nodesArray = nodes as NodeBase[] ?? nodes.ToArray();
-        NodeCount = nodesArray.Length;
-        NodeStartIndex = ContactStartIndex + ContactCount * ContactUnknownsCount;
-        NodeIndices = nodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+            foreach (var node in particle.Nodes)
+            {
+                AddNodeUnknown(node, NodeUnknown.LambdaVolume);
+                AddNodeUnknown(node, NodeUnknown.FluxToUpper);
+                AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
+            }
 
-        ContactNodeUnknownsCount = Enum.GetNames(typeof(ContactNodeUnknown)).Length;
-        var contactNodesArray = nodesArray.OfType<ContactNodeBase>().ToArray();
-        ContactNodeCount = contactNodesArray.Length;
-        ContactNodeStartIndex = NodeStartIndex + NodeCount * NodeUnknownsCount;
-        ContactNodeIndices = contactNodesArray.Index().ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+            _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
+        }
 
-        TotalUnknownsCount = ContactNodeStartIndex + ContactNodeCount * ContactNodeUnknownsCount;
+        BorderStart = _index;
+
+        foreach (var contact in currentState.Contacts)
+        {
+            AddContactUnknown(contact, ContactUnknown.RadialDisplacement);
+            AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
+            AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
+
+            foreach (var contactNode in contact.FromNodes)
+            {
+                if (contactNode is ParticleModel.NeckNode)
+                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
+                AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
+                AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
+            }
+
+            foreach (var contactNode in contact.ToNodes)
+            {
+                if (contactNode is ParticleModel.NeckNode)
+                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
+                LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
+                LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
+            }
+        }
+
+        BorderLength = _index - BorderStart + 1;
     }
 
-    public int ContactCount { get; }
+    private void AddNodeUnknown(INode node, NodeUnknown unknown)
+    {
+        _nodeUnknownIndices[(node.Id, unknown)] = _index;
+        _index++;
+    }
 
-    public int ContactStartIndex { get; }
+    private void AddContactUnknown(IParticleContact contact, ContactUnknown unknown)
+    {
+        _contactUnknownIndices[(contact.From.Id, contact.To.Id, unknown)] = _index;
+        _index++;
+    }
 
-    public IReadOnlyDictionary<(Guid from, Guid to), int> ContactIndices { get; }
+    private void LinkCommonNodeUnknown(IContactNode childsNode, NodeUnknown unknown)
+    {
+        _nodeUnknownIndices[(childsNode.Id, unknown)] = _nodeUnknownIndices[(childsNode.ContactedNodeId, unknown)];
+    }
 
-    public int NodeCount { get; }
+    private int _index;
+    private readonly Dictionary<(Guid, NodeUnknown), int> _nodeUnknownIndices = new();
+    private readonly Dictionary<(Guid, Guid, ContactUnknown), int> _contactUnknownIndices = new();
+    private readonly Dictionary<Guid, (int start, int length)> _particleBlocks = new();
 
-    public int NodeStartIndex { get; }
+    public int this[GlobalUnknown unknown] => _index + (int)unknown;
 
-    public IReadOnlyDictionary<Guid, int> NodeIndices { get; }
+    public int this[INode node, NodeUnknown unknown] => _nodeUnknownIndices[(node.Id, unknown)];
 
-    public int ContactNodeCount { get; }
+    public int this[Guid nodeId, NodeUnknown unknown] => _nodeUnknownIndices[(nodeId, unknown)];
 
-    public int ContactNodeStartIndex { get; }
+    public int this[IParticleContact contact, ContactUnknown unknown] => _contactUnknownIndices[(contact.From.Id, contact.To.Id, unknown)];
 
-    public Dictionary<Guid, int> ContactNodeIndices { get; }
+    public int this[Guid fromId, Guid toId, ContactUnknown unknown] => _contactUnknownIndices[(fromId, toId, unknown)];
 
-    public int TotalUnknownsCount { get; }
+    public (int start, int length) this[IParticle particle] => _particleBlocks[particle.Id];
 
-    public int GlobalUnknownsCount { get; }
+    public int BorderStart { get; }
 
-    public int ContactUnknownsCount { get; }
-
-    public int NodeUnknownsCount { get; }
-
-    public int ContactNodeUnknownsCount { get; }
-
-    internal int GetIndex(GlobalUnknown unknown) => (int)unknown;
-
-    internal int GetIndex(Guid fromParticleId, Guid toParticleId, ContactUnknown unknown) =>
-        ContactStartIndex + ContactUnknownsCount * ContactIndices[(fromParticleId, toParticleId)] + (int)unknown;
-
-    internal int GetIndex(Guid nodeId, NodeUnknown unknown) => NodeStartIndex + NodeUnknownsCount * NodeIndices[nodeId] + (int)unknown;
-    
-    internal int GetIndex(Guid nodeId, ContactNodeUnknown unknown) => ContactNodeStartIndex + ContactNodeUnknownsCount * ContactNodeIndices[nodeId] + (int)unknown;
+    public int BorderLength { get; }
 }

@@ -10,13 +10,10 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
-using Serilog;
 using static System.Math;
-using static NUnit.Framework.Assert;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver.Test;
 
@@ -28,7 +25,7 @@ public class TwoParticleTest
     {
         var endTime = 1e1;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6;
-        var nodeCountPerParticle = 20;
+        var nodeCountPerParticle = 100;
 
         var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
                 { NodeCount = nodeCountPerParticle }
@@ -39,7 +36,7 @@ public class TwoParticleTest
             new Node(Guid.NewGuid(), baseParticle1.Id, new PolarPoint(new AbsolutePoint(120e-6, 0)), NodeType.GrainBoundaryNode),
             new Node(Guid.NewGuid(), baseParticle1.Id, new PolarPoint(new AbsolutePoint(120e-6, initialNeck)), NodeType.NeckNode),
         }).ToArray();
-        _particle1 = new RefraSin.ParticleModel.Particle(baseParticle1.Id, new(0, 0), 0, baseParticle1.MaterialId, nodes1);
+        _particle1 = new Particle(baseParticle1.Id, new(0, 0), 0, baseParticle1.MaterialId, nodes1);
 
         var baseParticle2 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, _particle1.MaterialId)
                 { NodeCount = nodeCountPerParticle }
@@ -50,7 +47,7 @@ public class TwoParticleTest
             new Node(Guid.NewGuid(), baseParticle2.Id, new PolarPoint(new AbsolutePoint(120e-6, 0)), NodeType.GrainBoundaryNode),
             new Node(Guid.NewGuid(), baseParticle2.Id, new PolarPoint(new AbsolutePoint(120e-6, initialNeck)), NodeType.NeckNode),
         }).ToArray();
-        _particle2 = new RefraSin.ParticleModel.Particle(baseParticle2.Id, new(240e-6, 0), PI, baseParticle2.MaterialId, nodes2);
+        _particle2 = new Particle(baseParticle2.Id, new(240e-6, 0), PI, baseParticle2.MaterialId, nodes2);
 
         _solutionStorage = new InMemorySolutionStorage();
 
@@ -61,17 +58,18 @@ public class TwoParticleTest
         var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
 
         _solver = new Solver
-        {
-            LoggerFactory = loggerFactory,
-            Options = new SolverOptions
+        (
+            _solutionStorage,
+            loggerFactory,
+            SolverRoutines.Default,
+            new SolverOptions
             {
                 InitialTimeStepWidth = 1,
                 MinTimeStepWidth = 0.1,
                 TimeStepAdaptationFactor = 1.5,
-            },
-            SolutionStorage = _solutionStorage,
-            StepValidators = new IStepValidator[] { },
-        };
+                RootFindingAccuracy = 1e-6,
+            }
+        );
 
         _material = new Material(
             _particle1.MaterialId,
@@ -112,11 +110,53 @@ public class TwoParticleTest
     private string _tempDir;
 
     [Test]
-    public void PlotJacobianStructure()
+    public void PlotJacobianStructureAnalytical()
     {
         var session = new SolverSession(_solver, _process);
         var initialState = session.CurrentState;
-        var guess = LagrangianGradient.GuessSolution(initialState);
+        var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
+
+        var particleBlocks = initialState.Particles.Select(p => Jacobian.ParticleBlock(session, p, guess)).ToArray();
+        var functionalBlock = Jacobian.BorderBlock(session, initialState, guess);
+        var size = particleBlocks.Length + 1;
+
+        var array = new Matrix<double>[size, size];
+
+        for (int i = 0; i < particleBlocks.Length; i++)
+        {
+            for (int j = 0; j < particleBlocks.Length; j++)
+            {
+                array[i, j] = Matrix<double>.Build.Sparse(particleBlocks[i].RowCount, particleBlocks[j].ColumnCount);
+            }
+            array[i, particleBlocks.Length] = Matrix<double>.Build.Sparse(particleBlocks[i].RowCount, functionalBlock.ColumnCount);
+
+            array[i, i] = particleBlocks[i].PointwiseSign();
+        }
+
+        for (int j = 0; j < particleBlocks.Length; j++)
+        {
+            array[particleBlocks.Length, j] = Matrix<double>.Build.Sparse(functionalBlock.RowCount, particleBlocks[j].ColumnCount);
+        }
+
+        array[particleBlocks.Length, particleBlocks.Length] = functionalBlock.PointwiseSign();
+
+        var matrix = Matrix<double>.Build.SparseOfMatrixArray(array);
+
+        var plt = new Plot();
+
+        plt.Add.Heatmap(matrix.ToArray());
+        plt.Layout.Frameless();
+        plt.Axes.Margins(0, 0);
+
+        plt.SavePng(Path.Combine(_tempDir, "jacobian.png"), matrix.ColumnCount, matrix.RowCount);
+    }
+
+    [Test]
+    public void PlotJacobianStructureNumerical()
+    {
+        var session = new SolverSession(_solver, _process);
+        var initialState = session.CurrentState;
+        var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
         var matrix = Matrix<double>.Build.DenseOfColumns(YieldJacobianColumns(session, initialState, guess)).PointwiseSign();
 
@@ -131,13 +171,13 @@ public class TwoParticleTest
 
     private IEnumerable<Vector<double>> YieldJacobianColumns(SolverSession session, SolutionState state, StepVector guess)
     {
-        var zero = LagrangianGradient.EvaluateAt(session, state, guess);
+        var zero = Lagrangian.EvaluateAt(session, state, guess);
 
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
-            step[i] += 1;
-            var current = LagrangianGradient.EvaluateAt(session, state, step);
+            step[i] += 1e-3;
+            var current = Lagrangian.EvaluateAt(session, state, step);
 
             yield return current - zero;
         }
@@ -168,7 +208,7 @@ public class TwoParticleTest
         {
             var plt = new Plot();
 
-            foreach (var particle in state.ParticleStates)
+            foreach (var particle in state.Particles)
             {
                 var coordinates = particle.Nodes
                     .Append(particle.Nodes[0])
@@ -226,16 +266,16 @@ public class TwoParticleTest
         var plt = new Plot();
 
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.X)
+            new ScottPlot.Coordinates(s.Time, s.Particles[0].CenterCoordinates.Absolute.X)
         ).ToArray());
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[0].CenterCoordinates.Absolute.Y)
+            new ScottPlot.Coordinates(s.Time, s.Particles[0].CenterCoordinates.Absolute.Y)
         ).ToArray());
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[1].CenterCoordinates.Absolute.X)
+            new ScottPlot.Coordinates(s.Time, s.Particles[1].CenterCoordinates.Absolute.X)
         ).ToArray());
         plt.Add.Scatter(_solutionStorage.States.Select(s =>
-            new ScottPlot.Coordinates(s.Time, s.ParticleStates[1].CenterCoordinates.Absolute.Y)
+            new ScottPlot.Coordinates(s.Time, s.Particles[1].CenterCoordinates.Absolute.Y)
         ).ToArray());
 
         plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
