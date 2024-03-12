@@ -166,7 +166,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
 
     /// <inheritdoc />
     public Angle AngleDistanceFromContactDirection =>
-        _angleDistanceFromContactDirection ??= (Coordinates.R - ContactDirection).Reduce(
+        _angleDistanceFromContactDirection ??= (Coordinates.Phi - ContactDirection).Reduce(
             Angle.ReductionDomain.WithNegative
         );
 
