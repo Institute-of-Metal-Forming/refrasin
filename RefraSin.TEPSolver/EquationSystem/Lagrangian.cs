@@ -191,15 +191,10 @@ public static class Lagrangian
     {
         var dissipationTerm =
             2
-          * conditions.GasConstant
-          * conditions.Temperature
-          / (
-                node.Particle.Material.MolarVolume
-              * node.Particle.Material.EquilibriumVacancyConcentration
-            )
+          * node.Particle.DiffusionMaterialFactor
           * node.SurfaceDistance.ToUpper
-          * stepVector.FluxToUpper(node)
           / node.SurfaceDiffusionCoefficient.ToUpper
+          * stepVector.FluxToUpper(node)
           * stepVector.LambdaDissipation(node.Particle);
         var thisRequiredConstraintsTerm = stepVector.LambdaVolume(node);
         var upperRequiredConstraintsTerm = stepVector.LambdaVolume(node.Upper);
@@ -241,17 +236,12 @@ public static class Lagrangian
             .Sum();
 
         var dissipationFunction =
-            conditions.GasConstant
-          * conditions.Temperature
-          * particle
+            particle
                 .Nodes.Select(n =>
-                    n.SurfaceDistance.ToUpper
+                    n.Particle.DiffusionMaterialFactor
+                  * n.SurfaceDistance.ToUpper
                   * Pow(stepVector.FluxToUpper(n), 2)
                   / n.SurfaceDiffusionCoefficient.ToUpper
-                  / (
-                        n.Particle.Material.MolarVolume
-                      * n.Particle.Material.EquilibriumVacancyConcentration
-                    )
                 )
                 .Sum();
 

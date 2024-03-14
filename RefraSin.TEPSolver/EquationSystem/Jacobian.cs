@@ -126,13 +126,11 @@ public static class Jacobian
             );
             yield return (
                 stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper],
-                -2 * node.SurfaceDistance.ToUpper
-                   * stepVector.FluxToUpper(node)
+                -2
+              * node.Particle.DiffusionMaterialFactor
+              * node.SurfaceDistance.ToUpper
               / node.SurfaceDiffusionCoefficient.ToUpper
-              / (
-                    node.Particle.Material.MolarVolume
-                  * node.Particle.Material.EquilibriumVacancyConcentration
-                )
+              * stepVector.FluxToUpper(node)
             );
 
             if (node is NeckNode neckNode)
@@ -260,19 +258,14 @@ public static class Jacobian
         NodeBase node
     )
     {
-        var commonTerm =
+        var bilinearPreFactor =
             -2
-          * conditions.GasConstant
-          * conditions.Temperature
-          / (
-                node.Particle.Material.MolarVolume
-              * node.Particle.Material.EquilibriumVacancyConcentration
-            )
+          * node.Particle.DiffusionMaterialFactor
           * node.SurfaceDistance.ToUpper
           / node.SurfaceDiffusionCoefficient.ToUpper;
 
-        yield return (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], commonTerm * stepVector.LambdaDissipation(node.Particle));
-        yield return (stepVector.StepVectorMap[node.Particle, ParticleUnknown.LambdaDissipation], commonTerm * stepVector.FluxToUpper(node));
+        yield return (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], bilinearPreFactor * stepVector.LambdaDissipation(node.Particle));
+        yield return (stepVector.StepVectorMap[node.Particle, ParticleUnknown.LambdaDissipation], bilinearPreFactor * stepVector.FluxToUpper(node));
         yield return (stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume], -1);
         yield return (stepVector.StepVectorMap[node.Upper, NodeUnknown.LambdaVolume], 1);
     }

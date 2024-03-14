@@ -116,6 +116,11 @@ public class Particle : IParticle
 
     public double MeanRadius => _meanRadius ??= Sqrt(Nodes.Sum(n => n.Volume.ToUpper)) / PI;
 
+    public double DiffusionMaterialFactor => _diffusionMaterialFactor ??=
+        SolverSession.Temperature * SolverSession.GasConstant / (Material.MolarVolume * Material.EquilibriumVacancyConcentration);
+
+    private double? _diffusionMaterialFactor;
+
     public Particle ApplyTimeStep(Particle? parent, StepVector stepVector, double timeStepWidth)
     {
         Particle particle;
