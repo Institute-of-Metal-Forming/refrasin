@@ -17,7 +17,12 @@ public class StepVectorMap
                 AddNodeUnknown(node, NodeUnknown.LambdaVolume);
                 AddNodeUnknown(node, NodeUnknown.FluxToUpper);
                 AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
+                
+                if (node is ParticleModel.NeckNode)
+                    AddNodeUnknown(node, NodeUnknown.TangentialDisplacement);
             }
+
+            AddParticleUnknown(particle, ParticleUnknown.LambdaDissipation);
 
             _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
         }
@@ -32,27 +37,29 @@ public class StepVectorMap
 
             foreach (var contactNode in contact.FromNodes)
             {
-                if (contactNode is ParticleModel.NeckNode)
-                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
                 AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
                 AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
             }
 
             foreach (var contactNode in contact.ToNodes)
             {
-                if (contactNode is ParticleModel.NeckNode)
-                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
                 LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
                 LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
             }
         }
 
-        BorderLength = _index - BorderStart + 1;
+        BorderLength = _index - BorderStart;
     }
 
     private void AddNodeUnknown(INode node, NodeUnknown unknown)
     {
         _nodeUnknownIndices[(node.Id, unknown)] = _index;
+        _index++;
+    }
+
+    private void AddParticleUnknown(IParticle particle, ParticleUnknown unknown)
+    {
+        _particleUnknownIndices[(particle.Id, unknown)] = _index;
         _index++;
     }
 
@@ -69,10 +76,13 @@ public class StepVectorMap
 
     private int _index;
     private readonly Dictionary<(Guid, NodeUnknown), int> _nodeUnknownIndices = new();
+    private readonly Dictionary<(Guid, ParticleUnknown), int> _particleUnknownIndices = new();
     private readonly Dictionary<(Guid, Guid, ContactUnknown), int> _contactUnknownIndices = new();
     private readonly Dictionary<Guid, (int start, int length)> _particleBlocks = new();
 
-    public int this[GlobalUnknown unknown] => _index + (int)unknown;
+    public int this[IParticle particle, ParticleUnknown unknown] => _particleUnknownIndices[(particle.Id, unknown)];
+
+    public int this[Guid particleId, ParticleUnknown unknown] => _particleUnknownIndices[(particleId, unknown)];
 
     public int this[INode node, NodeUnknown unknown] => _nodeUnknownIndices[(node.Id, unknown)];
 

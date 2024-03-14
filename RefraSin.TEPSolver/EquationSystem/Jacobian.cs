@@ -36,11 +36,7 @@ public static class Jacobian
         ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
-    ) =>
-        Join(
-            YieldContactsEquations(conditions, currentState.Contacts, stepVector),
-            YieldGlobalEquations(conditions, currentState, stepVector)
-        );
+    ) => YieldContactsEquations(conditions, currentState.Contacts, stepVector);
 
     public static JacobianRows YieldContactsEquations(
         ISinteringConditions conditions,
@@ -80,24 +76,24 @@ public static class Jacobian
             yield return (
                 stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
                 node.ContactedNode.Coordinates.R
-                    * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
+              * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
             );
             yield return (
                 stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
                 -node.ContactedNode.Coordinates.R
-                    / contact.Distance
-                    * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
+              / contact.Distance
+              * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
             );
         }
     }
 
-    public static JacobianRows YieldGlobalEquations(
+    public static JacobianRows YieldParticleEquations(
         ISinteringConditions conditions,
-        SolutionState currentState,
+        Particle particle,
         StepVector stepVector
     )
     {
-        yield return DissipationEquality(conditions, currentState, stepVector);
+        yield return DissipationEquality(conditions, particle, stepVector);
     }
 
     private static JacobianRow StateVelocityDerivativeTangential(
@@ -107,7 +103,7 @@ public static class Jacobian
     )
     {
         yield return (
-            stepVector.StepVectorMap[GlobalUnknown.Lambda1],
+            stepVector.StepVectorMap[node.Particle, ParticleUnknown.LambdaDissipation],
             -node.GibbsEnergyGradient.Tangential
         );
         yield return (
@@ -122,17 +118,34 @@ public static class Jacobian
 
     private static JacobianRow DissipationEquality(
         ISinteringConditions conditions,
-        SolutionState currentState,
+        Particle particle,
         StepVector stepVector
-    ) =>
-        currentState
-            .Nodes.OfType<NeckNode>()
-            .Select(node =>
-                (
-                    stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
-                    -node.GibbsEnergyGradient.Tangential
+    )
+    {
+        foreach (var node in particle.Nodes)
+        {
+            yield return (
+                stepVector.StepVectorMap[node, NodeUnknown.NormalDisplacement],
+                -node.GibbsEnergyGradient.Normal
+            );
+            yield return (
+                stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper],
+                -2 * node.SurfaceDistance.ToUpper
+                   * stepVector.FluxToUpper(node)
+              / node.SurfaceDiffusionCoefficient.ToUpper
+              / (
+                    node.Particle.Material.MolarVolume
+                  * node.Particle.Material.EquilibriumVacancyConcentration
                 )
             );
+
+            if (node is NeckNode neckNode)
+                yield return (
+                    stepVector.StepVectorMap[neckNode, NodeUnknown.TangentialDisplacement],
+                    -neckNode.GibbsEnergyGradient.Tangential
+                );
+        }
+    }
 
     private static JacobianRow ContactConstraintDistance(
         ISinteringConditions conditions,
@@ -157,7 +170,7 @@ public static class Jacobian
         yield return (
             stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
             node.ContactedNode.Coordinates.R
-                * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
+          * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
         );
     }
 
@@ -184,8 +197,8 @@ public static class Jacobian
         yield return (
             stepVector.StepVectorMap[contact, ContactUnknown.RotationDisplacement],
             -node.ContactedNode.Coordinates.R
-                / contact.Distance
-                * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
+          / contact.Distance
+          * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
         );
     }
 
@@ -240,7 +253,10 @@ public static class Jacobian
         ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
-    ) => YieldNodeEquations(conditions, particle.Nodes, stepVector);
+    ) => Join(
+        YieldNodeEquations(conditions, particle.Nodes, stepVector),
+        YieldParticleEquations(conditions, particle, stepVector)
+    );
 
     private static JacobianRows YieldNodeEquations(
         ISinteringConditions conditions,
@@ -266,6 +282,10 @@ public static class Jacobian
             stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume],
             node.VolumeGradient.Normal
         );
+        yield return (
+            stepVector.StepVectorMap[node.Particle, ParticleUnknown.LambdaDissipation],
+            -node.GibbsEnergyGradient.Normal
+        );
     }
 
     private static JacobianRow FluxDerivative(
@@ -274,19 +294,19 @@ public static class Jacobian
         NodeBase node
     )
     {
-        var fluxToUpper =
+        var commonTerm =
             -2
-            * conditions.GasConstant
-            * conditions.Temperature
-            / (
+          * conditions.GasConstant
+          * conditions.Temperature
+          / (
                 node.Particle.Material.MolarVolume
-                * node.Particle.Material.EquilibriumVacancyConcentration
+              * node.Particle.Material.EquilibriumVacancyConcentration
             )
-            * node.SurfaceDistance.ToUpper
-            / node.SurfaceDiffusionCoefficient.ToUpper
-            * stepVector.Lambda1;
+          * node.SurfaceDistance.ToUpper
+          / node.SurfaceDiffusionCoefficient.ToUpper;
 
-        yield return (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], fluxToUpper);
+        yield return (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], commonTerm * stepVector.LambdaDissipation(node.Particle));
+        yield return (stepVector.StepVectorMap[node.Particle, ParticleUnknown.LambdaDissipation], commonTerm * stepVector.FluxToUpper(node));
         yield return (stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume], -1);
         yield return (stepVector.StepVectorMap[node.Upper, NodeUnknown.LambdaVolume], 1);
     }
