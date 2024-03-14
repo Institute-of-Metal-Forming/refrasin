@@ -19,10 +19,10 @@ class StepEstimator : IStepEstimator
         YieldFunctionalBlockGuesses(conditions, currentState)
     );
 
-    private static IEnumerable<double> YieldFunctionalBlockGuesses(IProcessConditions conditions, SolutionState currentState) =>
+    private static IEnumerable<double> YieldFunctionalBlockGuesses(ISinteringConditions conditions, SolutionState currentState) =>
         YieldContactUnknownsInitialGuess(currentState);
 
-    private static IEnumerable<double> YieldParticleBlockGuesses(IProcessConditions conditions, Particle particle) => Join(
+    private static IEnumerable<double> YieldParticleBlockGuesses(ISinteringConditions conditions, Particle particle) => Join(
         YieldNodeUnknownsInitialGuess(conditions, particle.Nodes),
         YieldParticleUnknownsGuesses()
     );
