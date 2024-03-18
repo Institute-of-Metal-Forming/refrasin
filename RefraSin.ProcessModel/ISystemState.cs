@@ -16,7 +16,17 @@ public interface ISystemState
     /// <summary>
     /// List of particle specifications.
     /// </summary>
-    public IReadOnlyList<IParticle> Particles { get; }
+    public IReadOnlyParticleCollection<IParticle> Particles { get; }
+    
+    /// <summary>
+    /// Collection of all nodes appearing in the particles.
+    /// </summary>
+    public IReadOnlyNodeCollection<INode> Nodes { get; }
+
+    /// <summary>
+    /// List of all contacts.
+    /// </summary>
+    IReadOnlyParticleContactCollection<IParticleContact> Contacts { get; }
 
     /// <summary>
     /// List of materials appearing in the process.

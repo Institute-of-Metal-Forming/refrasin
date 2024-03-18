@@ -1,3 +1,5 @@
+using RefraSin.ProcessModel;
+
 namespace RefraSin.Storage;
 
 /// <summary>
@@ -9,13 +11,13 @@ public interface ISolutionStorage
     /// Store a solution state.
     /// </summary>
     /// <param name="state"></param>
-    void StoreState(ISolutionState state);
+    void StoreState(ISystemState state);
 
     /// <summary>
     /// Store a solution step.
     /// </summary>
     /// <param name="step"></param>
-    void StoreStep(ISolutionStep step);
+    void StoreStep(ISystemChange step);
 
     /*
      * It is explicitly not planned to add some getter of states or steps here, since storage shall be considered as a black hole, fire and forget.

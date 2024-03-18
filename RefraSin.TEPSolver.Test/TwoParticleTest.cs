@@ -239,7 +239,9 @@ public class TwoParticleTest
         {
             var plt = new Plot();
 
-            foreach (var particle in step.ParticleTimeSteps)
+            var sinteringStep = (ISinteringStateChange)step;
+
+            foreach (var particle in sinteringStep.ParticleTimeSteps)
             {
                 var coordinates = particle.NodeTimeSteps.Values
                     .Select((n, j) => new ScottPlot.Coordinates(j, n.NormalDisplacement))
@@ -247,9 +249,9 @@ public class TwoParticleTest
                 plt.Add.Scatter(coordinates);
             }
 
-            plt.Add.Line(0, 0, step.ParticleTimeSteps[0].NodeTimeSteps.Count, 0);
+            plt.Add.Line(0, 0, sinteringStep.ParticleTimeSteps[0].NodeTimeSteps.Count, 0);
 
-            plt.Title($"t = {step.StartTime.ToString(CultureInfo.InvariantCulture)} - {step.EndTime.ToString(CultureInfo.InvariantCulture)}");
+            plt.Title($"t = {step.InputState.Time.ToString(CultureInfo.InvariantCulture)} - {step.OutputState.Time.ToString(CultureInfo.InvariantCulture)}");
 
             plt.SavePng(Path.Combine(dir, $"{i}.png"), 600, 400);
         }
@@ -259,7 +261,7 @@ public class TwoParticleTest
     {
         var plt = new Plot();
 
-        var steps = _solutionStorage.Steps.Select(s => new ScottPlot.Coordinates(s.StartTime, s.TimeStepWidth)).ToArray();
+        var steps = _solutionStorage.Steps.Select(s => new ScottPlot.Coordinates(s.InputState.Time, ((ISinteringStateChange)s).TimeStepWidth)).ToArray();
         plt.Add.Scatter(steps);
 
         var meanStepWidth = steps.Select(s => s.Y).Mean();

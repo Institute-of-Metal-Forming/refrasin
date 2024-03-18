@@ -50,11 +50,15 @@ internal class SolverSession : ISolverSession
         CurrentState = new SolutionState(
             StartTime,
             particles,
+            inputState.Materials,
+            inputState.MaterialInterfaces,
             Array.Empty<(Guid, Guid)>()
         );
         CurrentState = new SolutionState(
             StartTime,
             particles,
+            inputState.Materials,
+            inputState.MaterialInterfaces,
             GetParticleContacts(particles)
         );
     }
@@ -142,7 +146,7 @@ internal class SolverSession : ISolverSession
         StateMemory.Push(CurrentState);
     }
 
-    public void StoreStep(ISolutionStep step)
+    public void StoreStep(ISystemChange step)
     {
         _solutionStorage.StoreStep(step);
     }

@@ -1,3 +1,5 @@
+using RefraSin.ProcessModel;
+
 namespace RefraSin.Storage;
 
 public class InMemorySolutionStorage : ISolutionStorage
@@ -5,25 +7,25 @@ public class InMemorySolutionStorage : ISolutionStorage
     /// <summary>
     /// List of all stored solution states.
     /// </summary>
-    public IReadOnlyList<ISolutionState> States => _states;
+    public IReadOnlyList<ISystemState> States => _states;
 
-    private readonly List<ISolutionState> _states = new();
+    private readonly List<ISystemState> _states = new();
 
     /// <summary>
     /// List of all stored solution steps.
     /// </summary>
-    public IReadOnlyList<ISolutionStep> Steps => _steps;
+    public IReadOnlyList<ISystemChange> Steps => _steps;
 
-    private readonly List<ISolutionStep> _steps = new();
+    private readonly List<ISystemChange> _steps = new();
 
     /// <inheritdoc />
-    public void StoreState(ISolutionState state)
+    public void StoreState(ISystemState state)
     {
         _states.Add(state);
     }
 
     /// <inheritdoc />
-    public void StoreStep(ISolutionStep step)
+    public void StoreStep(ISystemChange step)
     {
         _steps.Add(step);
     }

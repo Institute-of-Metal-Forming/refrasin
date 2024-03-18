@@ -1,13 +1,19 @@
 using HDF5CSharp;
 using HDF5CSharp.DataTypes;
 using RefraSin.Coordinates.Polar;
+using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 
 namespace Refrasin.HDF5Storage;
 
 public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
 {
-    public Hdf5SolutionStorage(string filePath, string statesGroupName = "States", string stepsGroupName = "Steps")
+    public Hdf5SolutionStorage(
+        string filePath,
+        string statesGroupName = "States",
+        string stepsGroupName = "Steps"
+    )
     {
         FilePath = filePath;
         StatesGroupName = statesGroupName;
@@ -32,15 +38,23 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
     private int _stepIndex = 0;
 
     /// <inheritdoc />
-    public void StoreState(ISolutionState state)
+    public void StoreState(ISystemState state)
     {
         var stateId = Hdf5.CreateOrOpenGroup(StatesGroupId, _stateIndex.ToString());
         Hdf5.WriteAttribute(stateId, nameof(state.Time), state.Time);
 
-        Hdf5.WriteCompounds(stateId, "Particles", state.Particles.Select(p => new ParticleCompound(p)).ToArray(),
-            new Dictionary<string, List<string>>());
-        Hdf5.WriteCompounds(stateId, "Contacts", state.Contacts.Select(c => new ContactCompound(c)).ToArray(),
-            new Dictionary<string, List<string>>());
+        Hdf5.WriteCompounds(
+            stateId,
+            "Particles",
+            state.Particles.Select(p => new ParticleCompound(p)).ToArray(),
+            new Dictionary<string, List<string>>()
+        );
+        Hdf5.WriteCompounds(
+            stateId,
+            "Contacts",
+            state.Contacts.Select(c => new ContactCompound(c)).ToArray(),
+            new Dictionary<string, List<string>>()
+        );
 
         var nodesGroupId = Hdf5.CreateOrOpenGroup(stateId, "Nodes");
 
@@ -58,24 +72,41 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
     }
 
     /// <inheritdoc />
-    public void StoreStep(ISolutionStep step)
+    public void StoreStep(ISystemChange step)
     {
         var stepId = Hdf5.CreateOrOpenGroup(StepsGroupId, _stepIndex.ToString());
-        Hdf5.WriteAttribute(stepId, nameof(step.StartTime), step.StartTime);
-        Hdf5.WriteAttribute(stepId, nameof(step.EndTime), step.EndTime);
-        Hdf5.WriteAttribute(stepId, nameof(step.TimeStepWidth), step.TimeStepWidth);
-
-        Hdf5.WriteCompounds(stepId, "Particles", step.ParticleTimeSteps.Select(p => new ParticleTimeStepCompound(p)).ToArray(),
-            new Dictionary<string, List<string>>());
-
-        var nodesGroupId = Hdf5.CreateOrOpenGroup(stepId, "Nodes");
-
-        foreach (var particleTimeStep in step.ParticleTimeSteps)
+        Hdf5.WriteAttribute(stepId, "StartTime", step.InputState.Time);
+        Hdf5.WriteAttribute(stepId, "EndTime", step.OutputState.Time);
+        if (step is ISinteringStateChange sinteringStateChange)
         {
-            Hdf5.WriteCompounds(nodesGroupId, particleTimeStep.ParticleId.ToString(),
-                particleTimeStep.NodeTimeSteps.Values.Select(n => new NodeTimeStepCompound(n)).ToArray(),
+            Hdf5.WriteAttribute(
+                stepId,
+                nameof(sinteringStateChange.TimeStepWidth),
+                sinteringStateChange.TimeStepWidth
+            );
+
+            Hdf5.WriteCompounds(
+                stepId,
+                "Particles",
+                sinteringStateChange
+                    .ParticleTimeSteps.Select(p => new ParticleTimeStepCompound(p))
+                    .ToArray(),
                 new Dictionary<string, List<string>>()
             );
+
+            var nodesGroupId = Hdf5.CreateOrOpenGroup(stepId, "Nodes");
+
+            foreach (var particleTimeStep in sinteringStateChange.ParticleTimeSteps)
+            {
+                Hdf5.WriteCompounds(
+                    nodesGroupId,
+                    particleTimeStep.ParticleId.ToString(),
+                    particleTimeStep
+                        .NodeTimeSteps.Values.Select(n => new NodeTimeStepCompound(n))
+                        .ToArray(),
+                    new Dictionary<string, List<string>>()
+                );
+            }
         }
 
         _stepIndex += 1;
