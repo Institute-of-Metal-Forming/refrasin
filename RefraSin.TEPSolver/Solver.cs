@@ -91,6 +91,8 @@ public class Solver : ISinteringSolver
 
         var newState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
             newParticles.Values,
+            session.CurrentState.Materials,
+            session.CurrentState.MaterialInterfaces,
             session.CurrentState.Contacts.Select(c => (c.From.Id, c.To.Id))
         );
 

@@ -1,3 +1,5 @@
+using RefraSin.ProcessModel;
+
 namespace RefraSin.Storage;
 
 /// <summary>
@@ -16,7 +18,7 @@ public class CompoundSolutionStorage : ISolutionStorage
     public IList<ISolutionStorage> Storages;
 
     /// <inheritdoc />
-    public void StoreState(ISolutionState state)
+    public void StoreState(ISystemState state)
     {
         foreach (var storage in Storages)
         {

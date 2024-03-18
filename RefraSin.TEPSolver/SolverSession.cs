@@ -50,11 +50,15 @@ internal class SolverSession : ISolverSession
         CurrentState = new SolutionState(
             StartTime,
             particles,
+            inputState.Materials,
+            inputState.MaterialInterfaces,
             Array.Empty<(Guid, Guid)>()
         );
         CurrentState = new SolutionState(
             StartTime,
             particles,
+            inputState.Materials,
+            inputState.MaterialInterfaces,
             GetParticleContacts(particles)
         );
     }

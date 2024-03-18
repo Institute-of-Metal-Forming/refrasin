@@ -1,6 +1,7 @@
 using HDF5CSharp;
 using HDF5CSharp.DataTypes;
 using RefraSin.Coordinates.Polar;
+using RefraSin.ProcessModel;
 using RefraSin.Storage;
 
 namespace Refrasin.HDF5Storage;
@@ -32,7 +33,7 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
     private int _stepIndex = 0;
 
     /// <inheritdoc />
-    public void StoreState(ISolutionState state)
+    public void StoreState(ISystemState state)
     {
         var stateId = Hdf5.CreateOrOpenGroup(StatesGroupId, _stateIndex.ToString());
         Hdf5.WriteAttribute(stateId, nameof(state.Time), state.Time);

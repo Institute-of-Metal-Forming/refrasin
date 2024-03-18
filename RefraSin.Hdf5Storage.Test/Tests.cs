@@ -2,8 +2,10 @@ using HDF5CSharp;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using Refrasin.HDF5Storage;
+using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using static NUnit.Framework.Assert;
 using PolarPoint = RefraSin.Coordinates.Polar.PolarPoint;
@@ -44,9 +46,11 @@ public class Tests
             RotationAngle = Math.PI
         }.GetParticle();
 
-        storage.StoreState(new SolutionState(
+        storage.StoreState(new SystemState(
             0.12,
             new[] { particle1, particle2 },
+            Array.Empty<IMaterial>(),
+            Array.Empty<IMaterialInterface>(),
             new[] { new ParticleContact(particle1, particle2, 240, 0, 0) }
         ));
 

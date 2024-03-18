@@ -1,6 +1,7 @@
 using RefraSin.Graphs;
+using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
-using RefraSin.Storage;
+using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.ParticleModel;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
@@ -8,11 +9,13 @@ using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver;
 
-public class SolutionState : ISolutionState
+public class SolutionState : ISystemState
 {
-    public SolutionState(double time, IEnumerable<Particle> particles, IEnumerable<(Guid from, Guid to)>? contacts = null)
+    public SolutionState(double time, IEnumerable<Particle> particles, IReadOnlyList<IMaterial> materials, IReadOnlyList<IMaterialInterface> materialInterfaces, IEnumerable<(Guid from, Guid to)>? contacts = null)
     {
         Time = time;
+        Materials = materials;
+        MaterialInterfaces = materialInterfaces;
         Particles = particles as IReadOnlyParticleCollection<Particle> ?? new ReadOnlyParticleCollection<Particle>(particles);
         Nodes = Particles.SelectMany(p => p.Nodes).ToNodeCollection();
 
@@ -33,16 +36,22 @@ public class SolutionState : ISolutionState
     /// <inheritdoc />
     public double Time { get; }
 
-    /// <inheritdoc cref="ISolutionState.Nodes"/>>
+    /// <inheritdoc cref="ISystemState.Nodes"/>>
     public IReadOnlyNodeCollection<NodeBase> Nodes { get; }
 
-    /// <inheritdoc cref="ISolutionState.Particles"/>>
+    /// <inheritdoc cref="ISystemState.Particles"/>>
     public IReadOnlyParticleCollection<Particle> Particles { get; }
 
-    /// <inheritdoc cref="ISolutionState.Contacts" />
+    /// <inheritdoc cref="ISystemState.Contacts" />
     public IReadOnlyParticleContactCollection<ParticleContact> Contacts { get; }
 
-    IReadOnlyNodeCollection<INode> ISolutionState.Nodes => Nodes;
-    IReadOnlyParticleCollection<IParticle> ISolutionState.Particles => Particles;
-    IReadOnlyParticleContactCollection<IParticleContact> ISolutionState.Contacts => Contacts;
+    /// <inheritdoc />
+    public IReadOnlyList<IMaterial> Materials { get; }
+
+    /// <inheritdoc />
+    public IReadOnlyList<IMaterialInterface> MaterialInterfaces { get; }
+
+    IReadOnlyNodeCollection<INode> ISystemState.Nodes => Nodes;
+    IReadOnlyParticleCollection<IParticle> ISystemState.Particles => Particles;
+    IReadOnlyParticleContactCollection<IParticleContact> ISystemState.Contacts => Contacts;
 }

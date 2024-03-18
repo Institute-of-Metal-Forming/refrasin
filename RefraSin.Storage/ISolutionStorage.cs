@@ -1,3 +1,5 @@
+using RefraSin.ProcessModel;
+
 namespace RefraSin.Storage;
 
 /// <summary>
@@ -9,7 +11,7 @@ public interface ISolutionStorage
     /// Store a solution state.
     /// </summary>
     /// <param name="state"></param>
-    void StoreState(ISolutionState state);
+    void StoreState(ISystemState state);
 
     /// <summary>
     /// Store a solution step.
