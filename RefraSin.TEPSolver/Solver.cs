@@ -104,9 +104,9 @@ public class Solver : ISinteringSolver
 
     private static void StoreSolutionStep(SolverSession session, StepVector stepVector, SolutionState newState)
     {
-        var solutionStep = new SolutionStep(
-            session.CurrentState.Time,
-            newState.Time,
+        var solutionStep = new SinteringStateChange(
+            session.CurrentState,
+            newState,
             session.CurrentState.Particles.Zip(newState.Particles).Select(t =>
             {
                 var (current, next) = t;

@@ -14,9 +14,9 @@ public class InMemorySolutionStorage : ISolutionStorage
     /// <summary>
     /// List of all stored solution steps.
     /// </summary>
-    public IReadOnlyList<ISolutionStep> Steps => _steps;
+    public IReadOnlyList<ISystemChange> Steps => _steps;
 
-    private readonly List<ISolutionStep> _steps = new();
+    private readonly List<ISystemChange> _steps = new();
 
     /// <inheritdoc />
     public void StoreState(ISystemState state)
@@ -25,7 +25,7 @@ public class InMemorySolutionStorage : ISolutionStorage
     }
 
     /// <inheritdoc />
-    public void StoreStep(ISolutionStep step)
+    public void StoreStep(ISystemChange step)
     {
         _steps.Add(step);
     }

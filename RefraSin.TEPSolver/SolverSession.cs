@@ -146,7 +146,7 @@ internal class SolverSession : ISolverSession
         StateMemory.Push(CurrentState);
     }
 
-    public void StoreStep(ISolutionStep step)
+    public void StoreStep(ISystemChange step)
     {
         _solutionStorage.StoreStep(step);
     }

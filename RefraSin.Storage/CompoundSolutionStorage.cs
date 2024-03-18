@@ -27,7 +27,7 @@ public class CompoundSolutionStorage : ISolutionStorage
     }
 
     /// <inheritdoc />
-    public void StoreStep(ISolutionStep step)
+    public void StoreStep(ISystemChange step)
     {
         foreach (var storage in Storages)
         {

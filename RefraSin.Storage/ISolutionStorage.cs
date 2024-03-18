@@ -17,7 +17,7 @@ public interface ISolutionStorage
     /// Store a solution step.
     /// </summary>
     /// <param name="step"></param>
-    void StoreStep(ISolutionStep step);
+    void StoreStep(ISystemChange step);
 
     /*
      * It is explicitly not planned to add some getter of states or steps here, since storage shall be considered as a black hole, fire and forget.

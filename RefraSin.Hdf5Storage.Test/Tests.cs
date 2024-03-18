@@ -6,6 +6,7 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using static NUnit.Framework.Assert;
 using PolarPoint = RefraSin.Coordinates.Polar.PolarPoint;
@@ -85,9 +86,9 @@ public class Tests
             }
         );
 
-        storage.StoreStep(new SolutionStep(
-            0,
-            0.12,
+        storage.StoreStep(new SinteringStateChange(
+            new SystemState(0, Array.Empty<IParticle>(), Array.Empty<IMaterial>(), Array.Empty<IMaterialInterface>()),
+            new SystemState(0.12, Array.Empty<IParticle>(), Array.Empty<IMaterial>(), Array.Empty<IMaterialInterface>()),
             new[]
             {
                 particleStep
