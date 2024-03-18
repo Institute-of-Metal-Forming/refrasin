@@ -1,5 +1,6 @@
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
@@ -13,7 +14,7 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public static class Lagrangian
 {
     public static StepVector EvaluateAt(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
@@ -31,7 +32,7 @@ public static class Lagrangian
     }
 
     public static IEnumerable<double> YieldEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     ) =>
@@ -42,13 +43,13 @@ public static class Lagrangian
         );
 
     public static IEnumerable<double> YieldParticleBlockEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     ) => YieldNodeEquations(conditions, particle.Nodes, stepVector);
 
     public static IEnumerable<double> YieldFunctionalBlockEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     ) =>
@@ -58,7 +59,7 @@ public static class Lagrangian
         );
 
     public static IEnumerable<double> YieldNodeEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         IEnumerable<NodeBase> nodes,
         StepVector stepVector
     )
@@ -72,7 +73,7 @@ public static class Lagrangian
     }
 
     public static IEnumerable<double> YieldContactsEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
     ) =>
@@ -85,7 +86,7 @@ public static class Lagrangian
         });
 
     private static IEnumerable<double> YieldContactNodesEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         ParticleContact contact
     )
@@ -143,7 +144,7 @@ public static class Lagrangian
         );
 
     public static IEnumerable<double> YieldGlobalEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
@@ -152,7 +153,7 @@ public static class Lagrangian
     }
 
     private static double StateVelocityDerivativeNormal(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -175,7 +176,7 @@ public static class Lagrangian
     }
 
     private static double StateVelocityDerivativeTangential(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         ContactNodeBase node
     )
@@ -191,7 +192,7 @@ public static class Lagrangian
     }
 
     private static double FluxDerivative(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -215,7 +216,7 @@ public static class Lagrangian
     }
 
     private static double RequiredConstraint(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -233,7 +234,7 @@ public static class Lagrangian
     }
 
     private static double DissipationEquality(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
@@ -266,7 +267,7 @@ public static class Lagrangian
     }
 
     private static (double distance, double direction) ContactConstraints(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
         ContactNodeBase node

@@ -1,6 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
@@ -16,7 +17,7 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public static class Jacobian
 {
     public static Matrix<double> BorderBlock(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
@@ -32,7 +33,7 @@ public static class Jacobian
     }
 
     private static JacobianRows YieldBorderBlockRows(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     ) =>
@@ -42,7 +43,7 @@ public static class Jacobian
         );
 
     public static JacobianRows YieldContactsEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
     ) =>
@@ -91,7 +92,7 @@ public static class Jacobian
     }
 
     public static JacobianRows YieldGlobalEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
@@ -100,7 +101,7 @@ public static class Jacobian
     }
 
     private static JacobianRow StateVelocityDerivativeTangential(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         ContactNodeBase node
     )
@@ -120,7 +121,7 @@ public static class Jacobian
     }
 
     private static JacobianRow DissipationEquality(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     ) =>
@@ -134,7 +135,7 @@ public static class Jacobian
             );
 
     private static JacobianRow ContactConstraintDistance(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
         ContactNodeBase node
@@ -161,7 +162,7 @@ public static class Jacobian
     }
 
     private static JacobianRow ContactConstraintDirection(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
         ContactNodeBase node
@@ -189,7 +190,7 @@ public static class Jacobian
     }
 
     private static JacobianRows YieldContactNodesEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         ParticleContact contact
     )
@@ -219,7 +220,7 @@ public static class Jacobian
     }
 
     public static Matrix<double> ParticleBlock(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     )
@@ -236,13 +237,13 @@ public static class Jacobian
     }
 
     private static JacobianRows YieldParticleBlockEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     ) => YieldNodeEquations(conditions, particle.Nodes, stepVector);
 
     private static JacobianRows YieldNodeEquations(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         IEnumerable<NodeBase> nodes,
         StepVector stepVector
     )
@@ -256,7 +257,7 @@ public static class Jacobian
     }
 
     private static JacobianRow StateVelocityDerivativeNormal(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -268,7 +269,7 @@ public static class Jacobian
     }
 
     private static JacobianRow FluxDerivative(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -291,7 +292,7 @@ public static class Jacobian
     }
 
     private static JacobianRow RequiredConstraint(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )

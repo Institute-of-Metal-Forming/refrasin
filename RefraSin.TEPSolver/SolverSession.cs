@@ -4,6 +4,7 @@ using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
@@ -22,21 +23,22 @@ internal class SolverSession : ISolverSession
 
     private int _timeStepIndexWhereStepWidthWasLastModified = 0;
 
-    public SolverSession(Solver solver, ISinteringProcess process)
+    public SolverSession(Solver solver, ISystemState inputState, ISinteringConditions conditions)
     {
-        StartTime = process.StartTime;
-        EndTime = process.EndTime;
-        Temperature = process.Temperature;
-        GasConstant = process.GasConstant;
+        StartTime = inputState.Time;
+        Duration = conditions.Duration;
+        EndTime = StartTime + Duration;
+        Temperature = conditions.Temperature;
+        GasConstant = conditions.GasConstant;
         TimeStepWidth = solver.Options.InitialTimeStepWidth;
         Options = solver.Options;
         _solutionStorage = solver.SolutionStorage;
         _materialRegistry = new MaterialRegistry();
 
-        foreach (var material in process.Materials)
+        foreach (var material in inputState.Materials)
             _materialRegistry.RegisterMaterial(material);
 
-        foreach (var materialInterface in process.MaterialInterfaces)
+        foreach (var materialInterface in inputState.MaterialInterfaces)
             _materialRegistry.RegisterMaterialInterface(materialInterface);
 
         Logger = solver.LoggerFactory.CreateLogger<Solver>();
@@ -44,7 +46,7 @@ internal class SolverSession : ISolverSession
         StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
         Routines = solver.Routines;
 
-        var particles = process.Particles.Select(ps => new Particle(ps, this)).ToArray();
+        var particles = inputState.Particles.Select(ps => new Particle(ps, this)).ToArray();
         CurrentState = new SolutionState(
             StartTime,
             particles,
@@ -67,11 +69,12 @@ internal class SolverSession : ISolverSession
         return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
     }
 
-    /// <inheritdoc />
     public double StartTime { get; }
 
-    /// <inheritdoc />
     public double EndTime { get; }
+
+    /// <inheritdoc />
+    public double Duration { get; }
 
     /// <inheritdoc />
     public int TimeStepIndex { get; set; }

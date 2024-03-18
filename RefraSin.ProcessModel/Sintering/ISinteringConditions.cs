@@ -1,7 +1,12 @@
-namespace RefraSin.ProcessModel;
+namespace RefraSin.ProcessModel.Sintering;
 
-public interface IProcessConditions
+public interface ISinteringConditions
 {
+    /// <summary>
+    /// Duration of the sintering process.
+    /// </summary>
+    public double Duration { get; }
+    
     /// <summary>
     /// Constant process temperature.
     /// </summary>

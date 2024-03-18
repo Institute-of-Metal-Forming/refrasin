@@ -4,20 +4,15 @@ using RefraSin.ParticleModel;
 namespace RefraSin.ProcessModel;
 
 /// <summary>
-/// Interface that defines a data structure representing a sintering process.
+/// Interface for classes representing the state of a particle group at a certain position in time and process line.
 /// </summary>
-public interface ISinteringProcess : IProcessConditions
+public interface ISystemState
 {
     /// <summary>
-    /// Time coordinate of the process start.
+    /// Time coordinate.
     /// </summary>
-    public double StartTime { get; }
-
-    /// <summary>
-    /// Time coordinate of the process end.
-    /// </summary>
-    public double EndTime { get; }
-
+    double Time { get; }
+    
     /// <summary>
     /// List of particle specifications.
     /// </summary>
