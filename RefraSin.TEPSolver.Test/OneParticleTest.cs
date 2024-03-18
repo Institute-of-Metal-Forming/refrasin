@@ -7,6 +7,7 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.StepVectors;
@@ -20,7 +21,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var endTime = 1e2;
+        var duration = 1e2;
 
         _particle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid()).GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
@@ -62,13 +63,17 @@ public class OneParticleTest
             0
         );
 
-        _process = new SinteringProcess(
+        _initialState = new SystemState(
             0,
-            endTime,
             new[] { _particle },
             new[] { _material },
-            new[] { _materialInterface },
-            2073
+            new[] { _materialInterface }
+        );
+
+        _sinteringProcess = new SinteringStep(
+            duration,
+            2073,
+            _solver
         );
     }
 
@@ -76,14 +81,15 @@ public class OneParticleTest
     private Solver _solver;
     private IMaterial _material;
     private IMaterialInterface _materialInterface;
-    private ISinteringProcess _process;
+    private SystemState _initialState;
+    private SinteringStep _sinteringProcess;
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
 
     [Test]
     public void PlotJacobianStructureAnalytical()
     {
-        var session = new SolverSession(_solver, _process);
+        var session = new SolverSession(_solver, _initialState, _sinteringProcess);
         var initialState = session.CurrentState;
         var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
@@ -126,7 +132,7 @@ public class OneParticleTest
     [Test]
     public void PlotJacobianStructureNumerical()
     {
-        var session = new SolverSession(_solver, _process);
+        var session = new SolverSession(_solver, _initialState, _sinteringProcess);
         var initialState = session.CurrentState;
         var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
@@ -160,7 +166,7 @@ public class OneParticleTest
     {
         try
         {
-            _solver.Solve(_process);
+            _sinteringProcess.Solve(_initialState);
         }
         finally
         {
@@ -222,7 +228,7 @@ public class OneParticleTest
         plt.Add.Scatter(steps);
 
         var meanStepWidth = steps.Select(s => s.Y).Mean();
-        plt.Add.Line(0, meanStepWidth, _process.EndTime, meanStepWidth);
+        plt.Add.Line(0, meanStepWidth, _sinteringProcess.Duration, meanStepWidth);
 
         plt.SavePng(Path.Combine(_tempDir, "timeSteps.png"), 600, 400);
     }

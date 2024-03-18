@@ -1,4 +1,5 @@
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
@@ -6,11 +7,11 @@ namespace RefraSin.TEPSolver.StepEstimators;
 
 class StepEstimator : IStepEstimator
 {
-    public StepVector EstimateStep(IProcessConditions conditions, SolutionState currentState) =>
+    public StepVector EstimateStep(ISinteringConditions conditions, SolutionState currentState) =>
         new(YieldInitialGuess(conditions, currentState).ToArray(), new StepVectorMap(currentState));
 
     private static IEnumerable<double> YieldInitialGuess(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState
     ) =>
         YieldNodeUnknownsInitialGuess(conditions, currentState)
@@ -46,7 +47,7 @@ class StepEstimator : IStepEstimator
     }
 
     private static IEnumerable<double> YieldNodeUnknownsInitialGuess(
-        IProcessConditions conditions,
+        ISinteringConditions conditions,
         SolutionState currentState
     )
     {
@@ -58,7 +59,7 @@ class StepEstimator : IStepEstimator
         }
     }
 
-    private static double GuessNormalDisplacement(IProcessConditions conditions, NodeBase node)
+    private static double GuessNormalDisplacement(ISinteringConditions conditions, NodeBase node)
     {
         var fluxBalance =
             GuessFluxToUpper(conditions, node) - GuessFluxToUpper(conditions, node.Lower);
@@ -73,7 +74,7 @@ class StepEstimator : IStepEstimator
         return displacement;
     }
 
-    private static double GuessFluxToUpper(IProcessConditions conditions, NodeBase node)
+    private static double GuessFluxToUpper(ISinteringConditions conditions, NodeBase node)
     {
         var vacancyConcentrationGradient =
             -node.Particle.Material.EquilibriumVacancyConcentration

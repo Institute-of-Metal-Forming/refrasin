@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
@@ -14,18 +15,8 @@ namespace RefraSin.TEPSolver;
 /// <summary>
 /// Interface for objects holding session data of a solution procedure.
 /// </summary>
-public interface ISolverSession : IProcessConditions
+public interface ISolverSession : ISinteringConditions
 {
-    /// <summary>
-    /// Time where the solution started.
-    /// </summary>
-    public double StartTime { get; }
-
-    /// <summary>
-    /// Time where the solution should end.
-    /// </summary>
-    public double EndTime { get; }
-
     public int TimeStepIndex { get; }
 
     /// <summary>

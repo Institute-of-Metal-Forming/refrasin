@@ -1,28 +1,21 @@
 using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using RefraSin.Coordinates.Polar;
-using RefraSin.Graphs;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.ParticleModel;
-using RefraSin.TEPSolver.RootFinding;
-using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
-using RefraSin.TEPSolver.TimeSteppers;
-using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
-using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
 
 namespace RefraSin.TEPSolver;
 
 /// <summary>
 /// Solver for performing time integration of sintering processes based on the thermodynamic extremal principle (TEP).
 /// </summary>
-public class Solver
+public class Solver : ISinteringSolver
 {
     public Solver(ISolutionStorage solutionStorage, ILoggerFactory loggerFactory, ISolverRoutines routines, ISolverOptions options)
     {
@@ -55,11 +48,18 @@ public class Solver
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
     /// </summary>
-    public void Solve(ISinteringProcess process)
+    public ISystemState Solve(ISystemState inputState, ISinteringConditions conditions)
     {
-        var session = new SolverSession(this, process);
+        var session = new SolverSession(this, inputState, conditions);
         session.StoreCurrentState();
         DoTimeIntegration(session);
+
+        return new SystemState(
+            session.CurrentState.Time,
+            session.CurrentState.Particles,
+            session.MaterialRegistry.Materials,
+            session.MaterialRegistry.MaterialInterfaces
+        );
     }
 
     private static void DoTimeIntegration(SolverSession session)
