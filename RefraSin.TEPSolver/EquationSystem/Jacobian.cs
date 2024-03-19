@@ -17,12 +17,11 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public static class Jacobian
 {
     public static Matrix<double> BorderBlock(
-        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
     {
-        var rows = YieldBorderBlockRows(conditions, currentState, stepVector).ToArray();
+        var rows = YieldBorderBlockRows(currentState, stepVector).ToArray();
         var startIndex = stepVector.StepVectorMap.BorderStart;
         var size = stepVector.StepVectorMap.BorderLength;
         return Matrix<double>.Build.SparseOfIndexed(
@@ -33,19 +32,17 @@ public static class Jacobian
     }
 
     private static JacobianRows YieldBorderBlockRows(
-        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
-    ) => YieldContactsEquations(conditions, currentState.Contacts, stepVector);
+    ) => YieldContactsEquations(currentState.Contacts, stepVector);
 
     public static JacobianRows YieldContactsEquations(
-        ISinteringConditions conditions,
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
     ) =>
         contacts.SelectMany(contact =>
             Join(
-                YieldContactNodesEquations(conditions, stepVector, contact),
+                YieldContactNodesEquations(stepVector, contact),
                 YieldContactAuxiliaryDerivatives(stepVector, contact)
             )
         );
@@ -88,16 +85,14 @@ public static class Jacobian
     }
 
     public static JacobianRows YieldParticleEquations(
-        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     )
     {
-        yield return DissipationEquality(conditions, particle, stepVector);
+        yield return DissipationEquality(particle, stepVector);
     }
 
     private static JacobianRow StateVelocityDerivativeTangential(
-        ISinteringConditions conditions,
         StepVector stepVector,
         ContactNodeBase node
     )
@@ -113,7 +108,6 @@ public static class Jacobian
     }
 
     private static JacobianRow DissipationEquality(
-        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     )
@@ -142,7 +136,6 @@ public static class Jacobian
     }
 
     private static JacobianRow ContactConstraintDistance(
-        ISinteringConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
         ContactNodeBase node
@@ -157,7 +150,6 @@ public static class Jacobian
     }
 
     private static JacobianRow ContactConstraintDirection(
-        ISinteringConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
         ContactNodeBase node
@@ -173,15 +165,14 @@ public static class Jacobian
     }
 
     private static JacobianRows YieldContactNodesEquations(
-        ISinteringConditions conditions,
         StepVector stepVector,
         ParticleContact contact
     )
     {
         foreach (var contactNode in contact.FromNodes)
         {
-            yield return ContactConstraintDistance(conditions, stepVector, contact, contactNode);
-            yield return ContactConstraintDirection(conditions, stepVector, contact, contactNode);
+            yield return ContactConstraintDistance(stepVector, contact, contactNode);
+            yield return ContactConstraintDirection(stepVector, contact, contactNode);
         }
     }
 
@@ -193,12 +184,11 @@ public static class Jacobian
     }
 
     public static Matrix<double> ParticleBlock(
-        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     )
     {
-        var rows = YieldParticleBlockEquations(conditions, particle, stepVector)
+        var rows = YieldParticleBlockEquations(particle, stepVector)
             .Select(r => r.ToArray())
             .ToArray();
         var (startIndex, size) = stepVector.StepVectorMap[particle];
@@ -210,34 +200,31 @@ public static class Jacobian
     }
 
     private static JacobianRows YieldParticleBlockEquations(
-        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     ) => Join(
-        YieldNodeEquations(conditions, particle.Nodes, stepVector),
-        YieldParticleEquations(conditions, particle, stepVector)
+        YieldNodeEquations(particle.Nodes, stepVector),
+        YieldParticleEquations(particle, stepVector)
     );
 
     private static JacobianRows YieldNodeEquations(
-        ISinteringConditions conditions,
         IEnumerable<NodeBase> nodes,
         StepVector stepVector
     )
     {
         foreach (var node in nodes)
         {
-            yield return StateVelocityDerivativeNormal(conditions, stepVector, node);
+            yield return StateVelocityDerivativeNormal(stepVector, node);
 
             if (node is NeckNode neckNode)
-                yield return StateVelocityDerivativeTangential(conditions, stepVector, neckNode);
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
 
-            yield return FluxDerivative(conditions, stepVector, node);
-            yield return RequiredConstraint(conditions, stepVector, node);
+            yield return FluxDerivative(stepVector, node);
+            yield return RequiredConstraint(stepVector, node);
         }
     }
 
     private static JacobianRow StateVelocityDerivativeNormal(
-        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -253,7 +240,6 @@ public static class Jacobian
     }
 
     private static JacobianRow FluxDerivative(
-        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -271,7 +257,6 @@ public static class Jacobian
     }
 
     private static JacobianRow RequiredConstraint(
-        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )

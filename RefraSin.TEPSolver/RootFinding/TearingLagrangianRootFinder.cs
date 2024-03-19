@@ -31,37 +31,35 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
         Vector<double> Fun(Vector<double> vector)
         {
             stepVector.UpdateBorderBlock(vector.AsArray());
-            var result = TearAndEvaluateFunctionalBlock(solverSession, currentState, stepVector);
+            var result = TearAndEvaluateFunctionalBlock(currentState, stepVector);
             return new DenseVector(result);
         }
 
         Matrix<double> Jac(Vector<double> vector)
         {
             stepVector.UpdateBorderBlock(vector.AsArray());
-            var result = Jacobian.BorderBlock(solverSession, currentState, stepVector);
+            var result = Jacobian.BorderBlock(currentState, stepVector);
             return result;
         }
     }
 
     private double[] TearAndEvaluateFunctionalBlock(
-        ISolverSession solverSession,
         SolutionState currentState,
         StepVector stepVector
     )
     {
         foreach (var particle in currentState.Particles)
         {
-            var particleSolution = SolveParticleBlock(solverSession, particle, stepVector);
+            var particleSolution = SolveParticleBlock(particle, stepVector);
             stepVector.UpdateParticleBlock(particle, particleSolution.AsArray());
         }
 
         return Lagrangian
-            .YieldFunctionalBlockEquations(solverSession, currentState, stepVector)
+            .YieldFunctionalBlockEquations(currentState, stepVector)
             .ToArray();
     }
 
     private Vector<double> SolveParticleBlock(
-        ISolverSession solverSession,
         Particle particle,
         StepVector stepVector
     )
@@ -77,14 +75,14 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
         Vector<double> Fun(Vector<double> vector)
         {
             stepVector.UpdateParticleBlock(particle, vector.AsArray());
-            var result = Lagrangian.YieldParticleBlockEquations(solverSession, particle, stepVector).ToArray();
+            var result = Lagrangian.YieldParticleBlockEquations(particle, stepVector).ToArray();
             return new DenseVector(result);
         }
 
         Matrix<double> Jac(Vector<double> vector)
         {
             stepVector.UpdateParticleBlock(particle, vector.AsArray());
-            var result = Jacobian.ParticleBlock(solverSession, particle, stepVector);
+            var result = Jacobian.ParticleBlock(particle, stepVector);
             return result;
         }
     }

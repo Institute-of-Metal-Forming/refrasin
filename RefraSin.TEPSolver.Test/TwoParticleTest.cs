@@ -170,9 +170,9 @@ public class TwoParticleTest
         var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
         var particleBlocks = initialState
-            .Particles.Select(p => Jacobian.ParticleBlock(session, p, guess))
+            .Particles.Select(p => Jacobian.ParticleBlock(p, guess))
             .ToArray();
-        var functionalBlock = Jacobian.BorderBlock(session, initialState, guess);
+        var functionalBlock = Jacobian.BorderBlock(initialState, guess);
         var size = particleBlocks.Length + 1;
 
         var array = new Matrix<double>[size, size];
@@ -242,13 +242,13 @@ public class TwoParticleTest
         StepVector guess
     )
     {
-        var zero = Lagrangian.EvaluateAt(session, state, guess);
+        var zero = Lagrangian.EvaluateAt(state, guess);
 
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
             step[i] += 1e-3;
-            var current = Lagrangian.EvaluateAt(session, state, step);
+            var current = Lagrangian.EvaluateAt(state, step);
 
             yield return current - zero;
         }
