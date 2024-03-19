@@ -2,6 +2,7 @@ using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using static RefraSin.TEPSolver.EquationSystem.Helper;
 
 namespace RefraSin.TEPSolver.StepEstimators;
 
@@ -13,12 +14,20 @@ class StepEstimator : IStepEstimator
     private static IEnumerable<double> YieldInitialGuess(
         ISinteringConditions conditions,
         SolutionState currentState
-    ) =>
-        YieldNodeUnknownsInitialGuess(conditions, currentState)
-            .Concat(YieldContactUnknownsInitialGuess(currentState))
-            .Concat(YieldGlobalUnknownsInitialGuess());
+    ) => Join(
+        currentState.Particles.SelectMany(p => YieldParticleBlockGuesses(conditions, p)),
+        YieldFunctionalBlockGuesses(conditions, currentState)
+    );
 
-    private static IEnumerable<double> YieldGlobalUnknownsInitialGuess()
+    private static IEnumerable<double> YieldFunctionalBlockGuesses(ISinteringConditions conditions, SolutionState currentState) =>
+        YieldContactUnknownsInitialGuess(currentState);
+
+    private static IEnumerable<double> YieldParticleBlockGuesses(ISinteringConditions conditions, Particle particle) => Join(
+        YieldNodeUnknownsInitialGuess(conditions, particle.Nodes),
+        YieldParticleUnknownsGuesses()
+    );
+
+    private static IEnumerable<double> YieldParticleUnknownsGuesses()
     {
         yield return 1;
     }
@@ -33,29 +42,25 @@ class StepEstimator : IStepEstimator
 
             foreach (var node in contact.FromNodes)
             {
-                if (node is NeckNode)
-                    yield return 0;
                 yield return 1;
                 yield return 1;
-            }
-
-            foreach (var _ in contact.ToNodes.OfType<NeckNode>())
-            {
-                yield return 0;
             }
         }
     }
 
     private static IEnumerable<double> YieldNodeUnknownsInitialGuess(
         ISinteringConditions conditions,
-        SolutionState currentState
+        IEnumerable<NodeBase> nodes
     )
     {
-        foreach (var node in currentState.Nodes)
+        foreach (var node in nodes)
         {
-            yield return GuessNormalDisplacement(conditions, node);
-            yield return GuessFluxToUpper(conditions, node);
             yield return 1;
+            yield return GuessFluxToUpper(conditions, node);
+            yield return GuessNormalDisplacement(conditions, node);
+            
+            if (node is NeckNode)
+                yield return 0;
         }
     }
 
@@ -66,10 +71,10 @@ class StepEstimator : IStepEstimator
 
         var displacement =
             2
-            * fluxBalance
-            / (
+          * fluxBalance
+          / (
                 (node.SurfaceDistance.ToUpper + node.SurfaceDistance.ToLower)
-                * Math.Sin(node.SurfaceVectorAngle.Normal)
+              * Math.Sin(node.SurfaceVectorAngle.Normal)
             );
         return displacement;
     }
@@ -78,10 +83,10 @@ class StepEstimator : IStepEstimator
     {
         var vacancyConcentrationGradient =
             -node.Particle.Material.EquilibriumVacancyConcentration
-            / (conditions.GasConstant * conditions.Temperature)
-            * (node.Upper.GibbsEnergyGradient.Normal - node.GibbsEnergyGradient.Normal)
-            * node.Particle.Material.MolarVolume
-            / Math.Pow(node.SurfaceDistance.ToUpper, 2);
+          / (conditions.GasConstant * conditions.Temperature)
+          * (node.Upper.GibbsEnergyGradient.Normal - node.GibbsEnergyGradient.Normal)
+          * node.Particle.Material.MolarVolume
+          / Math.Pow(node.SurfaceDistance.ToUpper, 2);
         return -node.SurfaceDiffusionCoefficient.ToUpper * vacancyConcentrationGradient;
     }
 }
