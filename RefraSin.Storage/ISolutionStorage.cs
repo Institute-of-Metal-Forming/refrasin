@@ -10,14 +10,16 @@ public interface ISolutionStorage
     /// <summary>
     /// Store a solution state.
     /// </summary>
+    /// <param name="processStep"></param>
     /// <param name="state"></param>
-    void StoreState(ISystemState state);
+    void StoreState(IProcessStep processStep, ISystemState state);
 
     /// <summary>
     /// Store a solution step.
     /// </summary>
-    /// <param name="step"></param>
-    void StoreStep(ISystemChange step);
+    /// <param name="processStep"></param>
+    /// <param name="stateTransition"></param>
+    void StoreStateTransition(IProcessStep processStep, ISystemStateTransition stateTransition);
 
     /*
      * It is explicitly not planned to add some getter of states or steps here, since storage shall be considered as a black hole, fire and forget.

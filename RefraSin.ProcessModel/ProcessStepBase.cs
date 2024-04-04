@@ -9,7 +9,7 @@ public abstract class ProcessStepBase : IProcessStep
     public event EventHandler<IProcessStep.SystemStateReportedEventArgs>? SystemStateReported;
 
     /// <inheritdoc />
-    public event EventHandler<IProcessStep.SystemChangeReportedEventArgs>? SystemChangeReported;
+    public event EventHandler<IProcessStep.SystemStateTransitionReportedEventArgs>? SystemStateTransitionReported;
 
     protected virtual void ReportSystemState(IProcessStep.SystemStateReportedEventArgs reportedEventArgs)
     {
@@ -21,13 +21,13 @@ public abstract class ProcessStepBase : IProcessStep
         ReportSystemState(new IProcessStep.SystemStateReportedEventArgs(this, state));
     }
 
-    protected virtual void ReportSystemChange(IProcessStep.SystemChangeReportedEventArgs reportedEventArgs)
+    protected virtual void ReportSystemStateTransition(IProcessStep.SystemStateTransitionReportedEventArgs reportedEventArgs)
     {
-        SystemChangeReported?.Invoke(this, reportedEventArgs);
+        SystemStateTransitionReported?.Invoke(this, reportedEventArgs);
     }
 
-    protected virtual void ReportSystemChange(ISystemChange state)
+    protected virtual void ReportSystemStateTransition(ISystemStateTransition state)
     {
-        ReportSystemChange(new IProcessStep.SystemChangeReportedEventArgs(this, state));
+        ReportSystemStateTransition(new IProcessStep.SystemStateTransitionReportedEventArgs(this, state));
     }
 }

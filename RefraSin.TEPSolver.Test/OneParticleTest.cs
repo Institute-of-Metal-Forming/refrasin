@@ -227,7 +227,7 @@ public class OneParticleTest
         {
             var plt = new Plot();
 
-            var sinteringStep = (ISinteringStateChange)step;
+            var sinteringStep = (ISinteringStateStateTransition)step;
 
             var coordinates = sinteringStep
                 .ParticleTimeSteps[0]
@@ -254,7 +254,7 @@ public class OneParticleTest
         var steps = _solutionStorage
             .Steps.Select(s => new ScottPlot.Coordinates(
                 s.InputState.Time,
-                ((ISinteringStateChange)s).TimeStepWidth
+                ((ISinteringStateStateTransition)s).TimeStepWidth
             ))
             .ToArray();
         plt.Add.Scatter(steps);

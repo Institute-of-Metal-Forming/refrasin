@@ -6,14 +6,17 @@ namespace RefraSin.ProcessModel;
 public class SystemState : ISystemState
 {
     public SystemState(
+        Guid id,
         double time,
         IEnumerable<IParticle> particles,
         IEnumerable<IMaterial> materials,
         IEnumerable<IMaterialInterface> materialInterfaces
     )
-        : this(time, particles, materials, materialInterfaces, Array.Empty<IParticleContact>()) { }
+        : this(id, time, particles, materials, materialInterfaces, Array.Empty<IParticleContact>())
+    { }
 
     public SystemState(
+        Guid id,
         double time,
         IEnumerable<IParticle> particles,
         IEnumerable<IMaterial> materials,
@@ -21,6 +24,7 @@ public class SystemState : ISystemState
         IEnumerable<IParticleContact> particleContacts
     )
     {
+        Id = id;
         Time = time;
         Particles = particles.Select(s => s as Particle ?? new Particle(s)).ToParticleCollection();
         Contacts = particleContacts
@@ -30,6 +34,9 @@ public class SystemState : ISystemState
         Materials = materials.ToArray();
         MaterialInterfaces = materialInterfaces.ToArray();
     }
+
+    /// <inheritdoc />
+    public Guid Id { get; }
 
     /// <inheritdoc />
     public double Time { get; }

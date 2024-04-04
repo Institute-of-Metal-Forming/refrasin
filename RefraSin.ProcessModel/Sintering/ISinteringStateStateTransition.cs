@@ -2,7 +2,7 @@ using RefraSin.ParticleModel;
 
 namespace RefraSin.ProcessModel.Sintering;
 
-public interface ISinteringStateChange : ISystemChange
+public interface ISinteringStateStateTransition : ISystemStateTransition
 {
     /// <summary>
     /// Width of the time step.

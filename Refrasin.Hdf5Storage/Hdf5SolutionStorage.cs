@@ -38,7 +38,7 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
     private int _stepIndex = 0;
 
     /// <inheritdoc />
-    public void StoreState(ISystemState state)
+    public void StoreState(IProcessStep processStep, ISystemState state)
     {
         var stateId = Hdf5.CreateOrOpenGroup(StatesGroupId, _stateIndex.ToString());
         Hdf5.WriteAttribute(stateId, nameof(state.Time), state.Time);
@@ -72,12 +72,12 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
     }
 
     /// <inheritdoc />
-    public void StoreStep(ISystemChange step)
+    public void StoreStateTransition(IProcessStep processStep, ISystemStateTransition transition)
     {
         var stepId = Hdf5.CreateOrOpenGroup(StepsGroupId, _stepIndex.ToString());
-        Hdf5.WriteAttribute(stepId, "StartTime", step.InputState.Time);
-        Hdf5.WriteAttribute(stepId, "EndTime", step.OutputState.Time);
-        if (step is ISinteringStateChange sinteringStateChange)
+        Hdf5.WriteAttribute(stepId, "InputState", transition.InputStateId);
+        Hdf5.WriteAttribute(stepId, "OutputState", transition.OutputStateId);
+        if (transition is ISinteringStateStateTransition sinteringStateChange)
         {
             Hdf5.WriteAttribute(
                 stepId,

@@ -239,7 +239,7 @@ public class TwoParticleTest
         {
             var plt = new Plot();
 
-            var sinteringStep = (ISinteringStateChange)step;
+            var sinteringStep = (ISinteringStateStateTransition)step;
 
             foreach (var particle in sinteringStep.ParticleTimeSteps)
             {
@@ -261,7 +261,7 @@ public class TwoParticleTest
     {
         var plt = new Plot();
 
-        var steps = _solutionStorage.Steps.Select(s => new ScottPlot.Coordinates(s.InputState.Time, ((ISinteringStateChange)s).TimeStepWidth)).ToArray();
+        var steps = _solutionStorage.Steps.Select(s => new ScottPlot.Coordinates(s.InputState.Time, ((ISinteringStateStateTransition)s).TimeStepWidth)).ToArray();
         plt.Add.Scatter(steps);
 
         var meanStepWidth = steps.Select(s => s.Y).Mean();

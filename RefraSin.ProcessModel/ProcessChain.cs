@@ -21,12 +21,12 @@ public class ProcessChain : ProcessStepBase
         foreach (var processStep in ProcessSteps)
         {
             processStep.SystemStateReported += HandleSubStepSystemStateReported;
-            processStep.SystemChangeReported += HandleSubStepSystemChangeReported;
+            processStep.SystemStateTransitionReported += HandleSubStepSystemChangeReported;
             
             currentState = processStep.Solve(currentState);
             
             processStep.SystemStateReported -= HandleSubStepSystemStateReported;
-            processStep.SystemChangeReported -= HandleSubStepSystemChangeReported;
+            processStep.SystemStateTransitionReported -= HandleSubStepSystemChangeReported;
             
             ReportSystemState(currentState);
         }
@@ -39,9 +39,9 @@ public class ProcessChain : ProcessStepBase
         ReportSystemState(eventArgs);
     }
 
-    private void HandleSubStepSystemChangeReported(object? sender, IProcessStep.SystemChangeReportedEventArgs eventArgs)
+    private void HandleSubStepSystemChangeReported(object? sender, IProcessStep.SystemStateTransitionReportedEventArgs eventArgs)
     {
-        ReportSystemChange(eventArgs);
+        ReportSystemStateTransition(eventArgs);
     }
 
     /// <summary>

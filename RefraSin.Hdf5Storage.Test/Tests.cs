@@ -47,13 +47,16 @@ public class Tests
             RotationAngle = Math.PI
         }.GetParticle();
 
-        storage.StoreState(new SystemState(
-            0.12,
-            new[] { particle1, particle2 },
-            Array.Empty<IMaterial>(),
-            Array.Empty<IMaterialInterface>(),
-            new[] { new ParticleContact(particle1, particle2, 240, 0, 0) }
-        ));
+        storage.StoreState(
+            null!,
+            new SystemState(
+                Guid.NewGuid(),
+                0.12,
+                new[] { particle1, particle2 },
+                Array.Empty<IMaterial>(),
+                Array.Empty<IMaterialInterface>(),
+                new[] { new ParticleContact(particle1, particle2, 240, 0, 0) }
+            ));
 
         That(new FileInfo(fileName), Has.Length.GreaterThan(preFileSize));
 
@@ -86,14 +89,16 @@ public class Tests
             }
         );
 
-        storage.StoreStep(new SinteringStateChange(
-            new SystemState(0, Array.Empty<IParticle>(), Array.Empty<IMaterial>(), Array.Empty<IMaterialInterface>()),
-            new SystemState(0.12, Array.Empty<IParticle>(), Array.Empty<IMaterial>(), Array.Empty<IMaterialInterface>()),
-            new[]
-            {
-                particleStep
-            }
-        ));
+        storage.StoreStateTransition(
+            null!,
+            new SinteringStateTransition(
+                new SystemState(Guid.NewGuid(), 0, Array.Empty<IParticle>(), Array.Empty<IMaterial>(), Array.Empty<IMaterialInterface>()),
+                new SystemState(Guid.NewGuid(), 0.12, Array.Empty<IParticle>(), Array.Empty<IMaterial>(), Array.Empty<IMaterialInterface>()),
+                new[]
+                {
+                    particleStep
+                }
+            ));
 
         That(new FileInfo(fileName), Has.Length.GreaterThan(preFileSize));
 

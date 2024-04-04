@@ -14,19 +14,19 @@ public class InMemorySolutionStorage : ISolutionStorage
     /// <summary>
     /// List of all stored solution steps.
     /// </summary>
-    public IReadOnlyList<ISystemChange> Steps => _steps;
+    public IReadOnlyList<ISystemStateTransition> Steps => _steps;
 
-    private readonly List<ISystemChange> _steps = new();
+    private readonly List<ISystemStateTransition> _steps = new();
 
     /// <inheritdoc />
-    public void StoreState(ISystemState state)
+    public void StoreState(IProcessStep processStep, ISystemState state)
     {
         _states.Add(state);
     }
 
     /// <inheritdoc />
-    public void StoreStep(ISystemChange step)
+    public void StoreStateTransition(IProcessStep processStep, ISystemStateTransition stateTransition)
     {
-        _steps.Add(step);
+        _steps.Add(stateTransition);
     }
 }

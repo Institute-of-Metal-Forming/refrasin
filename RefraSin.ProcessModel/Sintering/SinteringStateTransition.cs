@@ -2,17 +2,21 @@ using RefraSin.ParticleModel;
 
 namespace RefraSin.ProcessModel.Sintering;
 
-public class SinteringStateChange(
+public class SinteringStateTransition(
     ISystemState inputState,
     ISystemState outputState,
     IEnumerable<IParticleTimeStep> particleTimeSteps)
-    : ISinteringStateChange
+    : ISinteringStateStateTransition
 {
-    /// <inheritdoc />
     public ISystemState InputState { get; } = inputState;
 
-    /// <inheritdoc />
     public ISystemState OutputState { get; } = outputState;
+
+    /// <inheritdoc />
+    public Guid InputStateId { get; } = inputState.Id;
+
+    /// <inheritdoc />
+    public Guid OutputStateId { get; } = outputState.Id;
 
     /// <inheritdoc />
     public double TimeStepWidth { get; } = outputState.Time - inputState.Time;
