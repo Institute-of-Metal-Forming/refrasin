@@ -13,18 +13,30 @@ public interface IProcessStep
     ISystemState Solve(ISystemState inputState);
 
     event EventHandler<SystemStateReportedEventArgs>? SystemStateReported;
+
+    void ReportSystemState(SystemStateReportedEventArgs reportedEventArgs);
+
+    void ReportSystemState(ISystemState state);
+
     event EventHandler<SystemStateTransitionReportedEventArgs>? SystemStateTransitionReported;
 
-    class SystemStateTransitionReportedEventArgs(IProcessStep processStep, ISystemStateTransition stateTransition) : EventArgs
-    {
-        public IProcessStep ProcessStep { get; } = processStep;
-        public ISystemStateTransition StateTransition { get; } = stateTransition;
-    }
+    void ReportSystemStateTransition(SystemStateTransitionReportedEventArgs reportedEventArgs);
+
+    void ReportSystemStateTransition(ISystemStateTransition state);
 
     class SystemStateReportedEventArgs(IProcessStep processStep, ISystemState state) : EventArgs
     {
         public IProcessStep ProcessStep { get; } = processStep;
-        
+
         public ISystemState State { get; } = state;
+    }
+
+    class SystemStateTransitionReportedEventArgs(
+        IProcessStep processStep,
+        ISystemStateTransition stateTransition
+    ) : EventArgs
+    {
+        public IProcessStep ProcessStep { get; } = processStep;
+        public ISystemStateTransition StateTransition { get; } = stateTransition;
     }
 }
