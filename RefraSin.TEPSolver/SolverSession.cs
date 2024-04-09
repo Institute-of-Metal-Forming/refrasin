@@ -19,20 +19,23 @@ namespace RefraSin.TEPSolver;
 internal class SolverSession : ISolverSession
 {
     private readonly IMaterialRegistry _materialRegistry;
-    private readonly ISolutionStorage _solutionStorage;
 
     private int _timeStepIndexWhereStepWidthWasLastModified = 0;
 
-    public SolverSession(Solver solver, ISystemState inputState, ISinteringConditions conditions)
+    private Action<ISystemState> _reportSystemState;
+    private Action<ISystemStateTransition> _reportSystemStateTransition;
+
+    public SolverSession(SinteringSolver sinteringSolver, ISystemState inputState, ISinteringStep step)
     {
         StartTime = inputState.Time;
-        Duration = conditions.Duration;
+        Duration = step.Duration;
         EndTime = StartTime + Duration;
-        Temperature = conditions.Temperature;
-        GasConstant = conditions.GasConstant;
-        TimeStepWidth = solver.Options.InitialTimeStepWidth;
-        Options = solver.Options;
-        _solutionStorage = solver.SolutionStorage;
+        Temperature = step.Temperature;
+        GasConstant = step.GasConstant;
+        _reportSystemState = step.ReportSystemState;
+        _reportSystemStateTransition = step.ReportSystemStateTransition;
+        TimeStepWidth = sinteringSolver.Options.InitialTimeStepWidth;
+        Options = sinteringSolver.Options;
         _materialRegistry = new MaterialRegistry();
 
         foreach (var material in inputState.Materials)
@@ -41,13 +44,14 @@ internal class SolverSession : ISolverSession
         foreach (var materialInterface in inputState.MaterialInterfaces)
             _materialRegistry.RegisterMaterialInterface(materialInterface);
 
-        Logger = solver.LoggerFactory.CreateLogger<Solver>();
+        Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
 
         StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
-        Routines = solver.Routines;
+        Routines = sinteringSolver.Routines;
 
         var particles = inputState.Particles.Select(ps => new Particle(ps, this)).ToArray();
         CurrentState = new SolutionState(
+            inputState.Id,
             StartTime,
             particles,
             inputState.Materials,
@@ -55,6 +59,7 @@ internal class SolverSession : ISolverSession
             Array.Empty<(Guid, Guid)>()
         );
         CurrentState = new SolutionState(
+            inputState.Id,
             StartTime,
             particles,
             inputState.Materials,
@@ -101,7 +106,7 @@ internal class SolverSession : ISolverSession
     public IReadOnlyMaterialRegistry MaterialRegistry => _materialRegistry;
 
     /// <inheritdoc />
-    public ILogger<Solver> Logger { get; }
+    public ILogger<SinteringSolver> Logger { get; }
 
     /// <inheritdoc />
     public ISolverRoutines Routines { get; }
@@ -140,14 +145,14 @@ internal class SolverSession : ISolverSession
         }
     }
 
-    public void StoreCurrentState()
+    public void ReportCurrentState()
     {
-        _solutionStorage.StoreState(CurrentState);
+        _reportSystemState(CurrentState);
         StateMemory.Push(CurrentState);
     }
 
-    public void StoreStep(ISystemChange step)
+    public void ReportTransition(ISinteringStateStateTransition step)
     {
-        _solutionStorage.StoreStep(step);
+        _reportSystemStateTransition(step);
     }
 }

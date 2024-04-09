@@ -3,7 +3,7 @@ namespace RefraSin.ProcessModel.Sintering;
 /// <summary>
 /// Data structure representing a sintering process.
 /// </summary>
-public class SinteringStep : IProcessStep, ISinteringConditions
+public class SinteringStep : ProcessStepBase, ISinteringStep
 {
     /// <summary>
     /// Creates a new sintering process.
@@ -14,7 +14,7 @@ public class SinteringStep : IProcessStep, ISinteringConditions
     /// <param name="gasConstant">value of the universal gas constant</param>
     public SinteringStep(
         double duration,
-        double temperature, ISinteringSolver solver, double gasConstant = 8.31446261815324
+        double temperature, IProcessStepSolver<SinteringStep> solver, double gasConstant = 8.31446261815324
     )
     {
         Duration = duration;
@@ -38,8 +38,8 @@ public class SinteringStep : IProcessStep, ISinteringConditions
     /// <summary>
     /// The solver used to solve this step.
     /// </summary>
-    public ISinteringSolver Solver { get; }
+    public IProcessStepSolver<SinteringStep> Solver { get; }
 
     /// <inheritdoc />
-    public ISystemState Solve(ISystemState inputState) => Solver.Solve(inputState, this);
+    public override ISystemState Solve(ISystemState inputState) => Solver.Solve(this, inputState);
 }

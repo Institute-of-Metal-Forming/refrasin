@@ -15,9 +15,9 @@ namespace RefraSin.TEPSolver;
 /// <summary>
 /// Solver for performing time integration of sintering processes based on the thermodynamic extremal principle (TEP).
 /// </summary>
-public class Solver : ISinteringSolver
+public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 {
-    public Solver(ISolutionStorage solutionStorage, ILoggerFactory loggerFactory, ISolverRoutines routines, ISolverOptions options)
+    public SinteringSolver(ISolutionStorage solutionStorage, ILoggerFactory loggerFactory, ISolverRoutines routines, ISolverOptions options)
     {
         SolutionStorage = solutionStorage;
         LoggerFactory = loggerFactory;
@@ -48,13 +48,14 @@ public class Solver : ISinteringSolver
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
     /// </summary>
-    public ISystemState Solve(ISystemState inputState, ISinteringConditions conditions)
+    public ISystemState Solve(ISinteringStep conditions, ISystemState inputState)
     {
         var session = new SolverSession(this, inputState, conditions);
-        session.StoreCurrentState();
+        session.ReportCurrentState();
         DoTimeIntegration(session);
 
         return new SystemState(
+            session.CurrentState.Id,
             session.CurrentState.Time,
             session.CurrentState.Particles,
             session.MaterialRegistry.Materials,
@@ -89,7 +90,9 @@ public class Solver : ISinteringSolver
             newParticles[contact.To.Id] = contact.To.ApplyTimeStep(newParticles[contact.From.Id], stepVector, session.TimeStepWidth);
         }
 
-        var newState = new SolutionState(session.CurrentState.Time + session.TimeStepWidth,
+        var newState = new SolutionState(
+            Guid.NewGuid(), 
+            session.CurrentState.Time + session.TimeStepWidth,
             newParticles.Values,
             session.CurrentState.Materials,
             session.CurrentState.MaterialInterfaces,
@@ -99,12 +102,12 @@ public class Solver : ISinteringSolver
         StoreSolutionStep(session, stepVector, newState);
 
         session.CurrentState = newState;
-        session.StoreCurrentState();
+        session.ReportCurrentState();
     }
 
     private static void StoreSolutionStep(SolverSession session, StepVector stepVector, SolutionState newState)
     {
-        var solutionStep = new SinteringStateChange(
+        var solutionStep = new SinteringStateTransition(
             session.CurrentState,
             newState,
             session.CurrentState.Particles.Zip(newState.Particles).Select(t =>
@@ -143,7 +146,7 @@ public class Solver : ISinteringSolver
             })
         );
 
-        session.StoreStep(solutionStep);
+        session.ReportTransition(solutionStep);
     }
 
     internal static StepVector TrySolveStepUntilValid(SolverSession session)

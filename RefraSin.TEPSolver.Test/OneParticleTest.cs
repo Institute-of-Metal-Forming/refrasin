@@ -8,6 +8,7 @@ using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
+using RefraSin.TEPSolver;
 using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
@@ -41,7 +42,7 @@ public class OneParticleTest
             builder.AddFile(Path.Combine(_tempDir, "test.log"));
         });
 
-        _solver = new Solver(
+        _solver = new SinteringSolver(
             _solutionStorage,
             loggerFactory,
             SolverRoutines.Default,
@@ -67,6 +68,7 @@ public class OneParticleTest
         _materialInterface = new MaterialInterface(_material.Id, _material.Id, 0.5, 1.65e-10, 0);
 
         _initialState = new SystemState(
+            Guid.NewGuid(),
             0,
             new[] { _particle },
             new[] { _material },
@@ -74,10 +76,11 @@ public class OneParticleTest
         );
 
         _sinteringProcess = new SinteringStep(duration, 2073, _solver);
+        _sinteringProcess.UseStorage(_solutionStorage);
     }
 
     private IParticle _particle;
-    private Solver _solver;
+    private SinteringSolver _solver;
     private IMaterial _material;
     private IMaterialInterface _materialInterface;
     private SystemState _initialState;
@@ -223,11 +226,11 @@ public class OneParticleTest
         var dir = Path.Combine(_tempDir, "nd");
         Directory.CreateDirectory(dir);
 
-        foreach (var (i, step) in _solutionStorage.Steps.Index())
+        foreach (var (i, step) in _solutionStorage.Transitions.Index())
         {
             var plt = new Plot();
 
-            var sinteringStep = (ISinteringStateChange)step;
+            var sinteringStep = (ISinteringStateStateTransition)step;
 
             var coordinates = sinteringStep
                 .ParticleTimeSteps[0]
@@ -240,7 +243,7 @@ public class OneParticleTest
             plt.Add.Line(0, 0, coordinates.Length, 0);
 
             plt.Title(
-                $"t = {step.InputState.Time.ToString(CultureInfo.InvariantCulture)} - {step.OutputState.Time.ToString(CultureInfo.InvariantCulture)}"
+                $"t = {_solutionStorage.GetStateById(step.InputStateId).Time.ToString(CultureInfo.InvariantCulture)} - {_solutionStorage.GetStateById(step.OutputStateId).Time.ToString(CultureInfo.InvariantCulture)}"
             );
 
             plt.SavePng(Path.Combine(dir, $"{i}.png"), 600, 400);
@@ -252,9 +255,9 @@ public class OneParticleTest
         var plt = new Plot();
 
         var steps = _solutionStorage
-            .Steps.Select(s => new ScottPlot.Coordinates(
-                s.InputState.Time,
-                ((ISinteringStateChange)s).TimeStepWidth
+            .Transitions.Select(s => new ScottPlot.Coordinates(
+                _solutionStorage.GetStateById(s.InputStateId).Time,
+                ((ISinteringStateStateTransition)s).TimeStepWidth
             ))
             .ToArray();
         plt.Add.Scatter(steps);

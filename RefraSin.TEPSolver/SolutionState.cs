@@ -11,11 +11,13 @@ namespace RefraSin.TEPSolver;
 
 public class SolutionState : ISystemState
 {
-    public SolutionState(double time, IEnumerable<Particle> particles, IReadOnlyList<IMaterial> materials, IReadOnlyList<IMaterialInterface> materialInterfaces, IEnumerable<(Guid from, Guid to)>? contacts = null)
+    public SolutionState(Guid id, double time, IEnumerable<Particle> particles, IReadOnlyList<IMaterial> materials,
+        IReadOnlyList<IMaterialInterface> materialInterfaces, IEnumerable<(Guid from, Guid to)>? contacts = null)
     {
         Time = time;
         Materials = materials;
         MaterialInterfaces = materialInterfaces;
+        Id = id;
         Particles = particles as IReadOnlyParticleCollection<Particle> ?? new ReadOnlyParticleCollection<Particle>(particles);
         Nodes = Particles.SelectMany(p => p.Nodes).ToNodeCollection();
 
@@ -32,6 +34,9 @@ public class SolutionState : ISystemState
 
         return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
     }
+
+    /// <inheritdoc />
+    public Guid Id { get; }
 
     /// <inheritdoc />
     public double Time { get; }

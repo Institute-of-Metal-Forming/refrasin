@@ -5,10 +5,38 @@ namespace RefraSin.ProcessModel;
 /// </summary>
 public interface IProcessStep
 {
-   /// <summary>
-   /// Run the solution procedure of this step.
-   /// </summary>
-   /// <param name="inputState">the incoming state</param>
-   /// <returns></returns>
-   ISystemState Solve(ISystemState inputState);
+    /// <summary>
+    /// Run the solution procedure of this step.
+    /// </summary>
+    /// <param name="inputState">the incoming state</param>
+    /// <returns></returns>
+    ISystemState Solve(ISystemState inputState);
+
+    event EventHandler<SystemStateReportedEventArgs>? SystemStateReported;
+
+    void ReportSystemState(SystemStateReportedEventArgs reportedEventArgs);
+
+    void ReportSystemState(ISystemState state);
+
+    event EventHandler<SystemStateTransitionReportedEventArgs>? SystemStateTransitionReported;
+
+    void ReportSystemStateTransition(SystemStateTransitionReportedEventArgs reportedEventArgs);
+
+    void ReportSystemStateTransition(ISystemStateTransition state);
+
+    class SystemStateReportedEventArgs(IProcessStep processStep, ISystemState state) : EventArgs
+    {
+        public IProcessStep ProcessStep { get; } = processStep;
+
+        public ISystemState State { get; } = state;
+    }
+
+    class SystemStateTransitionReportedEventArgs(
+        IProcessStep processStep,
+        ISystemStateTransition stateTransition
+    ) : EventArgs
+    {
+        public IProcessStep ProcessStep { get; } = processStep;
+        public ISystemStateTransition StateTransition { get; } = stateTransition;
+    }
 }

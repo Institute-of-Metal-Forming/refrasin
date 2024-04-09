@@ -41,7 +41,7 @@ public interface ISolverSession : ISinteringConditions
     /// <summary>
     /// Factory for loggers used in the session.
     /// </summary>
-    public ILogger<Solver> Logger { get; }
+    public ILogger<SinteringSolver> Logger { get; }
 
     /// <summary>
     /// COllection of solver routines to use.

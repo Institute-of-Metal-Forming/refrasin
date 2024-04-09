@@ -5,7 +5,7 @@ namespace RefraSin.ProcessModel;
 /// <summary>
 /// Process step that chains multiple sub-steps together. Can be nested.
 /// </summary>
-public class ProcessChain : IProcessStep
+public class ProcessChain : ProcessStepBase
 {
     public ProcessChain(IEnumerable<IProcessStep> processSteps)
     {
@@ -13,13 +13,15 @@ public class ProcessChain : IProcessStep
     }
 
     /// <inheritdoc />
-    public ISystemState Solve(ISystemState inputState)
+    public override ISystemState Solve(ISystemState inputState)
     {
         var currentState = inputState;
-        
+        ReportSystemState(inputState);
+
         foreach (var processStep in ProcessSteps)
         {
             currentState = processStep.Solve(currentState);
+            ReportSystemState(currentState);
         }
 
         return currentState;

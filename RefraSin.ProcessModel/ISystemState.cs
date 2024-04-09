@@ -9,6 +9,11 @@ namespace RefraSin.ProcessModel;
 public interface ISystemState
 {
     /// <summary>
+    /// Unique ID of this state.
+    /// </summary>
+    Guid Id { get; }
+    
+    /// <summary>
     /// Time coordinate.
     /// </summary>
     double Time { get; }
