@@ -3,6 +3,7 @@ using RefraSin.MaterialData;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepValidators;
@@ -31,10 +32,9 @@ public interface ISolverSession : ISinteringConditions
     /// </summary>
     public ISolverOptions Options { get; }
 
-    /// <summary>
-    /// Registry for material and material interface data.
-    /// </summary>
-    public IReadOnlyMaterialRegistry MaterialRegistry { get; }
+    public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
+    
+    public IReadOnlyDictionary<Guid, IReadOnlyList<IMaterialInterface>> MaterialInterfaces { get; }
 
     public SolutionState CurrentState { get; }
 
@@ -47,4 +47,6 @@ public interface ISolverSession : ISinteringConditions
     /// COllection of solver routines to use.
     /// </summary>
     public ISolverRoutines Routines { get; }
+    
+    INorm Norm { get; }
 }

@@ -9,7 +9,6 @@ public record Material(
     double VolumeDiffusionCoefficient,
     double EquilibriumVacancyConcentration,
     double Density,
-    double MolarVolume,
     double MolarMass,
     IInterfaceProperties Surface,
     IReadOnlyDictionary<Guid, IInterfaceProperties>? Interfaces = null
@@ -31,7 +30,7 @@ public record Material(
     public double Density { get; } = Density;
 
     /// <inheritdoc />
-    public double MolarVolume { get; } = MolarVolume;
+    public double MolarVolume { get; } = MolarMass / Density;
 
     /// <inheritdoc />
     public double MolarMass { get; } = MolarMass;

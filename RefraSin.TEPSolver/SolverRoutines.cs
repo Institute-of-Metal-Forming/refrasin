@@ -2,6 +2,7 @@ using MathNet.Numerics.LinearAlgebra.Double.Solvers;
 using MathNet.Numerics.LinearAlgebra.Solvers;
 using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
+using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
@@ -13,8 +14,8 @@ public record SolverRoutines(
     IStepEstimator StepEstimator,
     ITimeStepper TimeStepper,
     IEnumerable<IStepValidator> StepValidators,
-    ILagrangianRootFinder LagrangianRootFinder
-) : ISolverRoutines
+    ILagrangianRootFinder LagrangianRootFinder,
+    INormalizer Normalizer) : ISolverRoutines
 {
     public static SolverRoutines Default = new(
         new StepEstimator(),
@@ -27,12 +28,13 @@ public record SolverRoutines(
             new NewtonRaphsonRootFinder(new IterativeSolver(
                     new MlkBiCgStab(),
                     new Iterator<double>(),
-                    new MILU0Preconditioner()
+                    new UnitPreconditioner<double>()
                 )
             ),
             new NewtonRaphsonRootFinder(
                 new LUSolver()
             )
-        )
+        ),
+        new DefaultNormalizer()
     );
 }

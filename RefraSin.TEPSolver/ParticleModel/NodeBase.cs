@@ -26,7 +26,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
             throw new ArgumentException("IDs of the node spec and the given particle instance do not match.");
 
         Particle = particle;
-        Coordinates = new PolarPoint(node.Coordinates.ToTuple()) { SystemSource = () => Particle.LocalCoordinateSystem };
+        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R / solverSession.Norm.Length) { SystemSource = () => Particle.LocalCoordinateSystem };
         SolverSession = solverSession;
     }
 
@@ -136,9 +136,6 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
 
     /// <inheritdoc />
     public abstract ToUpperToLower<double> SurfaceDiffusionCoefficient { get; }
-
-    /// <inheritdoc />
-    public abstract double TransferCoefficient { get; }
 
     /// <inheritdoc />
     public NormalTangential<double> GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential<double>(

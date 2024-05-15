@@ -20,7 +20,7 @@
     </PackageVersion>
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
-    <PackageVersion Include="ScottPlot" Version="5.0.20" />
+    <PackageVersion Include="ScottPlot" Version="5.0.34" />
     <PackageVersion Include="HDF5-CSharp" Version="1.19.0" />
   </ItemGroup>
 </Project>

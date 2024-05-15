@@ -24,7 +24,7 @@ public class TwoParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e1;
+        var duration = 1e3;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6;
         var nodeCountPerParticle = 100;
 
@@ -110,10 +110,7 @@ public class TwoParticleTest
         Directory.CreateDirectory(_tempDir);
         TestContext.WriteLine(_tempDir);
 
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddFile(Path.Combine(_tempDir, "test.log"));
-        });
+        var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
 
         _solver = new SinteringSolver(
             _solutionStorage,
@@ -121,8 +118,7 @@ public class TwoParticleTest
             SolverRoutines.Default,
             new SolverOptions
             {
-                InitialTimeStepWidth = 1,
-                MinTimeStepWidth = 0.1,
+                InitialTimeStepWidth = 10,
                 TimeStepAdaptationFactor = 1.5,
                 RootFindingAccuracy = 1e-6,
             }
@@ -131,25 +127,27 @@ public class TwoParticleTest
         _material = new Material(
             _particle1.MaterialId,
             "Al2O3",
-            1.65e-10,
             0,
             1e-4,
-            0.9,
             1.8e3,
-            101.96e-3
+            101.96e-3,
+            new InterfaceProperties(
+                1.65e-10,
+                0.9
+            )
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 0.5, 1.65e-10, 0);
+        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 1.65e-10, 0.5);
 
         _initialState = new SystemState(
             Guid.NewGuid(),
             0,
-            new[] { _particle1, _particle2 },
-            new[] { _material },
-            new[] { _materialInterface }
+            new[] { _particle1, _particle2 }
         );
 
-        _sinteringProcess = new SinteringStep(duration, 2073, _solver);
+        _sinteringProcess = new SinteringStep(duration, 2073, _solver,
+            new[] { _material },
+            new[] { _materialInterface });
     }
 
     private IParticle _particle1;

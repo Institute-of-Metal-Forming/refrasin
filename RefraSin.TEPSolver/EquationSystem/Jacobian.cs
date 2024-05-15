@@ -121,7 +121,7 @@ public static class Jacobian
             yield return (
                 stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper],
                 -2
-              * node.Particle.DiffusionMaterialFactor
+              * node.Particle.VacancyVolumeEnergy
               * node.SurfaceDistance.ToUpper
               / node.SurfaceDiffusionCoefficient.ToUpper
               * stepVector.FluxToUpper(node)
@@ -246,7 +246,7 @@ public static class Jacobian
     {
         var bilinearPreFactor =
             -2
-          * node.Particle.DiffusionMaterialFactor
+          * node.Particle.VacancyVolumeEnergy
           * node.SurfaceDistance.ToUpper
           / node.SurfaceDiffusionCoefficient.ToUpper;
 

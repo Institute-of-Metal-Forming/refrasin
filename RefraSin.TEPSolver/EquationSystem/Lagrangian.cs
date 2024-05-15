@@ -180,7 +180,7 @@ public static class Lagrangian
     {
         var dissipationTerm =
             2
-          * node.Particle.DiffusionMaterialFactor
+          * node.Particle.VacancyVolumeEnergy
           * node.SurfaceDistance.ToUpper
           / node.SurfaceDiffusionCoefficient.ToUpper
           * stepVector.FluxToUpper(node)
@@ -225,7 +225,7 @@ public static class Lagrangian
         var dissipationFunction =
             particle
                 .Nodes.Select(n =>
-                    n.Particle.DiffusionMaterialFactor
+                    n.Particle.VacancyVolumeEnergy
                   * n.SurfaceDistance.ToUpper
                   * Pow(stepVector.FluxToUpper(n), 2)
                   / n.SurfaceDiffusionCoefficient.ToUpper

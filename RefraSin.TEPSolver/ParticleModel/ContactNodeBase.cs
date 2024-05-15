@@ -42,13 +42,10 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     /// <summary>
     /// Properties of the interface between two materials.
     /// </summary>
-    public IMaterialInterface MaterialInterface =>
-        _materialInterface ??= Particle.MaterialInterfaces[ContactedNode.Particle.Material.Id];
+    public IInterfaceProperties InterfaceProperties =>
+        _materialInterface ??= Particle.InterfaceProperties[ContactedNode.Particle.MaterialId];
 
-    private IMaterialInterface? _materialInterface;
-
-    /// <inheritdoc />
-    public override double TransferCoefficient => MaterialInterface.TransferCoefficient;
+    private IInterfaceProperties? _materialInterface;
 
     /// <inheritdoc />
     public override NormalTangential<Angle> CenterShiftVectorDirection =>
