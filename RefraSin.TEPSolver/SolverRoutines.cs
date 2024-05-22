@@ -25,11 +25,13 @@ public record SolverRoutines(
             new InstabilityDetector()
         },
         new TearingLagrangianRootFinder(
-            new NewtonRaphsonRootFinder(new IterativeSolver(
-                    new MlkBiCgStab(),
-                    new Iterator<double>(),
-                    new UnitPreconditioner<double>()
-                )
+            new NewtonRaphsonRootFinder(
+                new LUSolver()
+                // new IterativeSolver(
+                //     new MlkBiCgStab(),
+                //     new Iterator<double>(),
+                //     new MILU0Preconditioner<double>()
+                // )
             ),
             new NewtonRaphsonRootFinder(
                 new LUSolver()
