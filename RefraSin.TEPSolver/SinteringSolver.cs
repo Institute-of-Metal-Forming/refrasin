@@ -6,8 +6,8 @@ using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
-using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
@@ -142,7 +142,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                         next.RotationAngle - current.RotationAngle,
                         current.Nodes.Select(n =>
                         {
-                            if (n is ContactNodeBase contactNode)
+                            if (n is NeckNode contactNode)
                             {
                                 return new NodeTimeStep(
                                     n.Id,
