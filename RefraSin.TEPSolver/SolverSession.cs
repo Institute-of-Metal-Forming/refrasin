@@ -158,22 +158,28 @@ internal class SolverSession : ISolverSession
             new SystemState(
                 CurrentState.Id,
                 CurrentState.Time * Norm.Time,
-                CurrentState.Particles.Select(p => new RefraSin.ParticleModel.Particle(
-                    p.Id,
-                    new AbsolutePoint(
-                        p.CenterCoordinates.X * Norm.Length,
-                        p.CenterCoordinates.Y * Norm.Length
-                    ),
-                    p.RotationAngle,
-                    p.MaterialId,
-                    p.Nodes.Select(n => new Node(
-                        n.Id,
+                CurrentState.Particles.Select(p =>
+                {
+                    var particleCenter =
+                        new AbsolutePoint(
+                            p.CenterCoordinates.X * Norm.Length,
+                            p.CenterCoordinates.Y * Norm.Length
+                        );
+                    var particleSystem = new PolarCoordinateSystem(particleCenter, p.RotationAngle);
+                    return new RefraSin.ParticleModel.Particle(
                         p.Id,
-                        new PolarPoint(n.Coordinates.Phi, n.Coordinates.R * Norm.Length),
-                        n.Type
-                    ))
-                        .ToArray()
-                ))
+                        particleCenter,
+                        p.RotationAngle,
+                        p.MaterialId,
+                        p.Nodes.Select(n => new Node(
+                                n.Id,
+                                p.Id,
+                                new PolarPoint(n.Coordinates.Phi, n.Coordinates.R * Norm.Length, particleSystem),
+                                n.Type
+                            ))
+                            .ToArray()
+                    );
+                })
             )
         );
         StateMemory.Push(CurrentState);
