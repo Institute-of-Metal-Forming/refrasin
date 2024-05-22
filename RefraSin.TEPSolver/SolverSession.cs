@@ -124,7 +124,7 @@ internal class SolverSession : ISolverSession
 
         if (TimeStepWidth > Options.MaxTimeStepWidth / Norm.Time)
         {
-            TimeStepWidth = Options.MaxTimeStepWidth;
+            TimeStepWidth = Options.MaxTimeStepWidth / Norm.Time;
         }
     }
 
