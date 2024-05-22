@@ -22,7 +22,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e12;
+        var duration = 1e13;
 
         _particle = new ShapeFunctionParticleFactory(
             100e-6,
@@ -30,7 +30,7 @@ public class OneParticleTest
             5,
             0.1,
             Guid.NewGuid()
-        ).GetParticle();
+        ){NodeCount = 20}.GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");

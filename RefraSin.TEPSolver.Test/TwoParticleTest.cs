@@ -25,8 +25,8 @@ public class TwoParticleTest
     public void Setup()
     {
         var duration = 1e3;
-        var initialNeck = 2 * PI / 100 / 2 * 120e-6;
-        var nodeCountPerParticle = 100;
+        var initialNeck = 2 * PI / 100 / 2 * 120e-6 * 5;
+        var nodeCountPerParticle = 20;
 
         var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
         {
@@ -148,6 +148,7 @@ public class TwoParticleTest
         _sinteringProcess = new SinteringStep(duration, 2073, _solver,
             new[] { _material },
             new[] { _materialInterface });
+        _sinteringProcess.UseStorage(_solutionStorage);
     }
 
     private IParticle _particle1;
