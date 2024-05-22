@@ -1,7 +1,5 @@
 using MathNet.Numerics.LinearAlgebra;
 using RefraSin.ParticleModel;
-using RefraSin.ProcessModel;
-using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
@@ -98,12 +96,12 @@ public static class Jacobian
     )
     {
         yield return (
-            stepVector.StepVectorMap[node.Particle, ParticleUnknown.LambdaDissipation],
-            -node.GibbsEnergyGradient.Tangential
+            stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDistance],
+            -node.ContactDistanceGradient.Tangential
         );
         yield return (
-            stepVector.StepVectorMap[node, NodeUnknown.LambdaVolume],
-            node.VolumeGradient.Tangential
+            stepVector.StepVectorMap[node, NodeUnknown.LambdaContactDirection],
+            -node.ContactDirectionGradient.Tangential
         );
     }
 
@@ -126,12 +124,6 @@ public static class Jacobian
               / node.SurfaceDiffusionCoefficient.ToUpper
               * stepVector.FluxToUpper(node)
             );
-
-            if (node is NeckNode neckNode)
-                yield return (
-                    stepVector.StepVectorMap[neckNode, NodeUnknown.TangentialDisplacement],
-                    -neckNode.GibbsEnergyGradient.Tangential
-                );
         }
     }
 
@@ -147,6 +139,18 @@ public static class Jacobian
             node.ContactedNode.Coordinates.R
           * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
         );
+
+        if (node is NeckNode)
+        {
+            yield return (
+                stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
+                -node.ContactDistanceGradient.Normal
+            );
+            yield return (
+                stepVector.StepVectorMap[node.ContactedNode, NodeUnknown.TangentialDisplacement],
+                -node.ContactedNode.ContactDistanceGradient.Normal
+            );
+        }
     }
 
     private static JacobianRow ContactConstraintDirection(
@@ -162,6 +166,18 @@ public static class Jacobian
           / contact.Distance
           * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
         );
+
+        if (node is NeckNode)
+        {
+            yield return (
+                stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
+                -node.ContactDirectionGradient.Normal
+            );
+            yield return (
+                stepVector.StepVectorMap[node.ContactedNode, NodeUnknown.TangentialDisplacement],
+                -node.ContactedNode.ContactDirectionGradient.Normal
+            );
+        }
     }
 
     private static JacobianRows YieldContactNodesEquations(
@@ -173,6 +189,12 @@ public static class Jacobian
         {
             yield return ContactConstraintDistance(stepVector, contact, contactNode);
             yield return ContactConstraintDirection(stepVector, contact, contactNode);
+
+            if (contactNode is NeckNode neckNode)
+            {
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode.ContactedNode);
+            }
         }
     }
 
@@ -215,10 +237,6 @@ public static class Jacobian
         foreach (var node in nodes)
         {
             yield return StateVelocityDerivativeNormal(stepVector, node);
-
-            if (node is NeckNode neckNode)
-                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
-
             yield return FluxDerivative(stepVector, node);
             yield return RequiredConstraint(stepVector, node);
         }
@@ -265,11 +283,6 @@ public static class Jacobian
             stepVector.StepVectorMap[node, NodeUnknown.NormalDisplacement],
             node.VolumeGradient.Normal
         );
-        if (node is NeckNode neckNode)
-            yield return (
-                stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
-                node.VolumeGradient.Tangential
-            );
         yield return (stepVector.StepVectorMap[node, NodeUnknown.FluxToUpper], -1);
         yield return (stepVector.StepVectorMap[node.Lower, NodeUnknown.FluxToUpper], 1);
     }

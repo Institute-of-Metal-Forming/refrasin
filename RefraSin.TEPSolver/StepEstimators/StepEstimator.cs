@@ -38,8 +38,17 @@ class StepEstimator : IStepEstimator
 
             foreach (var node in contact.FromNodes)
             {
-                yield return 1;
-                yield return 1;
+                yield return 0;
+                yield return 0;
+
+                if (node is NeckNode)
+                    yield return 0;
+            }
+
+            foreach (var node in contact.ToNodes)
+            {
+                if (node is NeckNode)
+                    yield return 0;
             }
         }
     }
@@ -48,12 +57,9 @@ class StepEstimator : IStepEstimator
     {
         foreach (var node in nodes)
         {
-            yield return 1;
+            yield return 0;
             yield return GuessFluxToUpper(node);
-            yield return GuessTangentialDisplacement(node);
-
-            if (node is NeckNode)
-                yield return 0;
+            yield return GuessNormalDisplacement(node);
         }
     }
 
@@ -85,19 +91,11 @@ class StepEstimator : IStepEstimator
         return displacement;
     }
 
-    private static double GuessFluxToUpper(NodeBase node)
-    {
-        var vacancyConcentrationGradient =
-            GuessVacancyConcentration(node.Upper) - GuessVacancyConcentration(node);
-        return -node.SurfaceDiffusionCoefficient.ToUpper * vacancyConcentrationGradient;
-    }
+    private static double GuessFluxToUpper(NodeBase node) =>
+        -node.SurfaceDiffusionCoefficient.ToUpper * (GuessVacancyConcentration(node) - GuessVacancyConcentration(node.Upper))
+      / Math.Pow(node.SurfaceDistance.ToUpper, 2);
 
     private static double GuessVacancyConcentration(NodeBase node) =>
-        (
-            node is not NeckNode
-                ? node.GibbsEnergyGradient.Normal
-                : node.GibbsEnergyGradient.Tangential
-        )
-      / node.Particle.VacancyVolumeEnergy
-      / Math.Pow(node.SurfaceDistance.ToUpper, 2);
+        (node is not NeckNode ? node.GibbsEnergyGradient.Normal : node.GibbsEnergyGradient.Normal)
+      / node.Particle.VacancyVolumeEnergy;
 }

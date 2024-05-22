@@ -1,6 +1,4 @@
 using RefraSin.ParticleModel;
-using RefraSin.ProcessModel;
-using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
@@ -60,10 +58,6 @@ public static class Lagrangian
         foreach (var node in nodes)
         {
             yield return StateVelocityDerivativeNormal(stepVector, node);
-
-            if (node is NeckNode neckNode)
-                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
-
             yield return FluxDerivative(stepVector, node);
             yield return RequiredConstraint(stepVector, node);
         }
@@ -73,13 +67,10 @@ public static class Lagrangian
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
     ) =>
-        contacts.SelectMany(contact =>
-        {
-            return Join(
-                YieldContactNodesEquations(stepVector, contact),
-                YieldContactAuxiliaryDerivatives(stepVector, contact)
-            );
-        });
+        contacts.SelectMany(contact => Join(
+            YieldContactNodesEquations(stepVector, contact),
+            YieldContactAuxiliaryDerivatives(stepVector, contact)
+        ));
 
     private static IEnumerable<double> YieldContactNodesEquations(
         StepVector stepVector,
@@ -91,6 +82,12 @@ public static class Lagrangian
             var constraints = ContactConstraints(stepVector, contact, contactNode);
             yield return constraints.distance;
             yield return constraints.direction;
+
+            if (contactNode is NeckNode neckNode)
+            {
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode.ContactedNode);
+            }
         }
     }
 
@@ -200,8 +197,10 @@ public static class Lagrangian
         var tangentialVolumeTerm = 0.0;
 
         if (node is NeckNode neckNode)
+        {
             tangentialVolumeTerm =
                 node.VolumeGradient.Tangential * stepVector.TangentialDisplacement(neckNode);
+        }
 
         var fluxTerm = stepVector.FluxToUpper(node) - stepVector.FluxToUpper(node.Lower);
 
