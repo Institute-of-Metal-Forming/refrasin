@@ -49,13 +49,23 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
 
     /// <inheritdoc />
     public override NormalTangential<Angle> CenterShiftVectorDirection =>
-        _centerShiftVectorDirection ??= new NormalTangential<Angle>(
-            Pi
-                - (Coordinates.Phi - ContactDirection)
-                + (Pi - SurfaceVectorAngle.Normal - SurfaceRadiusAngle.ToLower),
-            -(Coordinates.Phi - ContactDirection)
-                + (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToLower)
-        );
+        _centerShiftVectorDirection ??= IsParentsNode
+            ? new NormalTangential<Angle>(
+                Pi
+                    - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
+                    + (Pi - SurfaceVectorAngle.Normal - SurfaceRadiusAngle.ToLower),
+                Pi
+                    - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
+                    - (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToUpper)
+            )
+            : new NormalTangential<Angle>(
+                Pi
+                    + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
+                    - (Pi - SurfaceVectorAngle.Normal - SurfaceRadiusAngle.ToUpper),
+                Pi
+                    + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
+                    - (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToUpper)
+            );
 
     private NormalTangential<Angle>? _centerShiftVectorDirection;
 

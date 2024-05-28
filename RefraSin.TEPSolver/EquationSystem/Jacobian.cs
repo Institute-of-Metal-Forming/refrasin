@@ -144,11 +144,11 @@ public static class Jacobian
         {
             yield return (
                 stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
-                -node.ContactDistanceGradient.Normal
+                -node.ContactDistanceGradient.Tangential
             );
             yield return (
                 stepVector.StepVectorMap[node.ContactedNode, NodeUnknown.TangentialDisplacement],
-                -node.ContactedNode.ContactDistanceGradient.Normal
+                -node.ContactedNode.ContactDistanceGradient.Tangential
             );
         }
     }
@@ -171,11 +171,11 @@ public static class Jacobian
         {
             yield return (
                 stepVector.StepVectorMap[node, NodeUnknown.TangentialDisplacement],
-                -node.ContactDirectionGradient.Normal
+                -node.ContactDirectionGradient.Tangential
             );
             yield return (
                 stepVector.StepVectorMap[node.ContactedNode, NodeUnknown.TangentialDisplacement],
-                -node.ContactedNode.ContactDirectionGradient.Normal
+                -node.ContactedNode.ContactDirectionGradient.Tangential
             );
         }
     }
