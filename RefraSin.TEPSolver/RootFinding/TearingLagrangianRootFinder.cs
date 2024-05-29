@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using RefraSin.Numerics.Exceptions;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
@@ -18,19 +19,48 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
     {
         var stepVector = initialGuess.Copy();
 
+        int i;
+
+        for (i = 0; i < solverSession.Options.MaxIterationCount; i++)
+        {
+            var oldVector = stepVector.Copy();
+
+            foreach (var particle in currentState.Particles)
+            {
+                var particleSolution = SolveParticleBlock(particle, stepVector);
+                stepVector.UpdateParticleBlock(particle, particleSolution.AsArray());
+            }
+
+            var borderSolution = SolveBorderBlock(currentState, stepVector);
+            stepVector.UpdateBorderBlock(borderSolution.AsArray());
+
+            if ((stepVector - oldVector).L2Norm() < solverSession.Options.IterationPrecision * stepVector.L2Norm())
+                return stepVector;
+        }
+
+        throw new UncriticalIterationInterceptedException($"{nameof(TearingLagrangianRootFinder)}.{nameof(FindRoot)}",
+            InterceptReason.MaxIterationCountExceeded, i);
+    }
+
+    private Vector<double> SolveBorderBlock(
+        SolutionState currentState,
+        StepVector stepVector
+    )
+    {
         var solution = BorderBlockRootFinder.FindRoot(
             Fun,
             Jac,
             new DenseVector(stepVector.BorderBlock())
         );
 
-        stepVector.UpdateBorderBlock(solution.AsArray());
-        return stepVector;
+        return solution;
 
         Vector<double> Fun(Vector<double> vector)
         {
             stepVector.UpdateBorderBlock(vector.AsArray());
-            var result = TearAndEvaluateFunctionalBlock(currentState, stepVector);
+            var result = Lagrangian
+                .YieldFunctionalBlockEquations(currentState, stepVector)
+                .ToArray();
             return new DenseVector(result);
         }
 
@@ -40,22 +70,6 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
             var result = Jacobian.BorderBlock(currentState, stepVector);
             return result;
         }
-    }
-
-    private double[] TearAndEvaluateFunctionalBlock(
-        SolutionState currentState,
-        StepVector stepVector
-    )
-    {
-        foreach (var particle in currentState.Particles)
-        {
-            var particleSolution = SolveParticleBlock(particle, stepVector);
-            stepVector.UpdateParticleBlock(particle, particleSolution.AsArray());
-        }
-
-        return Lagrangian
-            .YieldFunctionalBlockEquations(currentState, stepVector)
-            .ToArray();
     }
 
     private Vector<double> SolveParticleBlock(
