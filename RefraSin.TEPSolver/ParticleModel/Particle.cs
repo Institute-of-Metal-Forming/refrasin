@@ -105,16 +105,17 @@ public class Particle : IParticle
         }
         else
         {
+            var contact = SolverSession.CurrentState.Contacts[parent.Id, previousState.Id];
             var displacementVector = new PolarVector(
-                stepVector.AngleDisplacement(parent, previousState) * timeStepWidth,
-                stepVector.RadialDisplacement(parent, previousState) * timeStepWidth,
+                stepVector.AngleDisplacement(contact) * timeStepWidth,
+                stepVector.RadialDisplacement(contact) * timeStepWidth,
                 parent.LocalCoordinateSystem
             );
             CenterCoordinates = previousState.CenterCoordinates + displacementVector.Absolute;
 
             RotationAngle = (
                 previousState.RotationAngle
-              + stepVector.RotationDisplacement(parent, previousState) * timeStepWidth
+              + stepVector.RotationDisplacement(contact) * timeStepWidth
             ).Reduce();
         }
 

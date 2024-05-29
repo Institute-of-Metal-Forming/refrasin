@@ -6,7 +6,7 @@ namespace RefraSin.ParticleModel;
 public class ParticleContact : UndirectedEdge<IParticle>, IParticleContact
 {
     /// <inheritdoc />
-    public ParticleContact(IEdge<IParticle> edge, double distance, Angle directionFrom, Angle directionTo) : base(edge)
+    public ParticleContact(Guid id, IParticle from, IParticle to, double distance, Angle directionFrom, Angle directionTo) : base(id, from, to)
     {
         Distance = distance;
         DirectionFrom = directionFrom;
@@ -20,8 +20,16 @@ public class ParticleContact : UndirectedEdge<IParticle>, IParticleContact
         DirectionFrom = directionFrom;
         DirectionTo = directionTo;
     }
+    
+    /// <inheritdoc />
+    public ParticleContact(IEdge<IParticle> edge, double distance, Angle directionFrom, Angle directionTo) : base(edge)
+    {
+        Distance = distance;
+        DirectionFrom = directionFrom;
+        DirectionTo = directionTo;
+    }
 
-    public ParticleContact(IParticleContact template) : base(template.From, template.To)
+    public ParticleContact(IParticleContact template) : base(template)
     {
         Distance = template.Distance;
         DirectionFrom = template.DirectionFrom;

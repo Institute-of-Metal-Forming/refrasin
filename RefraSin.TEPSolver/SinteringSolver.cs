@@ -116,7 +116,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             Guid.NewGuid(),
             session.CurrentState.Time + session.TimeStepWidth,
             newParticles.Values,
-            session.CurrentState.Contacts.Select(c => (c.From.Id, c.To.Id))
+            session.CurrentState.Contacts.Select(c => (c.Id, c.From.Id, c.To.Id))
         );
 
         StoreSolutionStep(session, stepVector, newState);

@@ -9,10 +9,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class ParticleContact : DirectedEdge<Particle>, IParticleContact
 {
     /// <inheritdoc />
-    public ParticleContact(IEdge<Particle> edge) : this(edge.From, edge.To) { }
-
-    /// <inheritdoc />
-    public ParticleContact(Particle from, Particle to) : base(from, to)
+    public ParticleContact(Guid id, Particle from, Particle to) : base(id, from, to)
     {
         Distance = from.CenterCoordinates.DistanceTo(to.CenterCoordinates);
         DirectionFrom = new PolarVector(to.CenterCoordinates - from.CenterCoordinates, from.LocalCoordinateSystem).Phi;

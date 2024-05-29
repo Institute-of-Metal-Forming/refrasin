@@ -1,14 +1,11 @@
 namespace RefraSin.Graphs;
 
-public class UndirectedEdge<TVertex> : IEdge<TVertex> where TVertex : IVertex
+public class UndirectedEdge<TVertex>(Guid id, TVertex from, TVertex to) : IEdge<TVertex>
+    where TVertex : IVertex
 {
-    public UndirectedEdge(IEdge<TVertex> edge) : this(edge.From, edge.To) { }
+    public UndirectedEdge(IEdge<TVertex> edge) : this(edge.Id, edge.From, edge.To) { }
 
-    public UndirectedEdge(TVertex from, TVertex to)
-    {
-        From = from;
-        To = to;
-    }
+    public UndirectedEdge(TVertex from, TVertex to) : this(Helper.MergeGuids(from.Id, to.Id), from, to) { }
 
     public void Deconstruct(out TVertex start, out TVertex end)
     {
@@ -17,10 +14,13 @@ public class UndirectedEdge<TVertex> : IEdge<TVertex> where TVertex : IVertex
     }
 
     /// <inheritdoc />
-    public TVertex From { get; }
+    public Guid Id { get; } = id;
 
     /// <inheritdoc />
-    public TVertex To { get; }
+    public TVertex From { get; } = from;
+
+    /// <inheritdoc />
+    public TVertex To { get; } = to;
 
     /// <inheritdoc />
     public bool IsDirected => false;
