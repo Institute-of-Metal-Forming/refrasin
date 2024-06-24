@@ -1,6 +1,5 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.RootFinding;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
@@ -88,6 +87,6 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
     }
 
     public IRootFinder ParticleBlockRootFinder { get; } = particleBlockRootFinder;
-    
+
     public IRootFinder BorderBlockRootFinder { get; } = borderBlockRootFinder;
 }
