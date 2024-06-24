@@ -22,7 +22,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e12;
+        var duration = 1e6;
 
         _particle = new ShapeFunctionParticleFactory(
             100e-6,
@@ -30,7 +30,7 @@ public class OneParticleTest
             5,
             0.1,
             Guid.NewGuid()
-        ).GetParticle();
+        ){NodeCount = 20}.GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
@@ -45,7 +45,8 @@ public class OneParticleTest
             SolverRoutines.Default,
             new SolverOptions
             {
-                InitialTimeStepWidth = 1e2,
+                InitialTimeStepWidth = 1e1,
+                MaxTimeStepWidth = 0.5e4,
                 TimeStepAdaptationFactor = 1.5,
             }
         );
@@ -58,7 +59,7 @@ public class OneParticleTest
             1.8e3,
             101.96e-3,
             new InterfaceProperties(
-                4.557e-20,
+                1.65e-10,
                 0.9
             )
         );
@@ -216,7 +217,7 @@ public class OneParticleTest
 
             plt.Title($"t = {state.Time.ToString(CultureInfo.InvariantCulture)}");
 
-            plt.SavePng(Path.Combine(dir, $"{i}.png"), 3000, 3000);
+            plt.SavePng(Path.Combine(dir, $"{i}.png"), 1600, 900);
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Globalization;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
@@ -167,7 +168,7 @@ public class Particle : IParticle
         new(parent, this, stepVector, timeStepWidth);
 
     /// <inheritdoc/>
-    public override string ToString() => $"{GetType().Name} {Id}";
+    public override string ToString() => $"{GetType().Name} {Id} @ {CenterCoordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
 
     /// <inheritdoc />
     public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;

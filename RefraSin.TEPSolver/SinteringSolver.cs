@@ -68,6 +68,10 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 
     private static void DoTimeIntegration(SolverSession session)
     {
+        session.Logger.LogInformation(
+            "Starting time integration."
+        );
+
         while (session.CurrentState.Time < session.EndTime)
         {
             var stepVector = TrySolveStepUntilValid(session);
@@ -76,6 +80,9 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             CreateNewState(session, stepVector);
             session.TimeStepIndex += 1;
             session.MayIncreaseTimeStepWidth();
+
+            session.Logger.LogInformation("Time step {Index} successfully calculated. ({Time}/{EndTime})", session.TimeStepIndex,
+                session.CurrentState.Time, session.EndTime);
         }
 
         session.Logger.LogInformation(
@@ -148,7 +155,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                                     n.Id,
                                     stepVector.NormalDisplacement(n) * session.Norm.Length,
                                     stepVector.TangentialDisplacement(contactNode)
-                                        * session.Norm.Length,
+                                  * session.Norm.Length,
                                     new ToUpperToLower<double>(
                                         stepVector.FluxToUpper(n) * session.Norm.Volume,
                                         stepVector.FluxToUpper(n.Lower) * session.Norm.Volume
@@ -221,11 +228,16 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             return session.Routines.TimeStepper.Step(
                 session,
                 session.LastStep
-                    ?? session.Routines.StepEstimator.EstimateStep(session, session.CurrentState)
+             ?? session.Routines.StepEstimator.EstimateStep(session, session.CurrentState)
             );
         }
-        catch (NonConvergenceException)
+        catch (NonConvergenceException e)
         {
+            session.Logger.LogError(
+                e,
+                "Step solution did not converge. Try again with freshly estimated initial values."
+            );
+
             return session.Routines.TimeStepper.Step(
                 session,
                 session.Routines.StepEstimator.EstimateStep(session, session.CurrentState)
