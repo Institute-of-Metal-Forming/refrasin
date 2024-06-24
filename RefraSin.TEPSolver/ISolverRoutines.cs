@@ -1,3 +1,4 @@
+using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
@@ -26,4 +27,9 @@ public interface ISolverRoutines
     /// Subroutine to calculate the root of the Lagrangian gradient.
     /// </summary>
     ILagrangianRootFinder LagrangianRootFinder { get; }
+    
+    /// <summary>
+    /// Subroutine to normalize and denormalize states for solution and reporting.
+    /// </summary>
+    INormalizer Normalizer { get; }
 }

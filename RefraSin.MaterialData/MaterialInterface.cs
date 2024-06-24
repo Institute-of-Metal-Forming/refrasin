@@ -6,10 +6,8 @@ namespace RefraSin.MaterialData;
 public record MaterialInterface(
         Guid From,
         Guid To,
-        double InterfaceEnergy,
         double DiffusionCoefficient,
-        double TransferCoefficient
-    )
+        double Energy)
     : IMaterialInterface
 {
     /// <inheritdoc />
@@ -19,11 +17,8 @@ public record MaterialInterface(
     public Guid To { get; } = To;
 
     /// <inheritdoc />
-    public double InterfaceEnergy { get; } = InterfaceEnergy;
-
-    /// <inheritdoc />
     public double DiffusionCoefficient { get; } = DiffusionCoefficient;
 
     /// <inheritdoc />
-    public double TransferCoefficient { get; } = TransferCoefficient;
+    public double Energy { get; } = Energy;
 }

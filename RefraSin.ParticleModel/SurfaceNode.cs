@@ -20,8 +20,8 @@ public record SurfaceNode(
     NormalTangential<double> GibbsEnergyGradient,
     NormalTangential<double> VolumeGradient,
     ToUpperToLower<double> SurfaceEnergy,
-    ToUpperToLower<double> SurfaceDiffusionCoefficient,
-    double TransferCoefficient) : Node(Id, ParticleId, Coordinates, NodeType.SurfaceNode), ISurfaceNode
+    ToUpperToLower<double> SurfaceDiffusionCoefficient
+   ) : Node(Id, ParticleId, Coordinates, NodeType.SurfaceNode), ISurfaceNode
 {
     public SurfaceNode(ISurfaceNode template) : this(
         template.Id,
@@ -36,7 +36,6 @@ public record SurfaceNode(
         template.GibbsEnergyGradient,
         template.VolumeGradient,
         template.SurfaceEnergy,
-        template.SurfaceDiffusionCoefficient,
-        template.TransferCoefficient
+        template.SurfaceDiffusionCoefficient
     ) { }
 }

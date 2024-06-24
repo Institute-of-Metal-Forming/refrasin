@@ -11,12 +11,9 @@ namespace RefraSin.TEPSolver;
 
 public class SolutionState : ISystemState
 {
-    public SolutionState(Guid id, double time, IEnumerable<Particle> particles, IReadOnlyList<IMaterial> materials,
-        IReadOnlyList<IMaterialInterface> materialInterfaces, IEnumerable<(Guid from, Guid to)>? contacts = null)
+    public SolutionState(Guid id, double time, IEnumerable<Particle> particles, IEnumerable<(Guid from, Guid to)>? contacts = null)
     {
         Time = time;
-        Materials = materials;
-        MaterialInterfaces = materialInterfaces;
         Id = id;
         Particles = particles as IReadOnlyParticleCollection<Particle> ?? new ReadOnlyParticleCollection<Particle>(particles);
         Nodes = Particles.SelectMany(p => p.Nodes).ToNodeCollection();
@@ -47,16 +44,8 @@ public class SolutionState : ISystemState
     /// <inheritdoc cref="ISystemState.Particles"/>>
     public IReadOnlyParticleCollection<Particle> Particles { get; }
 
-    /// <inheritdoc cref="ISystemState.Contacts" />
     public IReadOnlyParticleContactCollection<ParticleContact> Contacts { get; }
-
-    /// <inheritdoc />
-    public IReadOnlyList<IMaterial> Materials { get; }
-
-    /// <inheritdoc />
-    public IReadOnlyList<IMaterialInterface> MaterialInterfaces { get; }
 
     IReadOnlyNodeCollection<INode> ISystemState.Nodes => Nodes;
     IReadOnlyParticleCollection<IParticle> ISystemState.Particles => Particles;
-    IReadOnlyParticleContactCollection<IParticleContact> ISystemState.Contacts => Contacts;
 }

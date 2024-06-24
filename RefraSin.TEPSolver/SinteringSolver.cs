@@ -6,8 +6,8 @@ using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
-using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
@@ -17,7 +17,12 @@ namespace RefraSin.TEPSolver;
 /// </summary>
 public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 {
-    public SinteringSolver(ISolutionStorage solutionStorage, ILoggerFactory loggerFactory, ISolverRoutines routines, ISolverOptions options)
+    public SinteringSolver(
+        ISolutionStorage solutionStorage,
+        ILoggerFactory loggerFactory,
+        ISolverRoutines routines,
+        ISolverOptions options
+    )
     {
         SolutionStorage = solutionStorage;
         LoggerFactory = loggerFactory;
@@ -57,9 +62,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         return new SystemState(
             session.CurrentState.Id,
             session.CurrentState.Time,
-            session.CurrentState.Particles,
-            session.MaterialRegistry.Materials,
-            session.MaterialRegistry.MaterialInterfaces
+            session.CurrentState.Particles
         );
     }
 
@@ -75,27 +78,37 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             session.MayIncreaseTimeStepWidth();
         }
 
-        session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", session.TimeStepIndex + 1);
+        session.Logger.LogInformation(
+            "End time successfully reached after {StepCount} steps.",
+            session.TimeStepIndex + 1
+        );
     }
 
     private static void CreateNewState(SolverSession session, StepVector stepVector)
     {
         var newParticles = new Dictionary<Guid, Particle>()
         {
-            [session.CurrentState.Particles.Root.Id] = session.CurrentState.Particles.Root.ApplyTimeStep(null, stepVector, session.TimeStepWidth)
+            [session.CurrentState.Particles.Root.Id] =
+                session.CurrentState.Particles.Root.ApplyTimeStep(
+                    null,
+                    stepVector,
+                    session.TimeStepWidth
+                )
         };
 
         foreach (var contact in session.CurrentState.Contacts)
         {
-            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(newParticles[contact.From.Id], stepVector, session.TimeStepWidth);
+            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(
+                newParticles[contact.From.Id],
+                stepVector,
+                session.TimeStepWidth
+            );
         }
 
         var newState = new SolutionState(
-            Guid.NewGuid(), 
+            Guid.NewGuid(),
             session.CurrentState.Time + session.TimeStepWidth,
             newParticles.Values,
-            session.CurrentState.Materials,
-            session.CurrentState.MaterialInterfaces,
             session.CurrentState.Contacts.Select(c => (c.From.Id, c.To.Id))
         );
 
@@ -105,45 +118,58 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         session.ReportCurrentState();
     }
 
-    private static void StoreSolutionStep(SolverSession session, StepVector stepVector, SolutionState newState)
+    private static void StoreSolutionStep(
+        SolverSession session,
+        StepVector stepVector,
+        SolutionState newState
+    )
     {
         var solutionStep = new SinteringStateTransition(
             session.CurrentState,
             newState,
-            session.CurrentState.Particles.Zip(newState.Particles).Select(t =>
-            {
-                var (current, next) = t;
+            session
+                .CurrentState.Particles.Zip(newState.Particles)
+                .Select(t =>
+                {
+                    var (current, next) = t;
 
-                var centerShift = next.CenterCoordinates - current.CenterCoordinates;
+                    var centerShift = next.CenterCoordinates - current.CenterCoordinates;
 
-                return new ParticleTimeStep(
-                    current.Id,
-                    centerShift.X,
-                    centerShift.Y,
-                    next.RotationAngle - current.RotationAngle,
-                    current.Nodes.Select(n =>
-                    {
-                        if (n is ContactNodeBase contactNode)
+                    return new ParticleTimeStep(
+                        current.Id,
+                        centerShift.X * session.Norm.Length,
+                        centerShift.Y * session.Norm.Length,
+                        next.RotationAngle - current.RotationAngle,
+                        current.Nodes.Select(n =>
                         {
+                            if (n is NeckNode contactNode)
+                            {
+                                return new NodeTimeStep(
+                                    n.Id,
+                                    stepVector.NormalDisplacement(n) * session.Norm.Length,
+                                    stepVector.TangentialDisplacement(contactNode)
+                                        * session.Norm.Length,
+                                    new ToUpperToLower<double>(
+                                        stepVector.FluxToUpper(n) * session.Norm.Volume,
+                                        stepVector.FluxToUpper(n.Lower) * session.Norm.Volume
+                                    ),
+                                    0
+                                );
+                            }
+
                             return new NodeTimeStep(
                                 n.Id,
-                                stepVector.NormalDisplacement(n),
-                                stepVector.TangentialDisplacement(contactNode),
-                                new ToUpperToLower<double>(stepVector.FluxToUpper(n), stepVector.FluxToUpper(n.Lower)),
+                                stepVector.NormalDisplacement(n) * session.Norm.Length,
+                                0,
+                                new ToUpperToLower<double>(
+                                    stepVector.FluxToUpper(n) * session.Norm.Volume,
+                                    stepVector.FluxToUpper(n) * session.Norm.Volume
+                                ),
                                 0
                             );
-                        }
-
-                        return new NodeTimeStep(
-                            n.Id,
-                            stepVector.NormalDisplacement(n),
-                            0,
-                            new ToUpperToLower<double>(stepVector.FluxToUpper(n), stepVector.FluxToUpper(n)),
-                            0
-                        );
-                    })
-                );
-            })
+                        })
+                    );
+                })
         );
 
         session.ReportTransition(solutionStep);
@@ -168,7 +194,10 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             }
             catch (Exception e)
             {
-                session.Logger.LogError(e, "Exception occured during time step solution. Lowering time step width and try again.");
+                session.Logger.LogError(
+                    e,
+                    "Exception occured during time step solution. Lowering time step width and try again."
+                );
                 session.DecreaseTimeStepWidth();
 
                 if (e is InstabilityException)
@@ -178,19 +207,29 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             }
         }
 
-        throw new CriticalIterationInterceptedException(nameof(TrySolveStepUntilValid), InterceptReason.MaxIterationCountExceeded, i);
+        throw new CriticalIterationInterceptedException(
+            nameof(TrySolveStepUntilValid),
+            InterceptReason.MaxIterationCountExceeded,
+            i
+        );
     }
 
     private static StepVector TrySolveStepWithLastStepOrGuess(SolverSession session)
     {
         try
         {
-            return session.Routines.TimeStepper.Step(session,
-                session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, session.CurrentState));
+            return session.Routines.TimeStepper.Step(
+                session,
+                session.LastStep
+                    ?? session.Routines.StepEstimator.EstimateStep(session, session.CurrentState)
+            );
         }
         catch (NonConvergenceException)
         {
-            return session.Routines.TimeStepper.Step(session, session.Routines.StepEstimator.EstimateStep(session, session.CurrentState));
+            return session.Routines.TimeStepper.Step(
+                session,
+                session.Routines.StepEstimator.EstimateStep(session, session.CurrentState)
+            );
         }
     }
 }

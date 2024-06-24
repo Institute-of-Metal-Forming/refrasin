@@ -58,7 +58,7 @@ class StepEstimator : IStepEstimator
             yield return 1;
             yield return GuessFluxToUpper(conditions, node);
             yield return GuessNormalDisplacement(conditions, node);
-            
+
             if (node is NeckNode)
                 yield return 0;
         }
@@ -82,10 +82,8 @@ class StepEstimator : IStepEstimator
     private static double GuessFluxToUpper(ISinteringConditions conditions, NodeBase node)
     {
         var vacancyConcentrationGradient =
-            -node.Particle.Material.EquilibriumVacancyConcentration
-          / (conditions.GasConstant * conditions.Temperature)
-          * (node.Upper.GibbsEnergyGradient.Normal - node.GibbsEnergyGradient.Normal)
-          * node.Particle.Material.MolarVolume
+            -(node.Upper.GibbsEnergyGradient.Normal - node.GibbsEnergyGradient.Normal)
+          / node.Particle.VacancyVolumeEnergy
           / Math.Pow(node.SurfaceDistance.ToUpper, 2);
         return -node.SurfaceDiffusionCoefficient.ToUpper * vacancyConcentrationGradient;
     }

@@ -6,12 +6,12 @@ namespace RefraSin.MaterialData;
 public record Material(
     Guid Id,
     string Name,
-    double SurfaceDiffusionCoefficient,
-    double BulkDiffusionCoefficient,
+    double VolumeDiffusionCoefficient,
     double EquilibriumVacancyConcentration,
-    double SurfaceEnergy,
     double Density,
-    double MolarWeight
+    double MolarMass,
+    IInterfaceProperties Surface,
+    IReadOnlyDictionary<Guid, IInterfaceProperties>? Interfaces = null
 ) : IMaterial
 {
     /// <inheritdoc />
@@ -21,23 +21,23 @@ public record Material(
     public string Name { get; } = Name;
 
     /// <inheritdoc />
-    public double SurfaceDiffusionCoefficient { get; } = SurfaceDiffusionCoefficient;
-
-    /// <inheritdoc />
-    public double BulkDiffusionCoefficient { get; } = BulkDiffusionCoefficient;
+    public double VolumeDiffusionCoefficient { get; } = VolumeDiffusionCoefficient;
 
     /// <inheritdoc />
     public double EquilibriumVacancyConcentration { get; } = EquilibriumVacancyConcentration;
 
     /// <inheritdoc />
-    public double SurfaceEnergy { get; } = SurfaceEnergy;
-
-    /// <inheritdoc />
-    public double MolarVolume { get; } = MolarWeight / Density;
-
-    /// <inheritdoc />
     public double Density { get; } = Density;
 
     /// <inheritdoc />
-    public double MolarWeight { get; } = MolarWeight;
+    public double MolarVolume { get; } = MolarMass / Density;
+
+    /// <inheritdoc />
+    public double MolarMass { get; } = MolarMass;
+
+    /// <inheritdoc />
+    public IInterfaceProperties Surface { get; } = Surface;
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<Guid, IInterfaceProperties> Interfaces { get; } = Interfaces ?? new Dictionary<Guid, IInterfaceProperties>();
 }

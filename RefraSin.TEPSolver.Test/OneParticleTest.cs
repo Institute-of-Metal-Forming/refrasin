@@ -22,7 +22,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e2;
+        var duration = 1e12;
 
         _particle = new ShapeFunctionParticleFactory(
             100e-6,
@@ -37,10 +37,7 @@ public class OneParticleTest
         Directory.CreateDirectory(_tempDir);
         TestContext.WriteLine(_tempDir);
 
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddFile(Path.Combine(_tempDir, "test.log"));
-        });
+        var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
 
         _solver = new SinteringSolver(
             _solutionStorage,
@@ -48,8 +45,7 @@ public class OneParticleTest
             SolverRoutines.Default,
             new SolverOptions
             {
-                InitialTimeStepWidth = 1,
-                MinTimeStepWidth = 0.1,
+                InitialTimeStepWidth = 1e2,
                 TimeStepAdaptationFactor = 1.5,
             }
         );
@@ -57,25 +53,27 @@ public class OneParticleTest
         _material = new Material(
             _particle.MaterialId,
             "Al2O3",
-            1.65e-10,
             0,
             1e-4,
-            0.9,
             1.8e3,
-            101.96e-3
+            101.96e-3,
+            new InterfaceProperties(
+                4.557e-20,
+                0.9
+            )
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 0.5, 1.65e-10, 0);
+        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 1.65e-10, 0.5);
 
         _initialState = new SystemState(
             Guid.NewGuid(),
             0,
-            new[] { _particle },
-            new[] { _material },
-            new[] { _materialInterface }
+            new[] { _particle }
         );
 
-        _sinteringProcess = new SinteringStep(duration, 2073, _solver);
+        _sinteringProcess = new SinteringStep(duration, 2073, _solver,
+            new[] { _material },
+            new[] { _materialInterface });
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
@@ -96,9 +94,9 @@ public class OneParticleTest
         var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
         var particleBlocks = initialState
-            .Particles.Select(p => Jacobian.ParticleBlock(session, p, guess))
+            .Particles.Select(p => Jacobian.ParticleBlock(p, guess))
             .ToArray();
-        var functionalBlock = Jacobian.BorderBlock(session, initialState, guess);
+        var functionalBlock = Jacobian.BorderBlock(initialState, guess);
         var size = particleBlocks.Length + 1;
 
         var array = new Matrix<double>[size, size];
@@ -168,13 +166,13 @@ public class OneParticleTest
         StepVector guess
     )
     {
-        var zero = Lagrangian.EvaluateAt(session, state, guess);
+        var zero = Lagrangian.EvaluateAt(state, guess);
 
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
             step[i] += 1e-3;
-            var current = Lagrangian.EvaluateAt(session, state, step);
+            var current = Lagrangian.EvaluateAt(state, step);
 
             yield return current - zero;
         }
@@ -204,6 +202,7 @@ public class OneParticleTest
         foreach (var (i, state) in _solutionStorage.States.Index())
         {
             var plt = new Plot();
+            plt.Axes.SquareUnits();
 
             var coordinates = state
                 .Particles[0]
@@ -255,15 +254,16 @@ public class OneParticleTest
         var plt = new Plot();
 
         var steps = _solutionStorage
-            .Transitions.Select(s => new ScottPlot.Coordinates(
-                _solutionStorage.GetStateById(s.InputStateId).Time,
-                ((ISinteringStateStateTransition)s).TimeStepWidth
+            .Transitions.Select((s, i) => new ScottPlot.Coordinates(
+                i,
+                Math.Log10(((ISinteringStateStateTransition)s).TimeStepWidth)
             ))
             .ToArray();
         plt.Add.Scatter(steps);
 
         var meanStepWidth = steps.Select(s => s.Y).Mean();
-        plt.Add.Line(0, meanStepWidth, _sinteringProcess.Duration, meanStepWidth);
+        var meanLine = plt.Add.HorizontalLine(meanStepWidth);
+        meanLine.Text = "mean";
 
         plt.SavePng(Path.Combine(_tempDir, "timeSteps.png"), 600, 400);
     }

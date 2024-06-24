@@ -14,12 +14,11 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public static class Lagrangian
 {
     public static StepVector EvaluateAt(
-        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     )
     {
-        var evaluation = YieldEquations(conditions, currentState, stepVector).ToArray();
+        var evaluation = YieldEquations(currentState, stepVector).ToArray();
 
         if (evaluation.Any(x => !double.IsFinite(x)))
         {
@@ -32,70 +31,64 @@ public static class Lagrangian
     }
 
     public static IEnumerable<double> YieldEquations(
-        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
     ) =>
         Join(
-            currentState.Particles.SelectMany(p => YieldParticleBlockEquations(conditions, p, stepVector)),
-            YieldFunctionalBlockEquations(conditions, currentState, stepVector)
+            currentState.Particles.SelectMany(p => YieldParticleBlockEquations(p, stepVector)),
+            YieldFunctionalBlockEquations(currentState, stepVector)
         );
 
     public static IEnumerable<double> YieldParticleBlockEquations(
-        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     ) => Join(
-        YieldNodeEquations(conditions, particle.Nodes, stepVector),
-        YieldParticleEquations(conditions, particle, stepVector)
+        YieldNodeEquations(particle.Nodes, stepVector),
+        YieldParticleEquations(particle, stepVector)
     );
 
     public static IEnumerable<double> YieldFunctionalBlockEquations(
-        ISinteringConditions conditions,
         SolutionState currentState,
         StepVector stepVector
-    ) => YieldContactsEquations(conditions, currentState.Contacts, stepVector);
+    ) => YieldContactsEquations(currentState.Contacts, stepVector);
 
     public static IEnumerable<double> YieldNodeEquations(
-        ISinteringConditions conditions,
         IEnumerable<NodeBase> nodes,
         StepVector stepVector
     )
     {
         foreach (var node in nodes)
         {
-            yield return StateVelocityDerivativeNormal(conditions, stepVector, node);
+            yield return StateVelocityDerivativeNormal(stepVector, node);
 
             if (node is NeckNode neckNode)
-                yield return StateVelocityDerivativeTangential(conditions, stepVector, neckNode);
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
 
-            yield return FluxDerivative(conditions, stepVector, node);
-            yield return RequiredConstraint(conditions, stepVector, node);
+            yield return FluxDerivative(stepVector, node);
+            yield return RequiredConstraint(stepVector, node);
         }
     }
 
     public static IEnumerable<double> YieldContactsEquations(
-        ISinteringConditions conditions,
         IEnumerable<ParticleContact> contacts,
         StepVector stepVector
     ) =>
         contacts.SelectMany(contact =>
         {
             return Join(
-                YieldContactNodesEquations(conditions, stepVector, contact),
+                YieldContactNodesEquations(stepVector, contact),
                 YieldContactAuxiliaryDerivatives(stepVector, contact)
             );
         });
 
     private static IEnumerable<double> YieldContactNodesEquations(
-        ISinteringConditions conditions,
         StepVector stepVector,
         ParticleContact contact
     )
     {
         foreach (var contactNode in contact.FromNodes)
         {
-            var constraints = ContactConstraints(conditions, stepVector, contact, contactNode);
+            var constraints = ContactConstraints(stepVector, contact, contactNode);
             yield return constraints.distance;
             yield return constraints.direction;
         }
@@ -136,16 +129,14 @@ public static class Lagrangian
         );
 
     public static IEnumerable<double> YieldParticleEquations(
-        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     )
     {
-        yield return DissipationEquality(conditions, particle, stepVector);
+        yield return DissipationEquality(particle, stepVector);
     }
 
     private static double StateVelocityDerivativeNormal(
-        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -168,7 +159,6 @@ public static class Lagrangian
     }
 
     private static double StateVelocityDerivativeTangential(
-        ISinteringConditions conditions,
         StepVector stepVector,
         NeckNode node
     )
@@ -184,14 +174,13 @@ public static class Lagrangian
     }
 
     private static double FluxDerivative(
-        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
     {
         var dissipationTerm =
             2
-          * node.Particle.DiffusionMaterialFactor
+          * node.Particle.VacancyVolumeEnergy
           * node.SurfaceDistance.ToUpper
           / node.SurfaceDiffusionCoefficient.ToUpper
           * stepVector.FluxToUpper(node)
@@ -203,7 +192,6 @@ public static class Lagrangian
     }
 
     private static double RequiredConstraint(
-        ISinteringConditions conditions,
         StepVector stepVector,
         NodeBase node
     )
@@ -221,7 +209,6 @@ public static class Lagrangian
     }
 
     private static double DissipationEquality(
-        ISinteringConditions conditions,
         Particle particle,
         StepVector stepVector
     )
@@ -238,7 +225,7 @@ public static class Lagrangian
         var dissipationFunction =
             particle
                 .Nodes.Select(n =>
-                    n.Particle.DiffusionMaterialFactor
+                    n.Particle.VacancyVolumeEnergy
                   * n.SurfaceDistance.ToUpper
                   * Pow(stepVector.FluxToUpper(n), 2)
                   / n.SurfaceDiffusionCoefficient.ToUpper
@@ -249,7 +236,6 @@ public static class Lagrangian
     }
 
     private static (double distance, double direction) ContactConstraints(
-        ISinteringConditions conditions,
         StepVector stepVector,
         IParticleContact contact,
         ContactNodeBase node

@@ -47,8 +47,6 @@ internal struct NodeCompound
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
     public readonly string ContactedNodeId = string.Empty;
 
-    public readonly double TransferCoefficient = 0;
-
     public NodeCompound(INode node)
     {
         Id = node.Id.ToString();
@@ -68,7 +66,6 @@ internal struct NodeCompound
         {
             SurfaceEnergy = nodeMaterialProperties.SurfaceEnergy.ToArray();
             SurfaceDiffusionCoefficient = nodeMaterialProperties.SurfaceDiffusionCoefficient.ToArray();
-            TransferCoefficient = nodeMaterialProperties.TransferCoefficient;
         }
 
         if (node is INodeGradients nodeGradients)

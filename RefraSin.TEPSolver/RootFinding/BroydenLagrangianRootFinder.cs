@@ -14,7 +14,7 @@ public class BroydenLagrangianRootFinder : ILagrangianRootFinder
     )
     {
         double[] Fun(double[] vector) =>
-            Lagrangian.EvaluateAt(solverSession, currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
+            Lagrangian.EvaluateAt(currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
 
         return new StepVector(Broyden.FindRoot(
             Fun,
