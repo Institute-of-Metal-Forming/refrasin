@@ -108,7 +108,7 @@ public static class Jacobian
 
     public static JacobianRow StateVelocityDerivativeTangential(
         StepVector stepVector,
-        ContactNodeBase node
+        NeckNode node
     )
     {
         yield return (
@@ -238,10 +238,10 @@ public static class Jacobian
             yield return ContactConstraintDistance(stepVector, contact, contactNode);
             yield return ContactConstraintDirection(stepVector, contact, contactNode);
 
-            if (contactNode is NeckNode neckNode)
+            if (contactNode is NeckNode)
             {
-                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
-                yield return StateVelocityDerivativeTangential(stepVector, neckNode.ContactedNode);
+                yield return StateVelocityDerivativeNormal(stepVector, contactNode);
+                yield return StateVelocityDerivativeNormal(stepVector, contactNode.ContactedNode);
             }
         }
     }
@@ -283,7 +283,11 @@ public static class Jacobian
     {
         foreach (var node in nodes)
         {
-            yield return StateVelocityDerivativeNormal(stepVector, node);
+            if (node is NeckNode neckNode)
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
+            else
+                yield return StateVelocityDerivativeNormal(stepVector, node);
+
             yield return FluxDerivative(stepVector, node);
             yield return RequiredConstraint(stepVector, node);
         }
@@ -344,5 +348,13 @@ public static class Jacobian
         );
         yield return (stepVector.StepVectorMap.FluxToUpper(node), -1);
         yield return (stepVector.StepVectorMap.FluxToUpper(node.Lower), 1);
+
+        if (node is NeckNode neckNode)
+        {
+            yield return (
+                stepVector.StepVectorMap.TangentialDisplacement(neckNode),
+                node.VolumeGradient.Tangential
+            );
+        }
     }
 }

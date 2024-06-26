@@ -53,7 +53,10 @@ public static class Lagrangian
     {
         foreach (var node in nodes)
         {
-            yield return StateVelocityDerivativeNormal(stepVector, node);
+            if (node is NeckNode neckNode)
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
+            else
+                yield return StateVelocityDerivativeNormal(stepVector, node);
             yield return FluxDerivative(stepVector, node);
             yield return RequiredConstraint(stepVector, node);
         }
@@ -82,8 +85,8 @@ public static class Lagrangian
 
             if (contactNode is NeckNode neckNode)
             {
-                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
-                yield return StateVelocityDerivativeTangential(stepVector, neckNode.ContactedNode);
+                yield return StateVelocityDerivativeNormal(stepVector, neckNode);
+                yield return StateVelocityDerivativeNormal(stepVector, neckNode.ContactedNode);
             }
         }
     }

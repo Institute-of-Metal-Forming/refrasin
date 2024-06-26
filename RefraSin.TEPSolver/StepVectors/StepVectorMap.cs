@@ -16,7 +16,11 @@ public class StepVectorMap
             {
                 AddUnknown(node.Id, Unknown.LambdaVolume);
                 AddUnknown(node.Id, Unknown.FluxToUpper);
-                AddUnknown(node.Id, Unknown.NormalDisplacement);
+                
+                if (node is INeckNode)
+                    AddUnknown(node.Id, Unknown.TangentialDisplacement);
+                else
+                    AddUnknown(node.Id, Unknown.NormalDisplacement);
             }
 
             _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
@@ -36,7 +40,7 @@ public class StepVectorMap
                 AddUnknown(contactNode.Id, Unknown.LambdaContactDirection);
 
                 if (contactNode is ParticleModel.NeckNode)
-                    AddUnknown(contactNode.Id, Unknown.TangentialDisplacement);
+                    AddUnknown(contactNode.Id, Unknown.NormalDisplacement);
             }
 
             foreach (var contactNode in contact.ToNodes)
@@ -45,7 +49,7 @@ public class StepVectorMap
                 LinkUnknown(contactNode.ContactedNodeId, contactNode.Id, Unknown.LambdaContactDirection);
 
                 if (contactNode is ParticleModel.NeckNode)
-                    AddUnknown(contactNode.Id, Unknown.TangentialDisplacement);
+                    AddUnknown(contactNode.Id, Unknown.NormalDisplacement);
             }
         }
 
