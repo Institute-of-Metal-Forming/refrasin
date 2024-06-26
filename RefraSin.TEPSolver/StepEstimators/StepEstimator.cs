@@ -15,10 +15,10 @@ class StepEstimator : IStepEstimator
         Join(
             currentState.Particles.SelectMany(p => YieldParticleBlockGuesses(p)),
             YieldFunctionalBlockGuesses(currentState)
-        );
+        ).Append(1);
 
     private static IEnumerable<double> YieldFunctionalBlockGuesses(SolutionState currentState) =>
-        YieldContactUnknownsInitialGuess(currentState).Append(1);
+        YieldContactUnknownsInitialGuess(currentState);
 
     private static IEnumerable<double> YieldParticleBlockGuesses(Particle particle) =>
         YieldNodeUnknownsInitialGuess(particle.Nodes);

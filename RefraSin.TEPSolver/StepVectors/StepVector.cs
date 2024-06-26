@@ -70,9 +70,6 @@ public class StepVector : DenseVector
 
     public void UpdateBorderBlock(double[] data)
     {
-        if (data.Length != StepVectorMap.BorderLength)
-            throw new InvalidOperationException("'data' must have exactly the length of the particle block.");
-
         data.CopyTo(Values, StepVectorMap.BorderStart);
     }
 }

@@ -14,6 +14,30 @@ namespace RefraSin.TEPSolver.EquationSystem;
 
 public static class Jacobian
 {
+    public static Matrix<double> EvaluateAt(
+        SolutionState currentState,
+        StepVector stepVector
+    )
+    {
+        var rows = YieldRows(currentState, stepVector).ToArray();
+        var size = rows.Length;
+        return Matrix<double>.Build.SparseOfIndexed(
+            size,
+            size,
+            rows.SelectMany((r, i) => r.Select(c => (i, c.colIndex, c.value)))
+        );
+    }
+
+    public static JacobianRows YieldRows(
+        SolutionState currentState,
+        StepVector stepVector
+    )
+        => Join(
+            currentState.Particles.SelectMany(p => YieldParticleBlockEquations
+                (p, stepVector)),
+            YieldBorderBlockRows(currentState, stepVector)
+        );
+
     public static Matrix<double> BorderBlock(
         SolutionState currentState,
         StepVector stepVector
@@ -278,7 +302,7 @@ public static class Jacobian
             stepVector.StepVectorMap.LambdaDissipation(),
             -node.GibbsEnergyGradient.Normal
         );
-        
+
         if (node is ContactNodeBase contactNode)
         {
             yield return (

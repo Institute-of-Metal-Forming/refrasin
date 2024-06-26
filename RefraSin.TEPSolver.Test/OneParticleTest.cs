@@ -87,50 +87,14 @@ public class OneParticleTest
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
 
+
     [Test]
     public void PlotJacobianStructureAnalytical()
     {
         var session = new SolverSession(_solver, _initialState, _sinteringProcess);
         var initialState = session.CurrentState;
         var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
-
-        var particleBlocks = initialState
-            .Particles.Select(p => Jacobian.ParticleBlock(p, guess))
-            .ToArray();
-        var functionalBlock = Jacobian.BorderBlock(initialState, guess);
-        var size = particleBlocks.Length + 1;
-
-        var array = new Matrix<double>[size, size];
-
-        for (int i = 0; i < particleBlocks.Length; i++)
-        {
-            for (int j = 0; j < particleBlocks.Length; j++)
-            {
-                array[i, j] = Matrix<double>.Build.Sparse(
-                    particleBlocks[i].RowCount,
-                    particleBlocks[j].ColumnCount
-                );
-            }
-
-            array[i, particleBlocks.Length] = Matrix<double>.Build.Sparse(
-                particleBlocks[i].RowCount,
-                functionalBlock.ColumnCount
-            );
-
-            array[i, i] = particleBlocks[i].PointwiseSign();
-        }
-
-        for (int j = 0; j < particleBlocks.Length; j++)
-        {
-            array[particleBlocks.Length, j] = Matrix<double>.Build.Sparse(
-                functionalBlock.RowCount,
-                particleBlocks[j].ColumnCount
-            );
-        }
-
-        array[particleBlocks.Length, particleBlocks.Length] = functionalBlock.PointwiseSign();
-
-        var matrix = Matrix<double>.Build.SparseOfMatrixArray(array);
+        var matrix = Jacobian.EvaluateAt(initialState, guess).PointwiseSign();
 
         var plt = new Plot();
 
