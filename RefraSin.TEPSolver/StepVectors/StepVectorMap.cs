@@ -19,8 +19,6 @@ public class StepVectorMap
                 AddUnknown(node.Id, Unknown.NormalDisplacement);
             }
 
-            AddUnknown(particle.Id, Unknown.LambdaDissipation);
-
             _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
         }
 
@@ -51,6 +49,8 @@ public class StepVectorMap
             }
         }
 
+        AddUnknown(Guid.Empty, Unknown.LambdaDissipation);
+        
         BorderLength = _index - BorderStart;
     }
 
@@ -74,7 +74,7 @@ public class StepVectorMap
     public int BorderStart { get; }
 
     public int BorderLength { get; }
-    public int LambdaDissipation(IParticle particle) => _indices[(particle.Id, Unknown.LambdaDissipation)];
+    public int LambdaDissipation() => _indices[(Guid.Empty, Unknown.LambdaDissipation)];
 
     public int NormalDisplacement(INode node) => _indices[(node.Id, Unknown.NormalDisplacement)];
 

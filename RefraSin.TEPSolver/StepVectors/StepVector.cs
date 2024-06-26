@@ -21,7 +21,7 @@ public class StepVector : DenseVector
 
     public StepVectorMap StepVectorMap { get; }
 
-    public double LambdaDissipation(IParticle particle) => this[StepVectorMap.LambdaDissipation(particle)];
+    public double LambdaDissipation() => this[StepVectorMap.LambdaDissipation()];
 
     public double NormalDisplacement(INode node) => this[StepVectorMap.NormalDisplacement(node)];
 

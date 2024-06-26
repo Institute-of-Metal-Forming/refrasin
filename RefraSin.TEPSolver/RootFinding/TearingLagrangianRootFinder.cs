@@ -59,7 +59,7 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
         {
             stepVector.UpdateBorderBlock(vector.AsArray());
             var result = Lagrangian
-                .YieldFunctionalBlockEquations(currentState, stepVector)
+                .YieldBorderBlockEquations(currentState, stepVector)
                 .ToArray();
             return new DenseVector(result);
         }

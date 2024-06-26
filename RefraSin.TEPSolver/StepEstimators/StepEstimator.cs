@@ -18,15 +18,10 @@ class StepEstimator : IStepEstimator
         );
 
     private static IEnumerable<double> YieldFunctionalBlockGuesses(SolutionState currentState) =>
-        YieldContactUnknownsInitialGuess(currentState);
+        YieldContactUnknownsInitialGuess(currentState).Append(1);
 
     private static IEnumerable<double> YieldParticleBlockGuesses(Particle particle) =>
-        Join(YieldNodeUnknownsInitialGuess(particle.Nodes), YieldParticleUnknownsGuesses());
-
-    private static IEnumerable<double> YieldParticleUnknownsGuesses()
-    {
-        yield return 1;
-    }
+        YieldNodeUnknownsInitialGuess(particle.Nodes);
 
     private static IEnumerable<double> YieldContactUnknownsInitialGuess(SolutionState currentState)
     {
