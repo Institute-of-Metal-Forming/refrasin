@@ -88,6 +88,10 @@ public static class Jacobian
     )
     {
         yield return (
+            stepVector.StepVectorMap.LambdaVolume(node),
+            node.VolumeGradient.Tangential
+        );
+        yield return (
             stepVector.StepVectorMap.LambdaContactDistance(node),
             -node.ContactDistanceGradient.Tangential
         );
@@ -142,6 +146,15 @@ public static class Jacobian
           * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
         );
 
+        yield return (
+            stepVector.StepVectorMap.NormalDisplacement(node),
+            -node.ContactDistanceGradient.Normal
+        );
+        yield return (
+            stepVector.StepVectorMap.NormalDisplacement(node.ContactedNode),
+            -node.ContactedNode.ContactDistanceGradient.Normal
+        );
+
         if (node is NeckNode)
         {
             yield return (
@@ -167,6 +180,15 @@ public static class Jacobian
             -node.ContactedNode.Coordinates.R
           / contact.Distance
           * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
+        );
+
+        yield return (
+            stepVector.StepVectorMap.NormalDisplacement(node),
+            -node.ContactDirectionGradient.Normal
+        );
+        yield return (
+            stepVector.StepVectorMap.NormalDisplacement(node.ContactedNode),
+            -node.ContactedNode.ContactDirectionGradient.Normal
         );
 
         if (node is NeckNode)
@@ -256,6 +278,18 @@ public static class Jacobian
             stepVector.StepVectorMap.LambdaDissipation(),
             -node.GibbsEnergyGradient.Normal
         );
+        
+        if (node is ContactNodeBase contactNode)
+        {
+            yield return (
+                stepVector.StepVectorMap.LambdaContactDistance(contactNode),
+                -contactNode.ContactDistanceGradient.Tangential
+            );
+            yield return (
+                stepVector.StepVectorMap.LambdaContactDirection(contactNode),
+                -contactNode.ContactDirectionGradient.Tangential
+            );
+        }
     }
 
     public static JacobianRow FluxDerivative(
