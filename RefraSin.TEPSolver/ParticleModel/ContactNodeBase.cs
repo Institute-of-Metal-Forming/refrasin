@@ -53,18 +53,18 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
             ? new NormalTangential<Angle>(
                 Pi
                     - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
-                    + (Pi - SurfaceVectorAngle.Normal - SurfaceRadiusAngle.ToLower),
+                    + (Pi - SurfaceNormalAngle.ToLower - SurfaceRadiusAngle.ToLower),
                 Pi
                     - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
-                    - (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToUpper)
+                    - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
             )
             : new NormalTangential<Angle>(
                 Pi
                     + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
-                    - (Pi - SurfaceVectorAngle.Normal - SurfaceRadiusAngle.ToUpper),
+                    - (Pi - SurfaceNormalAngle.ToUpper - SurfaceRadiusAngle.ToUpper),
                 Pi
                     + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
-                    - (Pi - SurfaceVectorAngle.Tangential - SurfaceRadiusAngle.ToUpper)
+                    - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
             );
 
     private NormalTangential<Angle>? _centerShiftVectorDirection;

@@ -2,6 +2,7 @@ using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using static System.Math;
 using static RefraSin.TEPSolver.EquationSystem.Helper;
 
 namespace RefraSin.TEPSolver.StepEstimators;
@@ -27,8 +28,9 @@ class StepEstimator : IStepEstimator
     {
         foreach (var contact in currentState.Contacts)
         {
-            yield return contact.FromNodes.Average(GuessNormalDisplacement) + contact.ToNodes.Average(GuessNormalDisplacement);
-            yield return 0;
+            var averageNormalDisplacement = contact.FromNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement) +
+                                            contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);
+            yield return averageNormalDisplacement;
             yield return 0;
 
             foreach (var node in contact.FromNodes)
@@ -37,13 +39,13 @@ class StepEstimator : IStepEstimator
                 yield return 0;
 
                 if (node is NeckNode)
-                    yield return 0;
+                    yield return averageNormalDisplacement;
             }
 
             foreach (var node in contact.ToNodes)
             {
                 if (node is NeckNode)
-                    yield return 0;
+                    yield return averageNormalDisplacement;
             }
         }
     }
@@ -54,7 +56,11 @@ class StepEstimator : IStepEstimator
         {
             yield return 0;
             yield return GuessFluxToUpper(node);
-            yield return GuessNormalDisplacement(node);
+
+            if (node is NeckNode)
+                yield return GuessTangentialDisplacement(node);
+            else
+                yield return GuessNormalDisplacement(node);
         }
     }
 
@@ -62,13 +68,7 @@ class StepEstimator : IStepEstimator
     {
         var fluxBalance = GuessFluxToUpper(node) - GuessFluxToUpper(node.Lower);
 
-        var displacement =
-            2
-          * fluxBalance
-          / (
-                (node.SurfaceDistance.ToUpper + node.SurfaceDistance.ToLower)
-              * Math.Sin(node.SurfaceVectorAngle.Normal)
-            );
+        var displacement = fluxBalance / node.VolumeGradient.Normal;
         return displacement;
     }
 
@@ -76,21 +76,15 @@ class StepEstimator : IStepEstimator
     {
         var fluxBalance = GuessFluxToUpper(node) - GuessFluxToUpper(node.Lower);
 
-        var displacement =
-            2
-          * fluxBalance
-          / (
-                (node.SurfaceDistance.ToUpper + node.SurfaceDistance.ToLower)
-              * Math.Sin(node.SurfaceVectorAngle.Tangential)
-            );
+        var displacement = fluxBalance / node.VolumeGradient.Tangential;
         return displacement;
     }
 
     private static double GuessFluxToUpper(NodeBase node) =>
         -node.SurfaceDiffusionCoefficient.ToUpper * (GuessVacancyConcentration(node) - GuessVacancyConcentration(node.Upper))
-      / Math.Pow(node.SurfaceDistance.ToUpper, 2);
+      / Pow(node.SurfaceDistance.ToUpper, 2);
 
     private static double GuessVacancyConcentration(NodeBase node) =>
-        (node is not NeckNode ? node.GibbsEnergyGradient.Normal : -Math.Abs(node.GibbsEnergyGradient.Tangential))
+        (node is not NeckNode ? node.GibbsEnergyGradient.Normal : -Abs(node.GibbsEnergyGradient.Tangential))
       / node.Particle.VacancyVolumeEnergy;
 }
