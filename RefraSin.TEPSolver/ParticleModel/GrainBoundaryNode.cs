@@ -41,7 +41,7 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>, IGrainBound
     public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)
     {
         var normalDisplacement = stepVector.NormalDisplacement(this) * timeStepWidth;
-        var angle = SurfaceRadiusAngle.ToUpper + SurfaceVectorAngle.Normal;
+        var angle = SurfaceRadiusAngle.ToUpper + SurfaceNormalAngle.ToUpper;
         var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
         var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
 

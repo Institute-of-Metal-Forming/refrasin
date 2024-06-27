@@ -14,12 +14,13 @@ public class StepVectorMap
 
             foreach (var node in particle.Nodes)
             {
-                AddNodeUnknown(node, NodeUnknown.LambdaVolume);
-                AddNodeUnknown(node, NodeUnknown.FluxToUpper);
-                AddNodeUnknown(node, NodeUnknown.NormalDisplacement);
+                if (node is not IContactNode)
+                {
+                    AddUnknown(node.Id, Unknown.LambdaVolume);
+                    AddUnknown(node.Id, Unknown.FluxToUpper);
+                    AddUnknown(node.Id, Unknown.NormalDisplacement);
+                }
             }
-
-            AddParticleUnknown(particle, ParticleUnknown.LambdaDissipation);
 
             _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
         }
@@ -28,76 +29,85 @@ public class StepVectorMap
 
         foreach (var contact in currentState.Contacts)
         {
-            AddContactUnknown(contact, ContactUnknown.RadialDisplacement);
-            AddContactUnknown(contact, ContactUnknown.AngleDisplacement);
-            AddContactUnknown(contact, ContactUnknown.RotationDisplacement);
+            AddUnknown(contact.Id, Unknown.RadialDisplacement);
+            AddUnknown(contact.Id, Unknown.AngleDisplacement);
 
             foreach (var contactNode in contact.FromNodes)
             {
-                AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
-                AddNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
-                
-                if (contactNode is ParticleModel.NeckNode)
-                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
-            }
+                AddUnknown(contactNode.Id, Unknown.LambdaContactDistance);
+                AddUnknown(contactNode.Id, Unknown.LambdaContactDirection);
+                LinkUnknown(contactNode.Id, contactNode.ContactedNodeId, Unknown.LambdaContactDistance);
+                LinkUnknown(contactNode.Id, contactNode.ContactedNodeId, Unknown.LambdaContactDirection);
 
-            foreach (var contactNode in contact.ToNodes)
-            {
-                LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDistance);
-                LinkCommonNodeUnknown(contactNode, NodeUnknown.LambdaContactDirection);
-                
-                if (contactNode is ParticleModel.NeckNode)
-                    AddNodeUnknown(contactNode, NodeUnknown.TangentialDisplacement);
+                AddUnknown(contactNode.Id, Unknown.LambdaVolume);
+                AddUnknown(contactNode.Id, Unknown.FluxToUpper);
+                AddUnknown(contactNode.Id, Unknown.NormalDisplacement);
+
+                AddUnknown(contactNode.ContactedNodeId, Unknown.LambdaVolume);
+                AddUnknown(contactNode.ContactedNodeId, Unknown.FluxToUpper);
+                AddUnknown(contactNode.ContactedNodeId, Unknown.NormalDisplacement);
+
+                if (contactNode is INeckNode)
+                {
+                    AddUnknown(contactNode.Id, Unknown.TangentialDisplacement);
+                    AddUnknown(contactNode.ContactedNodeId, Unknown.TangentialDisplacement);
+                }
             }
         }
+
+        AddUnknown(Guid.Empty, Unknown.LambdaDissipation);
 
         BorderLength = _index - BorderStart;
     }
 
-    private void AddNodeUnknown(INode node, NodeUnknown unknown)
+    private void AddUnknown(Guid id, Unknown unknown)
     {
-        _nodeUnknownIndices[(node.Id, unknown)] = _index;
+        _indices[(id, unknown)] = _index;
         _index++;
     }
 
-    private void AddParticleUnknown(IParticle particle, ParticleUnknown unknown)
+    private void LinkUnknown(Guid existingId, Guid newId, Unknown unknown)
     {
-        _particleUnknownIndices[(particle.Id, unknown)] = _index;
-        _index++;
-    }
-
-    private void AddContactUnknown(IParticleContact contact, ContactUnknown unknown)
-    {
-        _contactUnknownIndices[(contact.From.Id, contact.To.Id, unknown)] = _index;
-        _index++;
-    }
-
-    private void LinkCommonNodeUnknown(IContactNode childsNode, NodeUnknown unknown)
-    {
-        _nodeUnknownIndices[(childsNode.Id, unknown)] = _nodeUnknownIndices[(childsNode.ContactedNodeId, unknown)];
+        _indices[(newId, unknown)] = _indices[(existingId, unknown)];
     }
 
     private int _index;
-    private readonly Dictionary<(Guid, NodeUnknown), int> _nodeUnknownIndices = new();
-    private readonly Dictionary<(Guid, ParticleUnknown), int> _particleUnknownIndices = new();
-    private readonly Dictionary<(Guid, Guid, ContactUnknown), int> _contactUnknownIndices = new();
+    private readonly Dictionary<(Guid, Unknown), int> _indices = new();
     private readonly Dictionary<Guid, (int start, int length)> _particleBlocks = new();
-
-    public int this[IParticle particle, ParticleUnknown unknown] => _particleUnknownIndices[(particle.Id, unknown)];
-
-    public int this[Guid particleId, ParticleUnknown unknown] => _particleUnknownIndices[(particleId, unknown)];
-
-    public int this[INode node, NodeUnknown unknown] => _nodeUnknownIndices[(node.Id, unknown)];
-
-    public int this[Guid nodeId, NodeUnknown unknown] => _nodeUnknownIndices[(nodeId, unknown)];
-
-    public int this[IParticleContact contact, ContactUnknown unknown] => _contactUnknownIndices[(contact.From.Id, contact.To.Id, unknown)];
-
-    public int this[Guid fromId, Guid toId, ContactUnknown unknown] => _contactUnknownIndices[(fromId, toId, unknown)];
 
     public (int start, int length) this[IParticle particle] => _particleBlocks[particle.Id];
 
     public int BorderStart { get; }
 
     public int BorderLength { get; }
+    public int LambdaDissipation() => _indices[(Guid.Empty, Unknown.LambdaDissipation)];
+
+    public int NormalDisplacement(INode node) => _indices[(node.Id, Unknown.NormalDisplacement)];
+
+    public int FluxToUpper(INode node) => _indices[(node.Id, Unknown.FluxToUpper)];
+
+    public int LambdaVolume(INode node) => _indices[(node.Id, Unknown.LambdaVolume)];
+
+    public int TangentialDisplacement(IContactNode node) => _indices[(node.Id, Unknown.TangentialDisplacement)];
+
+    public int LambdaContactDistance(IContactNode node) => _indices[(node.Id, Unknown.LambdaContactDistance)];
+
+    public int LambdaContactDirection(IContactNode node) => _indices[(node.Id, Unknown.LambdaContactDirection)];
+
+    public int RadialDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.RadialDisplacement)];
+
+    public int AngleDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.AngleDisplacement)];
+
+    private enum Unknown
+    {
+        NormalDisplacement,
+        TangentialDisplacement,
+        FluxToUpper,
+        LambdaVolume,
+        LambdaContactDistance,
+        LambdaContactDirection,
+        RadialDisplacement,
+        AngleDisplacement,
+        LambdaDissipation,
+    }
 }

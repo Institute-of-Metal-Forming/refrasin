@@ -26,7 +26,8 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
             throw new ArgumentException("IDs of the node spec and the given particle instance do not match.");
 
         Particle = particle;
-        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R / solverSession.Norm.Length) { SystemSource = () => Particle.LocalCoordinateSystem };
+        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R / solverSession.Norm.Length)
+            { SystemSource = () => Particle.LocalCoordinateSystem };
         SolverSession = solverSession;
     }
 
@@ -124,12 +125,35 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
 
     private ToUpperToLower<double>? _volume;
 
-    public NormalTangential<Angle> SurfaceVectorAngle => _surfaceAngle ??= new NormalTangential<Angle>(
-        PI - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower),
-        PI / 2 - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower)
-    );
+    public virtual ToUpperToLower<Angle> SurfaceNormalAngle
+    {
+        get
+        {
+            if (_surfaceNormalAngle != null) return _surfaceNormalAngle.Value;
 
-    private NormalTangential<Angle>? _surfaceAngle;
+            var angle = PI - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower);
+            _surfaceNormalAngle = new ToUpperToLower<Angle>(angle, angle);
+
+            return _surfaceNormalAngle.Value;
+        }
+    }
+
+    protected ToUpperToLower<Angle>? _surfaceNormalAngle;
+
+    public virtual ToUpperToLower<Angle> SurfaceTangentAngle
+    {
+        get
+        {
+            if (_surfaceTangentAngle != null) return _surfaceTangentAngle.Value;
+
+            var angle = PI / 2 - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower);
+            _surfaceTangentAngle = new ToUpperToLower<Angle>(angle, angle);
+
+            return _surfaceTangentAngle.Value;
+        }
+    }
+
+    protected ToUpperToLower<Angle>? _surfaceTangentAngle;
 
     /// <inheritdoc />
     public abstract ToUpperToLower<double> SurfaceEnergy { get; }
@@ -139,16 +163,16 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
 
     /// <inheritdoc />
     public NormalTangential<double> GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential<double>(
-        -(SurfaceEnergy.ToUpper + SurfaceEnergy.ToLower) * Cos(SurfaceVectorAngle.Normal),
-        -(SurfaceEnergy.ToUpper - SurfaceEnergy.ToLower) * Cos(SurfaceVectorAngle.Tangential)
+        -(SurfaceEnergy.ToUpper * Cos(SurfaceNormalAngle.ToUpper) + SurfaceEnergy.ToLower * Cos(SurfaceNormalAngle.ToLower)),
+        -(SurfaceEnergy.ToUpper * Cos(SurfaceTangentAngle.ToUpper) - SurfaceEnergy.ToLower * Cos(SurfaceTangentAngle.ToLower))
     );
 
     private NormalTangential<double>? _gibbsEnergyGradient;
 
     /// <inheritdoc />
     public NormalTangential<double> VolumeGradient => _volumeGradient ??= new NormalTangential<double>(
-        0.5 * (SurfaceDistance.ToUpper + SurfaceDistance.ToLower) * Sin(SurfaceVectorAngle.Normal),
-        0.5 * (SurfaceDistance.ToUpper - SurfaceDistance.ToLower) * Sin(SurfaceVectorAngle.Tangential)
+        0.5 * (SurfaceDistance.ToUpper * Sin(SurfaceNormalAngle.ToUpper) + SurfaceDistance.ToLower * Sin(SurfaceNormalAngle.ToLower)),
+        0.5 * (SurfaceDistance.ToUpper * Sin(SurfaceTangentAngle.ToUpper) - SurfaceDistance.ToLower * Sin(SurfaceTangentAngle.ToLower))
     );
 
     private NormalTangential<double>? _volumeGradient;

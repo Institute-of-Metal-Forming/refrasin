@@ -11,7 +11,7 @@ namespace RefraSin.TEPSolver;
 
 public class SolutionState : ISystemState
 {
-    public SolutionState(Guid id, double time, IEnumerable<Particle> particles, IEnumerable<(Guid from, Guid to)>? contacts = null)
+    public SolutionState(Guid id, double time, IEnumerable<Particle> particles, IEnumerable<(Guid id, Guid from, Guid to)>? contacts = null)
     {
         Time = time;
         Id = id;
@@ -19,17 +19,17 @@ public class SolutionState : ISystemState
         Nodes = Particles.SelectMany(p => p.Nodes).ToNodeCollection();
 
         contacts ??= GetParticleContacts();
-        Contacts = contacts.Select(t => new ParticleContact(Particles[t.from], Particles[t.to])).ToParticleContactCollection();
+        Contacts = contacts.Select(t => new ParticleContact(t.id, Particles[t.from], Particles[t.to])).ToParticleContactCollection();
     }
 
-    private IEnumerable<(Guid from, Guid to)> GetParticleContacts()
+    private IEnumerable<(Guid id, Guid from, Guid to)> GetParticleContacts()
     {
         var edges = Particles.SelectMany(p => p.Nodes.OfType<NeckNode>())
             .Select(n => new UndirectedEdge<Particle>(n.Particle, n.ContactedNode.Particle));
         var graph = new UndirectedGraph<Particle>(Particles, edges);
         var explorer = BreadthFirstExplorer<Particle>.Explore(graph, Particles[0]);
 
-        return explorer.TraversedEdges.Select(e => (e.From.Id, e.To.Id)).ToArray();
+        return explorer.TraversedEdges.Select(e => (e.Id, e.From.Id, e.To.Id)).ToArray();
     }
 
     /// <inheritdoc />
