@@ -98,7 +98,6 @@ public static class Lagrangian
     {
         yield return ParticleRadialDisplacementDerivative(stepVector, contact);
         yield return ParticleAngleDisplacementDerivative(stepVector, contact);
-        yield return ParticleRotationDerivative(stepVector, contact);
     }
 
     public static double ParticleRadialDisplacementDerivative(
@@ -110,20 +109,6 @@ public static class Lagrangian
         StepVector stepVector,
         ParticleContact contact
     ) => contact.FromNodes.Sum(stepVector.LambdaContactDirection);
-
-    public static double ParticleRotationDerivative(
-        StepVector stepVector,
-        ParticleContact contact
-    ) =>
-        contact.FromNodes.Sum(n =>
-            n.ContactedNode.Coordinates.R
-          * Sin(n.ContactedNode.AngleDistanceFromContactDirection)
-          * stepVector.LambdaContactDistance(n)
-          - n.ContactedNode.Coordinates.R
-          / contact.Distance
-          * Cos(n.ContactedNode.AngleDistanceFromContactDirection)
-          * stepVector.LambdaContactDirection(n)
-        );
 
     public static double StateVelocityDerivativeNormal(StepVector stepVector, NodeBase node)
     {
@@ -227,10 +212,7 @@ public static class Lagrangian
                 + node.ContactedNode.ContactDistanceGradient.Tangential
                 * stepVector.TangentialDisplacement(node.ContactedNode)
                 : 0
-        )
-      + node.ContactedNode.Coordinates.R
-      * Sin(node.ContactedNode.AngleDistanceFromContactDirection)
-      * stepVector.RotationDisplacement(contact);
+        );
 
     public static double ContactConstraintDirection(
         StepVector stepVector,
@@ -247,9 +229,5 @@ public static class Lagrangian
                 + node.ContactedNode.ContactDirectionGradient.Tangential
                 * stepVector.TangentialDisplacement(node.ContactedNode)
                 : 0
-        )
-      - node.ContactedNode.Coordinates.R
-      / contact.Distance
-      * Cos(node.ContactedNode.AngleDistanceFromContactDirection)
-      * stepVector.RotationDisplacement(contact);
+        );
 }

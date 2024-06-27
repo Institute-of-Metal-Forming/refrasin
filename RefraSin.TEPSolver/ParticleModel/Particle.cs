@@ -113,10 +113,7 @@ public class Particle : IParticle
             );
             CenterCoordinates = previousState.CenterCoordinates + displacementVector.Absolute;
 
-            RotationAngle = (
-                previousState.RotationAngle
-              + stepVector.RotationDisplacement(contact) * timeStepWidth
-            ).Reduce();
+            RotationAngle = previousState.RotationAngle;
         }
 
         _nodes = previousState
