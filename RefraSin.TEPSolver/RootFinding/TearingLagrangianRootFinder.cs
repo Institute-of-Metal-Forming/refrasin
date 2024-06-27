@@ -32,7 +32,6 @@ public class TearingLagrangianRootFinder(
 
     private double SolveDissipationEquality(SolutionState currentState, StepVector stepVector)
     {
-        // var samples = Generate.LinearRangeMap(1e-4, 1e-4, 1e-2, Fun);
         var solution = Brent.FindRootExpand(Fun, stepVector.LambdaDissipation() * 0.9, stepVector.LambdaDissipation() * 1.1);
 
         return solution;
@@ -93,8 +92,7 @@ public class TearingLagrangianRootFinder(
         {
             stepVector.UpdateBorderBlock(vector.AsArray());
             var result = Lagrangian
-                .YieldBorderBlockEquations(currentState, stepVector)
-                .SkipLast(1)
+                .YieldLinearBorderBlockEquations(currentState, stepVector)
                 .ToArray();
             return new DenseVector(result);
         }
@@ -102,8 +100,7 @@ public class TearingLagrangianRootFinder(
         Matrix<double> Jac(Vector<double> vector)
         {
             stepVector.UpdateBorderBlock(vector.AsArray());
-            var result = Jacobian.BorderBlock(currentState, stepVector);
-            return result.SubMatrix(0, result.RowCount - 1, 0, result.ColumnCount - 1);
+            return Jacobian.LinearBorderBlock(currentState, stepVector);
         }
     }
 

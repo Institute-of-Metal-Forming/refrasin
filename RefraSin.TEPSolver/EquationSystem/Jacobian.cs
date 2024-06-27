@@ -53,10 +53,30 @@ public static class Jacobian
         );
     }
 
+    public static Matrix<double> LinearBorderBlock(
+        SolutionState currentState,
+        StepVector stepVector
+    )
+    {
+        var rows = YieldLinearBorderBlockRows(currentState, stepVector).ToArray();
+        var startIndex = stepVector.StepVectorMap.BorderStart;
+        var size = stepVector.StepVectorMap.BorderLength - 1;
+        return Matrix<double>.Build.SparseOfIndexed(
+            size,
+            size,
+            rows.SelectMany((r, i) => r.Select(c => (i, c.colIndex - startIndex, c.value)))
+        );
+    }
+
+    public static JacobianRows YieldLinearBorderBlockRows(
+        SolutionState currentState,
+        StepVector stepVector
+    ) => YieldContactsEquations(currentState.Contacts, stepVector);
+
     public static JacobianRows YieldBorderBlockRows(
         SolutionState currentState,
         StepVector stepVector
-    ) => YieldContactsEquations(currentState.Contacts, stepVector).Append(DissipationEquality(currentState, stepVector));
+    ) => YieldLinearBorderBlockRows(currentState, stepVector).Append(DissipationEquality(currentState, stepVector));
 
     public static JacobianRows YieldContactsEquations(
         IEnumerable<ParticleContact> contacts,

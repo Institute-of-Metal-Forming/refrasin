@@ -44,7 +44,12 @@ public static class Lagrangian
     public static IEnumerable<double> YieldBorderBlockEquations(
         SolutionState currentState,
         StepVector stepVector
-    ) => YieldContactsEquations(currentState.Contacts, stepVector).Append(DissipationEquality(currentState, stepVector));
+    ) => YieldLinearBorderBlockEquations(currentState, stepVector).Append(DissipationEquality(currentState, stepVector));
+    
+    public static IEnumerable<double> YieldLinearBorderBlockEquations(
+        SolutionState currentState,
+        StepVector stepVector
+    ) => YieldContactsEquations(currentState.Contacts, stepVector);
 
     public static IEnumerable<double> YieldNodeEquations(
         IEnumerable<NodeBase> nodes,
