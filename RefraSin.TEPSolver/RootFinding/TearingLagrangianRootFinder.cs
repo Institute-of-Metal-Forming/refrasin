@@ -1,3 +1,4 @@
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.RootFinding;
@@ -9,7 +10,11 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.RootFinding;
 
-public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IRootFinder borderBlockRootFinder) : ILagrangianRootFinder
+public class TearingLagrangianRootFinder(
+    IRootFinder particleBlockRootFinder,
+    IRootFinder borderBlockRootFinder,
+    double iterationPrecision = 1e-4,
+    int maxIterationCount = 100) : ILagrangianRootFinder
 {
     /// <inheritdoc />
     public StepVector FindRoot(
@@ -20,25 +25,14 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
     {
         var stepVector = initialGuess.Copy();
 
-        int i;
-
-        for (i = 0; i < solverSession.Options.MaxIterationCount; i++)
-        {
-            var oldVector = stepVector.Copy();
-
-            var dissipationEqualitySolution = SolveDissipationEquality(currentState, stepVector);
-            stepVector[^1] = dissipationEqualitySolution;
-
-            if ((stepVector - oldVector).L2Norm() < solverSession.Options.IterationPrecision * stepVector.L2Norm())
-                return stepVector;
-        }
-
-        throw new UncriticalIterationInterceptedException($"{nameof(TearingLagrangianRootFinder)}.{nameof(FindRoot)}",
-            InterceptReason.MaxIterationCountExceeded, i);
+        var dissipationEqualitySolution = SolveDissipationEquality(currentState, stepVector);
+        stepVector[^1] = dissipationEqualitySolution;
+        return stepVector;
     }
 
     private double SolveDissipationEquality(SolutionState currentState, StepVector stepVector)
     {
+        // var samples = Generate.LinearRangeMap(1e-4, 1e-4, 1e-2, Fun);
         var solution = Brent.FindRootExpand(Fun, stepVector.LambdaDissipation() * 0.9, stepVector.LambdaDissipation() * 1.1);
 
         return solution;
@@ -46,6 +40,26 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
         double Fun(double lambdaDissipation)
         {
             stepVector[^1] = lambdaDissipation;
+
+            stepVector = SolveParticleAndBorderBlocks(currentState, stepVector);
+
+            var result = Lagrangian.DissipationEquality(currentState, stepVector);
+            return result;
+        }
+    }
+
+    private StepVector SolveParticleAndBorderBlocks(
+        SolutionState currentState,
+        StepVector initialGuess
+    )
+    {
+        var stepVector = initialGuess.Copy();
+
+        int i;
+
+        for (i = 0; i < MaxIterationCount; i++)
+        {
+            var oldVector = stepVector.Copy();
 
             foreach (var particle in currentState.Particles)
             {
@@ -56,9 +70,12 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
             var borderSolution = SolveBorderBlockWithoutDissipationEquality(currentState, stepVector);
             stepVector.UpdateBorderBlock(borderSolution.AsArray());
 
-            var result = Lagrangian.DissipationEquality(currentState, stepVector);
-            return result;
+            if ((stepVector - oldVector).L2Norm() < IterationPrecision * stepVector.L2Norm())
+                return stepVector;
         }
+
+        throw new UncriticalIterationInterceptedException($"{nameof(TearingLagrangianRootFinder)}.{nameof(FindRoot)}",
+            InterceptReason.MaxIterationCountExceeded, i);
     }
 
     private Vector<double> SolveBorderBlockWithoutDissipationEquality(
@@ -123,4 +140,7 @@ public class TearingLagrangianRootFinder(IRootFinder particleBlockRootFinder, IR
     public IRootFinder ParticleBlockRootFinder { get; } = particleBlockRootFinder;
 
     public IRootFinder BorderBlockRootFinder { get; } = borderBlockRootFinder;
+    public int MaxIterationCount { get; } = maxIterationCount;
+
+    public double IterationPrecision { get; } = iterationPrecision;
 }

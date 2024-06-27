@@ -1,9 +1,13 @@
+using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using static RefraSin.TEPSolver.EquationSystem.Helper;
+using GrainBoundaryNode = RefraSin.TEPSolver.ParticleModel.GrainBoundaryNode;
+using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
+using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver.StepEstimators;
 
@@ -37,15 +41,20 @@ class StepEstimator : IStepEstimator
             {
                 yield return 0;
                 yield return 0;
+                
+                yield return 0;
+                yield return GuessFluxToUpper(node);
+                yield return averageNormalDisplacement;
+
+                yield return 0;
+                yield return GuessFluxToUpper(node.ContactedNode);
+                yield return averageNormalDisplacement;
 
                 if (node is NeckNode)
-                    yield return averageNormalDisplacement;
-            }
-
-            foreach (var node in contact.ToNodes)
-            {
-                if (node is NeckNode)
-                    yield return averageNormalDisplacement;
+                {
+                    yield return GuessTangentialDisplacement(node);
+                    yield return GuessTangentialDisplacement(node.ContactedNode);
+                }
             }
         }
     }
@@ -54,13 +63,12 @@ class StepEstimator : IStepEstimator
     {
         foreach (var node in nodes)
         {
-            yield return 0;
-            yield return GuessFluxToUpper(node);
-
-            if (node is NeckNode)
-                yield return GuessTangentialDisplacement(node);
-            else
+            if (node is not IContactNode)
+            {
+                yield return 0;
+                yield return GuessFluxToUpper(node);
                 yield return GuessNormalDisplacement(node);
+            }
         }
     }
 

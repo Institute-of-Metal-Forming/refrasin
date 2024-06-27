@@ -204,10 +204,18 @@ public static class Jacobian
             yield return ContactConstraintDistance(stepVector, contact, contactNode);
             yield return ContactConstraintDirection(stepVector, contact, contactNode);
 
-            if (contactNode is NeckNode)
+            yield return StateVelocityDerivativeNormal(stepVector, contactNode);
+            yield return FluxDerivative(stepVector, contactNode);
+            yield return RequiredConstraint(stepVector, contactNode);
+
+            yield return StateVelocityDerivativeNormal(stepVector, contactNode.ContactedNode);
+            yield return FluxDerivative(stepVector, contactNode.ContactedNode);
+            yield return RequiredConstraint(stepVector, contactNode.ContactedNode);
+
+            if (contactNode is NeckNode neckNode)
             {
-                yield return StateVelocityDerivativeNormal(stepVector, contactNode);
-                yield return StateVelocityDerivativeNormal(stepVector, contactNode.ContactedNode);
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
+                yield return StateVelocityDerivativeTangential(stepVector, neckNode.ContactedNode);
             }
         }
     }
@@ -248,13 +256,12 @@ public static class Jacobian
     {
         foreach (var node in nodes)
         {
-            if (node is NeckNode neckNode)
-                yield return StateVelocityDerivativeTangential(stepVector, neckNode);
-            else
+            if (node is not ContactNodeBase)
+            {
                 yield return StateVelocityDerivativeNormal(stepVector, node);
-
-            yield return FluxDerivative(stepVector, node);
-            yield return RequiredConstraint(stepVector, node);
+                yield return FluxDerivative(stepVector, node);
+                yield return RequiredConstraint(stepVector, node);
+            }
         }
     }
 

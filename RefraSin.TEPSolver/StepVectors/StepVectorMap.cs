@@ -14,13 +14,12 @@ public class StepVectorMap
 
             foreach (var node in particle.Nodes)
             {
-                AddUnknown(node.Id, Unknown.LambdaVolume);
-                AddUnknown(node.Id, Unknown.FluxToUpper);
-                
-                if (node is INeckNode)
-                    AddUnknown(node.Id, Unknown.TangentialDisplacement);
-                else
+                if (node is not IContactNode)
+                {
+                    AddUnknown(node.Id, Unknown.LambdaVolume);
+                    AddUnknown(node.Id, Unknown.FluxToUpper);
                     AddUnknown(node.Id, Unknown.NormalDisplacement);
+                }
             }
 
             _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
@@ -37,18 +36,22 @@ public class StepVectorMap
             {
                 AddUnknown(contactNode.Id, Unknown.LambdaContactDistance);
                 AddUnknown(contactNode.Id, Unknown.LambdaContactDirection);
+                LinkUnknown(contactNode.Id, contactNode.ContactedNodeId, Unknown.LambdaContactDistance);
+                LinkUnknown(contactNode.Id, contactNode.ContactedNodeId, Unknown.LambdaContactDirection);
 
-                if (contactNode is ParticleModel.NeckNode)
-                    AddUnknown(contactNode.Id, Unknown.NormalDisplacement);
-            }
+                AddUnknown(contactNode.Id, Unknown.LambdaVolume);
+                AddUnknown(contactNode.Id, Unknown.FluxToUpper);
+                AddUnknown(contactNode.Id, Unknown.NormalDisplacement);
 
-            foreach (var contactNode in contact.ToNodes)
-            {
-                LinkUnknown(contactNode.ContactedNodeId, contactNode.Id, Unknown.LambdaContactDistance);
-                LinkUnknown(contactNode.ContactedNodeId, contactNode.Id, Unknown.LambdaContactDirection);
+                AddUnknown(contactNode.ContactedNodeId, Unknown.LambdaVolume);
+                AddUnknown(contactNode.ContactedNodeId, Unknown.FluxToUpper);
+                AddUnknown(contactNode.ContactedNodeId, Unknown.NormalDisplacement);
 
-                if (contactNode is ParticleModel.NeckNode)
-                    AddUnknown(contactNode.Id, Unknown.NormalDisplacement);
+                if (contactNode is INeckNode)
+                {
+                    AddUnknown(contactNode.Id, Unknown.TangentialDisplacement);
+                    AddUnknown(contactNode.ContactedNodeId, Unknown.TangentialDisplacement);
+                }
             }
         }
 
