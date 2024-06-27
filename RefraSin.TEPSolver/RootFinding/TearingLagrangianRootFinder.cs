@@ -50,11 +50,9 @@ public class TearingLagrangianRootFinder(
 
     private StepVector SolveParticleAndBorderBlocks(
         SolutionState currentState,
-        StepVector initialGuess
+        StepVector stepVector
     )
     {
-        var stepVector = initialGuess.Copy();
-
         int i;
 
         for (i = 0; i < MaxIterationCount; i++)
