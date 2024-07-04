@@ -1,5 +1,6 @@
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
+using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
@@ -74,4 +75,22 @@ public interface INorm
                 );
             })
         );
+
+    public IInterfaceProperties NormalizeInterfaceProperties(IInterfaceProperties interfaceProperties)
+        => new InterfaceProperties(interfaceProperties.DiffusionCoefficient / DiffusionCoefficient, interfaceProperties.Energy / InterfaceEnergy);
+
+    public IBulkProperties NormalizeBulkProperties(IBulkProperties bulkProperties) =>
+        new BulkProperties(bulkProperties.VolumeDiffusionCoefficient / DiffusionCoefficient, bulkProperties.EquilibriumVacancyConcentration);
+
+    public ISubstanceProperties NormalizeSubstanceProperties(ISubstanceProperties substanceProperties) =>
+        new SubstanceProperties(substanceProperties.Density / Mass * Volume, substanceProperties.MolarMass / Mass * Substance);
+
+    public IMaterial NormalizeMaterial(IMaterial material) => new Material(
+        material.Id,
+        material.Name,
+        NormalizeBulkProperties(material.Bulk),
+        NormalizeSubstanceProperties(material.Substance),
+        NormalizeInterfaceProperties(material.Surface),
+        material.Interfaces.ToDictionary(kv => kv.Key, kv => NormalizeInterfaceProperties(kv.Value))
+    );
 }

@@ -121,17 +121,21 @@ public class TwoParticleTest
         _material = new Material(
             _particle1.MaterialId,
             "Al2O3",
-            0,
-            1e-4,
-            1.8e3,
-            101.96e-3,
+            new BulkProperties(
+                0,
+                1e-4
+            ),
+            new SubstanceProperties(
+                1.8e3,
+                101.96e-3
+            ),
             new InterfaceProperties(
                 1.65e-10,
                 0.9
             )
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 1.65e-10, 0.5);
+        _materialInterface = new MaterialInterface(_material.Id, _material.Id, new InterfaceProperties(1.65e-10, 0.5));
 
         _initialState = new SystemState(
             Guid.NewGuid(),

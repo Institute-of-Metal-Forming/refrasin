@@ -3,7 +3,7 @@ namespace RefraSin.MaterialData;
 /// <summary>
 /// Interface for types providing material data.
 /// </summary>
-public interface IMaterial : IBulkProperties, ISubstanceProperties
+public interface IMaterial
 {
     /// <summary>
     /// Unique id.
@@ -11,9 +11,13 @@ public interface IMaterial : IBulkProperties, ISubstanceProperties
     Guid Id { get; }
 
     /// <summary>
-    /// Human readable name.
+    /// Human-readable name.
     /// </summary>
     string Name { get; }
+    
+    IBulkProperties Bulk { get; }
+    
+    ISubstanceProperties Substance { get; }
 
     IInterfaceProperties Surface { get; }
     

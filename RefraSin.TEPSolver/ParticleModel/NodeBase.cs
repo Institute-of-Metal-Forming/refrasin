@@ -23,7 +23,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
             throw new ArgumentException("IDs of the node spec and the given particle instance do not match.");
 
         Particle = particle;
-        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R / solverSession.Norm.Length)
+        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R)
             { SystemSource = () => Particle.LocalCoordinateSystem };
         SolverSession = solverSession;
     }

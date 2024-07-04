@@ -30,7 +30,7 @@ public class OneParticleTest
             5,
             0.1,
             Guid.NewGuid()
-        ){NodeCount = 80}.GetParticle();
+        ) { NodeCount = 80 }.GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
@@ -48,17 +48,21 @@ public class OneParticleTest
         _material = new Material(
             _particle.MaterialId,
             "Al2O3",
-            0,
-            1e-4,
-            1.8e3,
-            101.96e-3,
+            new BulkProperties(
+                0,
+                1e-4
+            ),
+            new SubstanceProperties(
+                1.8e3,
+                101.96e-3
+            ),
             new InterfaceProperties(
                 1.65e-10,
                 0.9
             )
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 1.65e-10, 0.5);
+        _materialInterface = new MaterialInterface(_material.Id, _material.Id, new InterfaceProperties(1.65e-10, 0.5));
 
         _initialState = new SystemState(
             Guid.NewGuid(),
@@ -80,7 +84,6 @@ public class OneParticleTest
     private SinteringStep _sinteringProcess;
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
-
 
     [Test]
     public void PlotJacobianStructureAnalytical()

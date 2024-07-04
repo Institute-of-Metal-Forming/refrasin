@@ -27,14 +27,14 @@ public class DefaultNormalizer : INormalizer
             Volume = Pow(Length, 3);
 
             Time = sinteringStep.GasConstant * sinteringStep.Temperature * Pow(Length, 4) /
-                   (referenceMaterial.EquilibriumVacancyConcentration * referenceMaterial.MolarVolume *
+                   (referenceMaterial.Bulk.EquilibriumVacancyConcentration * referenceMaterial.Substance.MolarVolume *
                     referenceMaterial.Surface.DiffusionCoefficient * referenceMaterial.Surface.Energy);
 
             InterfaceEnergy = referenceMaterial.Surface.Energy;
             Energy = InterfaceEnergy * Area;
 
-            Substance = Volume / referenceMaterial.MolarVolume;
-            Mass = referenceMaterial.MolarMass * Substance;
+            Substance = Volume / referenceMaterial.Substance.MolarVolume;
+            Mass = referenceMaterial.Substance.MolarMass * Substance;
 
             Temperature = Energy / (Substance * sinteringStep.GasConstant);
 

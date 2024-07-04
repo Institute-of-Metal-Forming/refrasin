@@ -29,17 +29,24 @@ internal class SolverSession : ISolverSession
         Id = Guid.NewGuid();
         Norm = sinteringSolver.Routines.Normalizer.GetNorm(inputState, step);
 
-        StartTime = inputState.Time / Norm.Time;
+        var normalizedState = Norm.NormalizeSystemState(inputState);
+
+        StartTime = normalizedState.Time;
         Duration = step.Duration / Norm.Time;
         EndTime = StartTime + Duration;
-        Temperature = step.Temperature;
-        GasConstant = step.GasConstant;
+        Temperature = step.Temperature / Norm.Temperature;
+        GasConstant = step.GasConstant / Norm.Energy * Norm.Mass * Norm.Temperature;
         _reportSystemState = step.ReportSystemState;
         _reportSystemStateTransition = step.ReportSystemStateTransition;
 
-        Materials = step.Materials.ToDictionary(m => m.Id);
+        Materials = step.Materials.ToDictionary(
+            m => m.Id,
+            m => Norm.NormalizeMaterial(m)
+        );
+
         MaterialInterfaces = step
-            .MaterialInterfaces.GroupBy(mi => mi.From)
+            .MaterialInterfaces.Select(mi => new MaterialInterface(mi.From, mi.To, Norm.NormalizeInterfaceProperties(mi.Properties)))
+            .GroupBy(mi => mi.From)
             .ToDictionary(g => g.Key, g => (IReadOnlyList<IMaterialInterface>)g.ToArray());
 
         Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
