@@ -4,7 +4,7 @@ using RefraSin.TEPSolver.StepVectors;
 namespace RefraSin.TEPSolver.StepWidthControllers;
 
 public class TrialAndErrorStepWidthController(
-    double initialTimeStepWidth = 1,
+    double initialTimeStepWidth = 1e-5,
     double minimalTimeStepWidth = double.NegativeInfinity,
     double maximalTimeStepWidth = double.PositiveInfinity,
     double increaseFactor = 1.5,

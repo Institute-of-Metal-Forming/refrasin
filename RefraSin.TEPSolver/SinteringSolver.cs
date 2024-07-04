@@ -1,15 +1,11 @@
-using MathNet.Numerics;
 using Microsoft.Extensions.Logging;
 using RefraSin.Numerics.Exceptions;
-using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.StepVectors;
-using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -21,21 +17,14 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     public SinteringSolver(
         ISolutionStorage solutionStorage,
         ILoggerFactory loggerFactory,
-        ISolverRoutines routines,
-        ISolverOptions options
+        ISolverRoutines routines
     )
     {
         SolutionStorage = solutionStorage;
         LoggerFactory = loggerFactory;
         Routines = routines;
         routines.RegisterWithSolver(this);
-        Options = options;
     }
-
-    /// <summary>
-    /// Numeric options to control solver behavior.
-    /// </summary>
-    public ISolverOptions Options { get; }
 
     /// <summary>
     /// Storage for solution data.

@@ -16,11 +16,6 @@ public interface ISolverSession : ISinteringConditions
     /// </summary>
     Guid Id { get; }
     
-    /// <summary>
-    /// Options for the solver.
-    /// </summary>
-    public ISolverOptions Options { get; }
-
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
     
     public IReadOnlyDictionary<Guid, IReadOnlyList<IMaterialInterface>> MaterialInterfaces { get; }

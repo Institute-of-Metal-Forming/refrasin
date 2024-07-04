@@ -36,7 +36,6 @@ internal class SolverSession : ISolverSession
         GasConstant = step.GasConstant;
         _reportSystemState = step.ReportSystemState;
         _reportSystemStateTransition = step.ReportSystemStateTransition;
-        Options = sinteringSolver.Options;
 
         Materials = step.Materials.ToDictionary(m => m.Id);
         MaterialInterfaces = step
@@ -87,9 +86,6 @@ internal class SolverSession : ISolverSession
 
     /// <inheritdoc />
     public Guid Id { get; }
-
-    /// <inheritdoc />
-    public ISolverOptions Options { get; }
 
     public SolutionState CurrentState { get; set; }
 

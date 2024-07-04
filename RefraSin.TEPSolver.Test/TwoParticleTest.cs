@@ -24,7 +24,7 @@ public class TwoParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e5;
+        var duration = 1e4;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6 * 5;
         var nodeCountPerParticle = 20;
 
@@ -115,13 +115,7 @@ public class TwoParticleTest
         _solver = new SinteringSolver(
             _solutionStorage,
             loggerFactory,
-            SolverRoutines.Default,
-            new SolverOptions
-            {
-                InitialTimeStepWidth = 10,
-                MaxTimeStepWidth = 1e2,
-                TimeStepAdaptationFactor = 1.5,
-            }
+            SolverRoutines.Default
         );
 
         _material = new Material(

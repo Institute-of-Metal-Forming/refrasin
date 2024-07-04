@@ -22,7 +22,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e6;
+        var duration = 1e4;
 
         _particle = new ShapeFunctionParticleFactory(
             100e-6,
@@ -30,7 +30,7 @@ public class OneParticleTest
             5,
             0.1,
             Guid.NewGuid()
-        ){NodeCount = 20}.GetParticle();
+        ){NodeCount = 80}.GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
@@ -42,13 +42,7 @@ public class OneParticleTest
         _solver = new SinteringSolver(
             _solutionStorage,
             loggerFactory,
-            SolverRoutines.Default,
-            new SolverOptions
-            {
-                InitialTimeStepWidth = 1e1,
-                MaxTimeStepWidth = 0.5e4,
-                TimeStepAdaptationFactor = 1.5,
-            }
+            SolverRoutines.Default
         );
 
         _material = new Material(
