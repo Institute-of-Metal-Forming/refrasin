@@ -3,8 +3,8 @@ using RefraSin.Numerics.Exceptions;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.Recovery;
+using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver;
@@ -58,6 +58,18 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         );
     }
 
+    private void TryTimeIntegration(SolverSession session)
+    {
+        try
+        {
+            DoTimeIntegration(session);
+        }
+        catch (Exception e)
+        {
+            session.Logger.LogCritical(e, "Solution procedure failed due to exception.");
+        }
+    }
+
     private void DoTimeIntegration(SolverSession session)
     {
         session.Logger.LogInformation(
@@ -89,43 +101,50 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         );
     }
 
-    private StepVector SolveStepUntilValid(SolverSession session, SolutionState solutionState, IStateRecoverer[] recoverers)
+    private StepVector SolveStepUntilValid(SolverSession session, SolutionState baseState, IStateRecoverer[] recoverers)
     {
-        var stepVector = session.Routines.TimeStepper.Step(session, solutionState,
-            session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, solutionState));
+        var stepVector = session.Routines.TimeStepper.Step(session, baseState,
+            session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, baseState));
 
         try
         {
             foreach (var validator in session.Routines.StepValidators)
             {
-                validator.Validate(solutionState, stepVector);
+                validator.Validate(baseState, stepVector);
             }
         }
-        catch (StepRejectedException stepRejectedException)
+        catch (InvalidStepException stepRejectedException)
         {
             session.Logger.LogError(stepRejectedException, "Calculated step was rejected. Trying to recover.");
-            InvokeStepRejected(session, solutionState, stepVector);
+            InvokeStepRejected(session, baseState, stepVector);
 
             try
             {
-                stepVector = SolveStepUntilValid(session, recoverers[0].RecoverState(session, solutionState), recoverers);
+                stepVector = TryRecover(session, baseState, recoverers);
             }
             catch (RecoveryFailedException recoveryFailedException)
             {
                 session.Logger.LogError(recoveryFailedException, "Recovery failed. Trying next recoverer.");
-                var remainingRecoverers = recoverers[1..];
-
-                stepVector = SolveStepUntilValid(session, remainingRecoverers[0].RecoverState(session, solutionState), remainingRecoverers);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                session.Logger.LogError("No more recoverers available.");
-                throw new CriticalIterationInterceptedException(nameof(SolveStepUntilValid), InterceptReason.ExceptionOccured,
-                    furtherInformation: "Recovery of solution finally failed.");
+                stepVector = TryRecover(session, baseState, recoverers[1..]);
             }
         }
 
         return stepVector;
+    }
+
+    private StepVector TryRecover(SolverSession session, SolutionState invalidState, IStateRecoverer[] recoverers)
+    {
+        try
+        {
+            var recoveredState = recoverers[0].RecoverState(session, invalidState);
+            return SolveStepUntilValid(session, recoveredState, recoverers);
+        }
+        catch (IndexOutOfRangeException)
+        {
+            session.Logger.LogError("No more recoverers available.");
+            throw new CriticalIterationInterceptedException(nameof(SolveStepUntilValid), InterceptReason.ExceptionOccured,
+                furtherInformation: "Recovery of solution finally failed.");
+        }
     }
 
     public event EventHandler<StepSuccessfullyCalculatedEventArgs>? StepSuccessfullyCalculated;

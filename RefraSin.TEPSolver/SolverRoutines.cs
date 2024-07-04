@@ -1,5 +1,3 @@
-using MathNet.Numerics.LinearAlgebra.Double.Solvers;
-using MathNet.Numerics.LinearAlgebra.Solvers;
 using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.Normalization;
@@ -26,7 +24,7 @@ public record SolverRoutines(
         new AdamsMoultonTimeStepper(),
         new IStepValidator[]
         {
-            new InstabilityDetector()
+            // new InstabilityDetector()
         },
         new TearingLagrangianRootFinder(
             new NewtonRaphsonRootFinder(

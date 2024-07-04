@@ -4,7 +4,7 @@ using RefraSin.TEPSolver.StepVectors;
 namespace RefraSin.TEPSolver.StepWidthControllers;
 
 public class TrialAndErrorStepWidthController(
-    double initialTimeStepWidth = 1e-5,
+    double initialTimeStepWidth = 1e-6,
     double minimalTimeStepWidth = double.NegativeInfinity,
     double maximalTimeStepWidth = double.PositiveInfinity,
     double increaseFactor = 1.5,
@@ -36,6 +36,7 @@ public class TrialAndErrorStepWidthController(
         {
             _stepWidths[e.SolverSession.Id] *= DecreaseFactor;
             _stepsSinceLastIncrease[e.SolverSession.Id] = 0;
+            e.SolverSession.Logger.LogInformation("Time step width decreased to {Step}.", _stepWidths[e.SolverSession.Id]);
         }
     }
 

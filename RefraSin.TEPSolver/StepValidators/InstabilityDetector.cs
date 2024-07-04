@@ -1,5 +1,3 @@
-using RefraSin.ParticleModel;
-using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepValidators;
@@ -22,7 +20,7 @@ public class InstabilityDetector : IStepValidator
                     differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0 &&
                     differences[(i + 3) % differences.Length] * differences[(i + 4) % differences.Length] < 0
                 )
-                    throw new InstabilityException(particle.Id, particle.Nodes[i].Id, i);
+                    throw new InstabilityException(currentState, stepVector, particle.Id, particle.Nodes[i].Id, i);
             }
         }
     }
