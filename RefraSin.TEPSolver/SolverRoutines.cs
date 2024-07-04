@@ -3,9 +3,11 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepWidthControllers;
 using RefraSin.TEPSolver.TimeSteppers;
 
 namespace RefraSin.TEPSolver;
@@ -15,28 +17,45 @@ public record SolverRoutines(
     ITimeStepper TimeStepper,
     IEnumerable<IStepValidator> StepValidators,
     ILagrangianRootFinder LagrangianRootFinder,
-    INormalizer Normalizer) : ISolverRoutines
+    INormalizer Normalizer,
+    IStepWidthController StepWidthController,
+    IEnumerable<IStateRecoverer> StateRecoverers) : ISolverRoutines
 {
-    public static SolverRoutines Default = new(
+    public static readonly SolverRoutines Default = new(
         new StepEstimator(),
         new AdamsMoultonTimeStepper(),
-        new[]
+        new IStepValidator[]
         {
             new InstabilityDetector()
         },
         new TearingLagrangianRootFinder(
             new NewtonRaphsonRootFinder(
                 new LUSolver()
-                // new IterativeSolver(
-                //     new MlkBiCgStab(),
-                //     new Iterator<double>(),
-                //     new MILU0Preconditioner<double>()
-                // )
             ),
             new NewtonRaphsonRootFinder(
                 new LUSolver()
             )
         ),
-        new DefaultNormalizer()
+        new DefaultNormalizer(),
+        new TrialAndErrorStepWidthController(),
+        new IStateRecoverer[]
+        {
+            new StepBackStateRecoverer()
+        }
     );
+
+    /// <inheritdoc />
+    public void RegisterWithSolver(SinteringSolver solver)
+    {
+        StepEstimator.RegisterWithSolver(solver);
+        TimeStepper.RegisterWithSolver(solver);
+        LagrangianRootFinder.RegisterWithSolver(solver);
+        Normalizer.RegisterWithSolver(solver);
+        StepWidthController.RegisterWithSolver(solver);
+
+        foreach (var validator in StepValidators)
+            validator.RegisterWithSolver(solver);
+        foreach (var recoverer in StateRecoverers)
+            recoverer.RegisterWithSolver(solver);
+    }
 }

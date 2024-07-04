@@ -8,32 +8,7 @@ namespace RefraSin.TEPSolver;
 /// </summary>
 public interface ISolverOptions
 {
-    /// <summary>
-    /// Maximum count of iterations until an <see cref="IterationInterceptedException"/> is thrown.
-    /// </summary>
-    int MaxIterationCount { get; }
-
-    /// <summary>
-    /// Maximum count of iterations used in root finding routines.
-    /// </summary>
-    int RootFindingMaxIterationCount { get; }
-
-    /// <summary>
-    /// Accuracy value used for root finding routines.
-    /// </summary>
-    double RootFindingAccuracy { get; }
-
-    /// <summary>
-    /// Goal precision of iteration loops as fraction of 1.
-    /// </summary>
-    double IterationPrecision { get; }
-
     public double RelativeNodeCoordinateEquivalencePrecision { get; }
-
-    /// <summary>
-    /// Goal discretization width in space.
-    /// </summary>
-    double DiscretizationWidth { get; }
 
     /// <summary>
     /// Count of time steps until an increase of time step width is tried again after decrease.

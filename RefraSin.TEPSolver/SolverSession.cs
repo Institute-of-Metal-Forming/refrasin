@@ -17,10 +17,8 @@ namespace RefraSin.TEPSolver;
 
 internal class SolverSession : ISolverSession
 {
-    private int _timeStepIndexWhereStepWidthWasLastModified = 0;
-
-    private Action<ISystemState> _reportSystemState;
-    private Action<ISystemStateTransition> _reportSystemStateTransition;
+    private readonly Action<ISystemState> _reportSystemState;
+    private readonly Action<ISystemStateTransition> _reportSystemStateTransition;
 
     public SolverSession(
         SinteringSolver sinteringSolver,
@@ -28,6 +26,7 @@ internal class SolverSession : ISolverSession
         ISinteringStep step
     )
     {
+        Id = Guid.NewGuid();
         Norm = sinteringSolver.Routines.Normalizer.GetNorm(inputState, step);
 
         StartTime = inputState.Time / Norm.Time;
@@ -37,7 +36,6 @@ internal class SolverSession : ISolverSession
         GasConstant = step.GasConstant;
         _reportSystemState = step.ReportSystemState;
         _reportSystemStateTransition = step.ReportSystemStateTransition;
-        TimeStepWidth = sinteringSolver.Options.InitialTimeStepWidth / Norm.Time;
         Options = sinteringSolver.Options;
 
         Materials = step.Materials.ToDictionary(m => m.Id);
@@ -46,8 +44,6 @@ internal class SolverSession : ISolverSession
             .ToDictionary(g => g.Key, g => (IReadOnlyList<IMaterialInterface>)g.ToArray());
 
         Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
-
-        StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
         Routines = sinteringSolver.Routines;
 
         var particles = inputState.Particles.Select(ps => new Particle(ps, this)).ToArray();
@@ -84,21 +80,21 @@ internal class SolverSession : ISolverSession
     public double Duration { get; }
 
     /// <inheritdoc />
-    public int TimeStepIndex { get; set; }
-
-    /// <inheritdoc />
     public double Temperature { get; }
 
     /// <inheritdoc />
     public double GasConstant { get; }
 
     /// <inheritdoc />
-    public double TimeStepWidth { get; private set; }
+    public Guid Id { get; }
 
     /// <inheritdoc />
     public ISolverOptions Options { get; }
 
     public SolutionState CurrentState { get; set; }
+
+    /// <inheritdoc />
+    public StepVector? LastStep { get; set; }
 
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
 
@@ -112,45 +108,6 @@ internal class SolverSession : ISolverSession
 
     /// <inheritdoc />
     public INorm Norm { get; }
-
-    public StepVector? LastStep { get; set; }
-
-    public FixedStack<SolutionState> StateMemory { get; }
-
-    public void IncreaseTimeStepWidth()
-    {
-        TimeStepWidth *= Options.TimeStepAdaptationFactor;
-        _timeStepIndexWhereStepWidthWasLastModified = TimeStepIndex;
-
-        if (TimeStepWidth > Options.MaxTimeStepWidth / Norm.Time)
-        {
-            TimeStepWidth = Options.MaxTimeStepWidth / Norm.Time;
-        }
-    }
-
-    public void MayIncreaseTimeStepWidth()
-    {
-        if (
-            TimeStepIndex - _timeStepIndexWhereStepWidthWasLastModified
-            > Options.TimeStepIncreaseDelay
-        )
-            IncreaseTimeStepWidth();
-    }
-
-    public void DecreaseTimeStepWidth()
-    {
-        TimeStepWidth /= Options.TimeStepAdaptationFactor;
-        _timeStepIndexWhereStepWidthWasLastModified = TimeStepIndex;
-
-        Logger.LogInformation("Time step width decreased to {TimeStepWidth}.", TimeStepWidth);
-
-        if (TimeStepWidth < Options.MinTimeStepWidth / Norm.Time)
-        {
-            throw new InvalidOperationException(
-                "Time step width was decreased below the allowed minimum."
-            );
-        }
-    }
 
     public void ReportCurrentState()
     {
@@ -182,7 +139,6 @@ internal class SolverSession : ISolverSession
                 })
             )
         );
-        StateMemory.Push(CurrentState);
     }
 
     public void ReportTransition(ISinteringStateStateTransition step)

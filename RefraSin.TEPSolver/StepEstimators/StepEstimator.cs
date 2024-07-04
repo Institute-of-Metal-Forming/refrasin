@@ -41,7 +41,7 @@ class StepEstimator : IStepEstimator
             {
                 yield return 0;
                 yield return 0;
-                
+
                 yield return 0;
                 yield return GuessFluxToUpper(node);
                 yield return averageNormalDisplacement;
@@ -95,4 +95,7 @@ class StepEstimator : IStepEstimator
     private static double GuessVacancyConcentration(NodeBase node) =>
         (node is not NeckNode ? node.GibbsEnergyGradient.Normal : -Abs(node.GibbsEnergyGradient.Tangential))
       / node.Particle.VacancyVolumeEnergy;
+
+    /// <inheritdoc />
+    public void RegisterWithSolver(SinteringSolver solver) { }
 }
