@@ -76,6 +76,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             InvokeStepSuccessfullyCalculated(session, session.CurrentState, newState, stepVector);
 
             session.CurrentState = newState;
+            session.ReportCurrentState();
 
             session.Logger.LogInformation("Time step {Index} successfully calculated. ({Time}/{EndTime})", i, session.CurrentState.Time,
                 session.EndTime);

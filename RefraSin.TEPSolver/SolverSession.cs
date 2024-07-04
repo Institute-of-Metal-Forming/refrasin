@@ -107,34 +107,7 @@ internal class SolverSession : ISolverSession
 
     public void ReportCurrentState()
     {
-        _reportSystemState(
-            new SystemState(
-                CurrentState.Id,
-                CurrentState.Time * Norm.Time,
-                CurrentState.Particles.Select(p =>
-                {
-                    var particleCenter =
-                        new AbsolutePoint(
-                            p.CenterCoordinates.X * Norm.Length,
-                            p.CenterCoordinates.Y * Norm.Length
-                        );
-                    var particleSystem = new PolarCoordinateSystem(particleCenter, p.RotationAngle);
-                    return new RefraSin.ParticleModel.Particle(
-                        p.Id,
-                        particleCenter,
-                        p.RotationAngle,
-                        p.MaterialId,
-                        p.Nodes.Select(n => new Node(
-                                n.Id,
-                                p.Id,
-                                new PolarPoint(n.Coordinates.Phi, n.Coordinates.R * Norm.Length, particleSystem),
-                                n.Type
-                            ))
-                            .ToArray()
-                    );
-                })
-            )
-        );
+        _reportSystemState(Norm.DenormalizeSystemState(CurrentState));
     }
 
     public void ReportTransition(ISinteringStateStateTransition step)
