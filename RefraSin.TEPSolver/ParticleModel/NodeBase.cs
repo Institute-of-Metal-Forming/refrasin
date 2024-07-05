@@ -51,6 +51,8 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// </summary>
     public Particle Particle { get; }
 
+    IParticle INodeNeighbors.Particle => Particle;
+
     /// <inheritdoc />
     public Guid ParticleId => Particle.Id;
 

@@ -21,4 +21,16 @@ public interface IReadOnlyParticleSurface<out TNode> : IReadOnlyNodeCollection<T
     /// <param name="start">start ID</param>
     /// <param name="end">end ID (inclusive)</param>
     public IReadOnlyList<TNode> this[Guid start, Guid end] { get; }
+
+    /// <summary>
+    /// Returns the node that is the first upper neighbor of the specified one in the surface.
+    /// </summary>
+    /// <param name="node"></param>
+    public INode UpperNeighborOf(INode node) => this[IndexOf(node.Id) + 1];
+
+    /// <summary>
+    /// Returns the node that is the first lower neighbor of the specified one in the surface.
+    /// </summary>
+    /// <param name="node"></param>
+    public INode LowerNeighborOf(INode node) => this[IndexOf(node.Id) - 1];
 }

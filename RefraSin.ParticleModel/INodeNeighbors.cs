@@ -1,16 +1,16 @@
 namespace RefraSin.ParticleModel;
 
-public interface INodeNeighbors
+public interface INodeNeighbors : INode
 {
     /// <summary>
     /// Upper neighbor of this node.
     /// </summary>
-    public INode Upper { get; }
+    public INode Upper => Particle.Nodes.UpperNeighborOf(this);
 
     /// <summary>
     /// Lower neighbor of this node.
     /// </summary>
-    public INode Lower { get; }
+    public INode Lower => Particle.Nodes.LowerNeighborOf(this);
 
     /// <summary>
     /// Particle this node belongs to.
