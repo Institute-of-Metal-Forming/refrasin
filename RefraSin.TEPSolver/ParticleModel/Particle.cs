@@ -66,9 +66,9 @@ public class Particle : IParticle
                     INeckNode neckNode => new NeckNode(neckNode, this, solverSession),
                     IGrainBoundaryNode grainBoundaryNode
                         => new GrainBoundaryNode(grainBoundaryNode, this, solverSession),
-                    { Type: NodeType.GrainBoundaryNode }
+                    { Type: NodeType.GrainBoundary }
                         => new GrainBoundaryNode(node, this, solverSession),
-                    { Type: NodeType.NeckNode } => new NeckNode(node, this, solverSession),
+                    { Type: NodeType.Neck } => new NeckNode(node, this, solverSession),
                     _                           => (NodeBase)new SurfaceNode(node, this, solverSession),
                 }
             )

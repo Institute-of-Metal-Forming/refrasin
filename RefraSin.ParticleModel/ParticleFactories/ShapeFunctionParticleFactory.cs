@@ -56,7 +56,7 @@ public class ShapeFunctionParticleFactory : IParticleFactory
                     Guid.NewGuid(),
                     particleId,
                     new PolarPoint(t.First, t.Second),
-                    NodeType.SurfaceNode
+                    NodeType.Surface
                 )
             ).ToArray()
         );

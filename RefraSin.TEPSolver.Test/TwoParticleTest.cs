@@ -41,19 +41,19 @@ public class TwoParticleTest
                         Guid.NewGuid(),
                         baseParticle1.Id,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
-                        NodeType.NeckNode
+                        NodeType.Neck
                     ),
                     new Node(
                         Guid.NewGuid(),
                         baseParticle1.Id,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
-                        NodeType.GrainBoundaryNode
+                        NodeType.GrainBoundary
                     ),
                     new Node(
                         Guid.NewGuid(),
                         baseParticle1.Id,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
-                        NodeType.NeckNode
+                        NodeType.Neck
                     ),
                 }
             )
@@ -79,19 +79,19 @@ public class TwoParticleTest
                         Guid.NewGuid(),
                         baseParticle2.Id,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
-                        NodeType.NeckNode
+                        NodeType.Neck
                     ),
                     new Node(
                         Guid.NewGuid(),
                         baseParticle2.Id,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
-                        NodeType.GrainBoundaryNode
+                        NodeType.GrainBoundary
                     ),
                     new Node(
                         Guid.NewGuid(),
                         baseParticle2.Id,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
-                        NodeType.NeckNode
+                        NodeType.Neck
                     ),
                 }
             )

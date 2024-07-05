@@ -9,7 +9,7 @@ namespace RefraSin.ParticleModel;
 /// </summary>
 public record GrainBoundaryNode(
     Guid Id,
-    Guid ParticleId,
+    IParticle Particle,
     PolarPoint Coordinates,
     Guid ContactedParticleId,
     Guid ContactedNodeId,
@@ -30,12 +30,12 @@ public record GrainBoundaryNode(
     NormalTangential<Angle> CenterShiftVectorDirection,
     NormalTangential<double> ContactDistanceGradient,
     NormalTangential<double> ContactDirectionGradient
-) : Node(Id, ParticleId, Coordinates, NodeType.GrainBoundaryNode), IGrainBoundaryNode
+) : Node(Id, Particle.Id, Coordinates, NodeType.GrainBoundary), IGrainBoundaryNode
 {
     public GrainBoundaryNode(IGrainBoundaryNode template)
         : this(
             template.Id,
-            template.ParticleId,
+            template.Particle,
             template.Coordinates,
             template.ContactedParticleId,
             template.ContactedNodeId,

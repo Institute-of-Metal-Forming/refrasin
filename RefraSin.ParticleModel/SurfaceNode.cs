@@ -9,7 +9,7 @@ namespace RefraSin.ParticleModel;
 /// </summary>
 public record SurfaceNode(
     Guid Id,
-    Guid ParticleId,
+    IParticle Particle,
     PolarPoint Coordinates,
     AbsolutePoint AbsoluteCoordinates,
     ToUpperToLower<double> SurfaceDistance,
@@ -22,11 +22,11 @@ public record SurfaceNode(
     NormalTangential<double> VolumeGradient,
     ToUpperToLower<double> SurfaceEnergy,
     ToUpperToLower<double> SurfaceDiffusionCoefficient
-   ) : Node(Id, ParticleId, Coordinates, NodeType.SurfaceNode), ISurfaceNode
+   ) : Node(Id, Particle.Id, Coordinates, NodeType.Surface), ISurfaceNode
 {
     public SurfaceNode(ISurfaceNode template) : this(
         template.Id,
-        template.ParticleId,
+        template.Particle,
         template.Coordinates,
         template.AbsoluteCoordinates,
         template.SurfaceDistance,

@@ -16,7 +16,7 @@ public class SurfaceNode : NodeBase, ISurfaceNode
     private SurfaceNode(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession) : base(id, r, phi, particle, solverSession) { }
 
     /// <inheritdoc />
-    public override NodeType Type => NodeType.SurfaceNode;
+    public override NodeType Type => NodeType.Surface;
 
     /// <inheritdoc />
     public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(

@@ -9,7 +9,7 @@ namespace RefraSin.ParticleModel;
 /// </summary>
 public record NeckNode(
     Guid Id,
-    Guid ParticleId,
+    IParticle Particle,
     PolarPoint Coordinates,
     Guid ContactedParticleId,
     Guid ContactedNodeId,
@@ -30,12 +30,12 @@ public record NeckNode(
     NormalTangential<Angle> CenterShiftVectorDirection,
     NormalTangential<double> ContactDistanceGradient,
     NormalTangential<double> ContactDirectionGradient
-) : Node(Id, ParticleId, Coordinates, NodeType.NeckNode), INeckNode
+) : Node(Id, Particle.Id, Coordinates, NodeType.Neck), INeckNode
 {
     public NeckNode(INeckNode template)
         : this(
             template.Id,
-            template.ParticleId,
+            template.Particle,
             template.Coordinates,
             template.ContactedParticleId,
             template.ContactedNodeId,

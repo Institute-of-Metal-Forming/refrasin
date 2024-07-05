@@ -25,10 +25,8 @@ public class Particle : IParticle
         _nodes = new ReadOnlyParticleSurface<Node>(
             nodes.Select(node => node switch
             {
-                INeckNode neckNode                   => new NeckNode(neckNode),
-                IGrainBoundaryNode grainBoundaryNode => new GrainBoundaryNode(grainBoundaryNode),
-                ISurfaceNode surfaceNode             => new SurfaceNode(surfaceNode),
-                _                                    => new Node(node)
+                INodeGeometry nodeGeometry => new NodeGeometry(nodeGeometry),
+                _                          => new NodeGeometry(node, this)
             })
         );
     }
