@@ -33,7 +33,7 @@ public static class NodeGeometryExtensions
     {
         if (self.Type == NodeType.Neck) // neck normal is meant normal to existing grain boundary
         {
-            return self.Upper is GrainBoundaryNode
+            return self.Upper.Type == NodeType.GrainBoundary
                 ? new ToUpperToLower<Angle>(HalfOfPi, ThreeHalfsOfPi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower)
                 : new ToUpperToLower<Angle>(ThreeHalfsOfPi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower, HalfOfPi);
         }
@@ -46,7 +46,7 @@ public static class NodeGeometryExtensions
     {
         if (self.Type is NodeType.Neck) // neck tangent is meant tangential to existing grain boundary
         {
-            return self.Upper is GrainBoundaryNode
+            return self.Upper.Type == NodeType.GrainBoundary
                 ? new ToUpperToLower<Angle>(0, Pi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower)
                 : new ToUpperToLower<Angle>(Pi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower, 0);
         }
