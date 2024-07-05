@@ -1,6 +1,7 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
+using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel;
 
@@ -30,12 +31,26 @@ public static class NodeGeometryExtensions
 
     public static ToUpperToLower<Angle> SurfaceNormalAngle(this INodeGeometry self)
     {
+        if (self.Type == NodeType.Neck) // neck normal is meant normal to existing grain boundary
+        {
+            return self.Upper is GrainBoundaryNode
+                ? new ToUpperToLower<Angle>(HalfOfPi, ThreeHalfsOfPi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower)
+                : new ToUpperToLower<Angle>(ThreeHalfsOfPi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower, HalfOfPi);
+        }
+
         var angle = PI - 0.5 * (self.SurfaceRadiusAngle.ToUpper + self.SurfaceRadiusAngle.ToLower);
         return new ToUpperToLower<Angle>(angle, angle);
     }
 
     public static ToUpperToLower<Angle> SurfaceTangentAngle(this INodeGeometry self)
     {
+        if (self.Type is NodeType.Neck) // neck tangent is meant tangential to existing grain boundary
+        {
+            return self.Upper is GrainBoundaryNode
+                ? new ToUpperToLower<Angle>(0, Pi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower)
+                : new ToUpperToLower<Angle>(Pi - self.SurfaceRadiusAngle.ToUpper - self.SurfaceRadiusAngle.ToLower, 0);
+        }
+
         var angle = PI / 2 - 0.5 * (self.SurfaceRadiusAngle.ToUpper + self.SurfaceRadiusAngle.ToLower);
         return new ToUpperToLower<Angle>(angle, angle);
     }
