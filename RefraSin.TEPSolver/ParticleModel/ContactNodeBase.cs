@@ -33,7 +33,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     public new TContacted ContactedNode =>
         _contactedNode ??=
             SolverSession.CurrentState.Nodes[ContactedNodeId] as TContacted
-            ?? throw new InvalidCastException(
+         ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(TContacted)}."
             );
 
@@ -52,19 +52,19 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
         _centerShiftVectorDirection ??= IsParentsNode
             ? new NormalTangential<Angle>(
                 Pi
-                    - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
-                    + (Pi - SurfaceNormalAngle.ToLower - SurfaceRadiusAngle.ToLower),
+              - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
+              + (Pi - SurfaceNormalAngle.ToLower - SurfaceRadiusAngle.ToLower),
                 Pi
-                    - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
-                    - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
+              - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
+              - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
             )
             : new NormalTangential<Angle>(
                 Pi
-                    + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
-                    - (Pi - SurfaceNormalAngle.ToUpper - SurfaceRadiusAngle.ToUpper),
+              + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
+              - (Pi - SurfaceNormalAngle.ToUpper - SurfaceRadiusAngle.ToUpper),
                 Pi
-                    + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
-                    - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
+              + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
+              - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
             );
 
     private NormalTangential<Angle>? _centerShiftVectorDirection;
@@ -139,9 +139,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
             if (_contactedNodeId.HasValue)
                 return _contactedNodeId.Value;
 
-            var error =
-                SolverSession.Options.RelativeNodeCoordinateEquivalencePrecision
-                * Particle.MeanRadius;
+            var error = 1e-8 * Particle.MeanRadius;
 
             var contactedNode = SolverSession.CurrentState.Nodes.FirstOrDefault(n =>
                 n.Id != Id && n.Coordinates.Absolute.IsClose(Coordinates.Absolute, error)
@@ -149,7 +147,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
 
             _contactedNodeId =
                 contactedNode?.Id
-                ?? throw new InvalidOperationException(
+             ?? throw new InvalidOperationException(
                     "No corresponding node with same location could be found."
                 );
             return _contactedNodeId.Value;
@@ -159,7 +157,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
             SolverSession.CurrentState.Nodes[ContactedNodeId] as ContactNodeBase
-            ?? throw new InvalidCastException(
+         ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(ContactNodeBase)}."
             );
 

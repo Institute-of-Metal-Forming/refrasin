@@ -1,11 +1,12 @@
-using MathNet.Numerics.LinearAlgebra.Double.Solvers;
-using MathNet.Numerics.LinearAlgebra.Solvers;
 using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
+using RefraSin.ParticleModel.Remeshing;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepWidthControllers;
 using RefraSin.TEPSolver.TimeSteppers;
 
 namespace RefraSin.TEPSolver;
@@ -15,28 +16,49 @@ public record SolverRoutines(
     ITimeStepper TimeStepper,
     IEnumerable<IStepValidator> StepValidators,
     ILagrangianRootFinder LagrangianRootFinder,
-    INormalizer Normalizer) : ISolverRoutines
+    INormalizer Normalizer,
+    IStepWidthController StepWidthController,
+    IEnumerable<IStateRecoverer> StateRecoverers,
+    IEnumerable<IParticleRemesher> Remeshers) : ISolverRoutines
 {
-    public static SolverRoutines Default = new(
+    public static readonly SolverRoutines Default = new(
         new StepEstimator(),
         new AdamsMoultonTimeStepper(),
-        new[]
-        {
-            new InstabilityDetector()
-        },
+        [
+            // new InstabilityDetector()
+        ],
         new TearingLagrangianRootFinder(
             new NewtonRaphsonRootFinder(
-                new LUSolver()
-                // new IterativeSolver(
-                //     new MlkBiCgStab(),
-                //     new Iterator<double>(),
-                //     new MILU0Preconditioner<double>()
-                // )
+                new LUSolver(),
+                absoluteTolerance: 1e-4
             ),
             new NewtonRaphsonRootFinder(
-                new LUSolver()
+                new LUSolver(),
+                absoluteTolerance: 1e-4
             )
         ),
-        new DefaultNormalizer()
+        new DefaultNormalizer(),
+        new MaximumDisplacementAngleStepWidthController(),
+        [
+            new StepBackStateRecoverer()
+        ],
+        [
+            new FreeSurfaceRemesher()
+        ]
     );
+
+    /// <inheritdoc />
+    public void RegisterWithSolver(SinteringSolver solver)
+    {
+        StepEstimator.RegisterWithSolver(solver);
+        TimeStepper.RegisterWithSolver(solver);
+        LagrangianRootFinder.RegisterWithSolver(solver);
+        Normalizer.RegisterWithSolver(solver);
+        StepWidthController.RegisterWithSolver(solver);
+
+        foreach (var validator in StepValidators)
+            validator.RegisterWithSolver(solver);
+        foreach (var recoverer in StateRecoverers)
+            recoverer.RegisterWithSolver(solver);
+    }
 }

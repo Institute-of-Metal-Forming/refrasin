@@ -1,13 +1,15 @@
 using RefraSin.Numerics.Exceptions;
+using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver.Exceptions;
+namespace RefraSin.TEPSolver.StepValidators;
 
 /// <summary>
 /// An exception that is thrown, if an instability in time integration was detected.
 /// </summary>
-public class InstabilityException : NumericException
+public class InstabilityException : InvalidStepException
 {
-    public InstabilityException(Guid particleId, Guid nodeId, int index) : base($"Instability detected above node {nodeId} at index {index} of particle {particleId}.")
+    public InstabilityException(SolutionState baseState, StepVector stepVector, Guid particleId, Guid nodeId, int index) : base(baseState, stepVector,
+        $"Instability detected above node {nodeId} at index {index} of particle {particleId}.")
     {
         NodeId = nodeId;
         ParticleId = particleId;

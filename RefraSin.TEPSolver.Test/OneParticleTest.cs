@@ -22,7 +22,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e6;
+        var duration = 1e4;
 
         _particle = new ShapeFunctionParticleFactory(
             100e-6,
@@ -30,7 +30,7 @@ public class OneParticleTest
             5,
             0.1,
             Guid.NewGuid()
-        ){NodeCount = 20}.GetParticle();
+        ) { NodeCount = 80 }.GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
@@ -42,29 +42,27 @@ public class OneParticleTest
         _solver = new SinteringSolver(
             _solutionStorage,
             loggerFactory,
-            SolverRoutines.Default,
-            new SolverOptions
-            {
-                InitialTimeStepWidth = 1e1,
-                MaxTimeStepWidth = 0.5e4,
-                TimeStepAdaptationFactor = 1.5,
-            }
+            SolverRoutines.Default
         );
 
         _material = new Material(
             _particle.MaterialId,
             "Al2O3",
-            0,
-            1e-4,
-            1.8e3,
-            101.96e-3,
+            new BulkProperties(
+                0,
+                1e-4
+            ),
+            new SubstanceProperties(
+                1.8e3,
+                101.96e-3
+            ),
             new InterfaceProperties(
                 1.65e-10,
                 0.9
             )
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 1.65e-10, 0.5);
+        _materialInterface = new MaterialInterface(_material.Id, _material.Id, new InterfaceProperties(1.65e-10, 0.5));
 
         _initialState = new SystemState(
             Guid.NewGuid(),
@@ -86,7 +84,6 @@ public class OneParticleTest
     private SinteringStep _sinteringProcess;
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
-
 
     [Test]
     public void PlotJacobianStructureAnalytical()

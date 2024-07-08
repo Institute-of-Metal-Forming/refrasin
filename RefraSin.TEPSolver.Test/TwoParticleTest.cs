@@ -24,7 +24,7 @@ public class TwoParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e5;
+        var duration = 1e4;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6 * 5;
         var nodeCountPerParticle = 20;
 
@@ -37,21 +37,21 @@ public class TwoParticleTest
             .Concat(
                 new[]
                 {
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle1.Id,
+                        baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
                         NodeType.Neck
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle1.Id,
+                        baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
                         NodeType.GrainBoundary
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle1.Id,
+                        baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
                         NodeType.Neck
                     ),
@@ -75,21 +75,21 @@ public class TwoParticleTest
             .Concat(
                 new[]
                 {
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle2.Id,
+                        baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
                         NodeType.Neck
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle2.Id,
+                        baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
                         NodeType.GrainBoundary
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle2.Id,
+                        baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
                         NodeType.Neck
                     ),
@@ -115,29 +115,27 @@ public class TwoParticleTest
         _solver = new SinteringSolver(
             _solutionStorage,
             loggerFactory,
-            SolverRoutines.Default,
-            new SolverOptions
-            {
-                InitialTimeStepWidth = 10,
-                MaxTimeStepWidth = 1e2,
-                TimeStepAdaptationFactor = 1.5,
-            }
+            SolverRoutines.Default
         );
 
         _material = new Material(
             _particle1.MaterialId,
             "Al2O3",
-            0,
-            1e-4,
-            1.8e3,
-            101.96e-3,
+            new BulkProperties(
+                0,
+                1e-4
+            ),
+            new SubstanceProperties(
+                1.8e3,
+                101.96e-3
+            ),
             new InterfaceProperties(
                 1.65e-10,
                 0.9
             )
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, 1.65e-10, 0.5);
+        _materialInterface = new MaterialInterface(_material.Id, _material.Id, new InterfaceProperties(1.65e-10, 0.5));
 
         _initialState = new SystemState(
             Guid.NewGuid(),

@@ -25,17 +25,17 @@ public class DefaultNormalizer : INormalizer
             Length = referenceParticle.Nodes.Average(n => n.Coordinates.R);
             Area = Pow(Length, 2);
             Volume = Pow(Length, 3);
-            
+
             Time = sinteringStep.GasConstant * sinteringStep.Temperature * Pow(Length, 4) /
-                            (referenceMaterial.EquilibriumVacancyConcentration * referenceMaterial.MolarVolume *
-                             referenceMaterial.Surface.DiffusionCoefficient * referenceMaterial.Surface.Energy);
-            
+                   (referenceMaterial.Bulk.EquilibriumVacancyConcentration * referenceMaterial.Substance.MolarVolume *
+                    referenceMaterial.Surface.DiffusionCoefficient * referenceMaterial.Surface.Energy);
+
             InterfaceEnergy = referenceMaterial.Surface.Energy;
             Energy = InterfaceEnergy * Area;
-            
-            Substance = Volume / referenceMaterial.MolarVolume;
-            Mass = referenceMaterial.MolarMass * Substance;
-            
+
+            Substance = Volume / referenceMaterial.Substance.MolarVolume;
+            Mass = referenceMaterial.Substance.MolarMass * Substance;
+
             Temperature = Energy / (Substance * sinteringStep.GasConstant);
 
             DiffusionCoefficient = Volume / Time;
@@ -68,8 +68,10 @@ public class DefaultNormalizer : INormalizer
         /// <inheritdoc />
         public double DiffusionCoefficient { get; }
 
-
         /// <inheritdoc />
         public double InterfaceEnergy { get; }
     }
+
+    /// <inheritdoc />
+    public void RegisterWithSolver(SinteringSolver solver) { }
 }

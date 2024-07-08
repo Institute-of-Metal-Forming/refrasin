@@ -3,6 +3,7 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.StepVectors;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 using ParticleContact = RefraSin.TEPSolver.ParticleModel.ParticleContact;
@@ -48,4 +49,35 @@ public class SolutionState : ISystemState
 
     IReadOnlyNodeCollection<INode> ISystemState.Nodes => Nodes;
     IReadOnlyParticleCollection<IParticle> ISystemState.Particles => Particles;
+
+    public SolutionState ApplyTimeStep(StepVector stepVector, double timeStepWidth)
+    {
+        var newParticles = new Dictionary<Guid, Particle>()
+        {
+            [Particles.Root.Id] =
+                Particles.Root.ApplyTimeStep(
+                    null,
+                    stepVector,
+                    timeStepWidth
+                )
+        };
+
+        foreach (var contact in Contacts)
+        {
+            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(
+                newParticles[contact.From.Id],
+                stepVector,
+                timeStepWidth
+            );
+        }
+
+        var newState = new SolutionState(
+            Guid.NewGuid(),
+            Time + timeStepWidth,
+            newParticles.Values,
+            Contacts.Select(c => (c.Id, c.From.Id, c.To.Id))
+        );
+
+        return newState;
+    }
 }

@@ -3,12 +3,9 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
-using RefraSin.Enumerables;
 using RefraSin.ParticleModel;
-using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
-using static MathNet.Numerics.Constants;
 using static RefraSin.Coordinates.Angle.ReductionDomain;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -26,7 +23,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
             throw new ArgumentException("IDs of the node spec and the given particle instance do not match.");
 
         Particle = particle;
-        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R / solverSession.Norm.Length)
+        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R)
             { SystemSource = () => Particle.LocalCoordinateSystem };
         SolverSession = solverSession;
     }

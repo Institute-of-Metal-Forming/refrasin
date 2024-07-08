@@ -17,10 +17,8 @@ namespace RefraSin.TEPSolver;
 
 internal class SolverSession : ISolverSession
 {
-    private int _timeStepIndexWhereStepWidthWasLastModified = 0;
-
-    private Action<ISystemState> _reportSystemState;
-    private Action<ISystemStateTransition> _reportSystemStateTransition;
+    private readonly Action<ISystemState> _reportSystemState;
+    private readonly Action<ISystemStateTransition> _reportSystemStateTransition;
 
     public SolverSession(
         SinteringSolver sinteringSolver,
@@ -28,27 +26,66 @@ internal class SolverSession : ISolverSession
         ISinteringStep step
     )
     {
+        Id = Guid.NewGuid();
         Norm = sinteringSolver.Routines.Normalizer.GetNorm(inputState, step);
 
-        StartTime = inputState.Time / Norm.Time;
+        var normalizedState = Norm.NormalizeSystemState(inputState);
+
+        StartTime = normalizedState.Time;
         Duration = step.Duration / Norm.Time;
         EndTime = StartTime + Duration;
-        Temperature = step.Temperature;
-        GasConstant = step.GasConstant;
+        Temperature = step.Temperature / Norm.Temperature;
+        GasConstant = step.GasConstant / Norm.Energy * Norm.Substance * Norm.Temperature;
         _reportSystemState = step.ReportSystemState;
         _reportSystemStateTransition = step.ReportSystemStateTransition;
-        TimeStepWidth = sinteringSolver.Options.InitialTimeStepWidth / Norm.Time;
-        Options = sinteringSolver.Options;
 
-        Materials = step.Materials.ToDictionary(m => m.Id);
+        Materials = step.Materials.ToDictionary(
+            m => m.Id,
+            m => Norm.NormalizeMaterial(m)
+        );
+
         MaterialInterfaces = step
-            .MaterialInterfaces.GroupBy(mi => mi.From)
+            .MaterialInterfaces.Select(mi => new MaterialInterface(mi.From, mi.To, Norm.NormalizeInterfaceProperties(mi.Properties)))
+            .GroupBy(mi => mi.From)
             .ToDictionary(g => g.Key, g => (IReadOnlyList<IMaterialInterface>)g.ToArray());
 
         Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
-
-        StateMemory = new FixedStack<SolutionState>(Options.SolutionMemoryCount);
         Routines = sinteringSolver.Routines;
+
+        var particles = normalizedState.Particles.Select(ps => new Particle(ps, this)).ToArray();
+        CurrentState = new SolutionState(
+            normalizedState.Id,
+            StartTime,
+            particles,
+            Array.Empty<(Guid, Guid, Guid)>()
+        );
+        CurrentState = new SolutionState(
+            normalizedState.Id,
+            StartTime,
+            particles,
+            GetParticleContacts(particles)
+        );
+    }
+    public SolverSession(
+        SolverSession parentSession,
+        ISystemState inputState
+    )
+    {
+        Id = Guid.NewGuid();
+        Norm = parentSession.Norm;
+
+        StartTime = inputState.Time;
+        EndTime = parentSession.EndTime;
+        Duration = EndTime - StartTime;
+        Temperature = parentSession.Temperature;
+        GasConstant = parentSession.GasConstant;
+        _reportSystemState = parentSession._reportSystemState;
+        _reportSystemStateTransition = parentSession._reportSystemStateTransition;
+
+        Materials = parentSession.Materials;
+        MaterialInterfaces = parentSession.MaterialInterfaces;
+        Logger = parentSession.Logger;
+        Routines = parentSession.Routines;
 
         var particles = inputState.Particles.Select(ps => new Particle(ps, this)).ToArray();
         CurrentState = new SolutionState(
@@ -84,21 +121,18 @@ internal class SolverSession : ISolverSession
     public double Duration { get; }
 
     /// <inheritdoc />
-    public int TimeStepIndex { get; set; }
-
-    /// <inheritdoc />
     public double Temperature { get; }
 
     /// <inheritdoc />
     public double GasConstant { get; }
 
     /// <inheritdoc />
-    public double TimeStepWidth { get; private set; }
-
-    /// <inheritdoc />
-    public ISolverOptions Options { get; }
+    public Guid Id { get; }
 
     public SolutionState CurrentState { get; set; }
+
+    /// <inheritdoc />
+    public StepVector? LastStep { get; set; }
 
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
 
@@ -113,76 +147,9 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public INorm Norm { get; }
 
-    public StepVector? LastStep { get; set; }
-
-    public FixedStack<SolutionState> StateMemory { get; }
-
-    public void IncreaseTimeStepWidth()
-    {
-        TimeStepWidth *= Options.TimeStepAdaptationFactor;
-        _timeStepIndexWhereStepWidthWasLastModified = TimeStepIndex;
-
-        if (TimeStepWidth > Options.MaxTimeStepWidth / Norm.Time)
-        {
-            TimeStepWidth = Options.MaxTimeStepWidth / Norm.Time;
-        }
-    }
-
-    public void MayIncreaseTimeStepWidth()
-    {
-        if (
-            TimeStepIndex - _timeStepIndexWhereStepWidthWasLastModified
-            > Options.TimeStepIncreaseDelay
-        )
-            IncreaseTimeStepWidth();
-    }
-
-    public void DecreaseTimeStepWidth()
-    {
-        TimeStepWidth /= Options.TimeStepAdaptationFactor;
-        _timeStepIndexWhereStepWidthWasLastModified = TimeStepIndex;
-
-        Logger.LogInformation("Time step width decreased to {TimeStepWidth}.", TimeStepWidth);
-
-        if (TimeStepWidth < Options.MinTimeStepWidth / Norm.Time)
-        {
-            throw new InvalidOperationException(
-                "Time step width was decreased below the allowed minimum."
-            );
-        }
-    }
-
     public void ReportCurrentState()
     {
-        _reportSystemState(
-            new SystemState(
-                CurrentState.Id,
-                CurrentState.Time * Norm.Time,
-                CurrentState.Particles.Select(p =>
-                {
-                    var particleCenter =
-                        new AbsolutePoint(
-                            p.CenterCoordinates.X * Norm.Length,
-                            p.CenterCoordinates.Y * Norm.Length
-                        );
-                    var particleSystem = new PolarCoordinateSystem(particleCenter, p.RotationAngle);
-                    return new RefraSin.ParticleModel.Particle(
-                        p.Id,
-                        particleCenter,
-                        p.RotationAngle,
-                        p.MaterialId,
-                        p.Nodes.Select(n => new Node(
-                                n.Id,
-                                p.Id,
-                                new PolarPoint(n.Coordinates.Phi, n.Coordinates.R * Norm.Length, particleSystem),
-                                n.Type
-                            ))
-                            .ToArray()
-                    );
-                })
-            )
-        );
-        StateMemory.Push(CurrentState);
+        _reportSystemState(Norm.DenormalizeSystemState(CurrentState));
     }
 
     public void ReportTransition(ISinteringStateStateTransition step)

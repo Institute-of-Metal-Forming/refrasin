@@ -18,7 +18,6 @@ public class TearingLagrangianRootFinder(
 {
     /// <inheritdoc />
     public StepVector FindRoot(
-        ISolverSession solverSession,
         SolutionState currentState,
         StepVector initialGuess
     )
@@ -138,4 +137,7 @@ public class TearingLagrangianRootFinder(
     public int MaxIterationCount { get; } = maxIterationCount;
 
     public double IterationPrecision { get; } = iterationPrecision;
+
+    /// <inheritdoc />
+    public void RegisterWithSolver(SinteringSolver solver) { }
 }

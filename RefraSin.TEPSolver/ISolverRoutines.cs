@@ -1,7 +1,11 @@
+using System.Diagnostics.SymbolStore;
+using RefraSin.ParticleModel.Remeshing;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
+using RefraSin.TEPSolver.StepWidthControllers;
 using RefraSin.TEPSolver.TimeSteppers;
 
 namespace RefraSin.TEPSolver;
@@ -32,4 +36,21 @@ public interface ISolverRoutines
     /// Subroutine to normalize and denormalize states for solution and reporting.
     /// </summary>
     INormalizer Normalizer { get; }
+    
+    /// <summary>
+    /// Subroutine to determine time step width.
+    /// </summary>
+    IStepWidthController StepWidthController { get; }
+    
+    /// <summary>
+    /// Collection of routines for recovering invalid solution states.
+    /// </summary>
+    IEnumerable<IStateRecoverer> StateRecoverers { get; }
+    
+    /// <summary>
+    /// Collection of routines for recovering invalid solution states.
+    /// </summary>
+    IEnumerable<IParticleRemesher> Remeshers { get; }
+
+    void RegisterWithSolver(SinteringSolver solver);
 }

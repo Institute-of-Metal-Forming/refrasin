@@ -4,7 +4,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepEstimators;
 
-public interface IStepEstimator
+public interface IStepEstimator : ISolverRoutine
 {
     StepVector EstimateStep(ISinteringConditions conditions, SolutionState currentState);
 }

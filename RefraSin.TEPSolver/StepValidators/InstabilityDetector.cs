@@ -1,5 +1,3 @@
-using RefraSin.ParticleModel;
-using RefraSin.TEPSolver.Exceptions;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepValidators;
@@ -7,7 +5,7 @@ namespace RefraSin.TEPSolver.StepValidators;
 public class InstabilityDetector : IStepValidator
 {
     /// <inheritdoc />
-    public void Validate(SolutionState currentState, StepVector stepVector, ISolverOptions options)
+    public void Validate(SolutionState currentState, StepVector stepVector)
     {
         foreach (var particle in currentState.Particles)
         {
@@ -19,10 +17,14 @@ public class InstabilityDetector : IStepValidator
                 if (
                     differences[i] * differences[(i + 1) % differences.Length] < 0 &&
                     differences[(i + 1) % differences.Length] * differences[(i + 2) % differences.Length] < 0 &&
-                    differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0
+                    differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0 &&
+                    differences[(i + 3) % differences.Length] * differences[(i + 4) % differences.Length] < 0
                 )
-                    throw new InstabilityException(particle.Id, particle.Nodes[i].Id, i);
+                    throw new InstabilityException(currentState, stepVector, particle.Id, particle.Nodes[i].Id, i);
             }
         }
     }
+
+    /// <inheritdoc />
+    public void RegisterWithSolver(SinteringSolver solver) { }
 }

@@ -4,7 +4,7 @@ using RefraSin.ProcessModel.Sintering;
 
 namespace RefraSin.TEPSolver.Normalization;
 
-public interface INormalizer
+public interface INormalizer : ISolverRoutine
 {
     INorm GetNorm(ISystemState referenceState, ISinteringStep sinteringStep);
 }

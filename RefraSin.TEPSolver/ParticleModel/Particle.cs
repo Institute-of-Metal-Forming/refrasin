@@ -21,10 +21,7 @@ public class Particle : IParticle
     public Particle(IParticle particle, ISolverSession solverSession)
     {
         Id = particle.Id;
-        CenterCoordinates = new AbsolutePoint(
-            particle.CenterCoordinates.X / solverSession.Norm.Length,
-            particle.CenterCoordinates.Y / solverSession.Norm.Length
-        );
+        CenterCoordinates = new AbsolutePoint(particle.CenterCoordinates.X, particle.CenterCoordinates.Y);
         RotationAngle = particle.RotationAngle;
 
         LocalCoordinateSystem = new PolarCoordinateSystem
@@ -38,25 +35,11 @@ public class Particle : IParticle
         VacancyVolumeEnergy =
             solverSession.Temperature
           * solverSession.GasConstant
-          / (material.MolarVolume * material.EquilibriumVacancyConcentration)
-          / (solverSession.Norm.Energy / solverSession.Norm.Volume);
+          / (material.Substance.MolarVolume * material.Bulk.EquilibriumVacancyConcentration);
 
-        SurfaceProperties = new InterfaceProperties(
-            material.Surface.DiffusionCoefficient / solverSession.Norm.DiffusionCoefficient,
-            material.Surface.Energy / solverSession.Norm.InterfaceEnergy
-        );
+        SurfaceProperties = material.Surface;
 
-        InterfaceProperties = solverSession
-            .MaterialInterfaces[material.Id]
-            .ToDictionary(
-                i => i.To,
-                i =>
-                    (IInterfaceProperties)
-                    new InterfaceProperties(
-                        i.DiffusionCoefficient / solverSession.Norm.DiffusionCoefficient,
-                        i.Energy / solverSession.Norm.InterfaceEnergy
-                    )
-            );
+        InterfaceProperties = solverSession.MaterialInterfaces[material.Id].ToDictionary(mi => mi.To, mi => mi.Properties);
 
         SolverSession = solverSession;
         _nodes = particle

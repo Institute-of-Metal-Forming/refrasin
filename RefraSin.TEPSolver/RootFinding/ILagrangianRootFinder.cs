@@ -2,7 +2,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.RootFinding;
 
-public interface ILagrangianRootFinder
+public interface ILagrangianRootFinder : ISolverRoutine
 {
-    public StepVector FindRoot(ISolverSession solverSession, SolutionState currentState, StepVector initialGuess);
+    public StepVector FindRoot(SolutionState currentState, StepVector initialGuess);
 }
