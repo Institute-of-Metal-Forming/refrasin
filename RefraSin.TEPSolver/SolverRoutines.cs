@@ -28,14 +28,16 @@ public record SolverRoutines(
         },
         new TearingLagrangianRootFinder(
             new NewtonRaphsonRootFinder(
-                new LUSolver()
+                new LUSolver(),
+                absoluteTolerance: 1e-4
             ),
             new NewtonRaphsonRootFinder(
-                new LUSolver()
+                new LUSolver(),
+                absoluteTolerance: 1e-4
             )
         ),
         new DefaultNormalizer(),
-        new TrialAndErrorStepWidthController(),
+        new MaximumDisplacementAngleStepWidthController(),
         new IStateRecoverer[]
         {
             new StepBackStateRecoverer()
