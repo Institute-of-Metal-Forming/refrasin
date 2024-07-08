@@ -66,6 +66,41 @@ internal class SolverSession : ISolverSession
             GetParticleContacts(particles)
         );
     }
+    public SolverSession(
+        SolverSession parentSession,
+        ISystemState inputState
+    )
+    {
+        Id = Guid.NewGuid();
+        Norm = parentSession.Norm;
+
+        StartTime = inputState.Time;
+        EndTime = parentSession.EndTime;
+        Duration = EndTime - StartTime;
+        Temperature = parentSession.Temperature;
+        GasConstant = parentSession.GasConstant;
+        _reportSystemState = parentSession._reportSystemState;
+        _reportSystemStateTransition = parentSession._reportSystemStateTransition;
+
+        Materials = parentSession.Materials;
+        MaterialInterfaces = parentSession.MaterialInterfaces;
+        Logger = parentSession.Logger;
+        Routines = parentSession.Routines;
+
+        var particles = inputState.Particles.Select(ps => new Particle(ps, this)).ToArray();
+        CurrentState = new SolutionState(
+            inputState.Id,
+            StartTime,
+            particles,
+            Array.Empty<(Guid, Guid, Guid)>()
+        );
+        CurrentState = new SolutionState(
+            inputState.Id,
+            StartTime,
+            particles,
+            GetParticleContacts(particles)
+        );
+    }
 
     private static (Guid id, Guid from, Guid to)[] GetParticleContacts(Particle[] particles)
     {

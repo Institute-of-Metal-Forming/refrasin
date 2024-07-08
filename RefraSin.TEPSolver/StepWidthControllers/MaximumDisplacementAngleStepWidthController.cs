@@ -6,7 +6,7 @@ namespace RefraSin.TEPSolver.StepWidthControllers;
 
 public class MaximumDisplacementAngleStepWidthController(
     double initialTimeStepWidth = 1,
-    double maximumDisplacementAngle = 0.05,
+    double maximumDisplacementAngle = 0.02,
     double increaseFactor = 2,
     double decreaseFactor = 0.8,
     double minimalTimeStepWidth = double.NegativeInfinity,

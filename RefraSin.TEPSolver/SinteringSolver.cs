@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.Numerics.Exceptions;
+using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -17,12 +19,12 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     public SinteringSolver(
         ISolutionStorage solutionStorage,
         ILoggerFactory loggerFactory,
-        ISolverRoutines routines
-    )
+        ISolverRoutines routines, int remeshingEverySteps = 10)
     {
         SolutionStorage = solutionStorage;
         LoggerFactory = loggerFactory;
         Routines = routines;
+        RemeshingEverySteps = remeshingEverySteps;
         routines.RegisterWithSolver(this);
     }
 
@@ -40,16 +42,21 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     /// Collection of subroutines to use.
     /// </summary>
     public ISolverRoutines Routines { get; }
+    
+    /// <summary>
+    /// Count of time steps to compute before a remeshing is performed.
+    /// </summary>
+    public int RemeshingEverySteps { get; }
 
     /// <summary>
     /// Run the solution procedure starting with the given state till the specified time.
     /// </summary>
-    public ISystemState Solve(ISinteringStep conditions, ISystemState inputState)
+    public ISystemState Solve(ISinteringStep processStep, ISystemState inputState)
     {
-        var session = new SolverSession(this, inputState, conditions);
+        var session = new SolverSession(this, inputState, processStep);
         InvokeSessionInitialized(session);
         session.ReportCurrentState();
-        DoTimeIntegration(session);
+        TryTimeIntegration(session);
 
         return new SystemState(
             session.CurrentState.Id,
@@ -90,9 +97,19 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             session.CurrentState = newState;
             session.ReportCurrentState();
 
-            session.Logger.LogInformation("Time step {Index} successfully calculated. ({Time}/{EndTime})", i, session.CurrentState.Time,
-                session.EndTime);
+            session.Logger.LogInformation("Time step {Index} successfully calculated. ({Time:e2}/{EndTime:e2} = {Percent:f2}%)", i, session.CurrentState.Time,
+                session.EndTime, session.CurrentState.Time / session.EndTime * 100);
             i++;
+
+            if (i % RemeshingEverySteps == 0)
+            {
+                var remeshedState = new SystemState(Guid.NewGuid(), session.CurrentState.Time,
+                    session.CurrentState.Particles.Select(p => session.Routines.Remeshers.Aggregate((IParticle)p, (rp, remesher) => remesher.Remesh(rp))));
+
+                session = new SolverSession(session, remeshedState);
+                InvokeSessionInitialized(session);
+                session.Logger.LogInformation("Remeshed session created. Now {NodeCount} nodes present.", remeshedState.Nodes.Count);
+            }
         }
 
         session.Logger.LogInformation(

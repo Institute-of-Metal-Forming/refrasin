@@ -1,5 +1,6 @@
 using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
+using RefraSin.ParticleModel.Remeshing;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
@@ -17,15 +18,15 @@ public record SolverRoutines(
     ILagrangianRootFinder LagrangianRootFinder,
     INormalizer Normalizer,
     IStepWidthController StepWidthController,
-    IEnumerable<IStateRecoverer> StateRecoverers) : ISolverRoutines
+    IEnumerable<IStateRecoverer> StateRecoverers,
+    IEnumerable<IParticleRemesher> Remeshers) : ISolverRoutines
 {
     public static readonly SolverRoutines Default = new(
         new StepEstimator(),
         new AdamsMoultonTimeStepper(),
-        new IStepValidator[]
-        {
+        [
             // new InstabilityDetector()
-        },
+        ],
         new TearingLagrangianRootFinder(
             new NewtonRaphsonRootFinder(
                 new LUSolver(),
@@ -38,10 +39,12 @@ public record SolverRoutines(
         ),
         new DefaultNormalizer(),
         new MaximumDisplacementAngleStepWidthController(),
-        new IStateRecoverer[]
-        {
+        [
             new StepBackStateRecoverer()
-        }
+        ],
+        [
+            new FreeSurfaceRemesher()
+        ]
     );
 
     /// <inheritdoc />

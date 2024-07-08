@@ -1,4 +1,5 @@
 using System.Diagnostics.SymbolStore;
+using RefraSin.ParticleModel.Remeshing;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
@@ -45,6 +46,11 @@ public interface ISolverRoutines
     /// Collection of routines for recovering invalid solution states.
     /// </summary>
     IEnumerable<IStateRecoverer> StateRecoverers { get; }
+    
+    /// <summary>
+    /// Collection of routines for recovering invalid solution states.
+    /// </summary>
+    IEnumerable<IParticleRemesher> Remeshers { get; }
 
     void RegisterWithSolver(SinteringSolver solver);
 }
