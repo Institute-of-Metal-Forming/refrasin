@@ -20,7 +20,7 @@ public class NeckNode : ContactNodeBase<NeckNode>, INeckNode
         solverSession, contactedNodeId, contactedParticleId) { }
 
     /// <inheritdoc />
-    public override NodeType Type => NodeType.NeckNode;
+    public override NodeType Type => NodeType.Neck;
 
     public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(
         Upper.SurfaceEnergy.ToLower,
@@ -36,16 +36,6 @@ public class NeckNode : ContactNodeBase<NeckNode>, INeckNode
     );
 
     private ToUpperToLower<double>? _surfaceDiffusionCoefficient;
-
-    /// <inheritdoc />
-    public override ToUpperToLower<Angle> SurfaceNormalAngle => _surfaceNormalAngle ??= Upper is GrainBoundaryNode
-        ? new ToUpperToLower<Angle>(HalfOfPi, ThreeHalfsOfPi - SurfaceRadiusAngle.ToUpper - SurfaceRadiusAngle.ToLower)
-        : new ToUpperToLower<Angle>(ThreeHalfsOfPi - SurfaceRadiusAngle.ToUpper - SurfaceRadiusAngle.ToLower, HalfOfPi);
-
-    /// <inheritdoc />
-    public override ToUpperToLower<Angle> SurfaceTangentAngle => _surfaceTangentAngle ??= Upper is GrainBoundaryNode
-        ? new ToUpperToLower<Angle>(0, Pi - SurfaceRadiusAngle.ToUpper - SurfaceRadiusAngle.ToLower)
-        : new ToUpperToLower<Angle>(Pi - SurfaceRadiusAngle.ToUpper - SurfaceRadiusAngle.ToLower, 0);
 
     /// <inheritdoc />
     public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)

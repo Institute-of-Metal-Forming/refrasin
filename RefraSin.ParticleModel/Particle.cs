@@ -6,7 +6,7 @@ namespace RefraSin.ParticleModel;
 
 public class Particle : IParticle
 {
-    private readonly ReadOnlyParticleSurface<Node> _nodes;
+    private readonly ReadOnlyParticleSurface<INodeGeometry> _nodes;
 
     public Particle(IParticle template) : this(
         template.Id,
@@ -22,21 +22,17 @@ public class Particle : IParticle
         CenterCoordinates = centerCoordinates;
         RotationAngle = rotationAngle;
         MaterialId = materialId;
-        _nodes = new ReadOnlyParticleSurface<Node>(
+        _nodes = new ReadOnlyParticleSurface<INodeGeometry>(
             nodes.Select(node => node switch
             {
-                INeckNode neckNode                   => new NeckNode(neckNode),
-                IGrainBoundaryNode grainBoundaryNode => new GrainBoundaryNode(grainBoundaryNode),
-                ISurfaceNode surfaceNode             => new SurfaceNode(surfaceNode),
-                _                                    => new Node(node)
+                INodeGeometry nodeGeometry => new NodeGeometry(nodeGeometry),
+                _                          => new NodeGeometry(node, this)
             })
         );
     }
 
     /// <inheritdoc cref="IParticle.Nodes"/>
-    public IReadOnlyParticleSurface<Node> Nodes => _nodes;
-
-    IReadOnlyParticleSurface<INode> IParticle.Nodes => Nodes;
+    public IReadOnlyParticleSurface<INodeGeometry> Nodes => _nodes;
 
     public Guid Id { get; }
     public AbsolutePoint CenterCoordinates { get; }
