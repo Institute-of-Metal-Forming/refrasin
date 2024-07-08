@@ -35,7 +35,7 @@ internal class SolverSession : ISolverSession
         Duration = step.Duration / Norm.Time;
         EndTime = StartTime + Duration;
         Temperature = step.Temperature / Norm.Temperature;
-        GasConstant = step.GasConstant / Norm.Energy * Norm.Mass * Norm.Temperature;
+        GasConstant = step.GasConstant / Norm.Energy * Norm.Substance * Norm.Temperature;
         _reportSystemState = step.ReportSystemState;
         _reportSystemStateTransition = step.ReportSystemStateTransition;
 
@@ -52,15 +52,15 @@ internal class SolverSession : ISolverSession
         Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
         Routines = sinteringSolver.Routines;
 
-        var particles = inputState.Particles.Select(ps => new Particle(ps, this)).ToArray();
+        var particles = normalizedState.Particles.Select(ps => new Particle(ps, this)).ToArray();
         CurrentState = new SolutionState(
-            inputState.Id,
+            normalizedState.Id,
             StartTime,
             particles,
             Array.Empty<(Guid, Guid, Guid)>()
         );
         CurrentState = new SolutionState(
-            inputState.Id,
+            normalizedState.Id,
             StartTime,
             particles,
             GetParticleContacts(particles)
