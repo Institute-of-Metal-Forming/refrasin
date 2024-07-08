@@ -90,72 +90,38 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// <summary>
     ///     Winkeldistanz zu den Nachbarknoten (Größe des kürzesten Winkels).
     /// </summary>
-    public ToUpperToLower<Angle> AngleDistance => _angleDistance ??= new ToUpperToLower<Angle>(
-        Coordinates.AngleTo(Upper.Coordinates),
-        Coordinates.AngleTo(Lower.Coordinates)
-    );
+    public ToUpperToLower<Angle> AngleDistance => _angleDistance ??= this.AngleDistance();
 
     private ToUpperToLower<Angle>? _angleDistance;
 
     /// <summary>
     ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
     /// </summary>
-    public ToUpperToLower<double> SurfaceDistance => _surfaceDistance ??= new ToUpperToLower<double>(
-        CosLaw.C(Upper.Coordinates.R, Coordinates.R, AngleDistance.ToUpper),
-        CosLaw.C(Lower.Coordinates.R, Coordinates.R, AngleDistance.ToLower)
-    );
+    public ToUpperToLower<double> SurfaceDistance => _surfaceDistance ??= this.SurfaceDistance();
 
     private ToUpperToLower<double>? _surfaceDistance;
 
     /// <summary>
     ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
     /// </summary>
-    public ToUpperToLower<Angle> SurfaceRadiusAngle => _surfaceRadiusAngle ??= new ToUpperToLower<Angle>(
-        CosLaw.Gamma(SurfaceDistance.ToUpper, Coordinates.R, Upper.Coordinates.R),
-        CosLaw.Gamma(SurfaceDistance.ToLower, Coordinates.R, Lower.Coordinates.R)
-    );
+    public ToUpperToLower<Angle> SurfaceRadiusAngle => _surfaceRadiusAngle ??= this.SurfaceRadiusAngle();
 
     private ToUpperToLower<Angle>? _surfaceRadiusAngle;
 
     /// <summary>
     ///     Gesamtes Volumen der an den Knoten angrenzenden Elemente.
     /// </summary>
-    public ToUpperToLower<double> Volume => _volume ??= new ToUpperToLower<double>(
-        0.5 * Coordinates.R * Upper.Coordinates.R * Sin(AngleDistance.ToUpper),
-        0.5 * Coordinates.R * Lower.Coordinates.R * Sin(AngleDistance.ToLower)
-    );
-
+    public ToUpperToLower<double> Volume => _volume ??= this.Volume();
+    
     private ToUpperToLower<double>? _volume;
 
-    public virtual ToUpperToLower<Angle> SurfaceNormalAngle
-    {
-        get
-        {
-            if (_surfaceNormalAngle != null) return _surfaceNormalAngle.Value;
+    public virtual ToUpperToLower<Angle> SurfaceNormalAngle => _surfaceNormalAngle ??= this.SurfaceNormalAngle();
 
-            var angle = PI - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower);
-            _surfaceNormalAngle = new ToUpperToLower<Angle>(angle, angle);
+    private ToUpperToLower<Angle>? _surfaceNormalAngle;
 
-            return _surfaceNormalAngle.Value;
-        }
-    }
+    public virtual ToUpperToLower<Angle> SurfaceTangentAngle => _surfaceTangentAngle ??= this.SurfaceTangentAngle();
 
-    protected ToUpperToLower<Angle>? _surfaceNormalAngle;
-
-    public virtual ToUpperToLower<Angle> SurfaceTangentAngle
-    {
-        get
-        {
-            if (_surfaceTangentAngle != null) return _surfaceTangentAngle.Value;
-
-            var angle = PI / 2 - 0.5 * (SurfaceRadiusAngle.ToUpper + SurfaceRadiusAngle.ToLower);
-            _surfaceTangentAngle = new ToUpperToLower<Angle>(angle, angle);
-
-            return _surfaceTangentAngle.Value;
-        }
-    }
-
-    protected ToUpperToLower<Angle>? _surfaceTangentAngle;
+    private ToUpperToLower<Angle>? _surfaceTangentAngle;
 
     /// <inheritdoc />
     public abstract ToUpperToLower<double> SurfaceEnergy { get; }
