@@ -37,21 +37,21 @@ public class TwoParticleTest
             .Concat(
                 new[]
                 {
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle1.Id,
+                        baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
                         NodeType.Neck
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle1.Id,
+                        baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
                         NodeType.GrainBoundary
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle1.Id,
+                        baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
                         NodeType.Neck
                     ),
@@ -75,21 +75,21 @@ public class TwoParticleTest
             .Concat(
                 new[]
                 {
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle2.Id,
+                        baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
                         NodeType.Neck
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle2.Id,
+                        baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
                         NodeType.GrainBoundary
                     ),
-                    new Node(
+                    new NodeGeometry(
                         Guid.NewGuid(),
-                        baseParticle2.Id,
+                        baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
                         NodeType.Neck
                     ),
