@@ -6,7 +6,7 @@ namespace RefraSin.ParticleModel;
 
 public class Particle : IParticle
 {
-    private readonly ReadOnlyParticleSurface<Node> _nodes;
+    private readonly ReadOnlyParticleSurface<INodeGeometry> _nodes;
 
     public Particle(IParticle template) : this(
         template.Id,
@@ -22,7 +22,7 @@ public class Particle : IParticle
         CenterCoordinates = centerCoordinates;
         RotationAngle = rotationAngle;
         MaterialId = materialId;
-        _nodes = new ReadOnlyParticleSurface<Node>(
+        _nodes = new ReadOnlyParticleSurface<INodeGeometry>(
             nodes.Select(node => node switch
             {
                 INodeGeometry nodeGeometry => new NodeGeometry(nodeGeometry),
@@ -32,9 +32,7 @@ public class Particle : IParticle
     }
 
     /// <inheritdoc cref="IParticle.Nodes"/>
-    public IReadOnlyParticleSurface<Node> Nodes => _nodes;
-
-    IReadOnlyParticleSurface<INode> IParticle.Nodes => Nodes;
+    public IReadOnlyParticleSurface<INodeGeometry> Nodes => _nodes;
 
     public Guid Id { get; }
     public AbsolutePoint CenterCoordinates { get; }

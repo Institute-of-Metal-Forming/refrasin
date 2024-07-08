@@ -24,5 +24,5 @@ public interface IParticle : IVertex
     /// <summary>
     /// List of node specs.
     /// </summary>
-    public IReadOnlyParticleSurface<INode> Nodes { get; }
+    public IReadOnlyParticleSurface<INodeGeometry> Nodes { get; }
 }
