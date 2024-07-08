@@ -10,7 +10,7 @@ public readonly record struct ToUpperToLower<TValue>(TValue ToUpper, TValue ToLo
     /// <summary>
     /// Returns the components of the instance as 2-element array.
     /// </summary>
-    public TValue[] ToArray() => new[] { ToUpper, ToLower };
+    public TValue[] ToArray() => [ToUpper, ToLower];
 
     public static implicit operator ToUpperToLower<TValue>(TValue both) => new(both, both);
     public static implicit operator ToUpperToLower<TValue>((TValue toUpper, TValue toLower) t) => new(t.toUpper, t.toLower);
@@ -18,5 +18,9 @@ public readonly record struct ToUpperToLower<TValue>(TValue ToUpper, TValue ToLo
 
 public static class ToUpperToLowerExtensions
 {
-    public static double[] ToDoubleArray(this ToUpperToLower<Angle> self) => new double[] { self.ToUpper, self.ToLower };
+    public static double[] ToDoubleArray(this ToUpperToLower<Angle> self) => [self.ToUpper, self.ToLower];
+
+    public static double Sum(this ToUpperToLower<double> self) => self.ToUpper + self.ToLower;
+    
+    public static Angle Sum(this ToUpperToLower<Angle> self) => self.ToUpper + self.ToLower;
 }
