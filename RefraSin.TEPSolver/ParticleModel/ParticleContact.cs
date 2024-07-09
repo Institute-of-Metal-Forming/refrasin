@@ -8,15 +8,15 @@ namespace RefraSin.TEPSolver.ParticleModel;
 
 public class ParticleContact : DirectedEdge<Particle>, IParticleContact
 {
+    private IList<ContactNodeBase>? _fromNodes;
+    private IList<ContactNodeBase>? _toNodes;
+
     /// <inheritdoc />
     public ParticleContact(Guid id, Particle from, Particle to) : base(id, from, to)
     {
         Distance = from.CenterCoordinates.DistanceTo(to.CenterCoordinates);
         DirectionFrom = new PolarVector(to.CenterCoordinates - from.CenterCoordinates, from.LocalCoordinateSystem).Phi;
         DirectionTo = new PolarVector(from.CenterCoordinates - to.CenterCoordinates, to.LocalCoordinateSystem).Phi;
-
-        FromNodes = from.Nodes.OfType<ContactNodeBase>().Where(n=> n.ContactedParticleId == To.Id).ToArray();
-        ToNodes = FromNodes.Select(n => n.ContactedNode).ToArray();
     }
 
     /// <inheritdoc />
@@ -50,8 +50,9 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
 
     /// <inheritdoc />
     IEdge<IParticle> IEdge<IParticle>.Reversed() => new DirectedEdge<IParticle>(To, From);
-    
-    public IList<ContactNodeBase> FromNodes { get; }
-    
-    public IList<ContactNodeBase> ToNodes { get; }
+
+    public IList<ContactNodeBase> FromNodes =>
+        _fromNodes ??= From.Nodes.OfType<ContactNodeBase>().Where(n => n.ContactedParticleId == To.Id).ToArray();
+
+    public IList<ContactNodeBase> ToNodes => _toNodes ??= FromNodes.Select(n => n.ContactedNode).ToArray();
 }

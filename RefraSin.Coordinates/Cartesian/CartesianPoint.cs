@@ -113,7 +113,18 @@ public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<Cartesian
     {
         if (System.Equals(other.System))
             return new CartesianPoint(0.5 * (X + other.X), 0.5 * (Y + other.Y));
-        throw new DifferentCoordinateSystemException(this, other);
+        return PointHalfWayTo((IPoint)other);
+    }
+    
+    /// <summary>
+    ///     Computes the point halfway on the straight line between two points.
+    /// </summary>
+    /// <param name="other">other point</param>
+    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
+    public CartesianPoint PointHalfWayTo(IPoint other)
+    {
+        var halfwayAbsolute = Absolute.PointHalfWayTo(other.Absolute);
+        return new CartesianPoint(halfwayAbsolute, System);
     }
 
     /// <summary>

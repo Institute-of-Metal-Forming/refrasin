@@ -68,6 +68,13 @@ public class AbsolutePoint : AbsoluteCoordinates, IPoint, ICloneable<AbsolutePoi
     /// <returns></returns>
     public AbsolutePoint PointHalfWayTo(AbsolutePoint other) =>
         new(0.5 * (X + other.X), 0.5 * (Y + other.Y));
+    
+    /// <summary>
+    ///     Computes the point halfway on the straight line between two points.
+    /// </summary>
+    /// <param name="other">other point</param>
+    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
+    public AbsolutePoint PointHalfWayTo(IPoint other) => PointHalfWayTo(other.Absolute);
 
     /// <summary>
     ///     Parse from string representation.

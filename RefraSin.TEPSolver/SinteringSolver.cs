@@ -109,8 +109,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                         session.Routines.Remeshers.Aggregate((IParticle)p, (rp, remesher) => remesher.Remesh(rp))));
 
                 session = new SolverSession(session, remeshedState,
-                    session.CurrentState.ParticleContacts.Select(c => (c.Id, c.From.Id, c.To.Id)).ToArray(),
-                    session.CurrentState.NodeContacts.Select(c => (c.Key, c.Value)).ToArray()
+                    session.CurrentState.ParticleContacts.Select(c => (c.Id, c.From.Id, c.To.Id)).ToArray()
                 );
                 InvokeSessionInitialized(session);
                 session.Logger.LogInformation("Remeshed session created. Now {NodeCount} nodes present.", remeshedState.Nodes.Count);

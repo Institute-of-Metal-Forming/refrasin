@@ -103,4 +103,21 @@ public class SolutionState : ISystemState
 
         return newState;
     }
+
+    public void Sanitize()
+    {
+        var newNodeCoordinates = NodeContacts.Select(kv =>
+        {
+            var node = Nodes[kv.Key];
+            var contactedNode = Nodes[kv.Value];
+            var halfway = node.Coordinates.PointHalfWayTo(contactedNode.Coordinates);
+            return (node, halfway);
+        });
+        
+        foreach (var (node, halfway) in newNodeCoordinates)
+        {
+            node.Coordinates.Phi = halfway.Phi;
+            node.Coordinates.R = halfway.R;
+        }
+    }
 }
