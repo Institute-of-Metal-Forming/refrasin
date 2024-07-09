@@ -43,7 +43,8 @@ public record SolverRoutines(
             new StepBackStateRecoverer()
         ],
         [
-            new FreeSurfaceRemesher()
+            new FreeSurfaceRemesher(),
+            new NeckNeighborhoodRemesher()
         ]
     );
 

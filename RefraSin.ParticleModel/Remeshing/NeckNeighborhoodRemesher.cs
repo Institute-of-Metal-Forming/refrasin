@@ -5,7 +5,7 @@ using static RefraSin.ParticleModel.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
-public class NeckNeighborhoodRemesher(double deletionLimit = 0.2, double additionLimit = 2.5)
+public class NeckNeighborhoodRemesher(double deletionLimit = 0.2, double additionLimit = 3.0)
     : IParticleRemesher
 {
     /// <inheritdoc />
