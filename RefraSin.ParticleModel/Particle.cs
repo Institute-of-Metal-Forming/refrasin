@@ -25,7 +25,6 @@ public class Particle : IParticle
         _nodes = new ReadOnlyParticleSurface<INodeGeometry>(
             nodes.Select(node => node switch
             {
-                INodeGeometry nodeGeometry => new NodeGeometry(nodeGeometry),
                 _                          => new NodeGeometry(node, this)
             })
         );

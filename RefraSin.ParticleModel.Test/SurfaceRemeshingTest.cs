@@ -6,7 +6,7 @@ using ScottPlot;
 namespace RefraSin.ParticleModel.Test;
 
 [TestFixture]
-public class RemeshingTest
+public class SurfaceRemeshingTest
 {
     private string _tempDir;
 
@@ -29,23 +29,13 @@ public class RemeshingTest
         var plt = new Plot();
         plt.Axes.SquareUnits();
 
-        plt.Add.Scatter(particle
-            .Nodes.Append(particle.Nodes[0])
-            .Select(n => new ScottPlot.Coordinates(
-                n.Coordinates.Absolute.X,
-                n.Coordinates.Absolute.Y
-            ))
-            .ToArray());
-        plt.Add.Scatter(remeshedParticle
-            .Nodes.Append(particle.Nodes[0])
-            .Select(n => new ScottPlot.Coordinates(
-                n.Coordinates.Absolute.X,
-                n.Coordinates.Absolute.Y
-            ))
-            .ToArray());
+        PlotParticle(plt, particle);
+        PlotParticle(plt, remeshedParticle);
+
 
         plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
     }
+
     [Test]
     public void TestNodeAddition()
     {
@@ -57,22 +47,21 @@ public class RemeshingTest
         var plt = new Plot();
         plt.Axes.SquareUnits();
 
-        plt.Add.Scatter(particle
-            .Nodes.Append(particle.Nodes[0])
-            .Select(n => new ScottPlot.Coordinates(
-                n.Coordinates.Absolute.X,
-                n.Coordinates.Absolute.Y
-            ))
-            .ToArray()).LineWidth = 2 ;
+        PlotParticle(plt, particle);
+        PlotParticle(plt, remeshedParticle);
+
+        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.png"), 1600, 900);
+    }
+
+    void PlotParticle(Plot plot, IParticle particle)
+    {
         
-        plt.Add.Scatter(remeshedParticle
+        plot.Add.Scatter(particle
             .Nodes.Append(particle.Nodes[0])
             .Select(n => new ScottPlot.Coordinates(
                 n.Coordinates.Absolute.X,
                 n.Coordinates.Absolute.Y
             ))
             .ToArray());
-
-        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.png"), 1600, 900);
     }
 }
