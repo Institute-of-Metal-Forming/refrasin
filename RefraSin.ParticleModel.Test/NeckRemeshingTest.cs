@@ -22,10 +22,10 @@ public class NeckRemeshingTest
     }
 
     [Test]
-    public void TestNodeDeletion()
+    [TestCase(13e-6, 2)]
+    [TestCase(2e-6, 0)]
+    public void TestNodeDeletion(double initialNeck, int expectedRemovedNodeCount)
     {
-        var initialNeck = 13e-6;
-
         var baseParticle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
         {
             NodeCount = 50
@@ -69,14 +69,14 @@ public class NeckRemeshingTest
 
         plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
 
-        Assert.That(remeshedParticle.Nodes.Count, Is.EqualTo(particle.Nodes.Count - 2));
+        Assert.That(remeshedParticle.Nodes.Count, Is.EqualTo(particle.Nodes.Count - expectedRemovedNodeCount));
     }
 
     [Test]
-    public void TestNodeAddition()
+    [TestCase(13e-6, 2)]
+    [TestCase(2e-6, 0)]
+    public void TestNodeAddition(double initialNeck, int expectedAddedNodeCount)
     {
-        var initialNeck = 13e-6;
-
         var baseParticle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
         {
             NodeCount = 50
@@ -109,7 +109,7 @@ public class NeckRemeshingTest
             .ToArray();
         var particle = new Particle(baseParticle.Id, new(0, 0), 0, baseParticle.MaterialId, nodes);
 
-        var remesher = new NeckNeighborhoodRemesher(deletionLimit: double.PositiveInfinity, additionLimit: 1.2);
+        var remesher = new NeckNeighborhoodRemesher(deletionLimit: 0, additionLimit: 0.8);
         var remeshedParticle = remesher.Remesh(particle);
 
         var plt = new Plot();
@@ -120,7 +120,7 @@ public class NeckRemeshingTest
 
         plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
 
-        Assert.That(remeshedParticle.Nodes.Count, Is.EqualTo(particle.Nodes.Count + 2));
+        Assert.That(remeshedParticle.Nodes.Count, Is.EqualTo(particle.Nodes.Count + expectedAddedNodeCount));
     }
 
     void PlotParticle(Plot plot, IParticle particle)

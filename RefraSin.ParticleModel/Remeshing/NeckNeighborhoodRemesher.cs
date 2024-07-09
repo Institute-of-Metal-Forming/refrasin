@@ -1,6 +1,7 @@
 using RefraSin.Coordinates.Polar;
 using static System.Math;
 using static RefraSin.Coordinates.Constants;
+using static RefraSin.ParticleModel.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
@@ -30,22 +31,46 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.2, double additio
 
     private IEnumerable<INodeGeometry> DeleteNodesConditionally(IEnumerable<INodeGeometry> nodes, double minDistance)
     {
-        foreach (var n in nodes)
+        foreach (var node in nodes)
         {
-            if (n.Type == NodeType.Surface)
+            if (node.Type == Surface)
             {
-                if (n.Upper.Type == NodeType.Neck && n.SurfaceDistance.ToUpper < minDistance)
+                if (node.Upper.Type == Neck && node.SurfaceDistance.ToUpper < minDistance)
                     continue;
-                if (n.Lower.Type == NodeType.Neck && n.SurfaceDistance.ToLower < minDistance)
+                if (node.Lower.Type == Neck && node.SurfaceDistance.ToLower < minDistance)
                     continue;
             }
 
-            yield return n;
+            yield return node;
         }
     }
 
-    private IEnumerable<INodeGeometry> AddNodesConditionally(IEnumerable<INodeGeometry> nodes, double minWidth)
-        => nodes;
+    private IEnumerable<INodeGeometry> AddNodesConditionally(IEnumerable<INodeGeometry> nodes, double maxDistance)
+    {
+        foreach (var node in nodes)
+        {
+            if (node.Type == GrainBoundary)
+            {
+                if (node.Lower.Type == Neck && node.SurfaceDistance.ToLower > maxDistance)
+                {
+                    yield return new NodeGeometry(Guid.NewGuid(), node.Particle, node.Coordinates.PointHalfWayTo(node.Lower.Coordinates),
+                        GrainBoundary);
+                }
+
+                yield return node;
+
+                if (node.Upper.Type == Neck && node.SurfaceDistance.ToUpper > maxDistance)
+                {
+                    yield return new NodeGeometry(Guid.NewGuid(), node.Particle, node.Coordinates.PointHalfWayTo(node.Upper.Coordinates),
+                        GrainBoundary);
+                }
+
+                continue;
+            }
+
+            yield return node;
+        }
+    }
 
     public double DeletionLimit { get; } = deletionLimit;
 
