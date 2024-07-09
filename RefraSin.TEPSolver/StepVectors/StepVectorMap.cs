@@ -27,7 +27,7 @@ public class StepVectorMap
 
         BorderStart = _index;
 
-        foreach (var contact in currentState.Contacts)
+        foreach (var contact in currentState.ParticleContacts)
         {
             AddUnknown(contact.Id, Unknown.RadialDisplacement);
             AddUnknown(contact.Id, Unknown.AngleDisplacement);

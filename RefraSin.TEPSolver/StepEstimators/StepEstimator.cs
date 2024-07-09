@@ -30,7 +30,7 @@ class StepEstimator : IStepEstimator
 
     private static IEnumerable<double> YieldContactUnknownsInitialGuess(SolutionState currentState)
     {
-        foreach (var contact in currentState.Contacts)
+        foreach (var contact in currentState.ParticleContacts)
         {
             var averageNormalDisplacement = contact.FromNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement) +
                                             contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);

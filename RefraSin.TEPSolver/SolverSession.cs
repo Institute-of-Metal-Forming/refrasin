@@ -68,7 +68,9 @@ internal class SolverSession : ISolverSession
     }
     public SolverSession(
         SolverSession parentSession,
-        ISystemState inputState
+        ISystemState inputState,
+        (Guid id, Guid from, Guid to)[] particleContacts,
+        (Guid from, Guid to)[] nodeContacts
     )
     {
         Id = Guid.NewGuid();
@@ -92,13 +94,15 @@ internal class SolverSession : ISolverSession
             inputState.Id,
             StartTime,
             particles,
-            Array.Empty<(Guid, Guid, Guid)>()
+            Array.Empty<(Guid, Guid, Guid)>(),
+            nodeContacts
         );
         CurrentState = new SolutionState(
             inputState.Id,
             StartTime,
             particles,
-            GetParticleContacts(particles)
+            particleContacts,
+            nodeContacts
         );
     }
 

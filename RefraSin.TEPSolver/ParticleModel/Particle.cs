@@ -88,7 +88,7 @@ public class Particle : IParticle
         }
         else
         {
-            var contact = SolverSession.CurrentState.Contacts[parent.Id, previousState.Id];
+            var contact = SolverSession.CurrentState.ParticleContacts[parent.Id, previousState.Id];
             var displacementVector = new PolarVector(
                 stepVector.AngleDisplacement(contact) * timeStepWidth,
                 stepVector.RadialDisplacement(contact) * timeStepWidth,
