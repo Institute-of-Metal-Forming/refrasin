@@ -21,6 +21,13 @@ public interface IReadOnlyNodeCollection<out TNode> : IReadOnlyList<TNode> where
     public int IndexOf(Guid nodeId);
 
     /// <summary>
+    /// Returns the index of the specified node.
+    /// </summary>
+    /// <param name="node">node to return the index for</param>
+    /// <returns>the index in range 0 to <see cref="IReadOnlyParticleSurface{TNode}.Count"/>-1</returns>
+    public int IndexOf(INode node) => IndexOf(node.Id);
+
+    /// <summary>
     /// Indicates whether a node with the specified ID is contained in the collection.
     /// </summary>
     /// <param name="nodeId">the ID to test for</param>

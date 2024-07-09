@@ -12,6 +12,8 @@ public interface INodeNeighbors : INode
     /// </summary>
     public INode Lower => Particle.Nodes.LowerNeighborOf(this);
 
+    public int Index => Particle.Nodes.IndexOf(Id);
+
     /// <summary>
     /// Particle this node belongs to.
     /// </summary>
