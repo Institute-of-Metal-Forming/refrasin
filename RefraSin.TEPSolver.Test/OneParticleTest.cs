@@ -216,9 +216,9 @@ public class OneParticleTest
         var plt = new Plot();
 
         var steps = _solutionStorage
-            .Transitions.Select((s, i) => new ScottPlot.Coordinates(
+            .States.Skip(1).Zip(_solutionStorage.States).Select((s, i) => new ScottPlot.Coordinates(
                 i,
-                Math.Log10(((ISinteringStateStateTransition)s).TimeStepWidth)
+                Math.Log10(s.First.Time - s.Second.Time)
             ))
             .ToArray();
         plt.Add.Scatter(steps);
