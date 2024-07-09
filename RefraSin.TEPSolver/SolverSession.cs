@@ -62,13 +62,15 @@ internal class SolverSession : ISolverSession
         CurrentState = new SolutionState(
             normalizedState.Id,
             StartTime,
-            particles,
-            GetParticleContacts(particles)
+            particles
         );
+        CurrentState.Sanitize();
     }
     public SolverSession(
         SolverSession parentSession,
-        ISystemState inputState
+        ISystemState inputState,
+        IEnumerable<(Guid id, Guid from, Guid to)>? particleContacts = null,
+        IEnumerable<(Guid from, Guid to)>? nodeContacts = null
     )
     {
         Id = Guid.NewGuid();
@@ -92,25 +94,10 @@ internal class SolverSession : ISolverSession
             inputState.Id,
             StartTime,
             particles,
-            Array.Empty<(Guid, Guid, Guid)>()
+            particleContacts,
+            nodeContacts
         );
-        CurrentState = new SolutionState(
-            inputState.Id,
-            StartTime,
-            particles,
-            GetParticleContacts(particles)
-        );
-    }
-
-    private static (Guid id, Guid from, Guid to)[] GetParticleContacts(Particle[] particles)
-    {
-        var edges = particles
-            .SelectMany(p => p.Nodes.OfType<NeckNode>())
-            .Select(n => new UndirectedEdge<Particle>(n.Particle, n.ContactedNode.Particle));
-        var graph = new UndirectedGraph<Particle>(particles, edges);
-        var explorer = BreadthFirstExplorer<Particle>.Explore(graph, particles[0]);
-
-        return explorer.TraversedEdges.Select(e => (e.Id, e.From.Id, e.To.Id)).ToArray();
+        CurrentState.Sanitize();
     }
 
     public double StartTime { get; }
@@ -156,4 +143,5 @@ internal class SolverSession : ISolverSession
     {
         _reportSystemStateTransition(step);
     }
+
 }

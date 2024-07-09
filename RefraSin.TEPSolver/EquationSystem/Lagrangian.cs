@@ -49,7 +49,7 @@ public static class Lagrangian
     public static IEnumerable<double> YieldLinearBorderBlockEquations(
         SolutionState currentState,
         StepVector stepVector
-    ) => YieldContactsEquations(currentState.Contacts, stepVector);
+    ) => YieldContactsEquations(currentState.ParticleContacts, stepVector);
 
     public static IEnumerable<double> YieldNodeEquations(
         IEnumerable<NodeBase> nodes,

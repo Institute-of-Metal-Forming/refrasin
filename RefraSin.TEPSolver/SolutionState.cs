@@ -12,15 +12,19 @@ namespace RefraSin.TEPSolver;
 
 public class SolutionState : ISystemState
 {
-    public SolutionState(Guid id, double time, IEnumerable<Particle> particles, IEnumerable<(Guid id, Guid from, Guid to)>? contacts = null)
+    public SolutionState(Guid id, double time, IEnumerable<Particle> particles, IEnumerable<(Guid id, Guid from, Guid to)>? particleContacts = null,
+        IEnumerable<(Guid from, Guid to)>? nodeContacts = null)
     {
         Time = time;
         Id = id;
         Particles = particles as IReadOnlyParticleCollection<Particle> ?? new ReadOnlyParticleCollection<Particle>(particles);
         Nodes = Particles.SelectMany(p => p.Nodes).ToNodeCollection();
 
-        contacts ??= GetParticleContacts();
-        Contacts = contacts.Select(t => new ParticleContact(t.id, Particles[t.from], Particles[t.to])).ToParticleContactCollection();
+        particleContacts ??= GetParticleContacts();
+        ParticleContacts = particleContacts.Select(t => new ParticleContact(t.id, Particles[t.from], Particles[t.to])).ToParticleContactCollection();
+
+        nodeContacts ??= GetNodeContacts();
+        NodeContacts = nodeContacts.ToDictionary(t => t.from, t => t.to);
     }
 
     private IEnumerable<(Guid id, Guid from, Guid to)> GetParticleContacts()
@@ -31,6 +35,23 @@ public class SolutionState : ISystemState
         var explorer = BreadthFirstExplorer<Particle>.Explore(graph, Particles[0]);
 
         return explorer.TraversedEdges.Select(e => (e.Id, e.From.Id, e.To.Id)).ToArray();
+    }
+
+    private IEnumerable<(Guid from, Guid to)> GetNodeContacts()
+    {
+        foreach (var contactNode in Nodes.OfType<ContactNodeBase>())
+        {
+            var contactedNode = Nodes.FirstOrDefault(n =>
+                n.Id != contactNode.Id && n.Coordinates.Absolute.IsClose(contactNode.Coordinates.Absolute, 1e-4)
+            );
+
+            if (contactedNode is null)
+                throw new InvalidOperationException(
+                    $"No corresponding node with same location as {contactNode} could be found."
+                );
+
+            yield return (contactNode.Id, contactedNode.Id);
+        }
     }
 
     /// <inheritdoc />
@@ -45,7 +66,8 @@ public class SolutionState : ISystemState
     /// <inheritdoc cref="ISystemState.Particles"/>>
     public IReadOnlyParticleCollection<Particle> Particles { get; }
 
-    public IReadOnlyParticleContactCollection<ParticleContact> Contacts { get; }
+    public IReadOnlyParticleContactCollection<ParticleContact> ParticleContacts { get; }
+    public IReadOnlyDictionary<Guid, Guid> NodeContacts { get; }
 
     IReadOnlyNodeCollection<INode> ISystemState.Nodes => Nodes;
     IReadOnlyParticleCollection<IParticle> ISystemState.Particles => Particles;
@@ -62,7 +84,7 @@ public class SolutionState : ISystemState
                 )
         };
 
-        foreach (var contact in Contacts)
+        foreach (var contact in ParticleContacts)
         {
             newParticles[contact.To.Id] = contact.To.ApplyTimeStep(
                 newParticles[contact.From.Id],
@@ -75,9 +97,27 @@ public class SolutionState : ISystemState
             Guid.NewGuid(),
             Time + timeStepWidth,
             newParticles.Values,
-            Contacts.Select(c => (c.Id, c.From.Id, c.To.Id))
+            ParticleContacts.Select(c => (c.Id, c.From.Id, c.To.Id)),
+            NodeContacts.Select(c => (c.Key, c.Value)).ToArray()
         );
 
         return newState;
+    }
+
+    public void Sanitize()
+    {
+        var newNodeCoordinates = NodeContacts.Select(kv =>
+        {
+            var node = Nodes[kv.Key];
+            var contactedNode = Nodes[kv.Value];
+            var halfway = node.Coordinates.PointHalfWayTo(contactedNode.Coordinates);
+            return (node, halfway);
+        });
+        
+        foreach (var (node, halfway) in newNodeCoordinates)
+        {
+            node.Coordinates.Phi = halfway.Phi;
+            node.Coordinates.R = halfway.R;
+        }
     }
 }

@@ -46,7 +46,19 @@ public class TwoParticleTest
                     new NodeGeometry(
                         Guid.NewGuid(),
                         baseParticle1,
+                        new PolarPoint(new AbsolutePoint(120e-6, -1.0e-5)),
+                        NodeType.GrainBoundary
+                    ),
+                    new NodeGeometry(
+                        Guid.NewGuid(),
+                        baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                        NodeType.GrainBoundary
+                    ),
+                    new NodeGeometry(
+                        Guid.NewGuid(),
+                        baseParticle1,
+                        new PolarPoint(new AbsolutePoint(120e-6, 1.0e-5)),
                         NodeType.GrainBoundary
                     ),
                     new NodeGeometry(
@@ -84,7 +96,19 @@ public class TwoParticleTest
                     new NodeGeometry(
                         Guid.NewGuid(),
                         baseParticle2,
+                        new PolarPoint(new AbsolutePoint(120e-6, -1.0e-5)),
+                        NodeType.GrainBoundary
+                    ),
+                    new NodeGeometry(
+                        Guid.NewGuid(),
+                        baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                        NodeType.GrainBoundary
+                    ),
+                    new NodeGeometry(
+                        Guid.NewGuid(),
+                        baseParticle2,
+                        new PolarPoint(new AbsolutePoint(120e-6, 1.0e-5)),
                         NodeType.GrainBoundary
                     ),
                     new NodeGeometry(
@@ -295,18 +319,20 @@ public class TwoParticleTest
         var plt = new Plot();
 
         var steps = _solutionStorage
-            .Transitions.Select(s => new ScottPlot.Coordinates(
-                _solutionStorage.GetStateById(s.InputStateId).Time,
-                ((ISinteringStateStateTransition)s).TimeStepWidth
+            .States.Skip(1).Zip(_solutionStorage.States).Select((s, i) => new ScottPlot.Coordinates(
+                i,
+                Math.Log10(s.First.Time - s.Second.Time)
             ))
             .ToArray();
         plt.Add.Scatter(steps);
 
-        var meanStepWidth = steps.Select(s => s.Y).Mean();
-        plt.Add.Line(0, meanStepWidth, _sinteringProcess.Duration, meanStepWidth);
+        var meanStepWidth = Math.Log10(steps.Select(s => Math.Pow(10, s.Y)).Mean());
+        var meanLine = plt.Add.HorizontalLine(meanStepWidth);
+        meanLine.Text = "mean";
 
         plt.SavePng(Path.Combine(_tempDir, "timeSteps.png"), 600, 400);
     }
+
 
     private void PlotParticleCenter()
     {

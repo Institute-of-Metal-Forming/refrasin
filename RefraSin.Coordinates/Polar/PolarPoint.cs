@@ -105,7 +105,6 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsC
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
     public PolarPoint PointHalfWayTo(PolarPoint other)
     {
         if (System.Equals(other.System))
@@ -116,7 +115,18 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsC
             return new PolarPoint(Phi + Sign(angle) * CosLaw.Gamma(R, s, dist / 2), s, System);
         }
 
-        throw new DifferentCoordinateSystemException(this, other);
+        return PointHalfWayTo((IPoint)other);
+    }
+    
+    /// <summary>
+    ///     Computes the point halfway on the straight line between two points.
+    /// </summary>
+    /// <param name="other">other point</param>
+    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
+    public PolarPoint PointHalfWayTo(IPoint other)
+    {
+        var halfwayAbsolute = Absolute.PointHalfWayTo(other.Absolute);
+        return new PolarPoint(halfwayAbsolute, System);
     }
 
     /// <summary>

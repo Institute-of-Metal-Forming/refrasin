@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.Coordinates.Helpers;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepWidthControllers;
@@ -33,17 +34,29 @@ public class MaximumDisplacementAngleStepWidthController(
         while (true)
         {
             var stepWidth1 = stepWidth;
-            var displacementAngles = currentState.Nodes.Select(n =>
+            var normalDisplacementAngles = currentState.Nodes.Select(n =>
             {
                 var displacement = stepVector.NormalDisplacement(n) * stepWidth1;
                 var upperAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToUpper, n.SurfaceNormalAngle.ToUpper),
                     n.SurfaceNormalAngle.ToUpper);
                 var lowerAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToLower, n.SurfaceNormalAngle.ToLower),
                     n.SurfaceNormalAngle.ToLower);
-                return double.Max(upperAngle, lowerAngle);
+                return double.Max(double.Abs(upperAngle), double.Abs(lowerAngle));
             });
+            var maxNormalDisplacementAngle = normalDisplacementAngles.Max();
+            
+            var tangentialDisplacementAngles = currentState.Nodes.OfType<NeckNode>().Select(n =>
+            {
+                var displacement = stepVector.TangentialDisplacement(n) * stepWidth1;
+                var upperAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToUpper, n.SurfaceTangentAngle.ToUpper),
+                    n.SurfaceTangentAngle.ToUpper);
+                var lowerAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToLower, n.SurfaceTangentAngle.ToLower),
+                    n.SurfaceTangentAngle.ToLower);
+                return double.Max(double.Abs(upperAngle), double.Abs(lowerAngle));
+            });
+            var maxTangentialDisplacementAngle = tangentialDisplacementAngles.Max();
 
-            var maxAngle = displacementAngles.Max();
+            var maxAngle = double.Max(maxNormalDisplacementAngle, maxTangentialDisplacementAngle);
 
             if (maxAngle < MaximumDisplacementAngle)
             {

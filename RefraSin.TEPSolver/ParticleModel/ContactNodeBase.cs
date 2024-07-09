@@ -132,27 +132,7 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
         _contactedParticleId ??= SolverSession.CurrentState.Nodes[ContactedNodeId].ParticleId;
 
     /// <inheritdoc />
-    public Guid ContactedNodeId
-    {
-        get
-        {
-            if (_contactedNodeId.HasValue)
-                return _contactedNodeId.Value;
-
-            var error = 1e-8 * Particle.MeanRadius;
-
-            var contactedNode = SolverSession.CurrentState.Nodes.FirstOrDefault(n =>
-                n.Id != Id && n.Coordinates.Absolute.IsClose(Coordinates.Absolute, error)
-            );
-
-            _contactedNodeId =
-                contactedNode?.Id
-             ?? throw new InvalidOperationException(
-                    "No corresponding node with same location could be found."
-                );
-            return _contactedNodeId.Value;
-        }
-    }
+    public Guid ContactedNodeId => _contactedNodeId ??= SolverSession.CurrentState.NodeContacts[Id];
 
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
@@ -196,14 +176,14 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
             if (_contact is not null)
                 return _contact;
 
-            _contact = SolverSession.CurrentState.Contacts.FirstOrDefault(c =>
+            _contact = SolverSession.CurrentState.ParticleContacts.FirstOrDefault(c =>
                 c.From.Id == ParticleId && c.To.Id == ContactedParticleId
             );
 
             if (_contact is not null)
                 return _contact;
 
-            _contact = SolverSession.CurrentState.Contacts.FirstOrDefault(c =>
+            _contact = SolverSession.CurrentState.ParticleContacts.FirstOrDefault(c =>
                 c.To.Id == ParticleId && c.From.Id == ContactedParticleId
             );
 

@@ -71,7 +71,7 @@ public static class Jacobian
     public static JacobianRows YieldLinearBorderBlockRows(
         SolutionState currentState,
         StepVector stepVector
-    ) => YieldContactsEquations(currentState.Contacts, stepVector);
+    ) => YieldContactsEquations(currentState.ParticleContacts, stepVector);
 
     public static JacobianRows YieldBorderBlockRows(
         SolutionState currentState,

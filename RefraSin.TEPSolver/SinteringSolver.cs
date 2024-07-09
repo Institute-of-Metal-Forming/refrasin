@@ -42,7 +42,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     /// Collection of subroutines to use.
     /// </summary>
     public ISolverRoutines Routines { get; }
-    
+
     /// <summary>
     /// Count of time steps to compute before a remeshing is performed.
     /// </summary>
@@ -97,18 +97,23 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             session.CurrentState = newState;
             session.ReportCurrentState();
 
-            session.Logger.LogInformation("Time step {Index} successfully calculated. ({Time:e2}/{EndTime:e2} = {Percent:f2}%)", i, session.CurrentState.Time,
+            session.Logger.LogInformation("Time step {Index} successfully calculated. ({Time:e2}/{EndTime:e2} = {Percent:f2}%)", i,
+                session.CurrentState.Time,
                 session.EndTime, session.CurrentState.Time / session.EndTime * 100);
             i++;
 
             if (i % RemeshingEverySteps == 0)
             {
                 var remeshedState = new SystemState(Guid.NewGuid(), session.CurrentState.Time,
-                    session.CurrentState.Particles.Select(p => session.Routines.Remeshers.Aggregate((IParticle)p, (rp, remesher) => remesher.Remesh(rp))));
+                    session.CurrentState.Particles.Select(p =>
+                        session.Routines.Remeshers.Aggregate((IParticle)p, (rp, remesher) => remesher.Remesh(rp))));
 
-                session = new SolverSession(session, remeshedState);
+                session = new SolverSession(session, remeshedState,
+                    session.CurrentState.ParticleContacts.Select(c => (c.Id, c.From.Id, c.To.Id)).ToArray()
+                );
                 InvokeSessionInitialized(session);
                 session.Logger.LogInformation("Remeshed session created. Now {NodeCount} nodes present.", remeshedState.Nodes.Count);
+                session.ReportCurrentState();
             }
         }
 

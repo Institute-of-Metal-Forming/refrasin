@@ -1,6 +1,7 @@
 using RefraSin.Coordinates.Polar;
 using static System.Math;
 using static RefraSin.Coordinates.Constants;
+using static RefraSin.ParticleModel.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
@@ -28,8 +29,22 @@ public class FreeSurfaceRemesher(double deletionLimit = 0.05, double additionLim
         return newParticle;
     }
 
-    private IEnumerable<INodeGeometry> DeleteNodesConditionally(IEnumerable<INodeGeometry> nodes, double maxDistance) => nodes.Where(n =>
-        n.Type != NodeType.Surface || Abs(n.SurfaceRadiusAngle.Sum() - Pi) > DeletionLimit || n.SurfaceDistance.Sum() > maxDistance);
+    private IEnumerable<INodeGeometry> DeleteNodesConditionally(IEnumerable<INodeGeometry> nodes, double maxDistance)
+    {
+        foreach (INodeGeometry n in nodes)
+        {
+            if (
+                n.Type == Surface
+             && n.Upper.Type != Neck
+             && n.Lower.Type != Neck
+             && Abs(n.SurfaceRadiusAngle.Sum() - Pi) < DeletionLimit
+             && n.SurfaceDistance.Sum() < maxDistance
+            )
+                continue; // delete node
+
+            yield return n;
+        }
+    }
 
     private IEnumerable<INodeGeometry> AddNodesConditionally(IEnumerable<INodeGeometry> nodes, double minWidth)
     {
@@ -37,15 +52,15 @@ public class FreeSurfaceRemesher(double deletionLimit = 0.05, double additionLim
 
         foreach (var node in nodes)
         {
-            if (node.Type == NodeType.Surface && Abs(node.SurfaceRadiusAngle.Sum() - Pi) > AdditionLimit)
+            if (node.Type == Surface && Abs(node.SurfaceRadiusAngle.Sum() - Pi) > AdditionLimit)
             {
                 if (!wasInsertedAtLastNode && node.SurfaceDistance.ToLower > minWidth)
                     yield return new NodeGeometry(Guid.NewGuid(), node.Particle, node.Coordinates.PointHalfWayTo(node.Lower.Coordinates),
-                        NodeType.Surface);
+                        Surface);
                 yield return node;
                 if (node.SurfaceDistance.ToUpper > minWidth)
                     yield return new NodeGeometry(Guid.NewGuid(), node.Particle, node.Coordinates.PointHalfWayTo(node.Upper.Coordinates),
-                        NodeType.Surface);
+                        Surface);
                 wasInsertedAtLastNode = true;
             }
             else
