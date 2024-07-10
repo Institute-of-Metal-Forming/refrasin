@@ -18,7 +18,6 @@ namespace RefraSin.TEPSolver;
 internal class SolverSession : ISolverSession
 {
     private readonly Action<ISystemState> _reportSystemState;
-    private readonly Action<ISystemStateTransition> _reportSystemStateTransition;
 
     public SolverSession(
         SinteringSolver sinteringSolver,
@@ -37,7 +36,6 @@ internal class SolverSession : ISolverSession
         Temperature = step.Temperature / Norm.Temperature;
         GasConstant = step.GasConstant / Norm.Energy * Norm.Substance * Norm.Temperature;
         _reportSystemState = step.ReportSystemState;
-        _reportSystemStateTransition = step.ReportSystemStateTransition;
 
         Materials = step.Materials.ToDictionary(
             m => m.Id,
@@ -82,7 +80,6 @@ internal class SolverSession : ISolverSession
         Temperature = parentSession.Temperature;
         GasConstant = parentSession.GasConstant;
         _reportSystemState = parentSession._reportSystemState;
-        _reportSystemStateTransition = parentSession._reportSystemStateTransition;
 
         Materials = parentSession.Materials;
         MaterialInterfaces = parentSession.MaterialInterfaces;
@@ -134,8 +131,8 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public INorm Norm { get; }
 
-    public void ReportCurrentState()
+    public void ReportState(ISystemState state)
     {
-        _reportSystemState(Norm.DenormalizeSystemState(CurrentState));
+        _reportSystemState(Norm.DenormalizeSystemState(state));
     }
 }

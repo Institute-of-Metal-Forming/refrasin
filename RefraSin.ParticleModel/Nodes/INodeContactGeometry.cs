@@ -3,9 +3,9 @@ using RefraSin.Coordinates.Polar;
 
 namespace RefraSin.ParticleModel.Nodes;
 
-public interface INodeContactGeometry : INodeContactNeighbors, INodeGeometry
+public interface INodeContactGeometry : INodeContact, INodeGeometry
 {
-    Angle AngleDistanceToContactDirection => Coordinates.AngleTo(ContactedParticlesCenter, true);
+    Angle AngleDistanceToContactDirection { get; }
 
-    PolarPoint ContactedParticlesCenter => new(ContactedParticle.Coordinates, Particle);
+    IPolarPoint ContactedParticlesCenter { get; }
 }

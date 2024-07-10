@@ -9,7 +9,7 @@ namespace RefraSin.ParticleModel.Particles;
 
 public class Particle : IParticle
 {
-    private readonly ReadOnlyParticleSurface<INodeGeometry> _nodes;
+    private readonly ReadOnlyParticleSurface<IParticleNode> _nodes;
 
     public Particle(IParticle template) : this(
         template.Id,
@@ -25,16 +25,24 @@ public class Particle : IParticle
         Coordinates = centerCoordinates;
         RotationAngle = rotationAngle;
         MaterialId = materialId;
-        _nodes = new ReadOnlyParticleSurface<INodeGeometry>(
+        _nodes = new ReadOnlyParticleSurface<IParticleNode>(
             nodes.Select(node => node switch
             {
-                _                          => new NodeGeometry(node, this)
+                _                          => new ParticleNode(node, this)
             })
         );
     }
+    public Particle(Guid id, ICartesianPoint centerCoordinates, Angle rotationAngle, Guid materialId, Func<IParticle,IEnumerable<IParticleNode>> nodeFactory)
+    {
+        Id = id;
+        Coordinates = centerCoordinates;
+        RotationAngle = rotationAngle;
+        MaterialId = materialId;
+        _nodes = new ReadOnlyParticleSurface<IParticleNode>( nodeFactory(this) );
+    }
 
     /// <inheritdoc cref="IParticle.Nodes"/>
-    public IReadOnlyParticleSurface<INodeGeometry> Nodes => _nodes;
+    public IReadOnlyParticleSurface<IParticleNode> Nodes => _nodes;
 
     public Guid Id { get; }
     public ICartesianPoint Coordinates { get; }

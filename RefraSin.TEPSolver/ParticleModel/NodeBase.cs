@@ -14,7 +14,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Abstract base class for particle surface nodes.
 /// </summary>
-public abstract class NodeBase : INodeGeometry, INodeGradients, INodeMaterialProperties
+public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialProperties
 {
     protected NodeBase(INode node, Particle particle, ISolverSession solverSession)
     {
@@ -48,7 +48,7 @@ public abstract class NodeBase : INodeGeometry, INodeGradients, INodeMaterialPro
     /// </summary>
     public Particle Particle { get; }
 
-    IParticle INodeNeighbors.Particle => Particle;
+    IParticle IParticleNode.Particle => Particle;
 
     /// <inheritdoc />
     public Guid ParticleId => Particle.Id;

@@ -1,14 +1,23 @@
 using Microsoft.Extensions.Logging;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Cartesian;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Collections;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
+using Particle = RefraSin.ParticleModel.Particles.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -56,7 +65,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     {
         var session = new SolverSession(this, inputState, processStep);
         InvokeSessionInitialized(session);
-        session.ReportCurrentState();
+        session.ReportState(session.CurrentState);
         TryTimeIntegration(session);
 
         return new SystemState(
@@ -169,6 +178,48 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                 furtherInformation: "Recovery of solution finally failed.");
         }
     }
+
+    private ISystemState CreateReturnState(INorm norm, SolutionState solutionState, StepVector? stepVector = null) =>
+        new SystemState(
+            solutionState.Id,
+            solutionState.Time,
+            solutionState.Particles.Select(p =>
+            {
+                var center = new AbsolutePoint(p.Coordinates.X * norm.Length, p.Coordinates.Y * norm.Length);
+                var coordinateSystem = new PolarCoordinateSystem(center, p.RotationAngle);
+
+                return new ParticleState(
+                    p.Id,
+                    center,
+                    p.RotationAngle,
+                    p.MaterialId,
+                    p.Nodes.Select(n => n switch
+                    {
+                        _ => new NodeState(
+                            n.Id,
+                            n.ParticleId,
+                            new PolarPoint(n.Coordinates.Phi, n.Coordinates.R * norm.Length, coordinateSystem),
+                            n.Type,
+                            n.SurfaceDistance * norm.Length,
+                            n.SurfaceRadiusAngle,
+                            n.AngleDistance,
+                            n.Volume * norm.Area,
+                            n.SurfaceNormalAngle,
+                            n.SurfaceTangentAngle,
+                            (n as ContactNodeBase)?.ContactedNodeId ?? Guid.Empty,
+                            (n as ContactNodeBase)?.ContactedParticleId ?? Guid.Empty,
+                            (n as ContactNodeBase)?.AngleDistanceToContactDirection ?? 0,
+                            (n as ContactNodeBase)?.ContactedParticlesCenter ?? new PolarPoint(),
+                            (n as ContactNodeBase)?.CenterShiftVectorDirection ?? new Angle(0),
+                            (n as ContactNodeBase)?.ContactDistanceGradient ?? 0,
+                            (n as ContactNodeBase)?.ContactDirectionGradient ?? 0,
+                            (n as ContactNodeBase)?.ContactedParticle ?? 0,
+                            
+                        )
+                    }).ToArray()
+                );
+            })
+        );
 
     public event EventHandler<StepSuccessfullyCalculatedEventArgs>? StepSuccessfullyCalculated;
 

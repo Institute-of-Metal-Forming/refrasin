@@ -1,3 +1,4 @@
+using System.Numerics;
 using RefraSin.Coordinates.Helpers;
 using static RefraSin.Coordinates.Angle.ReductionDomain;
 using static RefraSin.Coordinates.Constants;
@@ -7,13 +8,19 @@ namespace RefraSin.Coordinates;
 /// <summary>
 ///     Represents an angle. Can be implicitly converted from and to double (always in radians).
 /// </summary>
-public readonly struct Angle : IFormattable, IIsClose<Angle>
+public readonly struct Angle
+    : IFormattable,
+        IIsClose<Angle>,
+        IAdditionOperators<Angle, Angle, Angle>,
+        IMultiplyOperators<Angle, double, Angle>,
+        IDivisionOperators<Angle, double, Angle>
 {
     /// <summary>
     ///     Constructs an angle from its value given in radians.
     /// </summary>
     /// <param name="radians">Angle in radians</param>
-    public Angle(double radians) : this()
+    public Angle(double radians)
+        : this()
     {
         Radians = radians;
     }
@@ -23,7 +30,8 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
     /// </summary>
     /// <param name="radians">Angle in radians</param>
     /// <param name="domain">the domain</param>
-    public Angle(double radians, ReductionDomain domain) : this()
+    public Angle(double radians, ReductionDomain domain)
+        : this()
     {
         Radians = ReduceRadians(radians, domain);
     }
@@ -227,7 +235,8 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
     /// <param name="radians">value in radians</param>
     /// <param name="domain">the domain</param>
     /// <returns></returns>
-    public static Angle FromRadians(double radians, ReductionDomain domain) => FromRadians(ReduceRadians(radians, domain));
+    public static Angle FromRadians(double radians, ReductionDomain domain) =>
+        FromRadians(ReduceRadians(radians, domain));
 
     /// <summary>
     ///     Constructs an angle from a double representing degrees.
@@ -242,7 +251,8 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
     /// <param name="degrees">value in degrees</param>
     /// <param name="domain">the domain</param>
     /// <returns></returns>
-    public static Angle FromDegrees(double degrees, ReductionDomain domain) => FromDegrees(ReduceDegrees(degrees, domain));
+    public static Angle FromDegrees(double degrees, ReductionDomain domain) =>
+        FromDegrees(ReduceDegrees(degrees, domain));
 
     /// <summary>
     ///     Constructs an angle from a double representing gradians.
@@ -257,7 +267,8 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
     /// <param name="gradians">value in gradians</param>
     /// <param name="domain">the domain</param>
     /// <returns></returns>
-    public static Angle FromGradians(double gradians, ReductionDomain domain) => FromGradians(ReduceGradians(gradians, domain));
+    public static Angle FromGradians(double gradians, ReductionDomain domain) =>
+        FromGradians(ReduceGradians(gradians, domain));
 
     /// <summary>
     ///     String representation of this angle.
@@ -333,7 +344,11 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
     ///         </item>
     ///     </list>
     /// </remarks>
-    public string ToString(string? numberFormat, string? angleFormat, IFormatProvider? formatProvider)
+    public string ToString(
+        string? numberFormat,
+        string? angleFormat,
+        IFormatProvider? formatProvider
+    )
     {
         if (string.IsNullOrEmpty(angleFormat))
             angleFormat = "G";
@@ -389,7 +404,9 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
         s = s.Trim();
 
         if (s.EndsWith("gon") || s.EndsWith("grad"))
-            return FromGradians(double.Parse(s.Substring(0, s.IndexOf('g')).Trim(), formatProvider));
+            return FromGradians(
+                double.Parse(s.Substring(0, s.IndexOf('g')).Trim(), formatProvider)
+            );
         if (s.EndsWith("rad"))
             return FromRadians(double.Parse(s.Substring(0, s.IndexOf('r')).Trim(), formatProvider));
         if (s.EndsWith("°"))
@@ -502,7 +519,8 @@ public readonly struct Angle : IFormattable, IIsClose<Angle>
     /// <param name="other"></param>
     /// <param name="precision"></param>
     /// <returns></returns>
-    public bool IsClose(Angle other, double precision = 1e-8) => (Radians - other.Radians).IsClose(0, precision);
+    public bool IsClose(Angle other, double precision = 1e-8) =>
+        (Radians - other.Radians).IsClose(0, precision);
 
     /// <summary>
     /// Constant of full angle (2 Pi or 360°).

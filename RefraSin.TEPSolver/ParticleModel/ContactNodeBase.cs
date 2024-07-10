@@ -1,4 +1,5 @@
 using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
@@ -93,7 +94,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
 /// <summary>
 /// Abstrakte Basisklasse für Oberflächenknoten eines Partikels, welche Kontakt zur Oberfläche eines anderen partiekls haben.
 /// </summary>
-public abstract class ContactNodeBase : NodeBase, INodeContactGradients
+public abstract class ContactNodeBase : NodeBase, INodeContactGradients, INodeContactNeighbors, INodeContactGeometry
 {
     private Guid? _contactedParticleId;
     private Guid? _contactedNodeId;
@@ -151,6 +152,8 @@ public abstract class ContactNodeBase : NodeBase, INodeContactGradients
     private ContactNodeBase? _contactedNode;
 
     INodeContactNeighbors INodeContactNeighbors.ContactedNode => ContactedNode;
+
+    public IPolarPoint ContactedParticlesCenter => new PolarPoint(ContactDirection, ContactDistance, Particle);
 
     /// <inheritdoc />
     public double ContactDistance => Contact.Distance;

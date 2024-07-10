@@ -39,31 +39,31 @@ public class TwoParticleTest
             .Concat(
                 new[]
                 {
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
                         NodeType.Neck
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, -1.0e-5)),
                         NodeType.GrainBoundary
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
                         NodeType.GrainBoundary
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, 1.0e-5)),
                         NodeType.GrainBoundary
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle1,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
@@ -89,31 +89,31 @@ public class TwoParticleTest
             .Concat(
                 new[]
                 {
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
                         NodeType.Neck
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, -1.0e-5)),
                         NodeType.GrainBoundary
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, 0)),
                         NodeType.GrainBoundary
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, 1.0e-5)),
                         NodeType.GrainBoundary
                     ),
-                    new NodeGeometry(
+                    new ParticleNode(
                         Guid.NewGuid(),
                         baseParticle2,
                         new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),

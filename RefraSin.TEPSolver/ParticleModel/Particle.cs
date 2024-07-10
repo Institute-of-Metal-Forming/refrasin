@@ -139,7 +139,7 @@ public class Particle : IParticle
 
     public IReadOnlyParticleSurface<NodeBase> Nodes => _nodes;
 
-    IReadOnlyParticleSurface<INodeGeometry> IParticle.Nodes => Nodes;
+    IReadOnlyParticleSurface<IParticleNode> IParticle.Nodes => Nodes;
 
     /// <summary>
     /// Reference to the current solver session.

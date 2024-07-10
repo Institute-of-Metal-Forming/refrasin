@@ -14,23 +14,10 @@ public class InMemorySolutionStorage : ISolutionStorage
 
     public ISystemState GetStateById(Guid id) => _statesDictionary[id];
 
-    /// <summary>
-    /// List of all stored solution steps.
-    /// </summary>
-    public IReadOnlyList<ISystemStateTransition> Transitions => _transitions;
-
-    private readonly List<ISystemStateTransition> _transitions = new();
-
     /// <inheritdoc />
     public void StoreState(IProcessStep processStep, ISystemState state)
     {
         _states.Add(state);
         _statesDictionary.Add(state.Id, state);
-    }
-
-    /// <inheritdoc />
-    public void StoreStateTransition(IProcessStep processStep, ISystemStateTransition stateTransition)
-    {
-        _transitions.Add(stateTransition);
     }
 }

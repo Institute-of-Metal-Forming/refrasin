@@ -22,7 +22,7 @@ public interface IParticle : IVertex, IPolarCoordinateSystem
     /// <summary>
     /// List of node specs.
     /// </summary>
-    public IReadOnlyParticleSurface<INodeGeometry> Nodes { get; }
+    public IReadOnlyParticleSurface<IParticleNode> Nodes { get; }
 
     IPoint ICoordinateSystem.Origin => Coordinates;
 
