@@ -9,7 +9,7 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Stellt einen Punkt in Polarkoordinaten dar.
 /// </summary>
-public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsClose<PolarPoint>
+public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
 {
     /// <summary>
     ///     Creates the point (0, 0).
@@ -20,14 +20,14 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsC
     ///     Creates the point (0, 0).
     /// </summary>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarPoint(PolarCoordinateSystem? system) : base(system) { }
+    public PolarPoint(IPolarCoordinateSystem? system) : base(system) { }
 
     /// <summary>
     ///     Creates the point (phi, r).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarPoint((Angle phi, double r) coordinates, PolarCoordinateSystem? system = null) : base(coordinates, system) { }
+    public PolarPoint((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null) : base(coordinates, system) { }
 
     /// <summary>
     ///     Creates the point (phi, r).
@@ -35,14 +35,14 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsC
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="phi">angle coordinate</param>
     /// <param name="r">radius coordinate</param>
-    public PolarPoint(Angle phi, double r, PolarCoordinateSystem? system = null) : base(phi, r, system) { }
+    public PolarPoint(Angle phi, double r, IPolarCoordinateSystem? system = null) : base(phi, r, system) { }
 
     /// <summary>
-    ///     Creates a point based on a template. The coordinates systems are automatically castd.
+    ///     Creates a point based on a template. The coordinates systems are automatically cast.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarPoint(IPoint other, PolarCoordinateSystem? system = null) : base(system)
+    public PolarPoint(IPoint other, IPolarCoordinateSystem? system = null) : base(system)
     {
         var absoluteCoordinates = other.Absolute;
         var originCoordinates = System.Origin.Absolute;
@@ -94,7 +94,7 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsC
     }
 
     /// <inheritdoc />
-    public bool IsClose(PolarPoint other, double precision = 1e-8)
+    public bool IsClose(IPolarPoint other, double precision = 1e-8)
     {
         if (System.Equals(other.System))
             return R.IsClose(other.R, precision) && Phi.IsClose(other.Phi, precision);
@@ -105,7 +105,7 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsC
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
-    public PolarPoint PointHalfWayTo(PolarPoint other)
+    public IPolarPoint PointHalfWayTo(IPolarPoint other)
     {
         if (System.Equals(other.System))
         {
@@ -123,7 +123,7 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPoint, IIsC
     /// </summary>
     /// <param name="other">other point</param>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public PolarPoint PointHalfWayTo(IPoint other)
+    public IPolarPoint PointHalfWayTo(IPoint other)
     {
         var halfwayAbsolute = Absolute.PointHalfWayTo(other.Absolute);
         return new PolarPoint(halfwayAbsolute, System);

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;

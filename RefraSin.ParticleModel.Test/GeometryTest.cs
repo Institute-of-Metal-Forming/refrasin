@@ -1,4 +1,7 @@
 using RefraSin.Coordinates.Polar;
+using RefraSin.Graphs;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using static NUnit.Framework.Assert;
 using static RefraSin.Coordinates.Constants;
 
@@ -7,7 +10,7 @@ namespace RefraSin.ParticleModel.Test;
 [TestFixture]
 public class GeometryTest
 {
-    record DummyNode(Guid Id, Guid ParticleId, PolarPoint Coordinates, NodeType Type, INode Upper, INode Lower) : INodeGeometry
+    record DummyNode(Guid Id, Guid ParticleId, IPolarPoint Coordinates, NodeType Type, INode Upper, INode Lower) : INodeGeometry
     {
         public IParticle Particle => throw new NotImplementedException();
     }

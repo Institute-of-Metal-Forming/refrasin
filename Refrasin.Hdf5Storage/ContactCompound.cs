@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Particles;
 
 namespace Refrasin.HDF5Storage;
 

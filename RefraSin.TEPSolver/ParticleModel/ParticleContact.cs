@@ -3,6 +3,7 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.Graphs;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -14,9 +15,9 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
     /// <inheritdoc />
     public ParticleContact(Guid id, Particle from, Particle to) : base(id, from, to)
     {
-        Distance = from.CenterCoordinates.DistanceTo(to.CenterCoordinates);
-        DirectionFrom = new PolarVector(to.CenterCoordinates - from.CenterCoordinates, from.LocalCoordinateSystem).Phi;
-        DirectionTo = new PolarVector(from.CenterCoordinates - to.CenterCoordinates, to.LocalCoordinateSystem).Phi;
+        Distance = from.Coordinates.DistanceTo(to.Coordinates);
+        DirectionFrom = new PolarVector(to.Coordinates - from.Coordinates, from.LocalCoordinateSystem).Phi;
+        DirectionTo = new PolarVector(from.Coordinates - to.Coordinates, to.LocalCoordinateSystem).Phi;
     }
 
     /// <inheritdoc />

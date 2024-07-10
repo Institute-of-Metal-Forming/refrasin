@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 
 namespace Refrasin.HDF5Storage;
 
@@ -30,10 +31,10 @@ internal struct NodeCompound
     public readonly double[] SurfaceAngle = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] SurfaceEnergy = { 0.0, 0.0 };
+    public readonly double[] InterfaceEnergy = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public readonly double[] SurfaceDiffusionCoefficient = { 0.0, 0.0 };
+    public readonly double[] InterfaceDiffusionCoefficient = { 0.0, 0.0 };
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public readonly double[] GibbsEnergyGradient = { 0.0, 0.0 };
@@ -64,8 +65,8 @@ internal struct NodeCompound
 
         if (node is INodeMaterialProperties nodeMaterialProperties)
         {
-            SurfaceEnergy = nodeMaterialProperties.SurfaceEnergy.ToArray();
-            SurfaceDiffusionCoefficient = nodeMaterialProperties.SurfaceDiffusionCoefficient.ToArray();
+            InterfaceEnergy = nodeMaterialProperties.InterfaceEnergy.ToArray();
+            InterfaceDiffusionCoefficient = nodeMaterialProperties.InterfaceDiffusionCoefficient.ToArray();
         }
 
         if (node is INodeGradients nodeGradients)

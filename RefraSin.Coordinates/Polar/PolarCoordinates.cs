@@ -6,23 +6,27 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Abstract base class for coordinates in polar systems.
 /// </summary>
-public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFormattable
+public abstract class PolarCoordinates : Coordinates, IPolarCoordinates
 {
     private double _r;
     private Angle _phi;
+    private IPolarCoordinateSystem? _system;
 
     /// <summary>
     ///     Creates the coordinates (0, 0).
     /// </summary>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    protected PolarCoordinates(PolarCoordinateSystem? system) : base(system) { }
+    protected PolarCoordinates(IPolarCoordinateSystem? system)
+    {
+        _system = system;
+    }
 
     /// <summary>
     ///     Creates the coordinates (phi, r).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    protected PolarCoordinates((Angle phi, double r) coordinates, PolarCoordinateSystem? system = null) : base(system)
+    protected PolarCoordinates((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null) : this(system)
     {
         (Phi, R) = coordinates;
     }
@@ -33,7 +37,7 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="phi">angle coordinate</param>
     /// <param name="r">radius coordinate</param>
-    protected PolarCoordinates(Angle phi, double r, PolarCoordinateSystem? system = null) : base(system)
+    protected PolarCoordinates(Angle phi, double r, IPolarCoordinateSystem? system = null) : this(system)
     {
         Phi = phi;
         R = r;
@@ -70,6 +74,9 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
         }
     }
 
+    /// <inheritdoc />
+    public IPolarCoordinateSystem System => _system ??= PolarCoordinateSystem.Default;
+
     /// <summary>
     ///     Get the string representation of this instance.
     /// </summary>
@@ -78,7 +85,7 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
     ///     <see cref="ToString(String,String,String,IFormatProvider)" />.
     /// </param>
     /// <param name="formatProvider">IFormatProvider</param>
-    public string ToString(string? format, IFormatProvider? formatProvider)
+    public override string ToString(string? format, IFormatProvider? formatProvider)
     {
         if (string.IsNullOrEmpty(format))
             return ToString(formatProvider);
@@ -152,7 +159,7 @@ public abstract class PolarCoordinates : Coordinates<PolarCoordinateSystem>, IFo
     /// <param name="other">other</param>
     /// <param name="allowNegative">whether to allow negative return values indicating direction</param>
     /// <returns>angle distance in interval [0; Pi], or [-Pi; Pi] if <paramref name="allowNegative" /> == true</returns>
-    public Angle AngleTo(PolarCoordinates other, bool allowNegative = false)
+    public Angle AngleTo(IPolarCoordinates other, bool allowNegative = false)
     {
         if (System.Equals(other.System))
         {

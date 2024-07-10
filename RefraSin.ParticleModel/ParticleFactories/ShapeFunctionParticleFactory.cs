@@ -1,6 +1,8 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using static System.Math;
 using static RefraSin.Coordinates.Constants;
 

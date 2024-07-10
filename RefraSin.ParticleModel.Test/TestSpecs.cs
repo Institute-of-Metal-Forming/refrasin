@@ -1,5 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using static NUnit.Framework.Assert;
 
 namespace RefraSin.ParticleModel.Test;

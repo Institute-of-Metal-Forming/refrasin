@@ -1,5 +1,6 @@
 using System.Globalization;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using ScottPlot;
 

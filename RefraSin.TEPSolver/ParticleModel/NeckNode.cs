@@ -2,6 +2,7 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.TEPSolver.StepVectors;
 using static RefraSin.Coordinates.Constants;
 
@@ -22,20 +23,20 @@ public class NeckNode : ContactNodeBase<NeckNode>, INeckNode
     /// <inheritdoc />
     public override NodeType Type => NodeType.Neck;
 
-    public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(
-        Upper.SurfaceEnergy.ToLower,
-        Lower.SurfaceEnergy.ToUpper
+    public override ToUpperToLower<double> InterfaceEnergy => _interfaceEnergy ??= new ToUpperToLower<double>(
+        Upper.InterfaceEnergy.ToLower,
+        Lower.InterfaceEnergy.ToUpper
     );
 
-    private ToUpperToLower<double>? _surfaceEnergy;
+    private ToUpperToLower<double>? _interfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
-        Upper.SurfaceDiffusionCoefficient.ToLower,
-        Lower.SurfaceDiffusionCoefficient.ToUpper
+    public override ToUpperToLower<double> InterfaceDiffusionCoefficient => _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
+        Upper.InterfaceDiffusionCoefficient.ToLower,
+        Lower.InterfaceDiffusionCoefficient.ToUpper
     );
 
-    private ToUpperToLower<double>? _surfaceDiffusionCoefficient;
+    private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
 
     /// <inheritdoc />
     public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)

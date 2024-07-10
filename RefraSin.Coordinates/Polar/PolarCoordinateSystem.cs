@@ -5,7 +5,7 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Stellt ein polares Koordinatensystem dar.
 /// </summary>
-public class PolarCoordinateSystem : CoordinateSystem
+public class PolarCoordinateSystem : CoordinateSystem, IPolarCoordinateSystem, ICloneable<PolarCoordinateSystem>
 {
     /// <summary>
     ///     Erzeugt ein polares System mit Urspurng in Absolut(0,0), ohne Rotation, ohne Skalierung.
@@ -39,7 +39,7 @@ public class PolarCoordinateSystem : CoordinateSystem
     /// <summary>
     ///     Standard-Polares System. Ursprung in (0,0), keine Drehung, keine Skalierung.
     /// </summary>
-    public static PolarCoordinateSystem Default => Default<PolarCoordinateSystem>.Instance;
+    public static PolarCoordinateSystem Default { get; } = new();
 
     /// <inheritdoc />
     public PolarCoordinateSystem Clone() => new(Origin, RotationAngle, RScale);

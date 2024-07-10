@@ -1,4 +1,6 @@
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
@@ -14,7 +16,7 @@ public class StepVectorMap
 
             foreach (var node in particle.Nodes)
             {
-                if (node is not IContactNode)
+                if (node is not INodeContact)
                 {
                     AddUnknown(node.Id, Unknown.LambdaVolume);
                     AddUnknown(node.Id, Unknown.FluxToUpper);
@@ -88,11 +90,11 @@ public class StepVectorMap
 
     public int LambdaVolume(INode node) => _indices[(node.Id, Unknown.LambdaVolume)];
 
-    public int TangentialDisplacement(IContactNode node) => _indices[(node.Id, Unknown.TangentialDisplacement)];
+    public int TangentialDisplacement(INodeContact node) => _indices[(node.Id, Unknown.TangentialDisplacement)];
 
-    public int LambdaContactDistance(IContactNode node) => _indices[(node.Id, Unknown.LambdaContactDistance)];
+    public int LambdaContactDistance(INodeContact node) => _indices[(node.Id, Unknown.LambdaContactDistance)];
 
-    public int LambdaContactDirection(IContactNode node) => _indices[(node.Id, Unknown.LambdaContactDirection)];
+    public int LambdaContactDirection(INodeContact node) => _indices[(node.Id, Unknown.LambdaContactDirection)];
 
     public int RadialDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.RadialDisplacement)];
 

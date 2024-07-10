@@ -1,3 +1,4 @@
+using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
@@ -6,7 +7,7 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a vector in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsoluteVector : AbsoluteCoordinates, IVector, IIsClose<AbsoluteVector>, ICloneable<AbsoluteVector>
+public class AbsoluteVector : AbsoluteCoordinates, ICartesianVector, IIsClose<AbsoluteVector>, ICloneable<AbsoluteVector>
 {
     /// <summary>
     ///     Creates the absolute vector (0,0).
@@ -116,4 +117,12 @@ public class AbsoluteVector : AbsoluteCoordinates, IVector, IIsClose<AbsoluteVec
     ///     Scalar product. See <see cref="ScalarProduct" />.
     /// </summary>
     public static double operator *(AbsoluteVector v1, AbsoluteVector v2) => v1.X * v2.X + v1.Y * v2.Y;
+
+    /// <inheritdoc />
+    public bool IsClose(ICartesianVector other, double precision)
+    {
+        if (System.Equals(other.System))
+            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
 }

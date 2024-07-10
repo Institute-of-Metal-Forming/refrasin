@@ -2,6 +2,8 @@ using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using static System.Double;
@@ -28,7 +30,7 @@ public interface INorm
             state.Time,
             state.Particles.Select(p =>
             {
-                var center = new AbsolutePoint(p.CenterCoordinates.X / Length, p.CenterCoordinates.Y / Length);
+                var center = new AbsolutePoint(p.Coordinates.X / Length, p.Coordinates.Y / Length);
                 var coordinateSystem = new PolarCoordinateSystem(center, p.RotationAngle);
 
                 return new Particle(
@@ -55,7 +57,7 @@ public interface INorm
             state.Time,
             state.Particles.Select(p =>
             {
-                var center = new AbsolutePoint(p.CenterCoordinates.X * Length, p.CenterCoordinates.Y * Length);
+                var center = new AbsolutePoint(p.Coordinates.X * Length, p.Coordinates.Y * Length);
                 var coordinateSystem = new PolarCoordinateSystem(center, p.RotationAngle);
 
                 return new Particle(

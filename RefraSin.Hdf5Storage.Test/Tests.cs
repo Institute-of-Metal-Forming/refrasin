@@ -5,6 +5,7 @@ using Refrasin.HDF5Storage;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;

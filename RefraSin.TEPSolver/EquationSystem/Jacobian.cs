@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
@@ -144,7 +145,7 @@ public static class Jacobian
                 -2
               * node.Particle.VacancyVolumeEnergy
               * node.SurfaceDistance.ToUpper
-              / node.SurfaceDiffusionCoefficient.ToUpper
+              / node.InterfaceDiffusionCoefficient.ToUpper
               * stepVector.FluxToUpper(node)
             );
 
@@ -321,7 +322,7 @@ public static class Jacobian
             -2
           * node.Particle.VacancyVolumeEnergy
           * node.SurfaceDistance.ToUpper
-          / node.SurfaceDiffusionCoefficient.ToUpper;
+          / node.InterfaceDiffusionCoefficient.ToUpper;
 
         yield return (stepVector.StepVectorMap.FluxToUpper(node), bilinearPreFactor * stepVector.LambdaDissipation());
         yield return (stepVector.StepVectorMap.LambdaDissipation(), bilinearPreFactor * stepVector.FluxToUpper(node));

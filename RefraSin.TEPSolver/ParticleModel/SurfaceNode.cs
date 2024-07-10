@@ -1,6 +1,7 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -19,20 +20,20 @@ public class SurfaceNode : NodeBase, ISurfaceNode
     public override NodeType Type => NodeType.Surface;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(
+    public override ToUpperToLower<double> InterfaceEnergy => _interfaceEnergy ??= new ToUpperToLower<double>(
         Particle.SurfaceProperties.Energy,
         Particle.SurfaceProperties.Energy
     );
 
-    private ToUpperToLower<double>? _surfaceEnergy;
+    private ToUpperToLower<double>? _interfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
+    public override ToUpperToLower<double> InterfaceDiffusionCoefficient => _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
         Particle.SurfaceProperties.DiffusionCoefficient,
         Particle.SurfaceProperties.DiffusionCoefficient
     );
 
-    private ToUpperToLower<double>? _surfaceDiffusionCoefficient;
+    private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
 
     /// <inheritdoc />
     public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)

@@ -138,10 +138,4 @@ internal class SolverSession : ISolverSession
     {
         _reportSystemState(Norm.DenormalizeSystemState(CurrentState));
     }
-
-    public void ReportTransition(ISinteringStateStateTransition step)
-    {
-        _reportSystemStateTransition(step);
-    }
-
 }

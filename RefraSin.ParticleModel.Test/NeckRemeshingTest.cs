@@ -1,7 +1,9 @@
 using System.Globalization;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using ScottPlot;
 using static RefraSin.Coordinates.Constants;
@@ -56,7 +58,7 @@ public class NeckRemeshingTest
                 }
             )
             .ToArray();
-        var particle = new Particle(baseParticle.Id, new(0, 0), 0, baseParticle.MaterialId, nodes);
+        var particle = new Particle(baseParticle.Id, new AbsolutePoint(0, 0), 0, baseParticle.MaterialId, nodes);
 
         var remesher = new NeckNeighborhoodRemesher(deletionLimit: 0.4, additionLimit: double.PositiveInfinity);
         var remeshedParticle = remesher.Remesh(particle);
@@ -107,7 +109,7 @@ public class NeckRemeshingTest
                 }
             )
             .ToArray();
-        var particle = new Particle(baseParticle.Id, new(0, 0), 0, baseParticle.MaterialId, nodes);
+        var particle = new Particle(baseParticle.Id, new AbsolutePoint(0, 0), 0, baseParticle.MaterialId, nodes);
 
         var remesher = new NeckNeighborhoodRemesher(deletionLimit: 0, additionLimit: 0.8);
         var remeshedParticle = remesher.Remesh(particle);

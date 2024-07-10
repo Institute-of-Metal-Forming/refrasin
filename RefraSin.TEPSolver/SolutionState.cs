@@ -1,6 +1,9 @@
 using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Collections;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
@@ -116,8 +119,7 @@ public class SolutionState : ISystemState
         
         foreach (var (node, halfway) in newNodeCoordinates)
         {
-            node.Coordinates.Phi = halfway.Phi;
-            node.Coordinates.R = halfway.R;
+            node.Coordinates = halfway;
         }
     }
 }

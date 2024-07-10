@@ -1,7 +1,9 @@
 using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using static System.Math;
 using static RefraSin.Coordinates.Constants;
-using static RefraSin.ParticleModel.NodeType;
+using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
@@ -20,7 +22,7 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.3, double additio
 
         var newParticle = new Particle(
             particle.Id,
-            particle.CenterCoordinates,
+            particle.Coordinates,
             particle.RotationAngle,
             particle.MaterialId,
             nodes.ToArray()

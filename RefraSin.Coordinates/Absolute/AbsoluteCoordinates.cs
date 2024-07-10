@@ -1,3 +1,4 @@
+using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
@@ -6,7 +7,7 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Abstract base class for coordinates in the absolute system (overall base system).
 /// </summary>
-public abstract class AbsoluteCoordinates : Coordinates, IFormattable
+public abstract class AbsoluteCoordinates : Coordinates, ICartesianCoordinates
 {
     /// <summary>
     ///     Creates the absolute coordinates (0, 0).
@@ -43,6 +44,9 @@ public abstract class AbsoluteCoordinates : Coordinates, IFormattable
     /// </summary>
     public double Y { get; set; }
 
+    /// <inheritdoc />
+    public ICartesianCoordinateSystem System => CartesianCoordinateSystem.Default;
+
     /// <summary>
     ///     Get the string representation of this instance.
     /// </summary>
@@ -51,7 +55,7 @@ public abstract class AbsoluteCoordinates : Coordinates, IFormattable
     ///     .
     /// </param>
     /// <param name="formatProvider">IFormatProvider</param>
-    public string ToString(string? format, IFormatProvider? formatProvider)
+    public override string ToString(string? format, IFormatProvider? formatProvider)
     {
         if (string.IsNullOrEmpty(format))
             return ToString(formatProvider);

@@ -1,6 +1,8 @@
 using RefraSin.Coordinates;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using static System.Math;
 using static MathNet.Numerics.Constants;
 
@@ -91,7 +93,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
 /// <summary>
 /// Abstrakte Basisklasse für Oberflächenknoten eines Partikels, welche Kontakt zur Oberfläche eines anderen partiekls haben.
 /// </summary>
-public abstract class ContactNodeBase : NodeBase, IContactNode
+public abstract class ContactNodeBase : NodeBase, INodeContactGradients
 {
     private Guid? _contactedParticleId;
     private Guid? _contactedNodeId;
@@ -134,6 +136,11 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
     /// <inheritdoc />
     public Guid ContactedNodeId => _contactedNodeId ??= SolverSession.CurrentState.NodeContacts[Id];
 
+    /// <inheritdoc />
+    public Particle ContactedParticle => ContactedNode.Particle;
+
+    IParticle INodeContactNeighbors.ContactedParticle => Particle;
+
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
             SolverSession.CurrentState.Nodes[ContactedNodeId] as ContactNodeBase
@@ -143,6 +150,8 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
 
     private ContactNodeBase? _contactedNode;
 
+    INodeContactNeighbors INodeContactNeighbors.ContactedNode => ContactedNode;
+
     /// <inheritdoc />
     public double ContactDistance => Contact.Distance;
 
@@ -150,10 +159,8 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
     public Angle ContactDirection => IsParentsNode ? Contact.DirectionFrom : Contact.DirectionTo;
 
     /// <inheritdoc />
-    public Angle AngleDistanceFromContactDirection =>
-        _angleDistanceFromContactDirection ??= (Coordinates.Phi - ContactDirection).Reduce(
-            Angle.ReductionDomain.WithNegative
-        );
+    public Angle AngleDistanceToContactDirection =>
+        _angleDistanceFromContactDirection ??= ((INodeContactGeometry)this).AngleDistanceToContactDirection;
 
     private Angle? _angleDistanceFromContactDirection;
 

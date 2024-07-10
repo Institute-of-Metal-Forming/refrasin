@@ -1,3 +1,4 @@
+using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
@@ -6,7 +7,7 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a point in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsolutePoint : AbsoluteCoordinates, IPoint, ICloneable<AbsolutePoint>, IIsClose<AbsolutePoint>
+public class AbsolutePoint : AbsoluteCoordinates, ICartesianPoint, ICloneable<AbsolutePoint>, IIsClose<AbsolutePoint>
 {
     /// <summary>
     ///     Creates the absolute point (0,0).
@@ -110,4 +111,12 @@ public class AbsolutePoint : AbsoluteCoordinates, IPoint, ICloneable<AbsolutePoi
     /// </summary>
     public static AbsoluteVector operator -(AbsolutePoint p1, AbsolutePoint p2) =>
         new(p1.X - p2.X, p1.Y - p2.Y);
+
+    /// <inheritdoc />
+    public bool IsClose(ICartesianPoint other, double precision = 1e-8)
+    {
+        if (System.Equals(other.System))
+            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
 }

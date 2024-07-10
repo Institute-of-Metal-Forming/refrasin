@@ -6,7 +6,9 @@ using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -342,7 +344,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].CenterCoordinates.Absolute.X
+                    s.Particles[0].Coordinates.Absolute.X
                 ))
                 .ToArray()
         );
@@ -350,7 +352,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].CenterCoordinates.Absolute.Y
+                    s.Particles[0].Coordinates.Absolute.Y
                 ))
                 .ToArray()
         );
@@ -358,7 +360,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[1].CenterCoordinates.Absolute.X
+                    s.Particles[1].Coordinates.Absolute.X
                 ))
                 .ToArray()
         );
@@ -366,7 +368,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[1].CenterCoordinates.Absolute.Y
+                    s.Particles[1].Coordinates.Absolute.Y
                 ))
                 .ToArray()
         );

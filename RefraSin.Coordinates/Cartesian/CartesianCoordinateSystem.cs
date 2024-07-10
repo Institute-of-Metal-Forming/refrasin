@@ -1,11 +1,12 @@
 using RefraSin.Coordinates.Helpers;
+using RefraSin.Coordinates.Polar;
 
 namespace RefraSin.Coordinates.Cartesian;
 
 /// <summary>
 ///     Represents a cartesian coordinate system.
 /// </summary>
-public class CartesianCoordinateSystem : CoordinateSystem, ICloneable<CartesianCoordinateSystem>
+public class CartesianCoordinateSystem : CoordinateSystem, ICartesianCoordinateSystem, ICloneable<CartesianCoordinateSystem>
 {
     /// <summary>
     ///     Creates a standard cartesian system: <see cref="CoordinateSystem.Origin" /> in (0,0),
@@ -31,7 +32,7 @@ public class CartesianCoordinateSystem : CoordinateSystem, ICloneable<CartesianC
     /// <summary>
     ///     Default instance.
     /// </summary>
-    public static CartesianCoordinateSystem Default => Default<CartesianCoordinateSystem>.Instance;
+    public static CartesianCoordinateSystem Default { get; } = new();
 
     /// <summary>
     ///     Gets or sets the scale along X axis.

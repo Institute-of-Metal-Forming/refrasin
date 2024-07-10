@@ -1,9 +1,10 @@
 using System.Globalization;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using static RefraSin.Coordinates.Angle.ReductionDomain;
@@ -13,7 +14,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Abstract base class for particle surface nodes.
 /// </summary>
-public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMaterialProperties
+public abstract class NodeBase : INodeGeometry, INodeGradients, INodeMaterialProperties
 {
     protected NodeBase(INode node, Particle particle, ISolverSession solverSession)
     {
@@ -23,8 +24,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
             throw new ArgumentException("IDs of the node spec and the given particle instance do not match.");
 
         Particle = particle;
-        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R)
-            { SystemSource = () => Particle.LocalCoordinateSystem };
+        Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R, particle);
         SolverSession = solverSession;
     }
 
@@ -76,7 +76,7 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// <summary>
     /// Coordinates of the node in terms of particle's local coordinate system <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
     /// </summary>
-    public PolarPoint Coordinates { get; }
+    public IPolarPoint Coordinates { get; set; }
 
     /// <inheritdoc />
     public abstract NodeType Type { get; }
@@ -87,49 +87,49 @@ public abstract class NodeBase : INode, INodeGeometry, INodeGradients, INodeMate
     /// <summary>
     ///     Winkeldistanz zu den Nachbarknoten (Größe des kürzesten Winkels).
     /// </summary>
-    public ToUpperToLower<Angle> AngleDistance => _angleDistance ??= this.AngleDistance();
+    public ToUpperToLower<Angle> AngleDistance => _angleDistance ??= ((INodeGeometry)this).AngleDistance;
 
     private ToUpperToLower<Angle>? _angleDistance;
 
     /// <summary>
     ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
     /// </summary>
-    public ToUpperToLower<double> SurfaceDistance => _surfaceDistance ??= this.SurfaceDistance();
+    public ToUpperToLower<double> SurfaceDistance => _surfaceDistance ??= ((INodeGeometry)this).SurfaceDistance;
 
     private ToUpperToLower<double>? _surfaceDistance;
 
     /// <summary>
     ///     Distanz zu den Nachbarknoten (Länge der Verbindungsgeraden).
     /// </summary>
-    public ToUpperToLower<Angle> SurfaceRadiusAngle => _surfaceRadiusAngle ??= this.SurfaceRadiusAngle();
+    public ToUpperToLower<Angle> SurfaceRadiusAngle => _surfaceRadiusAngle ??= ((INodeGeometry)this).SurfaceRadiusAngle;
 
     private ToUpperToLower<Angle>? _surfaceRadiusAngle;
 
     /// <summary>
     ///     Gesamtes Volumen der an den Knoten angrenzenden Elemente.
     /// </summary>
-    public ToUpperToLower<double> Volume => _volume ??= this.Volume();
-    
+    public ToUpperToLower<double> Volume => _volume ??= ((INodeGeometry)this).Volume;
+
     private ToUpperToLower<double>? _volume;
 
-    public virtual ToUpperToLower<Angle> SurfaceNormalAngle => _surfaceNormalAngle ??= this.SurfaceNormalAngle();
+    public virtual ToUpperToLower<Angle> SurfaceNormalAngle => _surfaceNormalAngle ??= ((INodeGeometry)this).SurfaceNormalAngle;
 
     private ToUpperToLower<Angle>? _surfaceNormalAngle;
 
-    public virtual ToUpperToLower<Angle> SurfaceTangentAngle => _surfaceTangentAngle ??= this.SurfaceTangentAngle();
+    public virtual ToUpperToLower<Angle> SurfaceTangentAngle => _surfaceTangentAngle ??= ((INodeGeometry)this).SurfaceTangentAngle;
 
     private ToUpperToLower<Angle>? _surfaceTangentAngle;
 
     /// <inheritdoc />
-    public abstract ToUpperToLower<double> SurfaceEnergy { get; }
+    public abstract ToUpperToLower<double> InterfaceEnergy { get; }
 
     /// <inheritdoc />
-    public abstract ToUpperToLower<double> SurfaceDiffusionCoefficient { get; }
+    public abstract ToUpperToLower<double> InterfaceDiffusionCoefficient { get; }
 
     /// <inheritdoc />
     public NormalTangential<double> GibbsEnergyGradient => _gibbsEnergyGradient ??= new NormalTangential<double>(
-        -(SurfaceEnergy.ToUpper * Cos(SurfaceNormalAngle.ToUpper) + SurfaceEnergy.ToLower * Cos(SurfaceNormalAngle.ToLower)),
-        -(SurfaceEnergy.ToUpper * Cos(SurfaceTangentAngle.ToUpper) - SurfaceEnergy.ToLower * Cos(SurfaceTangentAngle.ToLower))
+        -(InterfaceEnergy.ToUpper * Cos(SurfaceNormalAngle.ToUpper) + InterfaceEnergy.ToLower * Cos(SurfaceNormalAngle.ToLower)),
+        -(InterfaceEnergy.ToUpper * Cos(SurfaceTangentAngle.ToUpper) - InterfaceEnergy.ToLower * Cos(SurfaceTangentAngle.ToLower))
     );
 
     private NormalTangential<double>? _gibbsEnergyGradient;

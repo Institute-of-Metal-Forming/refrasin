@@ -2,6 +2,7 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -22,20 +23,20 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>, IGrainBound
     public override NodeType Type => NodeType.GrainBoundary;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> SurfaceEnergy => _surfaceEnergy ??= new ToUpperToLower<double>(
+    public override ToUpperToLower<double> InterfaceEnergy => _interfaceEnergy ??= new ToUpperToLower<double>(
         InterfaceProperties.Energy,
         InterfaceProperties.Energy
     );
 
-    private ToUpperToLower<double>? _surfaceEnergy;
+    private ToUpperToLower<double>? _interfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> SurfaceDiffusionCoefficient => _surfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
+    public override ToUpperToLower<double> InterfaceDiffusionCoefficient => _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
         InterfaceProperties.DiffusionCoefficient,
         InterfaceProperties.DiffusionCoefficient
     );
 
-    private ToUpperToLower<double>? _surfaceDiffusionCoefficient;
+    private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
 
     /// <inheritdoc />
     public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)

@@ -8,7 +8,7 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Stellt einen Vektor im kartesischen Koordinatensystem dar.
 /// </summary>
-public class CartesianVector : CartesianCoordinates, IVector, IIsClose<CartesianVector>, ICloneable<CartesianVector>
+public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneable<CartesianVector>
 {
     /// <summary>
     ///     Creates the vector (0, 0) in the default system.
@@ -26,7 +26,7 @@ public class CartesianVector : CartesianCoordinates, IVector, IIsClose<Cartesian
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector((double x, double y) coordinates, CartesianCoordinateSystem? system = null) : base(coordinates, system) { }
+    public CartesianVector((double x, double y) coordinates, ICartesianCoordinateSystem? system = null) : base(coordinates, system) { }
 
     /// <summary>
     ///     Creates the vector (x, y).
@@ -34,14 +34,14 @@ public class CartesianVector : CartesianCoordinates, IVector, IIsClose<Cartesian
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vertical coordinate</param>
-    public CartesianVector(double x, double y, CartesianCoordinateSystem? system = null) : base(x, y, system) { }
+    public CartesianVector(double x, double y, ICartesianCoordinateSystem? system = null) : base(x, y, system) { }
 
     /// <summary>
     ///     Creates a vector based on a template. The coordinates systems are automatically castd.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector(IVector other, CartesianCoordinateSystem? system = null) : base(system)
+    public CartesianVector(IVector other, ICartesianCoordinateSystem? system = null) : base(system)
     {
         var absoluteCoords = other.Absolute;
         X = absoluteCoords.X;
@@ -49,14 +49,13 @@ public class CartesianVector : CartesianCoordinates, IVector, IIsClose<Cartesian
         RotateBy(-System.RotationAngle);
         X /= System.XScale;
         Y /= System.YScale;
-        System = System;
     }
 
     /// <inheritdoc />
     public CartesianVector Clone() => new(X, Y, System);
 
     /// <inheritdoc />
-    public bool IsClose(CartesianVector other, double precision)
+    public bool IsClose(ICartesianVector other, double precision)
     {
         if (System.Equals(other.System))
             return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
