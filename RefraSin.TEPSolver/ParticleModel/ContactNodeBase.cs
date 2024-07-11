@@ -1,6 +1,9 @@
 using RefraSin.Coordinates;
+using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using static System.Math;
 using static MathNet.Numerics.Constants;
 
@@ -33,7 +36,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     public new TContacted ContactedNode =>
         _contactedNode ??=
             SolverSession.CurrentState.Nodes[ContactedNodeId] as TContacted
-         ?? throw new InvalidCastException(
+            ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(TContacted)}."
             );
 
@@ -52,19 +55,27 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
         _centerShiftVectorDirection ??= IsParentsNode
             ? new NormalTangential<Angle>(
                 Pi
-              - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
-              + (Pi - SurfaceNormalAngle.ToLower - SurfaceRadiusAngle.ToLower),
+                    - (Coordinates.Phi - ContactDirection).Reduce(
+                        Angle.ReductionDomain.WithNegative
+                    )
+                    + (Pi - SurfaceNormalAngle.ToLower - SurfaceRadiusAngle.ToLower),
                 Pi
-              - (Coordinates.Phi - ContactDirection).Reduce(Angle.ReductionDomain.WithNegative)
-              - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
+                    - (Coordinates.Phi - ContactDirection).Reduce(
+                        Angle.ReductionDomain.WithNegative
+                    )
+                    - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
             )
             : new NormalTangential<Angle>(
                 Pi
-              + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
-              - (Pi - SurfaceNormalAngle.ToUpper - SurfaceRadiusAngle.ToUpper),
+                    + (ContactDirection - Coordinates.Phi).Reduce(
+                        Angle.ReductionDomain.WithNegative
+                    )
+                    - (Pi - SurfaceNormalAngle.ToUpper - SurfaceRadiusAngle.ToUpper),
                 Pi
-              + (ContactDirection - Coordinates.Phi).Reduce(Angle.ReductionDomain.WithNegative)
-              - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
+                    + (ContactDirection - Coordinates.Phi).Reduce(
+                        Angle.ReductionDomain.WithNegative
+                    )
+                    - (Pi - SurfaceTangentAngle.ToUpper - SurfaceRadiusAngle.ToUpper)
             );
 
     private NormalTangential<Angle>? _centerShiftVectorDirection;
@@ -91,7 +102,11 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
 /// <summary>
 /// Abstrakte Basisklasse für Oberflächenknoten eines Partikels, welche Kontakt zur Oberfläche eines anderen partiekls haben.
 /// </summary>
-public abstract class ContactNodeBase : NodeBase, IContactNode
+public abstract class ContactNodeBase
+    : NodeBase,
+        INodeContactGradients,
+        INodeContactNeighbors,
+        INodeContactGeometry
 {
     private Guid? _contactedParticleId;
     private Guid? _contactedNodeId;
@@ -134,25 +149,34 @@ public abstract class ContactNodeBase : NodeBase, IContactNode
     /// <inheritdoc />
     public Guid ContactedNodeId => _contactedNodeId ??= SolverSession.CurrentState.NodeContacts[Id];
 
+    /// <inheritdoc />
+    public Particle ContactedParticle => ContactedNode.Particle;
+
+    IParticle INodeContactNeighbors.ContactedParticle => Particle;
+
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
             SolverSession.CurrentState.Nodes[ContactedNodeId] as ContactNodeBase
-         ?? throw new InvalidCastException(
+            ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(ContactNodeBase)}."
             );
 
     private ContactNodeBase? _contactedNode;
 
-    /// <inheritdoc />
+    INodeContactNeighbors INodeContactNeighbors.ContactedNode => ContactedNode;
+
+    public IPolarPoint ContactedParticlesCenter =>
+        new PolarPoint(ContactDirection, ContactDistance, Particle);
+
     public double ContactDistance => Contact.Distance;
 
-    /// <inheritdoc />
     public Angle ContactDirection => IsParentsNode ? Contact.DirectionFrom : Contact.DirectionTo;
 
     /// <inheritdoc />
-    public Angle AngleDistanceFromContactDirection =>
-        _angleDistanceFromContactDirection ??= (Coordinates.Phi - ContactDirection).Reduce(
-            Angle.ReductionDomain.WithNegative
+    public Angle AngleDistanceToContactDirection =>
+        _angleDistanceFromContactDirection ??= Coordinates.AngleTo(
+            ContactedParticlesCenter,
+            allowNegative: true
         );
 
     private Angle? _angleDistanceFromContactDirection;

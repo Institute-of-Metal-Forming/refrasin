@@ -1,55 +1,7 @@
-using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 using RefraSin.Coordinates.Helpers;
 
 namespace RefraSin.Coordinates;
-
-/// <summary>
-///     Abstract base class for coordinates featuring a coordinate system.
-/// </summary>
-/// <typeparam name="TSystem">type of the coordinate system</typeparam>
-public abstract class Coordinates<TSystem> : Coordinates where TSystem : CoordinateSystem, new()
-{
-    private TSystem? _system;
-
-    /// <summary>
-    ///     Constructor.
-    /// </summary>
-    /// <param name="system">coordinate system</param>
-    protected Coordinates(TSystem? system)
-    {
-        _system = system;
-    }
-
-    /// <summary>
-    ///     Coordinate system where this coordinates are defined in.
-    /// </summary>
-    /// <remarks>
-    ///     Use the setter to set an explicit system of this system.
-    ///     The getter always tries to invoke <see cref="SystemSource" /> for determining the system.
-    ///     If <see cref="SystemSource" /> is null or returns null, this property returns the value set by the setter.
-    ///     If no value was explicitly set, it is initialized on first use with the default system.
-    /// </remarks>
-    public TSystem System
-    {
-        get => SystemSource?.Invoke() ?? (_system ??= Default<TSystem>.Instance);
-        set => _system = value;
-    }
-
-    /// <summary>
-    ///     Gets or sets the delegate used to determine system of these coordinates.
-    ///     <remarks>
-    ///         This property can be used to make coordinates determine their system from a higher level object these
-    ///         coordinates are member of, or similar.
-    ///         If its value is not null, it takes precedence over the value set to <see cref="System" />.
-    ///         This delegate may return null, to make the getter of <see cref="System" /> to behave like this delegate were
-    ///         null.
-    ///         The getter of <see cref="System" /> tries always to invoke this delegate, if it is not null.
-    ///     </remarks>
-    /// </summary>
-    public Func<TSystem?>? SystemSource { get; set; }
-}
 
 /// <summary>
 ///     Abstract base class for coordinates without information about their system.
@@ -164,4 +116,7 @@ public abstract class Coordinates : ICoordinates
 
         throw new FormatException("Invalid format of input string.");
     }
+
+    /// <inheritdoc />
+    public abstract string ToString(string? format, IFormatProvider? formatProvider);
 }

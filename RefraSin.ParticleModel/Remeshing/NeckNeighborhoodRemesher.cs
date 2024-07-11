@@ -1,7 +1,9 @@
 using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using static System.Math;
 using static RefraSin.Coordinates.Constants;
-using static RefraSin.ParticleModel.NodeType;
+using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
@@ -12,63 +14,71 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.3, double additio
     public IParticle Remesh(IParticle particle)
     {
         var meanDiscretizationWidth = particle.Nodes.Average(n => n.SurfaceDistance.ToUpper);
-        var nodes = AddNodesConditionally(
-            DeleteNodesConditionally(
-                particle.Nodes.ToArray(), meanDiscretizationWidth * DeletionLimit
-            ), meanDiscretizationWidth * AdditionLimit
-        );
+
+        IEnumerable<IParticleNode> NodeFactory(IParticle newParticle) =>
+            FilterNodes(
+                newParticle,
+                particle.Nodes,
+                meanDiscretizationWidth * DeletionLimit,
+                meanDiscretizationWidth * AdditionLimit
+            );
 
         var newParticle = new Particle(
             particle.Id,
-            particle.CenterCoordinates,
+            particle.Coordinates,
             particle.RotationAngle,
             particle.MaterialId,
-            nodes.ToArray()
+            NodeFactory
         );
 
         return newParticle;
     }
 
-    private IEnumerable<INodeGeometry> DeleteNodesConditionally(IEnumerable<INodeGeometry> nodes, double minDistance)
+    private IEnumerable<IParticleNode> FilterNodes(
+        IParticle particle,
+        IEnumerable<IParticleNode> nodes,
+        double minDistance,
+        double maxDistance
+    )
     {
         foreach (var node in nodes)
         {
             if (node.Type == Surface)
             {
                 if (node.Upper.Type == Neck && node.SurfaceDistance.ToUpper < minDistance)
-                    continue;
+                    continue; // delete node
                 if (node.Lower.Type == Neck && node.SurfaceDistance.ToLower < minDistance)
-                    continue;
+                    continue; // delete node
             }
 
-            yield return node;
-        }
-    }
-
-    private IEnumerable<INodeGeometry> AddNodesConditionally(IEnumerable<INodeGeometry> nodes, double maxDistance)
-    {
-        foreach (var node in nodes)
-        {
             if (node.Type == GrainBoundary)
             {
                 if (node.Lower.Type == Neck && node.SurfaceDistance.ToLower > maxDistance)
                 {
-                    yield return new NodeGeometry(Guid.NewGuid(), node.Particle, node.Coordinates.PointHalfWayTo(node.Lower.Coordinates),
-                        GrainBoundary);
+                    yield return new ParticleNode(
+                        Guid.NewGuid(),
+                        particle,
+                        node.Coordinates.PointHalfWayTo(node.Lower.Coordinates),
+                        GrainBoundary
+                    );
                 }
 
-                yield return node;
+                yield return new ParticleNode((INode)node, particle);
 
                 if (node.Upper.Type == Neck && node.SurfaceDistance.ToUpper > maxDistance)
                 {
-                    yield return new NodeGeometry(Guid.NewGuid(), node.Particle, node.Coordinates.PointHalfWayTo(node.Upper.Coordinates),
-                        GrainBoundary);
+                    yield return new ParticleNode(
+                        Guid.NewGuid(),
+                        particle,
+                        node.Coordinates.PointHalfWayTo(node.Upper.Coordinates),
+                        GrainBoundary
+                    );
                 }
 
                 continue;
             }
 
-            yield return node;
+            yield return new ParticleNode((INode)node, particle);
         }
     }
 

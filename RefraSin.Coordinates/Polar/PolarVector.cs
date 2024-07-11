@@ -8,7 +8,7 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Stellt einen Vektor in Polarkoordinaten dar.
 /// </summary>
-public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, IIsClose<PolarVector>
+public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IPolarVector
 {
     /// <summary>
     ///     Creates the vector (0, 0).
@@ -19,14 +19,14 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, I
     ///     Creates the vector (0, 0).
     /// </summary>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarVector(PolarCoordinateSystem? system) : base(system) { }
+    public PolarVector(IPolarCoordinateSystem? system) : base(system) { }
 
     /// <summary>
     ///     Creates the vector (phi, r).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarVector((Angle phi, double r) coordinates, PolarCoordinateSystem? system = null) : base(coordinates, system) { }
+    public PolarVector((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null) : base(coordinates, system) { }
 
     /// <summary>
     ///     Creates the vector (phi, r).
@@ -34,14 +34,14 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, I
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="phi">angle coordinate</param>
     /// <param name="r">radius coordinate</param>
-    public PolarVector(Angle phi, double r, PolarCoordinateSystem? system = null) : base(phi, r, system) { }
+    public PolarVector(Angle phi, double r, IPolarCoordinateSystem? system = null) : base(phi, r, system) { }
 
     /// <summary>
     ///     Creates a vector based on a template. The coordinates systems are automatically castd.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarVector(IVector other, PolarCoordinateSystem? system = null) : base(system)
+    public PolarVector(IVector other, IPolarCoordinateSystem? system = null) : base(system)
     {
         var absoluteCoordinates = other.Absolute;
         var x = absoluteCoordinates.X;
@@ -54,7 +54,7 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IVector, I
     public PolarVector Clone() => new(Phi, R, System);
 
     /// <inheritdoc />
-    public bool IsClose(PolarVector other, double precision = 1e-8)
+    public bool IsClose(IPolarVector other, double precision = 1e-8)
     {
         if (System.Equals(other.System))
             return R.IsClose(other.R, precision) && Phi.IsClose(other.Phi, precision);

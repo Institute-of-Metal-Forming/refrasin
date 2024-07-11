@@ -1,4 +1,3 @@
-using System;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
@@ -8,7 +7,7 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Represents a point in cartesian coordinate system.
 /// </summary>
-public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<CartesianPoint>, IIsClose<CartesianPoint>
+public class CartesianPoint : CartesianCoordinates, ICartesianPoint, ICloneable<CartesianPoint>
 {
     /// <summary>
     ///     Creates the point (0, 0) in the default system.
@@ -16,17 +15,11 @@ public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<Cartesian
     public CartesianPoint() : base(null) { }
 
     /// <summary>
-    ///     Creates the point (0, 0).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianPoint(CartesianCoordinateSystem? system) : base(system) { }
-
-    /// <summary>
     ///     Creates the point (x, y).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianPoint((double x, double y) coordinates, CartesianCoordinateSystem? system = null) : base(coordinates, system) { }
+    public CartesianPoint((double x, double y) coordinates, ICartesianCoordinateSystem? system = null) : base(coordinates, system) { }
 
     /// <summary>
     ///     Creates the point (x, y).
@@ -34,14 +27,14 @@ public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<Cartesian
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vertical coordinate</param>
-    public CartesianPoint(double x, double y, CartesianCoordinateSystem? system = null) : base(x, y, system) { }
+    public CartesianPoint(double x, double y, ICartesianCoordinateSystem? system = null) : base(x, y, system) { }
 
     /// <summary>
     ///     Creates a point based on a template. The coordinates systems are automatically castd.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianPoint(IPoint other, CartesianCoordinateSystem? system = null) : base(system)
+    public CartesianPoint(IPoint other, ICartesianCoordinateSystem? system = null) : base(system)
     {
         var absoluteCoords = other.Absolute;
         var baseCoords = System.Origin.Absolute;
@@ -50,7 +43,6 @@ public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<Cartesian
         RotateBy(-System.RotationAngle);
         X /= System.XScale;
         Y /= System.YScale;
-        System = System;
     }
 
     /// <inheritdoc />
@@ -98,7 +90,7 @@ public class CartesianPoint : CartesianCoordinates, IPoint, ICloneable<Cartesian
     }
 
     /// <inheritdoc />
-    public bool IsClose(CartesianPoint other, double precision = 1e-8)
+    public bool IsClose(ICartesianPoint other, double precision = 1e-8)
     {
         if (System.Equals(other.System))
             return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);

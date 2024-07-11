@@ -4,7 +4,9 @@ using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -24,55 +26,46 @@ public class OneParticleTest
     {
         var duration = 1e4;
 
-        _particle = new ShapeFunctionParticleFactory(
-            100e-6,
-            0.1,
-            5,
-            0.1,
-            Guid.NewGuid()
-        ) { NodeCount = 80 }.GetParticle();
+        _particle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
+        {
+            NodeCount = 80
+        }.GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
         Directory.CreateDirectory(_tempDir);
         TestContext.WriteLine(_tempDir);
 
-        var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddFile(Path.Combine(_tempDir, "test.log"));
+        });
 
-        _solver = new SinteringSolver(
-            _solutionStorage,
-            loggerFactory,
-            SolverRoutines.Default
-        );
+        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default);
 
         _material = new Material(
             _particle.MaterialId,
             "Al2O3",
-            new BulkProperties(
-                0,
-                1e-4
-            ),
-            new SubstanceProperties(
-                1.8e3,
-                101.96e-3
-            ),
-            new InterfaceProperties(
-                1.65e-10,
-                0.9
-            )
+            new BulkProperties(0, 1e-4),
+            new SubstanceProperties(1.8e3, 101.96e-3),
+            new InterfaceProperties(1.65e-10, 0.9)
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, new InterfaceProperties(1.65e-10, 0.5));
-
-        _initialState = new SystemState(
-            Guid.NewGuid(),
-            0,
-            new[] { _particle }
+        _materialInterface = new MaterialInterface(
+            _material.Id,
+            _material.Id,
+            new InterfaceProperties(1.65e-10, 0.5)
         );
 
-        _sinteringProcess = new SinteringStep(duration, 2073, _solver,
+        _initialState = new SystemState(Guid.NewGuid(), 0, new[] { _particle });
+
+        _sinteringProcess = new SinteringStep(
+            duration,
+            2073,
+            _solver,
             new[] { _material },
-            new[] { _materialInterface });
+            new[] { _materialInterface }
+        );
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
@@ -187,25 +180,25 @@ public class OneParticleTest
         var dir = Path.Combine(_tempDir, "nd");
         Directory.CreateDirectory(dir);
 
-        foreach (var (i, step) in _solutionStorage.Transitions.Index())
+        foreach (var (i, step) in _solutionStorage.States.Index())
         {
             var plt = new Plot();
 
-            var sinteringStep = (ISinteringStateStateTransition)step;
-
-            var coordinates = sinteringStep
-                .ParticleTimeSteps[0]
-                .NodeTimeSteps.Values.Select(
-                    (n, j) => new ScottPlot.Coordinates(j, n.NormalDisplacement)
+            var coordinates = step.Particles[0]
+                .Nodes.Select(
+                    (n, j) =>
+                        n switch
+                        {
+                            INodeShifts shifts => new ScottPlot.Coordinates(j, shifts.Shift.Normal),
+                            _ => new ScottPlot.Coordinates()
+                        }
                 )
                 .ToArray();
             plt.Add.Scatter(coordinates);
 
             plt.Add.Line(0, 0, coordinates.Length, 0);
 
-            plt.Title(
-                $"t = {_solutionStorage.GetStateById(step.InputStateId).Time.ToString(CultureInfo.InvariantCulture)} - {_solutionStorage.GetStateById(step.OutputStateId).Time.ToString(CultureInfo.InvariantCulture)}"
-            );
+            plt.Title($"t = {step.Time.ToString(CultureInfo.InvariantCulture)}");
 
             plt.SavePng(Path.Combine(dir, $"{i}.png"), 600, 400);
         }
@@ -216,10 +209,11 @@ public class OneParticleTest
         var plt = new Plot();
 
         var steps = _solutionStorage
-            .States.Skip(1).Zip(_solutionStorage.States).Select((s, i) => new ScottPlot.Coordinates(
-                i,
-                Math.Log10(s.First.Time - s.Second.Time)
-            ))
+            .States.Skip(1)
+            .Zip(_solutionStorage.States)
+            .Select(
+                (s, i) => new ScottPlot.Coordinates(i, Math.Log10(s.First.Time - s.Second.Time))
+            )
             .ToArray();
         plt.Add.Scatter(steps);
 
@@ -238,7 +232,7 @@ public class OneParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].CenterCoordinates.Absolute.X
+                    s.Particles[0].Coordinates.Absolute.X
                 ))
                 .ToArray()
         );
@@ -246,7 +240,7 @@ public class OneParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].CenterCoordinates.Absolute.Y
+                    s.Particles[0].Coordinates.Absolute.Y
                 ))
                 .ToArray()
         );

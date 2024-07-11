@@ -6,7 +6,9 @@ using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -32,45 +34,39 @@ public class TwoParticleTest
         {
             NodeCount = nodeCountPerParticle
         }.GetParticle();
-        var nodes1 = baseParticle1
-            .Nodes.Skip(1)
-            .Concat(
-                new[]
-                {
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle1,
-                        new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
-                        NodeType.Neck
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle1,
-                        new PolarPoint(new AbsolutePoint(120e-6, -1.0e-5)),
-                        NodeType.GrainBoundary
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle1,
-                        new PolarPoint(new AbsolutePoint(120e-6, 0)),
-                        NodeType.GrainBoundary
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle1,
-                        new PolarPoint(new AbsolutePoint(120e-6, 1.0e-5)),
-                        NodeType.GrainBoundary
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle1,
-                        new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
-                        NodeType.Neck
-                    ),
-                }
-            )
-            .ToArray();
-        _particle1 = new Particle(baseParticle1.Id, new(0, 0), 0, baseParticle1.MaterialId, nodes1);
+        IEnumerable<IParticleNode> NodeFactory1(IParticle particle) =>
+            baseParticle1
+                .Nodes.Skip(1)
+                .Select(n => new ParticleNode(n, particle))
+                .Concat(
+                    [
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
+                            NodeType.Neck
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                            NodeType.GrainBoundary
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
+                            NodeType.Neck
+                        ),
+                    ]
+                );
+        _particle1 = new Particle(
+            baseParticle1.Id,
+            new AbsolutePoint(0, 0),
+            0,
+            baseParticle1.MaterialId,
+            NodeFactory1
+        );
 
         var baseParticle2 = new ShapeFunctionParticleFactory(
             100e-6,
@@ -82,50 +78,38 @@ public class TwoParticleTest
         {
             NodeCount = nodeCountPerParticle
         }.GetParticle();
-        var nodes2 = baseParticle2
-            .Nodes.Skip(1)
-            .Concat(
-                new[]
-                {
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle2,
-                        new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
-                        NodeType.Neck
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle2,
-                        new PolarPoint(new AbsolutePoint(120e-6, -1.0e-5)),
-                        NodeType.GrainBoundary
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle2,
-                        new PolarPoint(new AbsolutePoint(120e-6, 0)),
-                        NodeType.GrainBoundary
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle2,
-                        new PolarPoint(new AbsolutePoint(120e-6, 1.0e-5)),
-                        NodeType.GrainBoundary
-                    ),
-                    new NodeGeometry(
-                        Guid.NewGuid(),
-                        baseParticle2,
-                        new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
-                        NodeType.Neck
-                    ),
-                }
-            )
-            .ToArray();
+        IEnumerable<IParticleNode> NodeFactory2(IParticle particle) =>
+            baseParticle2
+                .Nodes.Skip(1)
+                .Select(n => new ParticleNode(n, particle))
+                .Concat(
+                    [
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
+                            NodeType.Neck
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                            NodeType.GrainBoundary
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
+                            NodeType.Neck
+                        ),
+                    ]
+                );
         _particle2 = new Particle(
             baseParticle2.Id,
-            new(240e-6, 0),
+            new AbsolutePoint(240e-6, 0),
             PI,
             baseParticle2.MaterialId,
-            nodes2
+            NodeFactory2
         );
 
         _solutionStorage = new InMemorySolutionStorage();
@@ -134,42 +118,36 @@ public class TwoParticleTest
         Directory.CreateDirectory(_tempDir);
         TestContext.WriteLine(_tempDir);
 
-        var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddFile(Path.Combine(_tempDir, "test.log"));
+        });
 
-        _solver = new SinteringSolver(
-            _solutionStorage,
-            loggerFactory,
-            SolverRoutines.Default
-        );
+        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default);
 
         _material = new Material(
             _particle1.MaterialId,
             "Al2O3",
-            new BulkProperties(
-                0,
-                1e-4
-            ),
-            new SubstanceProperties(
-                1.8e3,
-                101.96e-3
-            ),
-            new InterfaceProperties(
-                1.65e-10,
-                0.9
-            )
+            new BulkProperties(0, 1e-4),
+            new SubstanceProperties(1.8e3, 101.96e-3),
+            new InterfaceProperties(1.65e-10, 0.9)
         );
 
-        _materialInterface = new MaterialInterface(_material.Id, _material.Id, new InterfaceProperties(1.65e-10, 0.5));
-
-        _initialState = new SystemState(
-            Guid.NewGuid(),
-            0,
-            new[] { _particle1, _particle2 }
+        _materialInterface = new MaterialInterface(
+            _material.Id,
+            _material.Id,
+            new InterfaceProperties(1.65e-10, 0.5)
         );
 
-        _sinteringProcess = new SinteringStep(duration, 2073, _solver,
+        _initialState = new SystemState(Guid.NewGuid(), 0, new[] { _particle1, _particle2 });
+
+        _sinteringProcess = new SinteringStep(
+            duration,
+            2073,
+            _solver,
             new[] { _material },
-            new[] { _materialInterface });
+            new[] { _materialInterface }
+        );
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
@@ -288,27 +266,29 @@ public class TwoParticleTest
         var dir = Path.Combine(_tempDir, "nd");
         Directory.CreateDirectory(dir);
 
-        foreach (var (i, step) in _solutionStorage.Transitions.Index())
+        foreach (var (i, step) in _solutionStorage.States.Index())
         {
             var plt = new Plot();
 
-            var sinteringStep = (ISinteringStateStateTransition)step;
-
-            foreach (var particle in sinteringStep.ParticleTimeSteps)
+            foreach (var particle in step.Particles)
             {
-                var coordinates = particle
-                    .NodeTimeSteps.Values.Select(
-                        (n, j) => new ScottPlot.Coordinates(j, n.NormalDisplacement)
+                var coordinates = step.Particles[0]
+                    .Nodes.Select(
+                        (n, j) =>
+                            n switch
+                            {
+                                INodeShifts shifts
+                                    => new ScottPlot.Coordinates(j, shifts.Shift.Normal),
+                                _ => new ScottPlot.Coordinates()
+                            }
                     )
                     .ToArray();
                 plt.Add.Scatter(coordinates);
             }
 
-            plt.Add.Line(0, 0, sinteringStep.ParticleTimeSteps[0].NodeTimeSteps.Count, 0);
+            plt.Add.Line(0, 0, step.Particles[0].Nodes.Count, 0);
 
-            plt.Title(
-                $"t = {_solutionStorage.GetStateById(step.InputStateId).Time.ToString(CultureInfo.InvariantCulture)} - {_solutionStorage.GetStateById(step.OutputStateId).Time.ToString(CultureInfo.InvariantCulture)}"
-            );
+            plt.Title($"t = {step.Time.ToString(CultureInfo.InvariantCulture)}");
 
             plt.SavePng(Path.Combine(dir, $"{i}.png"), 600, 400);
         }
@@ -319,10 +299,11 @@ public class TwoParticleTest
         var plt = new Plot();
 
         var steps = _solutionStorage
-            .States.Skip(1).Zip(_solutionStorage.States).Select((s, i) => new ScottPlot.Coordinates(
-                i,
-                Math.Log10(s.First.Time - s.Second.Time)
-            ))
+            .States.Skip(1)
+            .Zip(_solutionStorage.States)
+            .Select(
+                (s, i) => new ScottPlot.Coordinates(i, Math.Log10(s.First.Time - s.Second.Time))
+            )
             .ToArray();
         plt.Add.Scatter(steps);
 
@@ -333,7 +314,6 @@ public class TwoParticleTest
         plt.SavePng(Path.Combine(_tempDir, "timeSteps.png"), 600, 400);
     }
 
-
     private void PlotParticleCenter()
     {
         var plt = new Plot();
@@ -342,7 +322,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].CenterCoordinates.Absolute.X
+                    s.Particles[0].Coordinates.Absolute.X
                 ))
                 .ToArray()
         );
@@ -350,7 +330,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].CenterCoordinates.Absolute.Y
+                    s.Particles[0].Coordinates.Absolute.Y
                 ))
                 .ToArray()
         );
@@ -358,7 +338,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[1].CenterCoordinates.Absolute.X
+                    s.Particles[1].Coordinates.Absolute.X
                 ))
                 .ToArray()
         );
@@ -366,7 +346,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[1].CenterCoordinates.Absolute.Y
+                    s.Particles[1].Coordinates.Absolute.Y
                 ))
                 .ToArray()
         );

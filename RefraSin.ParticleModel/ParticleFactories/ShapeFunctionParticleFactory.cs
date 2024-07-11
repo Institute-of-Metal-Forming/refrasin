@@ -1,6 +1,8 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using static System.Math;
 using static RefraSin.Coordinates.Constants;
 
@@ -51,14 +53,17 @@ public class ShapeFunctionParticleFactory : IParticleFactory
             CenterCoordinates,
             RotationAngle,
             MaterialId,
+            NodeFactory
+        );
+
+        IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
             phis.Zip(rs).Select(
-                t => new Node(
+                t => new ParticleNode(
                     Guid.NewGuid(),
-                    particleId,
+                    particle,
                     new PolarPoint(t.First, t.Second),
                     NodeType.Surface
                 )
-            ).ToArray()
-        );
+            );
     }
 }

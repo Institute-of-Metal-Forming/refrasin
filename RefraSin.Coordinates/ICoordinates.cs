@@ -3,7 +3,7 @@ namespace RefraSin.Coordinates;
 /// <summary>
 ///     Interface for coordinates.
 /// </summary>
-public interface ICoordinates
+public interface ICoordinates : IFormattable
 {
     /// <summary>
     ///     Rotates the coordinates with the systems origin as center.

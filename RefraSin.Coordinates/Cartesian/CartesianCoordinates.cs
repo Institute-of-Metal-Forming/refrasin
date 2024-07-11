@@ -1,4 +1,5 @@
 using RefraSin.Coordinates.Helpers;
+using RefraSin.Coordinates.Polar;
 using static System.Math;
 
 namespace RefraSin.Coordinates.Cartesian;
@@ -6,20 +7,25 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Abstract base class for coordinates in cartesian systems.
 /// </summary>
-public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSystem>, IFormattable
+public abstract class CartesianCoordinates : Coordinates, ICartesianCoordinates
 {
+    private  ICartesianCoordinateSystem? _system;
+
     /// <summary>
     ///     Creates the coordinates (0, 0).
     /// </summary>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    protected CartesianCoordinates(CartesianCoordinateSystem? system) : base(system) { }
+    protected CartesianCoordinates(ICartesianCoordinateSystem? system)
+    {
+        _system = system;
+    }
 
     /// <summary>
     ///     Creates the coordinates (x, y).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    protected CartesianCoordinates((double x, double y) coordinates, CartesianCoordinateSystem? system = null) : base(system)
+    protected CartesianCoordinates((double x, double y) coordinates, ICartesianCoordinateSystem? system = null) : this(system)
     {
         (X, Y) = coordinates;
     }
@@ -30,7 +36,7 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vertical coordinate</param>
-    protected CartesianCoordinates(double x, double y, CartesianCoordinateSystem? system = null) : base(system)
+    protected CartesianCoordinates(double x, double y, ICartesianCoordinateSystem? system = null) : this(system)
     {
         X = x;
         Y = y;
@@ -46,6 +52,9 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
     /// </summary>
     public double Y { get; set; }
 
+    /// <inheritdoc />
+    public ICartesianCoordinateSystem System => _system ??= CartesianCoordinateSystem.Default;
+
     /// <summary>
     ///     Get the string representation of this instance.
     /// </summary>
@@ -54,7 +63,7 @@ public abstract class CartesianCoordinates : Coordinates<CartesianCoordinateSyst
     ///     .
     /// </param>
     /// <param name="formatProvider">IFormatProvider</param>
-    public string ToString(string? format, IFormatProvider? formatProvider)
+    public override string ToString(string? format, IFormatProvider? formatProvider)
     {
         if (string.IsNullOrEmpty(format))
             return ToString(formatProvider);

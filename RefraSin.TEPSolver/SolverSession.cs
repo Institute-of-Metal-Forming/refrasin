@@ -8,6 +8,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
@@ -18,7 +19,6 @@ namespace RefraSin.TEPSolver;
 internal class SolverSession : ISolverSession
 {
     private readonly Action<ISystemState> _reportSystemState;
-    private readonly Action<ISystemStateTransition> _reportSystemStateTransition;
 
     public SolverSession(
         SinteringSolver sinteringSolver,
@@ -37,15 +37,15 @@ internal class SolverSession : ISolverSession
         Temperature = step.Temperature / Norm.Temperature;
         GasConstant = step.GasConstant / Norm.Energy * Norm.Substance * Norm.Temperature;
         _reportSystemState = step.ReportSystemState;
-        _reportSystemStateTransition = step.ReportSystemStateTransition;
 
-        Materials = step.Materials.ToDictionary(
-            m => m.Id,
-            m => Norm.NormalizeMaterial(m)
-        );
+        Materials = step.Materials.ToDictionary(m => m.Id, m => Norm.NormalizeMaterial(m));
 
         MaterialInterfaces = step
-            .MaterialInterfaces.Select(mi => new MaterialInterface(mi.From, mi.To, Norm.NormalizeInterfaceProperties(mi.Properties)))
+            .MaterialInterfaces.Select(mi => new MaterialInterface(
+                mi.From,
+                mi.To,
+                Norm.NormalizeInterfaceProperties(mi.Properties)
+            ))
             .GroupBy(mi => mi.From)
             .ToDictionary(g => g.Key, g => (IReadOnlyList<IMaterialInterface>)g.ToArray());
 
@@ -59,13 +59,10 @@ internal class SolverSession : ISolverSession
             particles,
             Array.Empty<(Guid, Guid, Guid)>()
         );
-        CurrentState = new SolutionState(
-            normalizedState.Id,
-            StartTime,
-            particles
-        );
+        CurrentState = new SolutionState(normalizedState.Id, StartTime, particles);
         CurrentState.Sanitize();
     }
+
     public SolverSession(
         SolverSession parentSession,
         ISystemState inputState,
@@ -82,7 +79,6 @@ internal class SolverSession : ISolverSession
         Temperature = parentSession.Temperature;
         GasConstant = parentSession.GasConstant;
         _reportSystemState = parentSession._reportSystemState;
-        _reportSystemStateTransition = parentSession._reportSystemStateTransition;
 
         Materials = parentSession.Materials;
         MaterialInterfaces = parentSession.MaterialInterfaces;
@@ -134,14 +130,14 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public INorm Norm { get; }
 
-    public void ReportCurrentState()
+    public void ReportCurrentState(StepVector? stepVector = null)
     {
-        _reportSystemState(Norm.DenormalizeSystemState(CurrentState));
+        _reportSystemState(
+            new SystemState(
+                CurrentState.Id,
+                CurrentState.Time,
+                CurrentState.Particles.Select(p => new ParticleReturn(p, stepVector, Norm))
+            )
+        );
     }
-
-    public void ReportTransition(ISinteringStateStateTransition step)
-    {
-        _reportSystemStateTransition(step);
-    }
-
 }

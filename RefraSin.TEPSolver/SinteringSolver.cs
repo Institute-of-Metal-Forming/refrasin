@@ -1,13 +1,23 @@
 using Microsoft.Extensions.Logging;
+using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Cartesian;
+using RefraSin.Coordinates.Polar;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Collections;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
+using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
+using Particle = RefraSin.ParticleModel.Particles.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -19,7 +29,9 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     public SinteringSolver(
         ISolutionStorage solutionStorage,
         ILoggerFactory loggerFactory,
-        ISolverRoutines routines, int remeshingEverySteps = 10)
+        ISolverRoutines routines,
+        int remeshingEverySteps = 10
+    )
     {
         SolutionStorage = solutionStorage;
         LoggerFactory = loggerFactory;
@@ -79,9 +91,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 
     private void DoTimeIntegration(SolverSession session)
     {
-        session.Logger.LogInformation(
-            "Starting time integration."
-        );
+        session.Logger.LogInformation("Starting time integration.");
 
         int i = 0;
         var recoverersArray = session.Routines.StateRecoverers.ToArray();
@@ -89,44 +99,70 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         while (session.CurrentState.Time < session.EndTime)
         {
             var stepVector = SolveStepUntilValid(session, session.CurrentState, recoverersArray);
-            var timeStepWidth = session.Routines.StepWidthController.GetStepWidth(session, session.CurrentState, stepVector);
+            var timeStepWidth = session.Routines.StepWidthController.GetStepWidth(
+                session,
+                session.CurrentState,
+                stepVector
+            );
             var newState = session.CurrentState.ApplyTimeStep(stepVector, timeStepWidth);
 
             InvokeStepSuccessfullyCalculated(session, session.CurrentState, newState, stepVector);
 
             session.CurrentState = newState;
-            session.ReportCurrentState();
+            session.ReportCurrentState(stepVector);
 
-            session.Logger.LogInformation("Time step {Index} successfully calculated. ({Time:e2}/{EndTime:e2} = {Percent:f2}%)", i,
+            session.Logger.LogInformation(
+                "Time step {Index} successfully calculated. ({Time:e2}/{EndTime:e2} = {Percent:f2}%)",
+                i,
                 session.CurrentState.Time,
-                session.EndTime, session.CurrentState.Time / session.EndTime * 100);
+                session.EndTime,
+                session.CurrentState.Time / session.EndTime * 100
+            );
             i++;
 
             if (i % RemeshingEverySteps == 0)
             {
-                var remeshedState = new SystemState(Guid.NewGuid(), session.CurrentState.Time,
+                var remeshedState = new SystemState(
+                    Guid.NewGuid(),
+                    session.CurrentState.Time,
                     session.CurrentState.Particles.Select(p =>
-                        session.Routines.Remeshers.Aggregate((IParticle)p, (rp, remesher) => remesher.Remesh(rp))));
+                        session.Routines.Remeshers.Aggregate(
+                            (IParticle)p,
+                            (rp, remesher) => remesher.Remesh(rp)
+                        )
+                    )
+                );
 
-                session = new SolverSession(session, remeshedState,
-                    session.CurrentState.ParticleContacts.Select(c => (c.Id, c.From.Id, c.To.Id)).ToArray()
+                session = new SolverSession(
+                    session,
+                    remeshedState,
+                    session
+                        .CurrentState.ParticleContacts.Select(c => (c.Id, c.From.Id, c.To.Id))
+                        .ToArray()
                 );
                 InvokeSessionInitialized(session);
-                session.Logger.LogInformation("Remeshed session created. Now {NodeCount} nodes present.", remeshedState.Nodes.Count);
+                session.Logger.LogInformation(
+                    "Remeshed session created. Now {NodeCount} nodes present.",
+                    remeshedState.Nodes.Count
+                );
                 session.ReportCurrentState();
             }
         }
 
-        session.Logger.LogInformation(
-            "End time successfully reached after {StepCount} steps.",
-            i
-        );
+        session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", i);
     }
 
-    private StepVector SolveStepUntilValid(SolverSession session, SolutionState baseState, IStateRecoverer[] recoverers)
+    private StepVector SolveStepUntilValid(
+        SolverSession session,
+        SolutionState baseState,
+        IStateRecoverer[] recoverers
+    )
     {
-        var stepVector = session.Routines.TimeStepper.Step(session, baseState,
-            session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, baseState));
+        var stepVector = session.Routines.TimeStepper.Step(
+            session,
+            baseState,
+            session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, baseState)
+        );
 
         try
         {
@@ -137,7 +173,10 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         }
         catch (InvalidStepException stepRejectedException)
         {
-            session.Logger.LogError(stepRejectedException, "Calculated step was rejected. Trying to recover.");
+            session.Logger.LogError(
+                stepRejectedException,
+                "Calculated step was rejected. Trying to recover."
+            );
             InvokeStepRejected(session, baseState, stepVector);
 
             try
@@ -146,7 +185,10 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             }
             catch (RecoveryFailedException recoveryFailedException)
             {
-                session.Logger.LogError(recoveryFailedException, "Recovery failed. Trying next recoverer.");
+                session.Logger.LogError(
+                    recoveryFailedException,
+                    "Recovery failed. Trying next recoverer."
+                );
                 stepVector = TryRecover(session, baseState, recoverers[1..]);
             }
         }
@@ -154,7 +196,11 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         return stepVector;
     }
 
-    private StepVector TryRecover(SolverSession session, SolutionState invalidState, IStateRecoverer[] recoverers)
+    private StepVector TryRecover(
+        SolverSession session,
+        SolutionState invalidState,
+        IStateRecoverer[] recoverers
+    )
     {
         try
         {
@@ -164,48 +210,53 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         catch (IndexOutOfRangeException)
         {
             session.Logger.LogError("No more recoverers available.");
-            throw new CriticalIterationInterceptedException(nameof(SolveStepUntilValid), InterceptReason.ExceptionOccured,
-                furtherInformation: "Recovery of solution finally failed.");
+            throw new CriticalIterationInterceptedException(
+                nameof(SolveStepUntilValid),
+                InterceptReason.ExceptionOccured,
+                furtherInformation: "Recovery of solution finally failed."
+            );
         }
     }
 
     public event EventHandler<StepSuccessfullyCalculatedEventArgs>? StepSuccessfullyCalculated;
 
-    private void InvokeStepSuccessfullyCalculated(SolverSession solverSession, SolutionState oldState, SolutionState newState, StepVector stepVector)
+    private void InvokeStepSuccessfullyCalculated(
+        SolverSession solverSession,
+        SolutionState oldState,
+        SolutionState newState,
+        StepVector stepVector
+    )
     {
-        StepSuccessfullyCalculated?.Invoke(this, new StepSuccessfullyCalculatedEventArgs(
-            solverSession,
-            oldState,
-            newState,
-            stepVector
-        ));
+        StepSuccessfullyCalculated?.Invoke(
+            this,
+            new StepSuccessfullyCalculatedEventArgs(solverSession, oldState, newState, stepVector)
+        );
     }
 
     public event EventHandler<StepRejectedEventArgs>? StepRejected;
 
-    private void InvokeStepRejected(SolverSession solverSession, SolutionState baseState, StepVector stepVector)
+    private void InvokeStepRejected(
+        SolverSession solverSession,
+        SolutionState baseState,
+        StepVector stepVector
+    )
     {
-        StepRejected?.Invoke(this, new StepRejectedEventArgs(
-            solverSession,
-            baseState,
-            stepVector
-        ));
+        StepRejected?.Invoke(this, new StepRejectedEventArgs(solverSession, baseState, stepVector));
     }
 
     public event EventHandler<SessionInitializedEventArgs>? SessionInitialized;
 
     private void InvokeSessionInitialized(SolverSession solverSession)
     {
-        SessionInitialized?.Invoke(this, new SessionInitializedEventArgs(
-            solverSession
-        ));
+        SessionInitialized?.Invoke(this, new SessionInitializedEventArgs(solverSession));
     }
 
     public class StepSuccessfullyCalculatedEventArgs(
         ISolverSession solverSession,
         SolutionState oldState,
         SolutionState newState,
-        StepVector stepVector) : EventArgs
+        StepVector stepVector
+    ) : EventArgs
     {
         public ISolverSession SolverSession { get; } = solverSession;
         public SolutionState OldState { get; } = oldState;
@@ -216,7 +267,8 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     public class StepRejectedEventArgs(
         ISolverSession solverSession,
         SolutionState baseState,
-        StepVector stepVector) : EventArgs
+        StepVector stepVector
+    ) : EventArgs
     {
         public ISolverSession SolverSession { get; } = solverSession;
         public SolutionState BaseState { get; } = baseState;

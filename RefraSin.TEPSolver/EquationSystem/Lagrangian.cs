@@ -1,6 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
@@ -162,7 +163,7 @@ public static class Lagrangian
             2
           * node.Particle.VacancyVolumeEnergy
           * node.SurfaceDistance.ToUpper
-          / node.SurfaceDiffusionCoefficient.ToUpper
+          / node.InterfaceDiffusionCoefficient.ToUpper
           * stepVector.FluxToUpper(node)
           * stepVector.LambdaDissipation();
         var thisRequiredConstraintsTerm = stepVector.LambdaVolume(node);
@@ -203,7 +204,7 @@ public static class Lagrangian
                 n.Particle.VacancyVolumeEnergy
               * n.SurfaceDistance.ToUpper
               * Pow(stepVector.FluxToUpper(n), 2)
-              / n.SurfaceDiffusionCoefficient.ToUpper
+              / n.InterfaceDiffusionCoefficient.ToUpper
             )
             .Sum();
 

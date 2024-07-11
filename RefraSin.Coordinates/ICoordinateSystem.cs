@@ -8,10 +8,10 @@ public interface ICoordinateSystem
     /// <summary>
     ///     Rotation angle of this system's axes.
     /// </summary>
-    Angle RotationAngle { get; set; }
+    Angle RotationAngle { get; }
 
     /// <summary>
     ///     Origin of this system's axes.
     /// </summary>
-    IPoint Origin { get; set; }
+    IPoint Origin { get; }
 }

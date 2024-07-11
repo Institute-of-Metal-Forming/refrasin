@@ -1,4 +1,5 @@
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
@@ -63,7 +64,7 @@ class StepEstimator : IStepEstimator
     {
         foreach (var node in nodes)
         {
-            if (node is not IContactNode)
+            if (node is not INodeContact)
             {
                 yield return 0;
                 yield return GuessFluxToUpper(node);
@@ -89,7 +90,7 @@ class StepEstimator : IStepEstimator
     }
 
     private static double GuessFluxToUpper(NodeBase node) =>
-        -node.SurfaceDiffusionCoefficient.ToUpper * (GuessVacancyConcentration(node) - GuessVacancyConcentration(node.Upper))
+        -node.InterfaceDiffusionCoefficient.ToUpper * (GuessVacancyConcentration(node) - GuessVacancyConcentration(node.Upper))
       / Pow(node.SurfaceDistance.ToUpper, 2);
 
     private static double GuessVacancyConcentration(NodeBase node) =>
