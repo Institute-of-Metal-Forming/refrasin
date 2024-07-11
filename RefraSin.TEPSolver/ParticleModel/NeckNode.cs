@@ -11,7 +11,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Oberflächenknoten welcher am Punkt des Sinterhalse liegt. Vermittelt den Übergang zwischen freien Oberflächen und Korngrenzen.
 /// </summary>
-public class NeckNode : ContactNodeBase<NeckNode>, INeckNode
+public class NeckNode : ContactNodeBase<NeckNode>
 {
     /// <inheritdoc />
     public NeckNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }

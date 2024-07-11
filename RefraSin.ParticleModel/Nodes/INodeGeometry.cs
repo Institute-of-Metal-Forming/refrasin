@@ -6,13 +6,8 @@ namespace RefraSin.ParticleModel.Nodes;
 /// <summary>
 /// Interface of geometry data on a node.
 /// </summary>
-public interface INodeGeometry : INode
+public interface INodeGeometry 
 {
-    /// <summary>
-    /// Absolute coordinates.
-    /// </summary>
-    public AbsolutePoint AbsoluteCoordinates => Coordinates.Absolute;
-
     /// <summary>
     /// Length of the surface lines to neighbor nodes.
     /// </summary>

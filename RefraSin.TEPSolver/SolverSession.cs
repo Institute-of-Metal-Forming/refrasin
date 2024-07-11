@@ -8,6 +8,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using static System.Math;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
@@ -37,13 +38,14 @@ internal class SolverSession : ISolverSession
         GasConstant = step.GasConstant / Norm.Energy * Norm.Substance * Norm.Temperature;
         _reportSystemState = step.ReportSystemState;
 
-        Materials = step.Materials.ToDictionary(
-            m => m.Id,
-            m => Norm.NormalizeMaterial(m)
-        );
+        Materials = step.Materials.ToDictionary(m => m.Id, m => Norm.NormalizeMaterial(m));
 
         MaterialInterfaces = step
-            .MaterialInterfaces.Select(mi => new MaterialInterface(mi.From, mi.To, Norm.NormalizeInterfaceProperties(mi.Properties)))
+            .MaterialInterfaces.Select(mi => new MaterialInterface(
+                mi.From,
+                mi.To,
+                Norm.NormalizeInterfaceProperties(mi.Properties)
+            ))
             .GroupBy(mi => mi.From)
             .ToDictionary(g => g.Key, g => (IReadOnlyList<IMaterialInterface>)g.ToArray());
 
@@ -57,13 +59,10 @@ internal class SolverSession : ISolverSession
             particles,
             Array.Empty<(Guid, Guid, Guid)>()
         );
-        CurrentState = new SolutionState(
-            normalizedState.Id,
-            StartTime,
-            particles
-        );
+        CurrentState = new SolutionState(normalizedState.Id, StartTime, particles);
         CurrentState.Sanitize();
     }
+
     public SolverSession(
         SolverSession parentSession,
         ISystemState inputState,
@@ -131,8 +130,14 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public INorm Norm { get; }
 
-    public void ReportState(ISystemState state)
+    public void ReportCurrentState(StepVector? stepVector = null)
     {
-        _reportSystemState(Norm.DenormalizeSystemState(state));
+        _reportSystemState(
+            new SystemState(
+                CurrentState.Id,
+                CurrentState.Time,
+                CurrentState.Particles.Select(p => new ParticleReturn(p, stepVector, Norm))
+            )
+        );
     }
 }

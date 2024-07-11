@@ -16,7 +16,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-public class Particle : IParticle
+public class Particle : IParticle<NodeBase>
 {
     private ReadOnlyParticleSurface<NodeBase> _nodes;
     private double? _meanRadius;
@@ -49,9 +49,6 @@ public class Particle : IParticle
             .Nodes.Select(node =>
                 node switch
                 {
-                    INeckNode neckNode => new NeckNode(neckNode, this, solverSession),
-                    IGrainBoundaryNode grainBoundaryNode
-                        => new GrainBoundaryNode(grainBoundaryNode, this, solverSession),
                     { Type: NodeType.GrainBoundary }
                         => new GrainBoundaryNode(node, this, solverSession),
                     { Type: NodeType.Neck } => new NeckNode(node, this, solverSession),
@@ -138,8 +135,6 @@ public class Particle : IParticle
     public Angle RotationAngle { get; }
 
     public IReadOnlyParticleSurface<NodeBase> Nodes => _nodes;
-
-    IReadOnlyParticleSurface<IParticleNode> IParticle.Nodes => Nodes;
 
     /// <summary>
     /// Reference to the current solver session.

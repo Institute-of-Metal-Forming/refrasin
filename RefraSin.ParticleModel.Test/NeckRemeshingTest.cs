@@ -32,35 +32,45 @@ public class NeckRemeshingTest
         {
             NodeCount = 50
         }.GetParticle();
-        var nodes = baseParticle
-            .Nodes.Skip(1)
-            .Concat(
-                new INode[]
-                {
-                    new Node(
-                        Guid.NewGuid(),
-                        baseParticle.Id,
-                        new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
-                        NodeType.Neck
-                    ),
-                    new Node(
-                        Guid.NewGuid(),
-                        baseParticle.Id,
-                        new PolarPoint(new AbsolutePoint(120e-6, 0)),
-                        NodeType.GrainBoundary
-                    ),
-                    new Node(
-                        Guid.NewGuid(),
-                        baseParticle.Id,
-                        new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
-                        NodeType.Neck
-                    ),
-                }
-            )
-            .ToArray();
-        var particle = new Particle(baseParticle.Id, new AbsolutePoint(0, 0), 0, baseParticle.MaterialId, nodes);
 
-        var remesher = new NeckNeighborhoodRemesher(deletionLimit: 0.4, additionLimit: double.PositiveInfinity);
+        IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
+            baseParticle
+                .Nodes.Skip(1)
+                .Concat(
+                    [
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
+                            NodeType.Neck
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                            NodeType.GrainBoundary
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
+                            NodeType.Neck
+                        ),
+                    ]
+                );
+
+        var particle = new Particle(
+            baseParticle.Id,
+            new AbsolutePoint(0, 0),
+            0,
+            baseParticle.MaterialId,
+            NodeFactory
+        );
+
+        var remesher = new NeckNeighborhoodRemesher(
+            deletionLimit: 0.4,
+            additionLimit: double.PositiveInfinity
+        );
         var remeshedParticle = remesher.Remesh(particle);
 
         var plt = new Plot();
@@ -71,7 +81,10 @@ public class NeckRemeshingTest
 
         plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
 
-        Assert.That(remeshedParticle.Nodes.Count, Is.EqualTo(particle.Nodes.Count - expectedRemovedNodeCount));
+        Assert.That(
+            remeshedParticle.Nodes.Count,
+            Is.EqualTo(particle.Nodes.Count - expectedRemovedNodeCount)
+        );
     }
 
     [Test]
@@ -83,33 +96,40 @@ public class NeckRemeshingTest
         {
             NodeCount = 50
         }.GetParticle();
-        var nodes = baseParticle
-            .Nodes.Skip(1)
-            .Concat(
-                new INode[]
-                {
-                    new Node(
-                        Guid.NewGuid(),
-                        baseParticle.Id,
-                        new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
-                        NodeType.Neck
-                    ),
-                    new Node(
-                        Guid.NewGuid(),
-                        baseParticle.Id,
-                        new PolarPoint(new AbsolutePoint(120e-6, 0)),
-                        NodeType.GrainBoundary
-                    ),
-                    new Node(
-                        Guid.NewGuid(),
-                        baseParticle.Id,
-                        new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
-                        NodeType.Neck
-                    ),
-                }
-            )
-            .ToArray();
-        var particle = new Particle(baseParticle.Id, new AbsolutePoint(0, 0), 0, baseParticle.MaterialId, nodes);
+
+        IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
+            baseParticle
+                .Nodes.Skip(1)
+                .Concat(
+                    [
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
+                            NodeType.Neck
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                            NodeType.GrainBoundary
+                        ),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
+                            NodeType.Neck
+                        ),
+                    ]
+                );
+
+        var particle = new Particle(
+            baseParticle.Id,
+            new AbsolutePoint(0, 0),
+            0,
+            baseParticle.MaterialId,
+            NodeFactory
+        );
 
         var remesher = new NeckNeighborhoodRemesher(deletionLimit: 0, additionLimit: 0.8);
         var remeshedParticle = remesher.Remesh(particle);
@@ -122,17 +142,22 @@ public class NeckRemeshingTest
 
         plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
 
-        Assert.That(remeshedParticle.Nodes.Count, Is.EqualTo(particle.Nodes.Count + expectedAddedNodeCount));
+        Assert.That(
+            remeshedParticle.Nodes.Count,
+            Is.EqualTo(particle.Nodes.Count + expectedAddedNodeCount)
+        );
     }
 
     void PlotParticle(Plot plot, IParticle particle)
     {
-        plot.Add.Scatter(particle
-            .Nodes.Append(particle.Nodes[0])
-            .Select(n => new ScottPlot.Coordinates(
-                n.Coordinates.Absolute.X,
-                n.Coordinates.Absolute.Y
-            ))
-            .ToArray());
+        plot.Add.Scatter(
+            particle
+                .Nodes.Append(particle.Nodes[0])
+                .Select(n => new ScottPlot.Coordinates(
+                    n.Coordinates.Absolute.X,
+                    n.Coordinates.Absolute.Y
+                ))
+                .ToArray()
+        );
     }
 }

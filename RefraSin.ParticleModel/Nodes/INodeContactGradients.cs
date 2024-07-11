@@ -2,7 +2,7 @@ using RefraSin.Coordinates;
 
 namespace RefraSin.ParticleModel.Nodes;
 
-public interface INodeContactGradients : INodeContact, INodeGradients
+public interface INodeContactGradients : INodeContact
 {
     NormalTangential<Angle> CenterShiftVectorDirection { get; }
 

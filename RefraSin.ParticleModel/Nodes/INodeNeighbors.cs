@@ -1,6 +1,6 @@
 namespace RefraSin.ParticleModel.Nodes;
 
-public interface INodeNeighbors : INode
+public interface INodeNeighbors
 {
     /// <summary>
     /// Upper neighbor of this node.

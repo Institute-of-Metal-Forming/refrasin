@@ -7,6 +7,13 @@ using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Particles;
 
+public interface IParticle<out TNode> : IParticle where TNode : IParticleNode
+{
+    public new IReadOnlyParticleSurface<TNode> Nodes { get; }
+
+    IReadOnlyParticleSurface<IParticleNode> IParticle.Nodes => (IReadOnlyParticleSurface<IParticleNode>)Nodes;
+}
+
 public interface IParticle : IVertex, IPolarCoordinateSystem
 {
     /// <summary>
@@ -27,6 +34,6 @@ public interface IParticle : IVertex, IPolarCoordinateSystem
     IPoint ICoordinateSystem.Origin => Coordinates;
 
     Angle.ReductionDomain IPolarCoordinateSystem.AngleReductionDomain => Angle.ReductionDomain.AllPositive;
-    
+
     double IPolarCoordinateSystem.RScale => 1;
 }

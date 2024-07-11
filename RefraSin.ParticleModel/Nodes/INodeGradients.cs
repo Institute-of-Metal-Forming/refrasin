@@ -1,6 +1,6 @@
 namespace RefraSin.ParticleModel.Nodes;
 
-public interface INodeGradients : INode
+public interface INodeGradients
 {
     /// <summary>
     /// Gradient of Gibbs energy for node shifting in normal and tangential direction.

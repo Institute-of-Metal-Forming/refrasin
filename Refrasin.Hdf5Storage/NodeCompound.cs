@@ -47,15 +47,15 @@ internal struct NodeCompound
 
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
     public readonly string ContactedNodeId = string.Empty;
-    
+
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public readonly double[] InterfaceFlux = [0.0, 0.0];
-    
+
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public readonly double[] VolumeFlux = [0.0, 0.0];
-    
+
     public readonly double TransferFlux = 0.0;
-    
+
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public readonly double[] Shift = [0.0, 0.0];
 
@@ -63,10 +63,10 @@ internal struct NodeCompound
     {
         Id = node.Id.ToString();
         Coordinates = node.Coordinates.ToArray();
+        AbsoluteCoordinates = node.Coordinates.Absolute.ToArray();
 
         if (node is INodeGeometry nodeGeometry)
         {
-            AbsoluteCoordinates = nodeGeometry.AbsoluteCoordinates.ToArray();
             SurfaceDistance = nodeGeometry.SurfaceDistance.ToArray();
             SurfaceRadiusAngle = nodeGeometry.SurfaceRadiusAngle.ToDoubleArray();
             AngleDistance = nodeGeometry.SurfaceRadiusAngle.ToDoubleArray();

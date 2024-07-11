@@ -11,17 +11,18 @@ namespace RefraSin.ParticleModel.Nodes;
 public record ParticleNode(Guid Id, IParticle Particle, IPolarPoint Coordinates, NodeType Type)
     : Node(Id, Particle.Id, Coordinates, Type), IParticleNode
 {
-    public ParticleNode(INodeGeometry template, IParticle particle) : this(template.Id, particle, template.Coordinates, template.Type)
+    public ParticleNode(INode template, IParticle particle) : this(template.Id, particle, template.Coordinates, template.Type)
     {
-        _surfaceDistance = template.SurfaceDistance;
-        _surfaceRadiusAngle = template.SurfaceRadiusAngle;
-        _angleDistance = template.AngleDistance;
-        _volume = template.Volume;
-        _surfaceNormalAngle = template.SurfaceNormalAngle;
-        _surfaceTangentAngle = template.SurfaceTangentAngle;
+        if (template is INodeGeometry geometry)
+        {
+            _surfaceDistance = geometry.SurfaceDistance;
+            _surfaceRadiusAngle = geometry.SurfaceRadiusAngle;
+            _angleDistance = geometry.AngleDistance;
+            _volume = geometry.Volume;
+            _surfaceNormalAngle = geometry.SurfaceNormalAngle;
+            _surfaceTangentAngle = geometry.SurfaceTangentAngle;
+        }
     }
-
-    public ParticleNode(INode template, IParticle particle) : this(template.Id, particle, template.Coordinates, template.Type) { }
 
     private ToUpperToLower<double>? _surfaceDistance;
     private ToUpperToLower<Angle>? _surfaceRadiusAngle;

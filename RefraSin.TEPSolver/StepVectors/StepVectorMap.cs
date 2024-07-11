@@ -49,7 +49,7 @@ public class StepVectorMap
                 AddUnknown(contactNode.ContactedNodeId, Unknown.FluxToUpper);
                 AddUnknown(contactNode.ContactedNodeId, Unknown.NormalDisplacement);
 
-                if (contactNode is INeckNode)
+                if (contactNode.Type == NodeType.Neck)
                 {
                     AddUnknown(contactNode.Id, Unknown.TangentialDisplacement);
                     AddUnknown(contactNode.ContactedNodeId, Unknown.TangentialDisplacement);
@@ -90,11 +90,11 @@ public class StepVectorMap
 
     public int LambdaVolume(INode node) => _indices[(node.Id, Unknown.LambdaVolume)];
 
-    public int TangentialDisplacement(INodeContact node) => _indices[(node.Id, Unknown.TangentialDisplacement)];
+    public int TangentialDisplacement(INode node) => _indices[(node.Id, Unknown.TangentialDisplacement)];
 
-    public int LambdaContactDistance(INodeContact node) => _indices[(node.Id, Unknown.LambdaContactDistance)];
+    public int LambdaContactDistance(INode node) => _indices[(node.Id, Unknown.LambdaContactDistance)];
 
-    public int LambdaContactDirection(INodeContact node) => _indices[(node.Id, Unknown.LambdaContactDirection)];
+    public int LambdaContactDirection(INode node) => _indices[(node.Id, Unknown.LambdaContactDirection)];
 
     public int RadialDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.RadialDisplacement)];
 

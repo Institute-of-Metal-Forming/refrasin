@@ -53,14 +53,17 @@ public class ShapeFunctionParticleFactory : IParticleFactory
             CenterCoordinates,
             RotationAngle,
             MaterialId,
+            NodeFactory
+        );
+
+        IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
             phis.Zip(rs).Select(
-                t => new Node(
+                t => new ParticleNode(
                     Guid.NewGuid(),
-                    particleId,
+                    particle,
                     new PolarPoint(t.First, t.Second),
                     NodeType.Surface
                 )
-            ).ToArray()
-        );
+            );
     }
 }

@@ -2,7 +2,7 @@ using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.ParticleModel.Nodes;
 
-public interface IParticleNode : INodeGeometry, INodeNeighbors
+public interface IParticleNode : INode, INodeGeometry, INodeNeighbors
 {
     public int Index => Particle.Nodes.IndexOf(Id);
 

@@ -3,7 +3,7 @@ namespace RefraSin.ParticleModel.Nodes;
 /// <summary>
 /// Interface for nodes being in contact with another.
 /// </summary>
-public interface INodeContact : INode
+public interface INodeContact 
 {
     /// <summary>
     /// ID of the other node, the contact is built to.

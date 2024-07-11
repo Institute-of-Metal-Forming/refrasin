@@ -9,7 +9,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Oberflächenknoten, der Teil einer freien Oberfläche ist.
 /// </summary>
-public class SurfaceNode : NodeBase, ISurfaceNode
+public class SurfaceNode : NodeBase 
 {
     /// <inheritdoc />
     public SurfaceNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
