@@ -145,7 +145,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                     "Remeshed session created. Now {NodeCount} nodes present.",
                     remeshedState.Nodes.Count
                 );
-                session.ReportCurrentState(stepVector);
+                session.ReportCurrentState();
             }
         }
 

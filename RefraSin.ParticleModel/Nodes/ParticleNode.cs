@@ -9,20 +9,11 @@ namespace RefraSin.ParticleModel.Nodes;
 /// Record of geometry data on a node.
 /// </summary>
 public record ParticleNode(Guid Id, IParticle Particle, IPolarPoint Coordinates, NodeType Type)
-    : Node(Id, Particle.Id, Coordinates, Type), IParticleNode
+    : Node(Id, Particle.Id, Coordinates, Type),
+        IParticleNode
 {
-    public ParticleNode(INode template, IParticle particle) : this(template.Id, particle, template.Coordinates, template.Type)
-    {
-        if (template is INodeGeometry geometry)
-        {
-            _surfaceDistance = geometry.SurfaceDistance;
-            _surfaceRadiusAngle = geometry.SurfaceRadiusAngle;
-            _angleDistance = geometry.AngleDistance;
-            _volume = geometry.Volume;
-            _surfaceNormalAngle = geometry.SurfaceNormalAngle;
-            _surfaceTangentAngle = geometry.SurfaceTangentAngle;
-        }
-    }
+    public ParticleNode(INode template, IParticle particle)
+        : this(template.Id, particle, template.Coordinates, template.Type) { }
 
     private ToUpperToLower<double>? _surfaceDistance;
     private ToUpperToLower<Angle>? _surfaceRadiusAngle;
@@ -35,7 +26,8 @@ public record ParticleNode(Guid Id, IParticle Particle, IPolarPoint Coordinates,
     public ToUpperToLower<double> SurfaceDistance => _surfaceDistance ??= this.SurfaceDistance();
 
     /// <inheritdoc />
-    public ToUpperToLower<Angle> SurfaceRadiusAngle => _surfaceRadiusAngle ??= this.SurfaceRadiusAngle();
+    public ToUpperToLower<Angle> SurfaceRadiusAngle =>
+        _surfaceRadiusAngle ??= this.SurfaceRadiusAngle();
 
     /// <inheritdoc />
     public ToUpperToLower<Angle> AngleDistance => _angleDistance ??= this.AngleDistance();
@@ -44,8 +36,10 @@ public record ParticleNode(Guid Id, IParticle Particle, IPolarPoint Coordinates,
     public ToUpperToLower<double> Volume => _volume ??= this.Volume();
 
     /// <inheritdoc />
-    public ToUpperToLower<Angle> SurfaceNormalAngle => _surfaceNormalAngle ??= this.SurfaceNormalAngle();
+    public ToUpperToLower<Angle> SurfaceNormalAngle =>
+        _surfaceNormalAngle ??= this.SurfaceNormalAngle();
 
     /// <inheritdoc />
-    public ToUpperToLower<Angle> SurfaceTangentAngle => _surfaceTangentAngle ??= this.SurfaceTangentAngle();
+    public ToUpperToLower<Angle> SurfaceTangentAngle =>
+        _surfaceTangentAngle ??= this.SurfaceTangentAngle();
 }

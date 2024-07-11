@@ -21,7 +21,12 @@ public record Particle : IParticle
         Coordinates = centerCoordinates;
         RotationAngle = rotationAngle;
         MaterialId = materialId;
-        _nodes = new ReadOnlyParticleSurface<IParticleNode>(nodesFactory(this));
+        var nodes = nodesFactory(this).ToArray();
+        if (nodes.Any(n => !ReferenceEquals(n.Particle, this)))
+            throw new InvalidOperationException(
+                "All nodes produced by the factory must be associated with the created particle instance."
+            );
+        _nodes = new ReadOnlyParticleSurface<IParticleNode>(nodes);
     }
 
     public Particle(IParticle template)

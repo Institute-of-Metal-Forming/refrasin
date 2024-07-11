@@ -12,8 +12,7 @@ public class MaximumDisplacementAngleStepWidthController(
     double decreaseFactor = 0.8,
     double minimalTimeStepWidth = double.NegativeInfinity,
     double maximalTimeStepWidth = double.PositiveInfinity
-) :
-    IStepWidthController
+) : IStepWidthController
 {
     /// <inheritdoc />
     public void RegisterWithSolver(SinteringSolver solver)
@@ -21,13 +20,20 @@ public class MaximumDisplacementAngleStepWidthController(
         solver.SessionInitialized += SolverOnSessionInitialized;
     }
 
-    private void SolverOnSessionInitialized(object? sender, SinteringSolver.SessionInitializedEventArgs e)
+    private void SolverOnSessionInitialized(
+        object? sender,
+        SinteringSolver.SessionInitializedEventArgs e
+    )
     {
         _stepWidths[e.SolverSession.Id] = InitialTimeStepWidth;
     }
 
     /// <inheritdoc />
-    public double GetStepWidth(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
+    public double GetStepWidth(
+        ISolverSession solverSession,
+        SolutionState currentState,
+        StepVector stepVector
+    )
     {
         var stepWidth = _stepWidths[solverSession.Id] * IncreaseFactor;
 
@@ -37,24 +43,46 @@ public class MaximumDisplacementAngleStepWidthController(
             var normalDisplacementAngles = currentState.Nodes.Select(n =>
             {
                 var displacement = stepVector.NormalDisplacement(n) * stepWidth1;
-                var upperAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToUpper, n.SurfaceNormalAngle.ToUpper),
-                    n.SurfaceNormalAngle.ToUpper);
-                var lowerAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToLower, n.SurfaceNormalAngle.ToLower),
-                    n.SurfaceNormalAngle.ToLower);
+                var upperAngle = SinLaw.Alpha(
+                    displacement,
+                    CosLaw.C(displacement, n.SurfaceDistance.ToUpper, n.SurfaceNormalAngle.ToUpper),
+                    n.SurfaceNormalAngle.ToUpper
+                );
+                var lowerAngle = SinLaw.Alpha(
+                    displacement,
+                    CosLaw.C(displacement, n.SurfaceDistance.ToLower, n.SurfaceNormalAngle.ToLower),
+                    n.SurfaceNormalAngle.ToLower
+                );
                 return double.Max(double.Abs(upperAngle), double.Abs(lowerAngle));
             });
             var maxNormalDisplacementAngle = normalDisplacementAngles.Max();
-            
-            var tangentialDisplacementAngles = currentState.Nodes.OfType<NeckNode>().Select(n =>
-            {
-                var displacement = stepVector.TangentialDisplacement(n) * stepWidth1;
-                var upperAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToUpper, n.SurfaceTangentAngle.ToUpper),
-                    n.SurfaceTangentAngle.ToUpper);
-                var lowerAngle = SinLaw.Alpha(displacement, CosLaw.C(displacement, n.SurfaceDistance.ToLower, n.SurfaceTangentAngle.ToLower),
-                    n.SurfaceTangentAngle.ToLower);
-                return double.Max(double.Abs(upperAngle), double.Abs(lowerAngle));
-            });
-            var maxTangentialDisplacementAngle = tangentialDisplacementAngles.Max();
+
+            var tangentialDisplacementAngles = currentState
+                .Nodes.OfType<NeckNode>()
+                .Select(n =>
+                {
+                    var displacement = stepVector.TangentialDisplacement(n) * stepWidth1;
+                    var upperAngle = SinLaw.Alpha(
+                        displacement,
+                        CosLaw.C(
+                            displacement,
+                            n.SurfaceDistance.ToUpper,
+                            n.SurfaceTangentAngle.ToUpper
+                        ),
+                        n.SurfaceTangentAngle.ToUpper
+                    );
+                    var lowerAngle = SinLaw.Alpha(
+                        displacement,
+                        CosLaw.C(
+                            displacement,
+                            n.SurfaceDistance.ToLower,
+                            n.SurfaceTangentAngle.ToLower
+                        ),
+                        n.SurfaceTangentAngle.ToLower
+                    );
+                    return double.Max(double.Abs(upperAngle), double.Abs(lowerAngle));
+                });
+            var maxTangentialDisplacementAngle = tangentialDisplacementAngles.Prepend(0).Max(); // prepend to avoid InvalidOperationException when no necks present
 
             var maxAngle = double.Max(maxNormalDisplacementAngle, maxTangentialDisplacementAngle);
 

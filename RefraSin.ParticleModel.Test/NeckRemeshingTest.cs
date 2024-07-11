@@ -36,6 +36,7 @@ public class NeckRemeshingTest
         IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
             baseParticle
                 .Nodes.Skip(1)
+                .Select(n => new ParticleNode(n, particle))
                 .Concat(
                     [
                         new ParticleNode(
@@ -100,6 +101,7 @@ public class NeckRemeshingTest
         IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
             baseParticle
                 .Nodes.Skip(1)
+                .Select(n => new ParticleNode(n, particle))
                 .Concat(
                     [
                         new ParticleNode(

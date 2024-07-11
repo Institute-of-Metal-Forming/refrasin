@@ -13,11 +13,12 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
     private IList<ContactNodeBase>? _toNodes;
 
     /// <inheritdoc />
-    public ParticleContact(Guid id, Particle from, Particle to) : base(id, from, to)
+    public ParticleContact(Guid id, Particle from, Particle to)
+        : base(id, from, to)
     {
         Distance = from.Coordinates.DistanceTo(to.Coordinates);
-        DirectionFrom = new PolarVector(to.Coordinates - from.Coordinates, from.LocalCoordinateSystem).Phi;
-        DirectionTo = new PolarVector(from.Coordinates - to.Coordinates, to.LocalCoordinateSystem).Phi;
+        DirectionFrom = new PolarVector(to.Coordinates - from.Coordinates, from).Phi;
+        DirectionTo = new PolarVector(from.Coordinates - to.Coordinates, to).Phi;
     }
 
     /// <inheritdoc />
@@ -32,8 +33,10 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
     /// <inheritdoc />
     public bool Equals(IEdge<IParticle>? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
         return From.Equals(other.From) && To.Equals(other.To);
     }
 
@@ -53,7 +56,11 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
     IEdge<IParticle> IEdge<IParticle>.Reversed() => new DirectedEdge<IParticle>(To, From);
 
     public IList<ContactNodeBase> FromNodes =>
-        _fromNodes ??= From.Nodes.OfType<ContactNodeBase>().Where(n => n.ContactedParticleId == To.Id).ToArray();
+        _fromNodes ??= From
+            .Nodes.OfType<ContactNodeBase>()
+            .Where(n => n.ContactedParticleId == To.Id)
+            .ToArray();
 
-    public IList<ContactNodeBase> ToNodes => _toNodes ??= FromNodes.Select(n => n.ContactedNode).ToArray();
+    public IList<ContactNodeBase> ToNodes =>
+        _toNodes ??= FromNodes.Select(n => n.ContactedNode).ToArray();
 }

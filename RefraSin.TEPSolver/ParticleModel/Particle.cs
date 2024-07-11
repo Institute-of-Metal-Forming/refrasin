@@ -27,22 +27,18 @@ public class Particle : IParticle<NodeBase>
         Coordinates = particle.Coordinates.Absolute;
         RotationAngle = particle.RotationAngle;
 
-        LocalCoordinateSystem = new PolarCoordinateSystem
-        {
-            OriginSource = () => Coordinates,
-            RotationAngleSource = () => RotationAngle
-        };
-
         MaterialId = particle.MaterialId;
         var material = solverSession.Materials[particle.MaterialId];
         VacancyVolumeEnergy =
             solverSession.Temperature
-          * solverSession.GasConstant
-          / (material.Substance.MolarVolume * material.Bulk.EquilibriumVacancyConcentration);
+            * solverSession.GasConstant
+            / (material.Substance.MolarVolume * material.Bulk.EquilibriumVacancyConcentration);
 
         SurfaceProperties = material.Surface;
 
-        InterfaceProperties = solverSession.MaterialInterfaces[material.Id].ToDictionary(mi => mi.To, mi => mi.Properties);
+        InterfaceProperties = solverSession
+            .MaterialInterfaces[material.Id]
+            .ToDictionary(mi => mi.To, mi => mi.Properties);
 
         SolverSession = solverSession;
         _nodes = particle
@@ -52,7 +48,7 @@ public class Particle : IParticle<NodeBase>
                     { Type: NodeType.GrainBoundary }
                         => new GrainBoundaryNode(node, this, solverSession),
                     { Type: NodeType.Neck } => new NeckNode(node, this, solverSession),
-                    _                           => (NodeBase)new SurfaceNode(node, this, solverSession),
+                    _ => (NodeBase)new SurfaceNode(node, this, solverSession),
                 }
             )
             .ToParticleSurface();
@@ -66,12 +62,6 @@ public class Particle : IParticle<NodeBase>
     )
     {
         Id = previousState.Id;
-
-        LocalCoordinateSystem = new PolarCoordinateSystem
-        {
-            OriginSource = () => Coordinates,
-            RotationAngleSource = () => RotationAngle
-        };
 
         MaterialId = previousState.MaterialId;
         VacancyVolumeEnergy = previousState.VacancyVolumeEnergy;
@@ -92,7 +82,7 @@ public class Particle : IParticle<NodeBase>
             var displacementVector = new PolarVector(
                 stepVector.AngleDisplacement(contact) * timeStepWidth,
                 stepVector.RadialDisplacement(contact) * timeStepWidth,
-                parent.LocalCoordinateSystem
+                parent
             );
             Coordinates = previousState.Coordinates + displacementVector.Absolute;
 
@@ -116,11 +106,6 @@ public class Particle : IParticle<NodeBase>
     /// Dictionary of material IDs to material interface data, assuming that the current instances material is always on the from side.
     /// </summary>
     public IReadOnlyDictionary<Guid, IInterfaceProperties> InterfaceProperties { get; }
-
-    /// <summary>
-    /// Lokales Koordinatensystem des Partikels. Bearbeitung über <see cref="Coordinates"/> und <see cref="RotationAngle"/>. Sollte nicht direkt verändert werden!!!
-    /// </summary>
-    internal PolarCoordinateSystem LocalCoordinateSystem { get; }
 
     /// <summary>
     /// Koordinaten des Ursprungs des lokalen Koordinatensystem ausgedrückt im Koordinatensystem des <see cref="Parent"/>
@@ -149,7 +134,8 @@ public class Particle : IParticle<NodeBase>
         new(parent, this, stepVector, timeStepWidth);
 
     /// <inheritdoc/>
-    public override string ToString() => $"{GetType().Name} {Id} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
+    public override string ToString() =>
+        $"{GetType().Name} {Id} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
 
     /// <inheritdoc />
     public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;

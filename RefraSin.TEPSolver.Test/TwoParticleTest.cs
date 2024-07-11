@@ -37,6 +37,7 @@ public class TwoParticleTest
         IEnumerable<IParticleNode> NodeFactory1(IParticle particle) =>
             baseParticle1
                 .Nodes.Skip(1)
+                .Select(n => new ParticleNode(n, particle))
                 .Concat(
                     [
                         new ParticleNode(
@@ -78,8 +79,9 @@ public class TwoParticleTest
             NodeCount = nodeCountPerParticle
         }.GetParticle();
         IEnumerable<IParticleNode> NodeFactory2(IParticle particle) =>
-            baseParticle1
+            baseParticle2
                 .Nodes.Skip(1)
+                .Select(n => new ParticleNode(n, particle))
                 .Concat(
                     [
                         new ParticleNode(
