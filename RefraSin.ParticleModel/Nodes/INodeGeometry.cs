@@ -37,4 +37,14 @@ public interface INodeGeometry
     /// Angle between surface line and surface normal resp. tangent.
     /// </summary>
     public ToUpperToLower<Angle> SurfaceTangentAngle { get; }
+    
+    /// <summary>
+    /// Angle between radial vector and surface normal resp. tangent.
+    /// </summary>
+    public ToUpperToLower<Angle> RadiusNormalAngle { get; }
+
+    /// <summary>
+    /// Angle between radial vector and surface normal resp. tangent.
+    /// </summary>
+    public ToUpperToLower<Angle> RadiusTangentAngle { get; }
 }

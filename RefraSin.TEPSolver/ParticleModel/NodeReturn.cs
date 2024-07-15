@@ -31,6 +31,8 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         Volume = template.Volume * norm.Area;
         SurfaceNormalAngle = template.SurfaceNormalAngle;
         SurfaceTangentAngle = template.SurfaceTangentAngle;
+        RadiusNormalAngle = template.RadiusNormalAngle;
+        RadiusTangentAngle = template.RadiusTangentAngle;
         InterfaceFlux = stepVector is not null
             ? new ToUpperToLower<double>(
                 stepVector.FluxToUpper(template),
@@ -64,6 +66,13 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
     public ToUpperToLower<double> Volume { get; }
     public ToUpperToLower<Angle> SurfaceNormalAngle { get; }
     public ToUpperToLower<Angle> SurfaceTangentAngle { get; }
+
+    /// <inheritdoc />
+    public ToUpperToLower<Angle> RadiusNormalAngle { get; }
+
+    /// <inheritdoc />
+    public ToUpperToLower<Angle> RadiusTangentAngle { get; }
+
     public ToUpperToLower<double> InterfaceFlux { get; }
     public ToUpperToLower<double> VolumeFlux { get; }
     public double TransferFlux { get; }

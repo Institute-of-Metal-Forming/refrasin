@@ -27,6 +27,8 @@ public class GeometryTest
         public ToUpperToLower<double> Volume => this.Volume();
         public ToUpperToLower<Angle> SurfaceNormalAngle => this.SurfaceNormalAngle();
         public ToUpperToLower<Angle> SurfaceTangentAngle => this.SurfaceTangentAngle();
+        public ToUpperToLower<Angle> RadiusNormalAngle => this.RadiusNormalAngle();
+        public ToUpperToLower<Angle> RadiusTangentAngle => this.RadiusTangentAngle();
     }
 
     [Test]
@@ -176,6 +178,37 @@ public class GeometryTest
     }
 
     [Test]
+    public void TestSurfaceTangentAngle()
+    {
+        var upper = new Node(
+            Guid.NewGuid(),
+            Guid.Empty,
+            new PolarPoint(HalfOfPi, 0.5),
+            NodeType.Surface
+        );
+        var lower = new Node(
+            Guid.NewGuid(),
+            Guid.Empty,
+            new PolarPoint(-ThirdOfPi, 1),
+            NodeType.Surface
+        );
+        var node = new DummyNode(
+            Guid.NewGuid(),
+            Guid.Empty,
+            new PolarPoint(QuarterOfPi, 1),
+            NodeType.Surface,
+            upper,
+            lower
+        );
+
+        That((double)node.SurfaceTangentAngle.ToUpper, Is.EqualTo(2.564106 - HalfOfPi).Within(1e-4));
+        That(
+            node.SurfaceTangentAngle.ToLower,
+            Is.EqualTo(node.SurfaceTangentAngle.ToUpper).Within(1e-8)
+        );
+    }
+
+    [Test]
     public void TestSurfaceNormalAngleNeckLowerIsGrainBoundary()
     {
         var upper = new Node(
@@ -291,5 +324,33 @@ public class GeometryTest
 
         That((double)node.SurfaceTangentAngle.ToLower, Is.EqualTo(2.564106 * 2 - Pi).Within(1e-4));
         That((double)node.SurfaceTangentAngle.ToUpper, Is.EqualTo(0).Within(1e-8));
+    }
+
+    [Test]
+    public void TestRadiusNormalAngle()
+    {
+        var upper = new Node(
+            Guid.NewGuid(),
+            Guid.Empty,
+            new PolarPoint(HalfOfPi, 0.5),
+            NodeType.Surface
+        );
+        var lower = new Node(
+            Guid.NewGuid(),
+            Guid.Empty,
+            new PolarPoint(-ThirdOfPi, 1),
+            NodeType.Surface
+        );
+        var node = new DummyNode(
+            Guid.NewGuid(),
+            Guid.Empty,
+            new PolarPoint(QuarterOfPi, 1),
+            NodeType.Surface,
+            upper,
+            lower
+        );
+
+        That((double)node.RadiusNormalAngle.ToUpper, Is.EqualTo(2.564106 + 0.50047).Within(1e-4));
+        That((double)node.RadiusNormalAngle.ToLower, Is.EqualTo(2.564106 + (Pi - QuarterOfPi - ThirdOfPi) / 2).Within(1e-4));
     }
 }
