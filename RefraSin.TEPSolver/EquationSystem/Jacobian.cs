@@ -105,6 +105,27 @@ public static class Jacobian
         contact.FromNodes.Select(node =>
             (stepVector.StepVectorMap.LambdaContactDirection(node), 1.0)
         );
+    
+    private static JacobianRow ParticleRotationDerivative(
+        StepVector stepVector,
+        ParticleContact contact
+    )
+    {
+        foreach (var node in contact.FromNodes)
+        {
+            yield return (
+                stepVector.StepVectorMap.LambdaContactDistance(node),
+                node.ContactedNode.Coordinates.R
+              * Sin(node.ContactedNode.AngleDistanceToContactDirection)
+            );
+            yield return (
+                stepVector.StepVectorMap.LambdaContactDirection(node),
+                -node.ContactedNode.Coordinates.R
+              / contact.Distance
+              * Cos(node.ContactedNode.AngleDistanceToContactDirection)
+            );
+        }
+    }
 
     public static JacobianRow StateVelocityDerivativeTangential(
         StepVector stepVector,
@@ -165,6 +186,11 @@ public static class Jacobian
     {
         yield return (stepVector.StepVectorMap.RadialDisplacement(contact), 1.0);
         yield return (
+            stepVector.StepVectorMap.RotationDisplacement(contact),
+            node.ContactedNode.Coordinates.R
+          * Sin(node.ContactedNode.AngleDistanceToContactDirection)
+        );
+        yield return (
             stepVector.StepVectorMap.NormalDisplacement(node),
             -node.ContactDistanceGradient.Normal
         );
@@ -193,6 +219,12 @@ public static class Jacobian
     )
     {
         yield return (stepVector.StepVectorMap.AngleDisplacement(contact), 1.0);
+        yield return (
+            stepVector.StepVectorMap.RotationDisplacement(contact),
+            -node.ContactedNode.Coordinates.R
+          / contact.Distance
+          * Cos(node.ContactedNode.AngleDistanceToContactDirection)
+        );
         yield return (
             stepVector.StepVectorMap.NormalDisplacement(node),
             -node.ContactDirectionGradient.Normal
@@ -245,6 +277,7 @@ public static class Jacobian
     {
         yield return ParticleRadialDisplacementDerivative(stepVector, contact);
         yield return ParticleAngleDisplacementDerivative(stepVector, contact);
+        yield return ParticleRotationDerivative(stepVector, contact);
     }
 
     public static Matrix<double> ParticleBlock(

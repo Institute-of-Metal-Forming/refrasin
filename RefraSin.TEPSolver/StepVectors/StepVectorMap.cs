@@ -33,6 +33,7 @@ public class StepVectorMap
         {
             AddUnknown(contact.Id, Unknown.RadialDisplacement);
             AddUnknown(contact.Id, Unknown.AngleDisplacement);
+            AddUnknown(contact.Id, Unknown.RotationDisplacement);
 
             foreach (var contactNode in contact.FromNodes)
             {
@@ -100,6 +101,8 @@ public class StepVectorMap
 
     public int AngleDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.AngleDisplacement)];
 
+    public int RotationDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.RotationDisplacement)];
+
     private enum Unknown
     {
         NormalDisplacement,
@@ -110,6 +113,7 @@ public class StepVectorMap
         LambdaContactDirection,
         RadialDisplacement,
         AngleDisplacement,
+        RotationDisplacement,
         LambdaDissipation,
     }
 }

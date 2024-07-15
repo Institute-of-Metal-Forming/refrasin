@@ -48,6 +48,9 @@ public class StepVector : DenseVector
     public double AngleDisplacement(IParticleContact contact) =>
         this[StepVectorMap.AngleDisplacement(contact)];
 
+    public double RotationDisplacement(IParticleContact contact) =>
+        this[StepVectorMap.RotationDisplacement(contact)];
+    
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);
 

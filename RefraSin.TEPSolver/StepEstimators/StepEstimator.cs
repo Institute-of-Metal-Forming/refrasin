@@ -37,6 +37,7 @@ class StepEstimator : IStepEstimator
                                             contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);
             yield return averageNormalDisplacement;
             yield return 0;
+            yield return 0;
 
             foreach (var node in contact.FromNodes)
             {
