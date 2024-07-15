@@ -33,8 +33,9 @@ public class StepVector : DenseVector
 
     public double LambdaVolume(INode node) => this[StepVectorMap.LambdaVolume(node)];
 
-    public double TangentialDisplacement(INode node) =>
-        node.Type == NodeType.Neck ? this[StepVectorMap.TangentialDisplacement(node)] : 0;
+    public double TangentialDisplacement(INode node) => node.Type is NodeType.GrainBoundary or NodeType.Neck
+        ? this[StepVectorMap.TangentialDisplacement(node)]
+        : 0;
 
     public double LambdaContactDistance(INode node) =>
         this[StepVectorMap.LambdaContactDistance(node)];
@@ -50,7 +51,7 @@ public class StepVector : DenseVector
 
     public double RotationDisplacement(IParticleContact contact) =>
         this[StepVectorMap.RotationDisplacement(contact)];
-    
+
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);
 
