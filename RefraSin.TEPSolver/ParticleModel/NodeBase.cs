@@ -129,12 +129,12 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
     private ToUpperToLower<Angle>? _surfaceTangentAngle;
 
     public virtual ToUpperToLower<Angle> RadiusNormalAngle =>
-        _radiusNormalAngle ??= this.SurfaceNormalAngle();
+        _radiusNormalAngle ??= this.RadiusNormalAngle();
 
     private ToUpperToLower<Angle>? _radiusNormalAngle;
 
     public virtual ToUpperToLower<Angle> RadiusTangentAngle =>
-        _radiusTangentAngle ??= this.SurfaceTangentAngle();
+        _radiusTangentAngle ??= this.RadiusTangentAngle();
 
     private ToUpperToLower<Angle>? _radiusTangentAngle;
 

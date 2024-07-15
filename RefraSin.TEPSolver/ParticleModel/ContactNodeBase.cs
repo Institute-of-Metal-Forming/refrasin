@@ -180,8 +180,8 @@ public abstract class ContactNodeBase
 
     /// <inheritdoc />
     public Angle AngleDistanceToContactDirection =>
-        _angleDistanceFromContactDirection ??= Coordinates.AngleTo(
-            ContactedParticlesCenter,
+        _angleDistanceFromContactDirection ??= ContactedParticlesCenter.AngleTo(
+            Coordinates,
             allowNegative: true
         );
 

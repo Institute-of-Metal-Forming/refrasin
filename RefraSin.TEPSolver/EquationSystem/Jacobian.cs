@@ -87,7 +87,7 @@ public static class Jacobian
             Join(
                 YieldContactNodesEquations(stepVector, contact),
                 YieldContactAuxiliaryDerivatives(stepVector, contact)
-            )
+            ).Append(ContactTorqueConstraint(stepVector, contact))
         );
 
     public static JacobianRow ParticleRadialDisplacementDerivative(
@@ -147,6 +147,10 @@ public static class Jacobian
         yield return (
             stepVector.StepVectorMap.LambdaDissipation(),
             -node.GibbsEnergyGradient.Tangential
+        );
+        yield return (
+            stepVector.StepVectorMap.LambdaContactRotation(node.Contact),
+            node.TorqueLeverArm.Tangential
         );
     }
 
@@ -237,6 +241,20 @@ public static class Jacobian
             stepVector.StepVectorMap.TangentialDisplacement(node.ContactedNode),
             -node.ContactedNode.ContactDirectionGradient.Tangential
         );
+    }
+
+    public static JacobianRow ContactTorqueConstraint(
+        StepVector stepVector,
+        ParticleContact contact
+    )
+    {
+        foreach (var node in contact.FromNodes)
+        {
+            yield return (stepVector.StepVectorMap.NormalDisplacement(node), node.TorqueLeverArm.Normal);
+            yield return (stepVector.StepVectorMap.NormalDisplacement(node.ContactedNode), node.ContactedNode.TorqueLeverArm.Normal);
+            yield return (stepVector.StepVectorMap.TangentialDisplacement(node), node.TorqueLeverArm.Tangential);
+            yield return (stepVector.StepVectorMap.TangentialDisplacement(node.ContactedNode), node.ContactedNode.TorqueLeverArm.Tangential);
+        }
     }
 
     public static JacobianRows YieldContactNodesEquations(
@@ -331,6 +349,10 @@ public static class Jacobian
                 stepVector.StepVectorMap.LambdaContactDirection(contactNode),
                 -contactNode.ContactDirectionGradient.Normal
             );
+            yield return (
+                stepVector.StepVectorMap.LambdaContactRotation(contactNode.Contact),
+                contactNode.TorqueLeverArm.Normal
+            );
         }
     }
 
@@ -362,7 +384,7 @@ public static class Jacobian
         );
         yield return (stepVector.StepVectorMap.FluxToUpper(node), -1);
         yield return (stepVector.StepVectorMap.FluxToUpper(node.Lower), 1);
-        
+
         if (node is ContactNodeBase)
             yield return (
                 stepVector.StepVectorMap.TangentialDisplacement(node),

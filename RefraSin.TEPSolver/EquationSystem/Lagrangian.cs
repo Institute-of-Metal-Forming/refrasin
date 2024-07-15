@@ -78,7 +78,7 @@ public static class Lagrangian
             Join(
                 YieldContactNodesEquations(stepVector, contact),
                 YieldContactAuxiliaryDerivatives(stepVector, contact)
-            )
+            ).Append(ContactTorqueConstraint(stepVector, contact))
         );
 
     public static IEnumerable<double> YieldContactNodesEquations(
@@ -150,7 +150,8 @@ public static class Lagrangian
                 contactNode.ContactDistanceGradient.Normal
               * stepVector.LambdaContactDistance(contactNode)
               + contactNode.ContactDirectionGradient.Normal
-              * stepVector.LambdaContactDirection(contactNode);
+              * stepVector.LambdaContactDirection(contactNode)
+              - contactNode.TorqueLeverArm.Normal * stepVector.LambdaContactRotation(contactNode.Contact);
         }
 
         return -gibbsTerm + requiredConstraintsTerm - contactTerm;
@@ -166,7 +167,8 @@ public static class Lagrangian
             node.VolumeGradient.Tangential * stepVector.LambdaVolume(node);
         var contactTerm =
             node.ContactDistanceGradient.Tangential * stepVector.LambdaContactDistance(node)
-          + node.ContactDirectionGradient.Tangential * stepVector.LambdaContactDirection(node);
+          + node.ContactDirectionGradient.Tangential * stepVector.LambdaContactDirection(node)
+          - node.TorqueLeverArm.Tangential * stepVector.LambdaContactRotation(node.Contact);
 
         return -gibbsTerm + requiredConstraintsTerm - contactTerm;
     }
@@ -251,4 +253,16 @@ public static class Lagrangian
       / contact.Distance
       * Cos(node.ContactedNode.AngleDistanceToContactDirection)
       * stepVector.RotationDisplacement(contact);
+
+    public static double ContactTorqueConstraint(StepVector stepVector, ParticleContact contact) =>
+        contact
+            .FromNodes.Select(n =>
+                stepVector.NormalDisplacement(n) * n.TorqueLeverArm.Normal
+              + stepVector.NormalDisplacement(n.ContactedNode)
+              * n.ContactedNode.TorqueLeverArm.Normal
+              + stepVector.TangentialDisplacement(n) * n.TorqueLeverArm.Tangential
+              + stepVector.TangentialDisplacement(n.ContactedNode)
+              * n.ContactedNode.TorqueLeverArm.Tangential
+            )
+            .Sum();
 }

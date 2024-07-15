@@ -43,6 +43,9 @@ public class StepVector : DenseVector
     public double LambdaContactDirection(INode node) =>
         this[StepVectorMap.LambdaContactDirection(node)];
 
+    public double LambdaContactRotation(IParticleContact contact) =>
+        this[StepVectorMap.LambdaContactRotation(contact)];
+
     public double RadialDisplacement(IParticleContact contact) =>
         this[StepVectorMap.RadialDisplacement(contact)];
 
