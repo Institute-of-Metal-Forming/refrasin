@@ -115,7 +115,7 @@ public class SolutionState : ISystemState
             var contactedNode = Nodes[kv.Value];
             var halfway = node.Coordinates.PointHalfWayTo(contactedNode.Coordinates);
             return (node, halfway);
-        });
+        }).ToArray();
         
         foreach (var (node, halfway) in newNodeCoordinates)
         {

@@ -79,14 +79,15 @@ public class Particle : IParticle<NodeBase>
         else
         {
             var contact = SolverSession.CurrentState.ParticleContacts[parent.Id, previousState.Id];
-            var displacementVector = new PolarVector(
-                stepVector.AngleDisplacement(contact) * timeStepWidth,
-                stepVector.RadialDisplacement(contact) * timeStepWidth,
+            var polarCoordinates = new PolarPoint(contact.DirectionFrom, contact.Distance, parent);
+            var newCoordinates = new PolarPoint(
+                polarCoordinates.Phi + stepVector.AngleDisplacement(contact) * timeStepWidth,
+                polarCoordinates.R + stepVector.RadialDisplacement(contact) * timeStepWidth,
                 parent
             );
-            Coordinates = previousState.Coordinates + displacementVector.Absolute;
+            Coordinates = newCoordinates.Absolute;
 
-            RotationAngle = previousState.RotationAngle;
+            RotationAngle = previousState.RotationAngle + stepVector.RotationDisplacement(contact) * timeStepWidth;
         }
 
         _nodes = previousState

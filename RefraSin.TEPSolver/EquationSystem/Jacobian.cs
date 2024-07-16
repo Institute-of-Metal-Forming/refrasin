@@ -1,5 +1,5 @@
 using MathNet.Numerics.LinearAlgebra;
-using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
@@ -260,8 +260,11 @@ public static class Jacobian
         {
             yield return (stepVector.StepVectorMap.NormalDisplacement(node), node.TorqueLeverArm.Normal);
             yield return (stepVector.StepVectorMap.NormalDisplacement(node.ContactedNode), node.ContactedNode.TorqueLeverArm.Normal);
-            yield return (stepVector.StepVectorMap.TangentialDisplacement(node), node.TorqueLeverArm.Tangential);
-            yield return (stepVector.StepVectorMap.TangentialDisplacement(node.ContactedNode), node.ContactedNode.TorqueLeverArm.Tangential);
+            if (node.Type is NodeType.Neck)
+            {
+                yield return (stepVector.StepVectorMap.TangentialDisplacement(node), node.TorqueLeverArm.Tangential);
+                yield return (stepVector.StepVectorMap.TangentialDisplacement(node.ContactedNode), node.ContactedNode.TorqueLeverArm.Tangential);
+            }
         }
     }
 
