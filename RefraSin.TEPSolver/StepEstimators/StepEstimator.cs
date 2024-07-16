@@ -48,12 +48,16 @@ class StepEstimator : IStepEstimator
                 yield return 0;
                 yield return GuessFluxToUpper(node);
                 yield return averageNormalDisplacement;
-                yield return GuessTangentialDisplacement(node);
 
                 yield return 0;
                 yield return GuessFluxToUpper(node.ContactedNode);
                 yield return averageNormalDisplacement;
-                yield return GuessTangentialDisplacement(node.ContactedNode);
+
+                if (node is NeckNode)
+                {
+                    yield return GuessTangentialDisplacement(node);
+                    yield return GuessTangentialDisplacement(node.ContactedNode);
+                }
             }
         }
     }
@@ -79,10 +83,8 @@ class StepEstimator : IStepEstimator
         return displacement;
     }
 
-    private static double GuessTangentialDisplacement(ContactNodeBase node)
+    private static double GuessTangentialDisplacement(NodeBase node)
     {
-        if (node.Type == NodeType.GrainBoundary) return 0;
-        
         var fluxBalance = GuessFluxToUpper(node) - GuessFluxToUpper(node.Lower);
 
         var displacement = fluxBalance / node.VolumeGradient.Tangential;

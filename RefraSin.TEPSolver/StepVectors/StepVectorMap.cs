@@ -46,12 +46,16 @@ public class StepVectorMap
                 AddUnknown(contactNode.Id, Unknown.LambdaVolume);
                 AddUnknown(contactNode.Id, Unknown.FluxToUpper);
                 AddUnknown(contactNode.Id, Unknown.NormalDisplacement);
-                AddUnknown(contactNode.Id, Unknown.TangentialDisplacement);
 
                 AddUnknown(contactNode.ContactedNodeId, Unknown.LambdaVolume);
                 AddUnknown(contactNode.ContactedNodeId, Unknown.FluxToUpper);
                 AddUnknown(contactNode.ContactedNodeId, Unknown.NormalDisplacement);
-                AddUnknown(contactNode.ContactedNodeId, Unknown.TangentialDisplacement);
+
+                if (contactNode.Type == NodeType.Neck)
+                {
+                    AddUnknown(contactNode.Id, Unknown.TangentialDisplacement);
+                    AddUnknown(contactNode.ContactedNodeId, Unknown.TangentialDisplacement);
+                }
             }
         }
 
