@@ -54,4 +54,12 @@ public static class NodeGeometryExtensions
         var angle = PI / 2 - 0.5 * (self.SurfaceRadiusAngle.ToUpper + self.SurfaceRadiusAngle.ToLower);
         return new ToUpperToLower<Angle>(angle, angle);
     }
+
+    public static ToUpperToLower<Angle> RadiusNormalAngle<TNode>(this TNode self) where TNode : INode, INodeGeometry, INodeNeighbors =>
+        new(self.SurfaceRadiusAngle.ToUpper + self.SurfaceNormalAngle.ToUpper,
+            self.SurfaceRadiusAngle.ToLower + self.SurfaceNormalAngle.ToLower);
+
+    public static ToUpperToLower<Angle> RadiusTangentAngle<TNode>(this TNode self) where TNode : INode, INodeGeometry, INodeNeighbors =>
+        new(self.SurfaceRadiusAngle.ToUpper + self.SurfaceTangentAngle.ToUpper,
+            self.SurfaceRadiusAngle.ToLower + self.SurfaceTangentAngle.ToLower);
 }

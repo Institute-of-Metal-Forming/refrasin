@@ -21,6 +21,8 @@ public record ParticleNode(Guid Id, IParticle Particle, IPolarPoint Coordinates,
     private ToUpperToLower<double>? _volume;
     private ToUpperToLower<Angle>? _surfaceNormalAngle;
     private ToUpperToLower<Angle>? _surfaceTangentAngle;
+    private ToUpperToLower<Angle>? _radiusNormalAngle;
+    private ToUpperToLower<Angle>? _radiusTangentAngle;
 
     /// <inheritdoc />
     public ToUpperToLower<double> SurfaceDistance => _surfaceDistance ??= this.SurfaceDistance();
@@ -42,4 +44,10 @@ public record ParticleNode(Guid Id, IParticle Particle, IPolarPoint Coordinates,
     /// <inheritdoc />
     public ToUpperToLower<Angle> SurfaceTangentAngle =>
         _surfaceTangentAngle ??= this.SurfaceTangentAngle();
+
+    /// <inheritdoc />
+    public ToUpperToLower<Angle> RadiusNormalAngle => _radiusNormalAngle ??= this.RadiusNormalAngle();
+
+    /// <inheritdoc />
+    public ToUpperToLower<Angle> RadiusTangentAngle => _radiusTangentAngle ??= this.RadiusTangentAngle();
 }

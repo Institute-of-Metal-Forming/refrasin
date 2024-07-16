@@ -122,6 +122,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 
             if (i % RemeshingEverySteps == 0)
             {
+                session.CurrentState.Sanitize();
                 var remeshedState = new SystemState(
                     Guid.NewGuid(),
                     session.CurrentState.Time,

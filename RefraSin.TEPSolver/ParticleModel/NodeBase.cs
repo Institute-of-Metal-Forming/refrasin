@@ -128,6 +128,16 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
 
     private ToUpperToLower<Angle>? _surfaceTangentAngle;
 
+    public virtual ToUpperToLower<Angle> RadiusNormalAngle =>
+        _radiusNormalAngle ??= this.RadiusNormalAngle();
+
+    private ToUpperToLower<Angle>? _radiusNormalAngle;
+
+    public virtual ToUpperToLower<Angle> RadiusTangentAngle =>
+        _radiusTangentAngle ??= this.RadiusTangentAngle();
+
+    private ToUpperToLower<Angle>? _radiusTangentAngle;
+
     /// <inheritdoc />
     public abstract ToUpperToLower<double> InterfaceEnergy { get; }
 
@@ -139,11 +149,11 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
         _gibbsEnergyGradient ??= new NormalTangential<double>(
             -(
                 InterfaceEnergy.ToUpper * Cos(SurfaceNormalAngle.ToUpper)
-                + InterfaceEnergy.ToLower * Cos(SurfaceNormalAngle.ToLower)
+              + InterfaceEnergy.ToLower * Cos(SurfaceNormalAngle.ToLower)
             ),
             -(
                 InterfaceEnergy.ToUpper * Cos(SurfaceTangentAngle.ToUpper)
-                - InterfaceEnergy.ToLower * Cos(SurfaceTangentAngle.ToLower)
+              - InterfaceEnergy.ToLower * Cos(SurfaceTangentAngle.ToLower)
             )
         );
 
@@ -153,15 +163,15 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
     public NormalTangential<double> VolumeGradient =>
         _volumeGradient ??= new NormalTangential<double>(
             0.5
-                * (
-                    SurfaceDistance.ToUpper * Sin(SurfaceNormalAngle.ToUpper)
-                    + SurfaceDistance.ToLower * Sin(SurfaceNormalAngle.ToLower)
-                ),
+          * (
+                SurfaceDistance.ToUpper * Sin(SurfaceNormalAngle.ToUpper)
+              + SurfaceDistance.ToLower * Sin(SurfaceNormalAngle.ToLower)
+            ),
             0.5
-                * (
-                    SurfaceDistance.ToUpper * Sin(SurfaceTangentAngle.ToUpper)
-                    - SurfaceDistance.ToLower * Sin(SurfaceTangentAngle.ToLower)
-                )
+          * (
+                SurfaceDistance.ToUpper * Sin(SurfaceTangentAngle.ToUpper)
+              - SurfaceDistance.ToLower * Sin(SurfaceTangentAngle.ToLower)
+            )
         );
 
     private NormalTangential<double>? _volumeGradient;

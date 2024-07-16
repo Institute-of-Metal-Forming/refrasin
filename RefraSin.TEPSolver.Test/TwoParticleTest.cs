@@ -26,7 +26,7 @@ public class TwoParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e4;
+        var duration = 1e5;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6 * 5;
         var nodeCountPerParticle = 20;
 
@@ -34,6 +34,7 @@ public class TwoParticleTest
         {
             NodeCount = nodeCountPerParticle
         }.GetParticle();
+
         IEnumerable<IParticleNode> NodeFactory1(IParticle particle) =>
             baseParticle1
                 .Nodes.Skip(1)
@@ -46,12 +47,26 @@ public class TwoParticleTest
                             new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
                             NodeType.Neck
                         ),
+                        // new ParticleNode(
+                        //     Guid.NewGuid(),
+                        //     particle,
+                        //     new PolarPoint(new AbsolutePoint(120e-6, -initialNeck / 2)),
+                        //     NodeType.GrainBoundary
+                        // ),
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                            new PolarPoint(new AbsolutePoint(125e-6, -0.5 * initialNeck)),
+                            // new PolarPoint(new AbsolutePoint(125e-6, 0)),
+                            // new PolarPoint(new AbsolutePoint(120e-6, 0)),
                             NodeType.GrainBoundary
                         ),
+                        // new ParticleNode(
+                        //     Guid.NewGuid(),
+                        //     particle,
+                        //     new PolarPoint(new AbsolutePoint(120e-6, initialNeck / 2)),
+                        //     NodeType.GrainBoundary
+                        // ),
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
@@ -60,6 +75,7 @@ public class TwoParticleTest
                         ),
                     ]
                 );
+
         _particle1 = new Particle(
             baseParticle1.Id,
             new AbsolutePoint(0, 0),
@@ -69,7 +85,7 @@ public class TwoParticleTest
         );
 
         var baseParticle2 = new ShapeFunctionParticleFactory(
-            100e-6,
+            200e-6,
             0.1,
             5,
             0.1,
@@ -78,6 +94,7 @@ public class TwoParticleTest
         {
             NodeCount = nodeCountPerParticle
         }.GetParticle();
+
         IEnumerable<IParticleNode> NodeFactory2(IParticle particle) =>
             baseParticle2
                 .Nodes.Skip(1)
@@ -87,26 +104,41 @@ public class TwoParticleTest
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
+                            new PolarPoint(new AbsolutePoint(240e-6, -initialNeck)),
                             NodeType.Neck
                         ),
+                        // new ParticleNode(
+                        //     Guid.NewGuid(),
+                        //     particle,
+                        //     new PolarPoint(new AbsolutePoint(240e-6, -initialNeck / 2)),
+                        //     NodeType.GrainBoundary
+                        // ),
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                            new PolarPoint(new AbsolutePoint(235e-6, 0.5 * initialNeck)),
+                            // new PolarPoint(new AbsolutePoint(235e-6, 0)),
+                            // new PolarPoint(new AbsolutePoint(240e-6, 0)),
                             NodeType.GrainBoundary
                         ),
+                        // new ParticleNode(
+                        //     Guid.NewGuid(),
+                        //     particle,
+                        //     new PolarPoint(new AbsolutePoint(240e-6, initialNeck / 2)),
+                        //     NodeType.GrainBoundary
+                        // ),
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
+                            new PolarPoint(new AbsolutePoint(240e-6, initialNeck)),
                             NodeType.Neck
                         ),
                     ]
                 );
+
         _particle2 = new Particle(
             baseParticle2.Id,
-            new AbsolutePoint(240e-6, 0),
+            new AbsolutePoint(360e-6, 0),
             PI,
             baseParticle2.MaterialId,
             NodeFactory2
@@ -118,12 +150,9 @@ public class TwoParticleTest
         Directory.CreateDirectory(_tempDir);
         TestContext.WriteLine(_tempDir);
 
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddFile(Path.Combine(_tempDir, "test.log"));
-        });
+        var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
 
-        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default);
+        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default, 30);
 
         _material = new Material(
             _particle1.MaterialId,
@@ -322,7 +351,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].Coordinates.Absolute.X
+                    s.Particles[0].Coordinates.X - _particle1.Coordinates.X
                 ))
                 .ToArray()
         );
@@ -330,7 +359,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].Coordinates.Absolute.Y
+                    s.Particles[0].Coordinates.Y - _particle1.Coordinates.Y
                 ))
                 .ToArray()
         );
@@ -338,7 +367,7 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[1].Coordinates.Absolute.X
+                    s.Particles[1].Coordinates.X - _particle2.Coordinates.X
                 ))
                 .ToArray()
         );
@@ -346,7 +375,23 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[1].Coordinates.Absolute.Y
+                    s.Particles[1].Coordinates.Y - _particle2.Coordinates.Y
+                ))
+                .ToArray()
+        );
+        plt.Add.Scatter(
+            _solutionStorage
+                .States.Select(s => new ScottPlot.Coordinates(
+                    s.Time,
+                    s.Particles[0].RotationAngle - _particle1.RotationAngle
+                ))
+                .ToArray()
+        );
+        plt.Add.Scatter(
+            _solutionStorage
+                .States.Select(s => new ScottPlot.Coordinates(
+                    s.Time,
+                    s.Particles[1].RotationAngle - _particle2.RotationAngle
                 ))
                 .ToArray()
         );
