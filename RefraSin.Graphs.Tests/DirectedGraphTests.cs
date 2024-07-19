@@ -19,9 +19,9 @@ public class DirectedGraphTests
 
         _edges = new IEdge<Vertex>[]
         {
-            new DirectedEdge<Vertex>(_vertices[0], _vertices[1]),
-            new UndirectedEdge<Vertex>(_vertices[1], _vertices[2]),
-            new DirectedEdge<Vertex>(_vertices[2], _vertices[0]),
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], false),
+            new Edge<Vertex>(_vertices[2], _vertices[0], true),
         };
 
         _graph = new DirectedGraph<Vertex>(_vertices, _edges);
@@ -46,10 +46,10 @@ public class DirectedGraphTests
             Is.EqualTo(
                 new IEdge<Vertex>[]
                 {
-                    new DirectedEdge<Vertex>(_vertices[0], _vertices[1]),
-                    new DirectedEdge<Vertex>(_vertices[1], _vertices[2]),
-                    new DirectedEdge<Vertex>(_vertices[2], _vertices[1]),
-                    new DirectedEdge<Vertex>(_vertices[2], _vertices[0]),
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[0], true),
                 }.ToHashSet()
             )
         );

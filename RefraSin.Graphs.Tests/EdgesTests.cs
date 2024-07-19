@@ -1,12 +1,12 @@
 namespace RefraSin.Graphs.Tests;
 
 [TestFixture]
-public class UndirectedEdgesTests
+public class EdgesTests
 {
     private Vertex _vertex1;
     private Vertex _vertex2;
-    private UndirectedEdge<Vertex> _edge1;
-    private UndirectedEdge<Vertex> _edge2;
+    private Edge<Vertex> _edge1;
+    private Edge<Vertex> _edge2;
 
     [SetUp]
     public void Setup()
@@ -14,8 +14,8 @@ public class UndirectedEdgesTests
         _vertex1 = new Vertex(Guid.NewGuid());
         _vertex2 = new Vertex(Guid.NewGuid());
 
-        _edge1 = new UndirectedEdge<Vertex>(_vertex1, _vertex2);
-        _edge2 = new UndirectedEdge<Vertex>(_vertex2, _vertex1);
+        _edge1 = new Edge<Vertex>(_vertex1, _vertex2, true);
+        _edge2 = new Edge<Vertex>(_vertex2, _vertex1, true);
     }
 
     [Test]
@@ -23,13 +23,13 @@ public class UndirectedEdgesTests
     {
         Assert.That(
             _edge1,
-            Is.EqualTo(
+            Is.Not.EqualTo(
                 _edge2
             )
         );
         Assert.That(
             _edge2,
-            Is.EqualTo(
+            Is.Not.EqualTo(
                 _edge1
             )
         );
@@ -40,13 +40,13 @@ public class UndirectedEdgesTests
     {
         Assert.That(
             _edge1.GetHashCode(),
-            Is.EqualTo(
+            Is.Not.EqualTo(
                 _edge2.GetHashCode()
             )
         );
         Assert.That(
             _edge2.GetHashCode(),
-            Is.EqualTo(
+            Is.Not.EqualTo(
                 _edge1.GetHashCode()
             )
         );
@@ -56,7 +56,7 @@ public class UndirectedEdgesTests
     public void TestDirected()
     {
         Assert.That(
-            !_edge1.IsDirected
+            _edge1.IsDirected
         );
     }
 
@@ -64,10 +64,10 @@ public class UndirectedEdgesTests
     public void TestIsEdgeFrom()
     {
         Assert.That(
-            _edge1.IsEdgeFrom(_vertex1)
+            _edge1.IsFrom(_vertex1)
         );
         Assert.That(
-            _edge1.IsEdgeFrom(_vertex2)
+            !_edge1.IsFrom(_vertex2)
         );
     }
 
@@ -75,10 +75,10 @@ public class UndirectedEdgesTests
     public void TestIsEdgeTo()
     {
         Assert.That(
-            _edge1.IsEdgeTo(_vertex1)
+            _edge1.IsTo(_vertex2)
         );
         Assert.That(
-            _edge1.IsEdgeTo(_vertex2)
+            !_edge1.IsTo(_vertex1)
         );
     }
 
@@ -90,7 +90,7 @@ public class UndirectedEdgesTests
         Assert.That(
             reversed,
             Is.EqualTo(
-                _edge1
+                _edge2
             )
         );
         Assert.That(

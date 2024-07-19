@@ -2,9 +2,9 @@ namespace RefraSin.Graphs;
 
 public class DepthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
 {
-    private readonly TraversedEdge<TVertex>[] _exploredEdges;
+    private readonly Edge<TVertex>[] _exploredEdges;
 
-    private DepthFirstExplorer(TVertex start, TraversedEdge<TVertex>[] exploredEdges)
+    private DepthFirstExplorer(TVertex start, Edge<TVertex>[] exploredEdges)
     {
         Start = start;
         _exploredEdges = exploredEdges;
@@ -22,12 +22,12 @@ public class DepthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVerte
             DoExplore(graph, graph.Root).ToArray()
         );
 
-    private static IEnumerable<TraversedEdge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
+    private static IEnumerable<Edge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
         var edgesVisited = new HashSet<TEdge>(graph.EdgeCount);
 
-        IEnumerable<TraversedEdge<TVertex>> InspectVertex(TVertex current)
+        IEnumerable<Edge<TVertex>> InspectVertex(TVertex current)
         {
             foreach (var edge in graph.EdgesFrom(current))
             {
@@ -40,11 +40,11 @@ public class DepthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVerte
 
                 if (verticesVisited.Contains(child))
                 {
-                    yield return new TraversedEdge<TVertex>(current, child, true);
+                    yield return new Edge<TVertex>(current, child, true);
                     continue;
                 }
 
-                yield return new TraversedEdge<TVertex>(current, child, false);
+                yield return new Edge<TVertex>(current, child, true);
 
                 verticesVisited.Add(child);
 
@@ -67,5 +67,5 @@ public class DepthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVerte
     public TVertex Start { get; }
 
     /// <inheritdoc />
-    public IEnumerable<TraversedEdge<TVertex>> TraversedEdges => _exploredEdges;
+    public IEnumerable<IEdge<TVertex>> TraversedEdges => _exploredEdges;
 }

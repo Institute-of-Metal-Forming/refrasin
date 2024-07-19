@@ -22,11 +22,11 @@ public class TestDepthFirstExplorer
 
         _edges = new IEdge<Vertex>[]
         {
-            new DirectedEdge<Vertex>(_vertices[0], _vertices[1]),
-            new DirectedEdge<Vertex>(_vertices[1], _vertices[2]),
-            new DirectedEdge<Vertex>(_vertices[1], _vertices[3]),
-            new DirectedEdge<Vertex>(_vertices[0], _vertices[4]),
-            new DirectedEdge<Vertex>(_vertices[2], _vertices[5]),
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], true),
+            new Edge<Vertex>(_vertices[1], _vertices[3], true),
+            new Edge<Vertex>(_vertices[0], _vertices[4], true),
+            new Edge<Vertex>(_vertices[2], _vertices[5], false),
         };
     }
 
@@ -37,39 +37,15 @@ public class TestDepthFirstExplorer
 
         var explorer = DepthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        using var enm = explorer.TraversedEdges.GetEnumerator();
-
-        for (int i = 0; i < 2; i++)
+        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
         {
-            enm.MoveNext();
-
-            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[0], _vertices[1])))
-            {
-                for (int j = 0; j < 2; j++)
-                {
-                    enm.MoveNext();
-                    if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[1], _vertices[2])))
-                    {
-                        enm.MoveNext();
-                        Assert.That(enm.Current, Is.EqualTo(new DirectedEdge<Vertex>(_vertices[2], _vertices[5])));
-                        continue;
-                    }
-
-                    if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[1], _vertices[3])))
-                        continue;
-                    Assert.Fail("Wrong edges from Vertex 1.");
-                }
-
-                continue;
-            }
-
-            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[0], _vertices[4])))
-                continue;
-
-            Assert.Fail("Wrong edges from Vertex 0.");
-        }
-
-        Assert.That(!enm.MoveNext());
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], true),
+            new Edge<Vertex>(_vertices[2], _vertices[5], true),
+            new Edge<Vertex>(_vertices[5], _vertices[2], true),
+            new Edge<Vertex>(_vertices[1], _vertices[3], true),
+            new Edge<Vertex>(_vertices[0], _vertices[4], true),
+        }));
     }
 
     [Test]
@@ -79,41 +55,19 @@ public class TestDepthFirstExplorer
 
         var explorer = DepthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        using var enm = explorer.TraversedEdges.GetEnumerator();
-
-        for (int i = 0; i < 2; i++)
+        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
         {
-            enm.MoveNext();
-
-            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[0], _vertices[1])))
-            {
-                for (int j = 0; j < 2; j++)
-                {
-                    enm.MoveNext();
-                    if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[1], _vertices[2])))
-                    {
-                        enm.MoveNext();
-                        Assert.That(enm.Current, Is.EqualTo(new DirectedEdge<Vertex>(_vertices[2], _vertices[5])));
-
-                        continue;
-                    }
-
-                    if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[1], _vertices[3])))
-                        continue;
-
-                    Assert.Fail("Wrong edges from Vertex 1.");
-                }
-
-                continue;
-            }
-
-            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[0], _vertices[4])))
-                continue;
-
-            Assert.Fail("Wrong edges from Vertex 0.");
-        }
-
-        Assert.That(!enm.MoveNext());
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], true),
+            new Edge<Vertex>(_vertices[2], _vertices[5], true),
+            new Edge<Vertex>(_vertices[5], _vertices[2], true),
+            new Edge<Vertex>(_vertices[2], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[3], true),
+            new Edge<Vertex>(_vertices[3], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[0], true),
+            new Edge<Vertex>(_vertices[0], _vertices[4], true),
+            new Edge<Vertex>(_vertices[4], _vertices[0], true),
+        }));
     }
 
     [Test]
@@ -123,62 +77,18 @@ public class TestDepthFirstExplorer
 
         var explorer = DepthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        using var enm = explorer.TraversedEdges.GetEnumerator();
-
-        for (int i = 0; i < 2; i++)
+        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
         {
-            enm.MoveNext();
-
-            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[0], _vertices[1])))
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    enm.MoveNext();
-                    if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[1], _vertices[2])))
-                    {
-                        for (int k = 0; k < 2; k++)
-                        {
-                            enm.MoveNext();
-                            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[2], _vertices[5])))
-                            {
-                                enm.MoveNext();
-                                Assert.That(enm.Current, Is.EqualTo(new DirectedEdge<Vertex>(_vertices[5], _vertices[2])));
-                                continue;
-                            }
-
-                            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[2], _vertices[1])))
-                                continue;
-                            Assert.Fail("Wrong edges from Vertex 2.");
-                        }
-
-                        continue;
-                    }
-
-                    if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[1], _vertices[3])))
-                    {
-                        enm.MoveNext();
-                        Assert.That(enm.Current, Is.EqualTo(new DirectedEdge<Vertex>(_vertices[3], _vertices[1])));
-                        continue;
-                    }
-
-                    if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[1], _vertices[0])))
-                        continue;
-                    Assert.Fail("Wrong edges from Vertex 1.");
-                }
-
-                continue;
-            }
-
-            if (enm.Current.Equals(new DirectedEdge<Vertex>(_vertices[0], _vertices[4])))
-            {
-                enm.MoveNext();
-                Assert.That(enm.Current, Is.EqualTo(new DirectedEdge<Vertex>(_vertices[4], _vertices[0])));
-                continue;
-            }
-
-            Assert.Fail("Wrong edges from Vertex 0.");
-        }
-
-        Assert.That(!enm.MoveNext());
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[0], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], true),
+            new Edge<Vertex>(_vertices[2], _vertices[1], true),
+            new Edge<Vertex>(_vertices[2], _vertices[5], true),
+            new Edge<Vertex>(_vertices[5], _vertices[2], true),
+            new Edge<Vertex>(_vertices[1], _vertices[3], true),
+            new Edge<Vertex>(_vertices[3], _vertices[1], true),
+            new Edge<Vertex>(_vertices[0], _vertices[4], true),
+            new Edge<Vertex>(_vertices[4], _vertices[0], true),
+        }));
     }
 }

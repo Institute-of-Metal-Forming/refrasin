@@ -11,19 +11,19 @@ public interface IGraph<TVertex, TEdge> where TVertex : IVertex where TEdge : IE
     int EdgeCount => Edges.Count;
 
     public IEnumerable<TEdge> EdgesTo(TVertex vertex) =>
-        Edges.Where(e => e.IsEdgeTo(vertex));
+        Edges.Where(e => e.IsTo(vertex));
 
     public IEnumerable<TEdge> EdgesFrom(TVertex vertex) =>
-        Edges.Where(e => e.IsEdgeFrom(vertex));
+        Edges.Where(e => e.IsFrom(vertex));
 
     public IEnumerable<TEdge> EdgesAt(TVertex vertex) =>
-        Edges.Where(e => e.IsEdgeAt(vertex));
+        Edges.Where(e => e.IsAt(vertex));
 
     public IEnumerable<TVertex> ParentsOf(TVertex vertex) =>
-        Edges.Where(e => e.IsEdgeTo(vertex)).Select(e => e.From.Equals(vertex) ? e.To : e.From);
+        Edges.Where(e => e.IsTo(vertex)).Select(e => e.From.Equals(vertex) ? e.To : e.From);
 
     public IEnumerable<TVertex> ChildrenOf(TVertex vertex) =>
-        Edges.Where(e => e.IsEdgeFrom(vertex)).Select(e => e.From.Equals(vertex) ? e.To : e.From);
+        Edges.Where(e => e.IsFrom(vertex)).Select(e => e.From.Equals(vertex) ? e.To : e.From);
 
     public IEnumerable<TVertex> AdjacentsOf(TVertex vertex)
     {

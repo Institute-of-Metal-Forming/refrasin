@@ -2,9 +2,9 @@ namespace RefraSin.Graphs;
 
 public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
 {
-    private readonly TraversedEdge<TVertex>[] _exploredEdges;
+    private readonly Edge<TVertex>[] _exploredEdges;
 
-    private BreadthFirstExplorer(TVertex start, TraversedEdge<TVertex>[] exploredEdges)
+    private BreadthFirstExplorer(TVertex start, Edge<TVertex>[] exploredEdges)
     {
         Start = start;
         _exploredEdges = exploredEdges;
@@ -22,7 +22,7 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
             DoExplore(graph, graph.Root).ToArray()
         );
 
-    private static IEnumerable<TraversedEdge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
+    private static IEnumerable<Edge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start) where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
         var edgesVisited = new HashSet<TEdge>(graph.EdgeCount);
@@ -34,7 +34,7 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
         {
             foreach (var edge in graph.EdgesFrom(current))
             {
-                if (edgesVisited.Contains(edge))
+                if (edgesVisited.Contains(edge, EqualityComparer<TEdge>.Default))
                     continue;
 
                 edgesVisited.Add(edge);
@@ -43,11 +43,11 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
 
                 if (verticesVisited.Contains(child))
                 {
-                    yield return new TraversedEdge<TVertex>(current, child, true);
+                    yield return new Edge<TVertex>(current, child, true);
                     continue;
                 }
 
-                yield return new TraversedEdge<TVertex>(current, child, false);
+                yield return new Edge<TVertex>(current, child, true);
 
                 verticesVisited.Add(child);
                 queue.Enqueue(child);
@@ -59,5 +59,5 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
     public TVertex Start { get; }
 
     /// <inheritdoc />
-    public IEnumerable<TraversedEdge<TVertex>> TraversedEdges => _exploredEdges;
+    public IEnumerable<IEdge<TVertex>> TraversedEdges => _exploredEdges;
 }
