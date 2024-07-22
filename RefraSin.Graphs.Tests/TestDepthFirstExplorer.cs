@@ -91,4 +91,55 @@ public class TestDepthFirstExplorer
             new Edge<Vertex>(_vertices[4], _vertices[0], true),
         }));
     }
+
+    [Test]
+    public void TestOrderDirectedNoBackstep()
+    {
+        var graph = new DirectedGraph<Vertex>(_vertices, _edges);
+
+        var explorer = DepthFirstExplorer<Vertex>.Explore(graph, _vertices[0], false);
+
+        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
+        {
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], true),
+            new Edge<Vertex>(_vertices[2], _vertices[5], true),
+            new Edge<Vertex>(_vertices[1], _vertices[3], true),
+            new Edge<Vertex>(_vertices[0], _vertices[4], true),
+        }));
+    }
+
+    [Test]
+    public void TestOrderUndirectedNoBackstep()
+    {
+        var graph = new UndirectedGraph<Vertex>(_vertices, _edges);
+
+        var explorer = DepthFirstExplorer<Vertex>.Explore(graph, _vertices[0], false);
+
+        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
+        {
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], true),
+            new Edge<Vertex>(_vertices[2], _vertices[5], true),
+            new Edge<Vertex>(_vertices[1], _vertices[3], true),
+            new Edge<Vertex>(_vertices[0], _vertices[4], true),
+        }));
+    }
+
+    [Test]
+    public void TestOrderDirectedFromUndirectedNoBackstep()
+    {
+        var graph = DirectedGraph<Vertex>.FromGraph(new UndirectedGraph<Vertex>(_vertices, _edges));
+
+        var explorer = DepthFirstExplorer<Vertex>.Explore(graph, _vertices[0], false);
+
+        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
+        {
+            new Edge<Vertex>(_vertices[0], _vertices[1], true),
+            new Edge<Vertex>(_vertices[1], _vertices[2], true),
+            new Edge<Vertex>(_vertices[2], _vertices[5], true),
+            new Edge<Vertex>(_vertices[1], _vertices[3], true),
+            new Edge<Vertex>(_vertices[0], _vertices[4], true),
+        }));
+    }
 }

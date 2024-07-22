@@ -169,7 +169,7 @@ public abstract class ContactNodeBase
 
     INodeContactNeighbors INodeContactNeighbors.ContactedNode => ContactedNode;
 
-    public IPolarVector ContactVector => Contact.ContactVector;
+    public IPolarVector ContactVector => IsParentsNode ? Contact.ContactVector : Contact.Reversed().ContactVector;
 
     public double ContactDistance => ContactVector.R;
 

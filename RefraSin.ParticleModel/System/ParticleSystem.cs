@@ -14,11 +14,17 @@ public class ParticleSystem<TParticle, TNode> : IParticleSystem<TParticle, TNode
         Particles = particles.ToReadOnlyParticleCollection<TParticle, TNode>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
         var contactNodes = Nodes.Where(n => n.Type is Neck or GrainBoundary).ToArray();
-        NodeContacts = contactNodes.Select(node => new Edge<TNode>(node, node.FindContactedNodeByCoordinates(contactNodes), false)).ToReadOnlyContactCollection();
-        ParticleContacts = NodeContacts
-            .Select(nc => new ParticleContactEdge<TParticle>(Particles[nc.From.ParticleId], Particles[nc.To.ParticleId]))
-            .Distinct()
+        NodeContacts = contactNodes.Select(node => new Edge<TNode>(node, node.FindContactedNodeByCoordinates(contactNodes), false))
             .ToReadOnlyContactCollection();
+        var particleGraph = new UndirectedGraph<TParticle>(
+            Particles,
+            NodeContacts
+                .Select(nc => new Edge<TParticle>(Particles[nc.From.ParticleId], Particles[nc.To.ParticleId], false))
+                .DistinctBy(c => (c.From, c.To))
+        );
+
+        var pathExplorer = BreadthFirstExplorer<TParticle>.Explore(particleGraph, Particles[0], false);
+        ParticleContacts = pathExplorer.TraversedEdges.Select(e => new ParticleContactEdge<TParticle>(e.From, e.To)).ToReadOnlyContactCollection();
     }
 
     public ParticleSystem(IEnumerable<TParticle> particles, IEnumerable<IEdge> particleContacts, IEnumerable<IEdge> nodeContacts)
@@ -26,7 +32,8 @@ public class ParticleSystem<TParticle, TNode> : IParticleSystem<TParticle, TNode
         Particles = particles.ToReadOnlyParticleCollection<TParticle, TNode>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
         NodeContacts = nodeContacts.Select(nc => new Edge<TNode>(Nodes[nc.From], Nodes[nc.To], true)).ToReadOnlyContactCollection();
-        ParticleContacts = particleContacts.Select(pc => new ParticleContactEdge<TParticle>(Particles[pc.From], Particles[pc.To])).ToReadOnlyContactCollection();
+        ParticleContacts = particleContacts.Select(pc => new ParticleContactEdge<TParticle>(Particles[pc.From], Particles[pc.To]))
+            .ToReadOnlyContactCollection();
     }
 
     /// <inheritdoc />

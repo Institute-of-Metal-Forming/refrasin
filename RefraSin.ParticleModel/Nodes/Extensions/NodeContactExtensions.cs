@@ -5,8 +5,10 @@ public static class NodeContactExtensions
     public static TNode FindContactedNodeByCoordinates<TNode>(this TNode self, IEnumerable<TNode> allContactNodes, double precision = 1e-4)
         where TNode : INode
     {
+        var absolutePrecision = precision * self.Coordinates.R;
+        
         var contactedNode = allContactNodes.FirstOrDefault(n =>
-            n.Id != self.Id && n.Coordinates.Absolute.IsClose(self.Coordinates.Absolute, precision)
+            n.Id != self.Id && n.Coordinates.Absolute.IsClose(self.Coordinates.Absolute, absolutePrecision)
         );
 
         if (contactedNode is null)

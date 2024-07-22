@@ -130,7 +130,9 @@ internal class SolverSession : ISolverSession
             new SystemState(
                 CurrentState.Id,
                 CurrentState.Time,
-                CurrentState.Particles.Select(p => new ParticleReturn(p, stepVector, Norm))
+                CurrentState.Particles.Select(p => new ParticleReturn(p, stepVector, Norm)),
+                CurrentState.ParticleContacts,
+                CurrentState.NodeContacts
             )
         );
     }
