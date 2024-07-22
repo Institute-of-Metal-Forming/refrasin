@@ -1,6 +1,7 @@
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
@@ -31,10 +32,10 @@ public class StepVectorMap
 
         foreach (var contact in currentState.ParticleContacts)
         {
-            AddUnknown(contact.Id, Unknown.RadialDisplacement);
-            AddUnknown(contact.Id, Unknown.AngleDisplacement);
-            AddUnknown(contact.Id, Unknown.RotationDisplacement);
-            AddUnknown(contact.Id, Unknown.LambdaContactRotation);
+            AddUnknown(contact.MergedId, Unknown.RadialDisplacement);
+            AddUnknown(contact.MergedId, Unknown.AngleDisplacement);
+            AddUnknown(contact.MergedId, Unknown.RotationDisplacement);
+            AddUnknown(contact.MergedId, Unknown.LambdaContactRotation);
 
             foreach (var contactNode in contact.FromNodes)
             {
@@ -98,13 +99,13 @@ public class StepVectorMap
 
     public int LambdaContactDirection(INode node) => _indices[(node.Id, Unknown.LambdaContactDirection)];
     
-    public int LambdaContactRotation(IParticleContact contact) => _indices[(contact.Id, Unknown.LambdaContactRotation)];
+    public int LambdaContactRotation(ParticleContact contact) => _indices[(contact.MergedId, Unknown.LambdaContactRotation)];
 
-    public int RadialDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.RadialDisplacement)];
+    public int RadialDisplacement(ParticleContact contact) => _indices[(contact.MergedId, Unknown.RadialDisplacement)];
 
-    public int AngleDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.AngleDisplacement)];
+    public int AngleDisplacement(ParticleContact contact) => _indices[(contact.MergedId, Unknown.AngleDisplacement)];
 
-    public int RotationDisplacement(IParticleContact contact) => _indices[(contact.Id, Unknown.RotationDisplacement)];
+    public int RotationDisplacement(ParticleContact contact) => _indices[(contact.MergedId, Unknown.RotationDisplacement)];
 
     private enum Unknown
     {

@@ -1,6 +1,6 @@
 namespace RefraSin.Graphs;
 
-public interface IEdge<TVertex> : IEdge, IEquatable<IEdge<TVertex>> where TVertex : IVertex
+public interface IEdge<out TVertex> : IEdge where TVertex : IVertex
 {
     new TVertex From { get; }
     new TVertex To { get; }
@@ -9,7 +9,6 @@ public interface IEdge<TVertex> : IEdge, IEquatable<IEdge<TVertex>> where TVerte
     Guid IEdge.To => To.Id;
 
     new IEdge<TVertex> Reversed();
-    bool IEquatable<IEdge<TVertex>>.Equals(IEdge<TVertex>? other) => ((IEdge)this).Equals(other);
 }
 
 public interface IEdge : IEquatable<IEdge>

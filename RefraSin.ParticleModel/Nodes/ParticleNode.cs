@@ -8,11 +8,14 @@ namespace RefraSin.ParticleModel.Nodes;
 /// <summary>
 /// Record of geometry data on a node.
 /// </summary>
-public record ParticleNode(Guid Id, IParticle Particle, IPolarPoint Coordinates, NodeType Type)
+public record ParticleNode(Guid Id, IParticle<IParticleNode> Particle, IPolarPoint Coordinates, NodeType Type)
     : Node(Id, Particle.Id, Coordinates, Type),
         IParticleNode
 {
-    public ParticleNode(INode template, IParticle particle)
+    public ParticleNode(Guid id, IParticle<IParticleNode> particle, Angle phi, double r, NodeType type) :
+        this(id, particle, new PolarPoint(phi, r, particle), type) { }
+
+    public ParticleNode(INode template, IParticle<IParticleNode> particle)
         : this(template.Id, particle, template.Coordinates, template.Type) { }
 
     private ToUpperToLower<double>? _surfaceDistance;

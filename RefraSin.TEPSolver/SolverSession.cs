@@ -52,22 +52,18 @@ internal class SolverSession : ISolverSession
         Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
         Routines = sinteringSolver.Routines;
 
-        var particles = normalizedState.Particles.Select(ps => new Particle(ps, this)).ToArray();
         CurrentState = new SolutionState(
             normalizedState.Id,
             StartTime,
-            particles,
-            Array.Empty<(Guid, Guid, Guid)>()
+            normalizedState,
+            this
         );
-        CurrentState = new SolutionState(normalizedState.Id, StartTime, particles);
         CurrentState.Sanitize();
     }
 
     public SolverSession(
         SolverSession parentSession,
-        ISystemState inputState,
-        IEnumerable<(Guid id, Guid from, Guid to)>? particleContacts = null,
-        IEnumerable<(Guid from, Guid to)>? nodeContacts = null
+        ISystemState inputState
     )
     {
         Id = Guid.NewGuid();
@@ -85,13 +81,11 @@ internal class SolverSession : ISolverSession
         Logger = parentSession.Logger;
         Routines = parentSession.Routines;
 
-        var particles = inputState.Particles.Select(ps => new Particle(ps, this)).ToArray();
         CurrentState = new SolutionState(
             inputState.Id,
             StartTime,
-            particles,
-            particleContacts,
-            nodeContacts
+            inputState,
+            this
         );
         CurrentState.Sanitize();
     }

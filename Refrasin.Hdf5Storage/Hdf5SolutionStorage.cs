@@ -1,6 +1,8 @@
 using HDF5CSharp;
 using HDF5CSharp.DataTypes;
 using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -30,7 +32,7 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
     private int _stateIndex = 0;
 
     /// <inheritdoc />
-    public void StoreState(IProcessStep processStep, ISystemState state)
+    public void StoreState(IProcessStep processStep, ISystemState<IParticle<IParticleNode>, IParticleNode> state)
     {
         var stateId = Hdf5.CreateOrOpenGroup(StatesGroupId, _stateIndex.ToString());
         Hdf5.WriteAttribute(stateId, nameof(state.Time), state.Time);

@@ -56,7 +56,7 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
     /// </summary>
     public Particle Particle { get; }
 
-    IParticle IParticleNode.Particle => Particle;
+    IParticle<IParticleNode> IParticleNode.Particle => Particle;
 
     /// <inheritdoc />
     public Guid ParticleId => Particle.Id;

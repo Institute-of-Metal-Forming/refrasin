@@ -4,6 +4,7 @@ using Microsoft.VisualBasic.CompilerServices;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
@@ -42,16 +43,16 @@ public class StepVector : DenseVector
     public double LambdaContactDirection(INode node) =>
         this[StepVectorMap.LambdaContactDirection(node)];
 
-    public double LambdaContactRotation(IParticleContact contact) =>
+    public double LambdaContactRotation(ParticleContact contact) =>
         this[StepVectorMap.LambdaContactRotation(contact)];
 
-    public double RadialDisplacement(IParticleContact contact) =>
+    public double RadialDisplacement(ParticleContact contact) =>
         this[StepVectorMap.RadialDisplacement(contact)];
 
-    public double AngleDisplacement(IParticleContact contact) =>
+    public double AngleDisplacement(ParticleContact contact) =>
         this[StepVectorMap.AngleDisplacement(contact)];
 
-    public double RotationDisplacement(IParticleContact contact) =>
+    public double RotationDisplacement(ParticleContact contact) =>
         this[StepVectorMap.RotationDisplacement(contact)];
     
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>

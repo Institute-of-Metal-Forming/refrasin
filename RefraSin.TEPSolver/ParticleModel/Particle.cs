@@ -16,12 +16,13 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-public class Particle : IParticle<NodeBase>
+public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 {
     private ReadOnlyParticleSurface<NodeBase> _nodes;
     private double? _meanRadius;
+    private IReadOnlyContactCollection<IParticleContactEdge<Particle>>? _contacts;
 
-    public Particle(IParticle particle, ISolverSession solverSession)
+    public Particle(IParticle<IParticleNode> particle, ISolverSession solverSession)
     {
         Id = particle.Id;
         Coordinates = particle.Coordinates.Absolute;
@@ -51,7 +52,7 @@ public class Particle : IParticle<NodeBase>
                     _ => (NodeBase)new SurfaceNode(node, this, solverSession),
                 }
             )
-            .ToParticleSurface();
+            .ToReadOnlyParticleSurface();
     }
 
     private Particle(
@@ -79,7 +80,7 @@ public class Particle : IParticle<NodeBase>
         else
         {
             var contact = SolverSession.CurrentState.ParticleContacts[parent.Id, previousState.Id];
-            var polarCoordinates = new PolarPoint(contact.DirectionFrom, contact.Distance, parent);
+            var polarCoordinates = contact.ContactVector;
             var newCoordinates = new PolarPoint(
                 polarCoordinates.Phi + stepVector.AngleDisplacement(contact) * timeStepWidth,
                 polarCoordinates.R + stepVector.RadialDisplacement(contact) * timeStepWidth,
@@ -92,7 +93,7 @@ public class Particle : IParticle<NodeBase>
 
         _nodes = previousState
             .Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, this))
-            .ToParticleSurface();
+            .ToReadOnlyParticleSurface();
     }
 
     /// <inheritdoc/>
@@ -140,4 +141,7 @@ public class Particle : IParticle<NodeBase>
 
     /// <inheritdoc />
     public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;
+
+    /// <inheritdoc />
+    public IReadOnlyContactCollection<IParticleContactEdge<Particle>> Contacts => _contacts ??=  SolverSession.CurrentState.ParticleContacts.From(Id).ToReadOnlyContactCollection();
 }

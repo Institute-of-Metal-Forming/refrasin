@@ -9,9 +9,10 @@ namespace RefraSin.ParticleModel.Particles;
 
 public interface IParticle<out TNode> : IParticle where TNode : IParticleNode
 {
-    public new IReadOnlyParticleSurface<TNode> Nodes { get; }
-
-    IReadOnlyParticleSurface<IParticleNode> IParticle.Nodes => (IReadOnlyParticleSurface<IParticleNode>)Nodes;
+    /// <summary>
+    /// List of node specs.
+    /// </summary>
+    public IReadOnlyParticleSurface<TNode> Nodes { get; }
 }
 
 public interface IParticle : IVertex, IPolarCoordinateSystem
@@ -25,11 +26,6 @@ public interface IParticle : IVertex, IPolarCoordinateSystem
     /// ID of the material.
     /// </summary>
     Guid MaterialId { get; }
-
-    /// <summary>
-    /// List of node specs.
-    /// </summary>
-    public IReadOnlyParticleSurface<IParticleNode> Nodes { get; }
 
     IPoint ICoordinateSystem.Origin => Coordinates;
 

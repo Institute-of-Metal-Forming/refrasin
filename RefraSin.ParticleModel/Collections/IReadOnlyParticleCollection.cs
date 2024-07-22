@@ -1,3 +1,4 @@
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.ParticleModel.Collections;
@@ -6,7 +7,8 @@ namespace RefraSin.ParticleModel.Collections;
 /// An interface for collections of particles, where items can be indexed by position and GUID.
 /// </summary>
 /// <typeparam name="TParticle"></typeparam>
-public interface IReadOnlyParticleCollection<out TParticle> : IReadOnlyList<TParticle> where TParticle : IParticle
+/// <typeparam name="TNode"></typeparam>
+public interface IReadOnlyParticleCollection<out TParticle, out TNode> : IReadOnlyList<TParticle> where TParticle : IParticle<TNode> where TNode : IParticleNode
 // IReadOnlyDictionary is not implemented, since this would break covariance
 {
     /// <summary>

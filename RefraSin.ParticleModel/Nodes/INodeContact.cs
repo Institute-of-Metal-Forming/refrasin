@@ -1,9 +1,11 @@
+using RefraSin.Graphs;
+
 namespace RefraSin.ParticleModel.Nodes;
 
 /// <summary>
 /// Interface for nodes being in contact with another.
 /// </summary>
-public interface INodeContact 
+public interface INodeContact
 {
     /// <summary>
     /// ID of the other node, the contact is built to.

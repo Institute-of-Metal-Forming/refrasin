@@ -1,3 +1,4 @@
+using RefraSin.Graphs;
 using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.ParticleModel.Collections;
@@ -5,8 +6,8 @@ namespace RefraSin.ParticleModel.Collections;
 /// <summary>
 /// An interface for collections of particle contacts, where items can be indexed by position and GUIDs.
 /// </summary>
-/// <typeparam name="TParticleContact"></typeparam>
-public interface IReadOnlyParticleContactCollection<out TParticleContact> : IReadOnlyList<TParticleContact> where TParticleContact : IParticleContact
+/// <typeparam name="TContact"></typeparam>
+public interface IReadOnlyContactCollection<out TContact> : IReadOnlyList<TContact> where TContact : IEdge
 // IReadOnlyDictionary is not implemented, since this would break covariance
 {
     /// <summary>
@@ -15,7 +16,7 @@ public interface IReadOnlyParticleContactCollection<out TParticleContact> : IRea
     /// <param name="from"></param>
     /// <param name="to"></param>
     /// <exception cref="KeyNotFoundException">if a particle contact with the specified IDs is not present</exception>
-    public TParticleContact this[Guid from, Guid to] { get; }
+    public TContact this[Guid from, Guid to] { get; }
 
     /// <summary>
     /// Returns the index of the specified particle contact.
@@ -31,4 +32,8 @@ public interface IReadOnlyParticleContactCollection<out TParticleContact> : IRea
     /// <param name="from"></param>
     /// <param name="to"></param>
     public bool Contains(Guid from, Guid to);
+
+    IEnumerable<TContact> From(Guid id);
+    
+    IEnumerable<TContact> To(Guid id);
 }

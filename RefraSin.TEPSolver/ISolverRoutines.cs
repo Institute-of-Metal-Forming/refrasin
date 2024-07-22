@@ -50,7 +50,7 @@ public interface ISolverRoutines
     /// <summary>
     /// Collection of routines for recovering invalid solution states.
     /// </summary>
-    IEnumerable<IParticleRemesher> Remeshers { get; }
+    IEnumerable<IParticleSystemRemesher> Remeshers { get; }
 
     void RegisterWithSolver(SinteringSolver solver);
 }

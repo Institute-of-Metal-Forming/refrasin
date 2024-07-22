@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepWidthControllers;

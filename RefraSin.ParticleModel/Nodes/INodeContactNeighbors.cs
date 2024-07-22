@@ -4,7 +4,7 @@ namespace RefraSin.ParticleModel.Nodes;
 
 public interface INodeContactNeighbors : INodeContact
 {
-    IParticle ContactedParticle { get; }
+    IParticle<IParticleNode> ContactedParticle { get; }
     
     INodeContactNeighbors ContactedNode { get; }
 }

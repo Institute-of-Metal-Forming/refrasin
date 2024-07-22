@@ -66,20 +66,15 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
     public ToUpperToLower<double> Volume { get; }
     public ToUpperToLower<Angle> SurfaceNormalAngle { get; }
     public ToUpperToLower<Angle> SurfaceTangentAngle { get; }
-
-    /// <inheritdoc />
     public ToUpperToLower<Angle> RadiusNormalAngle { get; }
-
-    /// <inheritdoc />
     public ToUpperToLower<Angle> RadiusTangentAngle { get; }
-
     public ToUpperToLower<double> InterfaceFlux { get; }
     public ToUpperToLower<double> VolumeFlux { get; }
     public double TransferFlux { get; }
     public NormalTangential<double> GibbsEnergyGradient { get; }
     public NormalTangential<double> VolumeGradient { get; }
     public NormalTangential<double> Shift { get; }
-    public IParticle Particle { get; }
+    public IParticle<IParticleNode> Particle { get; }
 }
 
 internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeContactGradients
@@ -96,9 +91,9 @@ internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeConta
         ContactedNodeId = template.ContactedNodeId;
         ContactedParticleId = template.ContactedParticleId;
         AngleDistanceToContactDirection = template.AngleDistanceToContactDirection;
-        ContactedParticlesCenter = new PolarPoint(
-            template.ContactedParticlesCenter.Phi,
-            template.ContactedParticlesCenter.R * norm.Length,
+        ContactVector = new PolarVector(
+            template.ContactVector.Phi,
+            template.ContactVector.R * norm.Length,
             particle
         );
         CenterShiftVectorDirection = template.CenterShiftVectorDirection;
@@ -106,24 +101,11 @@ internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeConta
         ContactDirectionGradient = template.ContactDirectionGradient / norm.Length / norm.Time;
     }
 
-    /// <inheritdoc />
     public Guid ContactedNodeId { get; }
-
-    /// <inheritdoc />
     public Guid ContactedParticleId { get; }
-
-    /// <inheritdoc />
     public Angle AngleDistanceToContactDirection { get; }
-
-    /// <inheritdoc />
-    public IPolarPoint ContactedParticlesCenter { get; }
-
-    /// <inheritdoc />
+    public IPolarVector ContactVector { get; }
     public NormalTangential<Angle> CenterShiftVectorDirection { get; }
-
-    /// <inheritdoc />
     public NormalTangential<double> ContactDistanceGradient { get; }
-
-    /// <inheritdoc />
     public NormalTangential<double> ContactDirectionGradient { get; }
 }

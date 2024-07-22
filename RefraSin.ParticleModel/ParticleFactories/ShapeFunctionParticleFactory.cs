@@ -8,7 +8,7 @@ using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.ParticleFactories;
 
-public class ShapeFunctionParticleFactory : IParticleFactory
+public class ShapeFunctionParticleFactory : IParticleFactory<Particle<ParticleNode>, ParticleNode>
 {
     public ShapeFunctionParticleFactory(double baseRadius, double peakHeight, uint peakCount, double ovality, Guid materialId)
     {
@@ -40,7 +40,7 @@ public class ShapeFunctionParticleFactory : IParticleFactory
     public virtual double ParticleShapeFunction(double phi) => BaseRadius * (1 + PeakHeight * Cos(PeakCount * phi) + Ovality * Cos(2 * phi));
 
     /// <inheritdoc />
-    public IParticle GetParticle()
+    public Particle<ParticleNode> GetParticle()
     {
         var nodeCount = NodeCountFunction?.Invoke(this) ?? NodeCount;
 
@@ -48,7 +48,7 @@ public class ShapeFunctionParticleFactory : IParticleFactory
         var rs = phis.Select(ParticleShapeFunction).ToArray();
         var particleId = Guid.NewGuid();
 
-        return new Particle(
+        return new Particle<ParticleNode>(
             particleId,
             CenterCoordinates,
             RotationAngle,
@@ -56,7 +56,7 @@ public class ShapeFunctionParticleFactory : IParticleFactory
             NodeFactory
         );
 
-        IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
+        IEnumerable<ParticleNode> NodeFactory(IParticle<ParticleNode> particle) =>
             phis.Zip(rs).Select(
                 t => new ParticleNode(
                     Guid.NewGuid(),

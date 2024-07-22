@@ -1,4 +1,5 @@
 using RefraSin.Numerics.Exceptions;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepValidators;

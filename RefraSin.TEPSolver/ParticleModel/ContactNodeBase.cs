@@ -5,7 +5,6 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using static System.Math;
-using static MathNet.Numerics.Constants;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -82,7 +81,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
 
     public override NormalTangential<double> TorqueLeverArm =>
         _torqueLeverArm ??= new NormalTangential<double>(Sin(TorqueProjectionAngle.Normal), Sin(TorqueProjectionAngle.Tangential)) *
-                                    (IsParentsNode ? ContactedNode.Coordinates.R : Coordinates.R);
+                            (IsParentsNode ? ContactedNode.Coordinates.R : Coordinates.R);
 
     private NormalTangential<double>? _torqueLeverArm;
 
@@ -153,12 +152,11 @@ public abstract class ContactNodeBase
         _contactedParticleId ??= SolverSession.CurrentState.Nodes[ContactedNodeId].ParticleId;
 
     /// <inheritdoc />
-    public Guid ContactedNodeId => _contactedNodeId ??= SolverSession.CurrentState.NodeContacts[Id];
+    public Guid ContactedNodeId => _contactedNodeId ??= SolverSession.CurrentState.NodeContacts.From(Id).Single().To.Id;
 
-    /// <inheritdoc />
     public Particle ContactedParticle => ContactedNode.Particle;
 
-    IParticle INodeContactNeighbors.ContactedParticle => Particle;
+    IParticle<IParticleNode> INodeContactNeighbors.ContactedParticle => Particle;
 
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
@@ -171,16 +169,15 @@ public abstract class ContactNodeBase
 
     INodeContactNeighbors INodeContactNeighbors.ContactedNode => ContactedNode;
 
-    public IPolarPoint ContactedParticlesCenter =>
-        new PolarPoint(ContactDirection, ContactDistance, Particle);
+    public IPolarVector ContactVector => Contact.ContactVector;
 
-    public double ContactDistance => Contact.Distance;
+    public double ContactDistance => ContactVector.R;
 
     public Angle ContactDirection => IsParentsNode ? Contact.DirectionFrom : Contact.DirectionTo;
 
     /// <inheritdoc />
     public Angle AngleDistanceToContactDirection =>
-        _angleDistanceFromContactDirection ??= ContactedParticlesCenter.AngleTo(
+        _angleDistanceFromContactDirection ??= ContactVector.AngleTo(
             Coordinates,
             allowNegative: true
         );

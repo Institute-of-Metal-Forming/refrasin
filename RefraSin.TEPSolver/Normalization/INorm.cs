@@ -30,7 +30,7 @@ public interface INorm
             state.Time,
             state.Particles.Select(p =>
             {
-                IEnumerable<IParticleNode> NodeFactory(IParticle particle) =>
+                IEnumerable<ParticleNode> NodeFactory(IParticle<IParticleNode> particle) =>
                     p.Nodes.Select(n => new ParticleNode(
                         n.Id,
                         particle,
@@ -38,7 +38,7 @@ public interface INorm
                         n.Type
                     ));
 
-                return new Particle(
+                return new Particle<ParticleNode>(
                     p.Id,
                     new AbsolutePoint(p.Coordinates.X / Length, p.Coordinates.Y / Length),
                     p.RotationAngle,

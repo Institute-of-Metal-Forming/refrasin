@@ -30,7 +30,7 @@ internal record ParticleReturn : IParticle<NodeReturn>
                     _ => new NodeReturn(n, stepVector, this, norm)
                 }
             )
-            .ToParticleSurface();
+            .ToReadOnlyParticleSurface();
     }
 
     public Guid Id { get; }
