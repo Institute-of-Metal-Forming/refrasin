@@ -184,7 +184,7 @@ public static class Jacobian
 
     public static JacobianRow ContactConstraintDistance(
         StepVector stepVector,
-        IParticleContact contact,
+        ParticleContact contact,
         ContactNodeBase node
     )
     {
@@ -218,7 +218,7 @@ public static class Jacobian
 
     public static JacobianRow ContactConstraintDirection(
         StepVector stepVector,
-        IParticleContact contact,
+        ParticleContact contact,
         ContactNodeBase node
     )
     {

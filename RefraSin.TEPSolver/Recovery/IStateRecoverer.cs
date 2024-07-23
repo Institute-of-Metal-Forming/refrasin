@@ -1,3 +1,5 @@
+using RefraSin.TEPSolver.ParticleModel;
+
 namespace RefraSin.TEPSolver.Recovery;
 
 /// <summary>

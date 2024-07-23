@@ -3,12 +3,14 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Polar;
+using RefraSin.Graphs;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
+using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -17,7 +19,6 @@ using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
-using Particle = RefraSin.ParticleModel.Particles.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -126,20 +127,15 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                 var remeshedState = new SystemState(
                     Guid.NewGuid(),
                     session.CurrentState.Time,
-                    session.CurrentState.Particles.Select(p =>
-                        session.Routines.Remeshers.Aggregate(
-                            (IParticle)p,
-                            (rp, remesher) => remesher.Remesh(rp)
-                        )
+                    session.Routines.Remeshers.Aggregate<IParticleSystemRemesher, IParticleSystem<IParticle<IParticleNode>, IParticleNode>>(
+                        session.CurrentState,
+                        (state, remesher) => remesher.RemeshSystem(state)
                     )
                 );
 
                 session = new SolverSession(
                     session,
-                    remeshedState,
-                    session
-                        .CurrentState.ParticleContacts.Select(c => (c.Id, c.From.Id, c.To.Id))
-                        .ToArray()
+                    remeshedState
                 );
                 InvokeSessionInitialized(session);
                 session.Logger.LogInformation(

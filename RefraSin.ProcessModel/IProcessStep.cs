@@ -1,3 +1,6 @@
+using RefraSin.ParticleModel.Nodes;
+using RefraSin.ParticleModel.Particles;
+
 namespace RefraSin.ProcessModel;
 
 /// <summary>

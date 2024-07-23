@@ -1,5 +1,6 @@
 using MathNet.Numerics.RootFinding;
 using RefraSin.TEPSolver.EquationSystem;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.RootFinding;

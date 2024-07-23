@@ -5,16 +5,14 @@ using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Particles;
 
-public record Particle : IParticle
+public record Particle<TNode> : IParticle<TNode> where TNode : IParticleNode
 {
-    private readonly ReadOnlyParticleSurface<IParticleNode> _nodes;
-
     public Particle(
         Guid id,
         ICartesianPoint centerCoordinates,
         Angle rotationAngle,
         Guid materialId,
-        Func<IParticle, IEnumerable<IParticleNode>> nodesFactory
+        Func<IParticle<TNode>, IEnumerable<TNode>> nodesFactory
     )
     {
         Id = id;
@@ -26,21 +24,23 @@ public record Particle : IParticle
             throw new InvalidOperationException(
                 "All nodes produced by the factory must be associated with the created particle instance."
             );
-        _nodes = new ReadOnlyParticleSurface<IParticleNode>(nodes);
+        _nodes = new ReadOnlyParticleSurface<TNode>(nodes);
     }
 
-    public Particle(IParticle template)
+    public Particle(IParticle<TNode> template, Func<INode, IParticle<TNode>, TNode> nodeSelector)
         : this(
             template.Id,
             template.Coordinates,
             template.RotationAngle,
             template.MaterialId,
-            particle => template.Nodes.Select(n => new ParticleNode(n, particle))
+            particle => template.Nodes.Select(n => nodeSelector(n, particle))
         ) { }
 
-    public IReadOnlyParticleSurface<IParticleNode> Nodes => _nodes;
+    public IReadOnlyParticleSurface<TNode> Nodes => _nodes;
     public Guid Id { get; }
     public ICartesianPoint Coordinates { get; }
     public Angle RotationAngle { get; }
     public Guid MaterialId { get; }
+
+    private readonly ReadOnlyParticleSurface<TNode> _nodes;
 }

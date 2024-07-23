@@ -19,7 +19,7 @@ public record SolverRoutines(
     INormalizer Normalizer,
     IStepWidthController StepWidthController,
     IEnumerable<IStateRecoverer> StateRecoverers,
-    IEnumerable<IParticleRemesher> Remeshers) : ISolverRoutines
+    IEnumerable<IParticleSystemRemesher> Remeshers) : ISolverRoutines
 {
     public static readonly SolverRoutines Default = new(
         new StepEstimator(),
@@ -44,7 +44,8 @@ public record SolverRoutines(
         ],
         [
             new FreeSurfaceRemesher(),
-            new NeckNeighborhoodRemesher()
+            new NeckNeighborhoodRemesher(),
+            new GrainBoundaryRemesher(),
         ]
     );
 

@@ -14,11 +14,11 @@ public class FreeSurfaceRemesher(
 ) : IParticleRemesher
 {
     /// <inheritdoc />
-    public IParticle Remesh(IParticle particle)
+    public IParticle<IParticleNode> Remesh(IParticle<IParticleNode> particle)
     {
         var meanDiscretizationWidth = particle.Nodes.Average(n => n.SurfaceDistance.ToUpper);
 
-        IEnumerable<IParticleNode> NodeFactory(IParticle newParticle) =>
+        IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> newParticle) =>
             FilterNodes(
                 newParticle,
                 particle.Nodes,
@@ -26,7 +26,7 @@ public class FreeSurfaceRemesher(
                 meanDiscretizationWidth * MaxWidthFactor
             );
 
-        var newParticle = new Particle(
+        var newParticle = new Particle<IParticleNode>(
             particle.Id,
             particle.Coordinates,
             particle.RotationAngle,
@@ -38,7 +38,7 @@ public class FreeSurfaceRemesher(
     }
 
     private IEnumerable<IParticleNode> FilterNodes(
-        IParticle particle,
+        IParticle<IParticleNode> particle,
         IEnumerable<IParticleNode> nodes,
         double minDistance,
         double maxDistance

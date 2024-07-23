@@ -1,9 +1,10 @@
 using System.Collections;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.ParticleModel.Collections;
 
-public class ReadOnlyParticleCollection<TParticle> : IReadOnlyParticleCollection<TParticle> where TParticle : IParticle
+public class ReadOnlyParticleCollection<TParticle, TNode> : IReadOnlyParticleCollection<TParticle, TNode> where TParticle : IParticle<TNode> where TNode : IParticleNode
 {
     private TParticle[] _particles;
     private Dictionary<Guid, int> _particleIndices;
@@ -44,5 +45,5 @@ public class ReadOnlyParticleCollection<TParticle> : IReadOnlyParticleCollection
     /// <inheritdoc />
     public TParticle Root => _particles[0];
 
-    public static ReadOnlyParticleCollection<TParticle> Empty { get; } = new();
+    public static ReadOnlyParticleCollection<TParticle, TNode> Empty { get; } = new();
 }

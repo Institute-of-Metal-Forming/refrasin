@@ -1,13 +1,17 @@
 using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using static NUnit.Framework.Assert;
+using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.Test;
 
 public class TestSpecs
 {
-    private IParticle _particle;
+    private IParticle<IParticleNode> _particle;
 
     [SetUp]
     public void Setup()

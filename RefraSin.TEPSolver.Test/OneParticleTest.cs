@@ -12,6 +12,7 @@ using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver;
 using RefraSin.TEPSolver.EquationSystem;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 using static MoreLinq.Extensions.IndexExtension;
@@ -69,7 +70,7 @@ public class OneParticleTest
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
-    private IParticle _particle;
+    private IParticle<IParticleNode> _particle;
     private SinteringSolver _solver;
     private IMaterial _material;
     private IMaterialInterface _materialInterface;

@@ -9,7 +9,7 @@ public interface IParticleNode : INode, INodeGeometry, INodeNeighbors
     /// <summary>
     /// Particle this node belongs to.
     /// </summary>
-    public IParticle Particle { get; }
+    public IParticle<IParticleNode> Particle { get; }
     
     INode INodeNeighbors.Upper => Particle.Nodes.UpperNeighborOf(this);
     INode INodeNeighbors.Lower => Particle.Nodes.LowerNeighborOf(this);

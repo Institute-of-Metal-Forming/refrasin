@@ -4,13 +4,13 @@ using RefraSin.ParticleModel.Particles;
 
 namespace Refrasin.HDF5Storage;
 
-internal struct ContactCompound(IParticleContact contact)
+internal struct ContactCompound(IParticleContactEdge contact)
 {
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
-    public string From = contact.From.Id.ToString();
+    public string From = contact.From.ToString();
 
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
-    public string To = contact.To.Id.ToString();
+    public string To = contact.To.ToString();
 
     public double Distance = contact.Distance;
 

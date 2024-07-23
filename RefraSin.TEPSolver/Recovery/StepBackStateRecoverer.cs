@@ -1,4 +1,5 @@
 using RefraSin.Enumerables;
+using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.Recovery;
 

@@ -7,53 +7,26 @@ using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
-public class ParticleContact : DirectedEdge<Particle>, IParticleContact
+public record ParticleContact : ParticleContactEdge<Particle>
 {
     private IList<ContactNodeBase>? _fromNodes;
     private IList<ContactNodeBase>? _toNodes;
 
     /// <inheritdoc />
-    public ParticleContact(Guid id, Particle from, Particle to)
-        : base(id, from, to)
+    public ParticleContact(Particle from, Particle to)
+        : base(from, to)
     {
-        Distance = from.Coordinates.DistanceTo(to.Coordinates);
-        DirectionFrom = new PolarVector(to.Coordinates - from.Coordinates, from).Phi;
-        DirectionTo = new PolarVector(from.Coordinates - to.Coordinates, to).Phi;
+        var bytes1 = from.Id.ToByteArray();
+        var bytes2 = to.Id.ToByteArray();
+        var xoredBytes = new byte[16];
+
+        for (var i = 0; i < 16; i++)
+        {
+            xoredBytes[i] = (byte)(bytes1[i] ^ bytes2[i]);
+        }
+
+        MergedId = new Guid(xoredBytes);
     }
-
-    /// <inheritdoc />
-    public double Distance { get; }
-
-    /// <inheritdoc />
-    public Angle DirectionFrom { get; }
-
-    /// <inheritdoc />
-    public Angle DirectionTo { get; }
-
-    /// <inheritdoc />
-    public bool Equals(IEdge<IParticle>? other)
-    {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return From.Equals(other.From) && To.Equals(other.To);
-    }
-
-    /// <inheritdoc />
-    IParticle IEdge<IParticle>.From => From;
-
-    /// <inheritdoc />
-    IParticle IEdge<IParticle>.To => To;
-
-    /// <inheritdoc />
-    public bool IsEdgeFrom(IParticle from) => From.Equals(from);
-
-    /// <inheritdoc />
-    public bool IsEdgeTo(IParticle to) => To.Equals(to);
-
-    /// <inheritdoc />
-    IEdge<IParticle> IEdge<IParticle>.Reversed() => new DirectedEdge<IParticle>(To, From);
 
     public IList<ContactNodeBase> FromNodes =>
         _fromNodes ??= From
@@ -63,4 +36,6 @@ public class ParticleContact : DirectedEdge<Particle>, IParticleContact
 
     public IList<ContactNodeBase> ToNodes =>
         _toNodes ??= FromNodes.Select(n => n.ContactedNode).ToArray();
+    
+    public Guid MergedId { get; }
 }

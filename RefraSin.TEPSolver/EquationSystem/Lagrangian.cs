@@ -230,7 +230,7 @@ public static class Lagrangian
 
     public static double ContactConstraintDistance(
         StepVector stepVector,
-        IParticleContact contact,
+        ParticleContact contact,
         ContactNodeBase node
     ) =>
         stepVector.RadialDisplacement(contact)
@@ -250,7 +250,7 @@ public static class Lagrangian
 
     public static double ContactConstraintDirection(
         StepVector stepVector,
-        IParticleContact contact,
+        ParticleContact contact,
         ContactNodeBase node
     ) =>
         stepVector.AngleDisplacement(contact)

@@ -13,6 +13,7 @@ using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
 using RefraSin.TEPSolver.EquationSystem;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 using static System.Math;
@@ -35,7 +36,7 @@ public class TwoParticleTest
             NodeCount = nodeCountPerParticle
         }.GetParticle();
 
-        IEnumerable<IParticleNode> NodeFactory1(IParticle particle) =>
+        IEnumerable<IParticleNode> NodeFactory1(IParticle<IParticleNode> particle) =>
             baseParticle1
                 .Nodes.Skip(1)
                 .Select(n => new ParticleNode(n, particle))
@@ -76,7 +77,7 @@ public class TwoParticleTest
                     ]
                 );
 
-        _particle1 = new Particle(
+        _particle1 = new Particle<IParticleNode>(
             baseParticle1.Id,
             new AbsolutePoint(0, 0),
             0,
@@ -95,7 +96,7 @@ public class TwoParticleTest
             NodeCount = nodeCountPerParticle
         }.GetParticle();
 
-        IEnumerable<IParticleNode> NodeFactory2(IParticle particle) =>
+        IEnumerable<IParticleNode> NodeFactory2(IParticle<IParticleNode> particle) =>
             baseParticle2
                 .Nodes.Skip(1)
                 .Select(n => new ParticleNode(n, particle))
@@ -136,7 +137,7 @@ public class TwoParticleTest
                     ]
                 );
 
-        _particle2 = new Particle(
+        _particle2 = new Particle<IParticleNode>(
             baseParticle2.Id,
             new AbsolutePoint(360e-6, 0),
             PI,
@@ -180,12 +181,12 @@ public class TwoParticleTest
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
-    private IParticle _particle1;
-    private IParticle _particle2;
+    private IParticle<IParticleNode> _particle1;
+    private IParticle<IParticleNode> _particle2;
     private SinteringSolver _solver;
     private IMaterial _material;
     private IMaterialInterface _materialInterface;
-    private ISystemState _initialState;
+    private SystemState _initialState;
     private SinteringStep _sinteringProcess;
     private InMemorySolutionStorage _solutionStorage;
     private string _tempDir;
@@ -256,9 +257,9 @@ public class TwoParticleTest
         finally
         {
             PlotParticles();
-            PlotDisplacements();
             PlotTimeSteps();
             PlotParticleCenter();
+            PlotParticleRotation();
         }
     }
 
@@ -351,22 +352,6 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].Coordinates.X - _particle1.Coordinates.X
-                ))
-                .ToArray()
-        );
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    s.Particles[0].Coordinates.Y - _particle1.Coordinates.Y
-                ))
-                .ToArray()
-        );
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
                     s.Particles[1].Coordinates.X - _particle2.Coordinates.X
                 ))
                 .ToArray()
@@ -379,11 +364,21 @@ public class TwoParticleTest
                 ))
                 .ToArray()
         );
+
+        plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
+    }
+
+    private void PlotParticleRotation()
+    {
+        var plt = new Plot();
+
+        var initialAngle = new PolarVector(_particle1.Coordinates.VectorTo(_particle2.Coordinates), _particle1).Phi;
+
         plt.Add.Scatter(
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].RotationAngle - _particle1.RotationAngle
+                    new PolarVector(s.Particles[0].Coordinates.VectorTo(s.Particles[1].Coordinates), s.Particles[0]).Phi - initialAngle
                 ))
                 .ToArray()
         );
@@ -396,6 +391,6 @@ public class TwoParticleTest
                 .ToArray()
         );
 
-        plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
+        plt.SavePng(Path.Combine(_tempDir, "particleRotation.png"), 600, 400);
     }
 }

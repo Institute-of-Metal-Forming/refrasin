@@ -19,9 +19,9 @@ public class UndirectedGraphTests
 
         _edges = new IEdge<Vertex>[]
         {
-            new UndirectedEdge<Vertex>(_vertices[0], _vertices[1]),
-            new UndirectedEdge<Vertex>(_vertices[1], _vertices[2]),
-            new UndirectedEdge<Vertex>(_vertices[2], _vertices[0]),
+            new Edge<Vertex>(_vertices[0], _vertices[1], false),
+            new Edge<Vertex>(_vertices[1], _vertices[2], false),
+            new Edge<Vertex>(_vertices[2], _vertices[0], false),
         };
 
         _graph = new UndirectedGraph<Vertex>(_vertices, _edges);

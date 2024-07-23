@@ -7,5 +7,5 @@ public interface INodeContactGeometry : INodeContact
 {
     Angle AngleDistanceToContactDirection { get; }
 
-    IPolarPoint ContactedParticlesCenter { get; }
+    IPolarVector ContactVector { get; }
 }

@@ -1,21 +1,40 @@
 namespace RefraSin.Graphs;
 
-public interface IEdge<TVertex> : IEquatable<IEdge<TVertex>> where TVertex : IVertex
+public interface IEdge<out TVertex> : IEdge where TVertex : IVertex
 {
-    Guid Id => Helper.MergeGuids(From.Id, To.Id);
-    
-    TVertex From { get; }
-    TVertex To { get; }
+    new TVertex From { get; }
+    new TVertex To { get; }
+
+    Guid IEdge.From => From.Id;
+    Guid IEdge.To => To.Id;
+
+    new IEdge<TVertex> Reversed();
+}
+
+public interface IEdge : IEquatable<IEdge>
+{
+    Guid From { get; }
+    Guid To { get; }
 
     bool IsDirected { get; }
 
-    public bool IsEdgeFrom(TVertex from);
+    IEdge Reversed();
 
-    public bool IsEdgeTo(TVertex to);
+    bool IEquatable<IEdge>.Equals(IEdge? other)
+    {
+        if (other is null)
+            return false;
 
-    public bool IsEdgeAt(TVertex vertex) => IsEdgeFrom(vertex) || IsEdgeTo(vertex);
+        if (ReferenceEquals(this, other))
+            return true;
 
-    public bool IsEdgeFromTo(TVertex from, TVertex to) => IsEdgeFrom(from) && IsEdgeTo(to);
+        if (From == other.From && To == other.To && IsDirected == other.IsDirected)
+            return true;
 
-    public IEdge<TVertex> Reversed();
+        if (IsDirected == false)
+            if (To == other.From && From == other.To && IsDirected == other.IsDirected)
+                return true;
+
+        return false;
+    }
 }

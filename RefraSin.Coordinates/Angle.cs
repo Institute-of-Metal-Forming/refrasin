@@ -10,6 +10,7 @@ namespace RefraSin.Coordinates;
 /// </summary>
 public readonly struct Angle
     : IFormattable,
+        IComparable<Angle>,
         IIsClose<Angle>,
         IAdditionOperators<Angle, Angle, Angle>,
         IMultiplyOperators<Angle, double, Angle>,
@@ -582,4 +583,7 @@ public readonly struct Angle
         /// </summary>
         WithNegative
     }
+
+    /// <inheritdoc />
+    public int CompareTo(Angle other) => Radians.CompareTo(other.Radians);
 }

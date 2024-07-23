@@ -1,15 +1,12 @@
-using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Collections;
-using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.Particles;
+using RefraSin.ParticleModel.System;
 
 namespace RefraSin.ProcessModel;
 
 /// <summary>
 /// Interface for classes representing the state of a particle group at a certain position in time and process line.
 /// </summary>
-public interface ISystemState
+public interface ISystemState<out TParticle, out TNode> : IParticleSystem<TParticle, TNode>
+    where TParticle : IParticle<TNode> where TNode : IParticleNode
 {
     /// <summary>
     /// Unique ID of this state.
@@ -20,14 +17,4 @@ public interface ISystemState
     /// Time coordinate.
     /// </summary>
     double Time { get; }
-
-    /// <summary>
-    /// List of particle specifications.
-    /// </summary>
-    IReadOnlyParticleCollection<IParticle> Particles { get; }
-
-    /// <summary>
-    /// Collection of all nodes appearing in the particles.
-    /// </summary>
-    IReadOnlyNodeCollection<INode> Nodes { get; }
 }
