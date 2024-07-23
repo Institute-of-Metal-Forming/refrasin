@@ -1,4 +1,5 @@
 using System.Globalization;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
@@ -54,7 +55,7 @@ public class SurfaceRemeshingTest
         plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.png"), 1600, 900);
     }
 
-    void PlotParticle(Plot plot, IParticle particle)
+    void PlotParticle(Plot plot, IParticle<IParticleNode> particle)
     {
         
         plot.Add.Scatter(particle

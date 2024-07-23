@@ -34,11 +34,4 @@
       <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="NeckRemeshingTest.cs" />
-      <None Include="NeckRemeshingTest.cs" />
-      <Compile Remove="SurfaceRemeshingTest.cs" />
-      <None Include="SurfaceRemeshingTest.cs" />
-    </ItemGroup>
-
 </Project>

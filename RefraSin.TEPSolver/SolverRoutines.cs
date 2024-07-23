@@ -44,7 +44,8 @@ public record SolverRoutines(
         ],
         [
             new FreeSurfaceRemesher(),
-            new NeckNeighborhoodRemesher()
+            new NeckNeighborhoodRemesher(),
+            new GrainBoundaryRemesher(),
         ]
     );
 

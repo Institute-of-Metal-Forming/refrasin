@@ -5,13 +5,14 @@ using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
+using RefraSin.ParticleModel.System;
 using ScottPlot;
 using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.Test;
 
 [TestFixture]
-public class NeckRemeshingTest
+public class GrainBoundaryRemeshingTest
 {
     private string _tempDir;
 
@@ -24,66 +25,78 @@ public class NeckRemeshingTest
     }
 
     [Test]
-    [TestCase(13e-6, 2)]
-    [TestCase(2e-6, 0)]
-    public void TestNodeDeletion(double initialNeck, int expectedRemovedNodeCount)
+    [TestCase(30, 2)]
+    [TestCase(2, 0)]
+    public void TestNodeAddition(double initialNeck, int expectedAddedNodeCount)
     {
-        var baseParticle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
+        var baseParticleFactory = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.NewGuid())
         {
             NodeCount = 50
-        }.GetParticle();
+        };
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> particle) =>
-            baseParticle
-                .Nodes.Skip(1)
+            baseParticleFactory.GetParticle()
+                .Nodes.Skip(2).SkipLast(1)
                 .Select(n => new ParticleNode(n, particle))
                 .Concat(
                     [
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
+                            new PolarPoint(new AbsolutePoint(120, -initialNeck)),
                             NodeType.Neck
                         ),
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, 0)),
+                            new PolarPoint(new AbsolutePoint(120, 0)),
                             NodeType.GrainBoundary
                         ),
                         new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
+                            new PolarPoint(new AbsolutePoint(120, initialNeck)),
                             NodeType.Neck
                         ),
                     ]
                 );
 
-        var particle = new Particle<IParticleNode>(
-            baseParticle.Id,
+        var particle1 = new Particle<IParticleNode>(
+            Guid.NewGuid(), 
             new AbsolutePoint(0, 0),
             0,
-            baseParticle.MaterialId,
+            Guid.Empty, 
             NodeFactory
         );
-
-        var remesher = new NeckNeighborhoodRemesher(
-            deletionLimit: 0.4
+        var particle2 = new Particle<IParticleNode>(
+            Guid.NewGuid(),
+            new AbsolutePoint(240, 0),
+            Pi,
+            Guid.Empty,
+            NodeFactory
         );
-        var remeshedParticle = remesher.Remesh(particle);
+        var particleSystem = new ParticleSystem<IParticle<IParticleNode>, IParticleNode>([particle1, particle2]);
+
+        var remesher = new GrainBoundaryRemesher(additionLimit: 1.2);
+        var remeshedParticleSystem = remesher.RemeshSystem(particleSystem);
 
         var plt = new Plot();
         plt.Axes.SquareUnits();
 
-        PlotParticle(plt, particle);
-        PlotParticle(plt, remeshedParticle);
+        PlotParticle(plt, particle1);
+        PlotParticle(plt, particle2);
+        PlotParticle(plt, remeshedParticleSystem.Particles[0]);
+        PlotParticle(plt, remeshedParticleSystem.Particles[1]);
 
-        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
+        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.png"), 1600, 900);
 
         Assert.That(
-            remeshedParticle.Nodes.Count,
-            Is.EqualTo(particle.Nodes.Count - expectedRemovedNodeCount)
+            remeshedParticleSystem.Particles[0].Nodes.Count,
+            Is.EqualTo(particle1.Nodes.Count + expectedAddedNodeCount)
+        );
+        Assert.That(
+            remeshedParticleSystem.Particles[1].Nodes.Count,
+            Is.EqualTo(particle2.Nodes.Count + expectedAddedNodeCount)
         );
     }
 
