@@ -257,9 +257,9 @@ public class TwoParticleTest
         finally
         {
             PlotParticles();
-            PlotDisplacements();
             PlotTimeSteps();
             PlotParticleCenter();
+            PlotParticleRotation();
         }
     }
 
@@ -352,22 +352,6 @@ public class TwoParticleTest
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].Coordinates.X - _particle1.Coordinates.X
-                ))
-                .ToArray()
-        );
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    s.Particles[0].Coordinates.Y - _particle1.Coordinates.Y
-                ))
-                .ToArray()
-        );
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
                     s.Particles[1].Coordinates.X - _particle2.Coordinates.X
                 ))
                 .ToArray()
@@ -380,11 +364,21 @@ public class TwoParticleTest
                 ))
                 .ToArray()
         );
+
+        plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
+    }
+
+    private void PlotParticleRotation()
+    {
+        var plt = new Plot();
+
+        var initialAngle = new PolarVector(_particle1.Coordinates.VectorTo(_particle2.Coordinates), _particle1).Phi;
+
         plt.Add.Scatter(
             _solutionStorage
                 .States.Select(s => new ScottPlot.Coordinates(
                     s.Time,
-                    s.Particles[0].RotationAngle - _particle1.RotationAngle
+                    new PolarVector(s.Particles[0].Coordinates.VectorTo(s.Particles[1].Coordinates), s.Particles[0]).Phi - initialAngle
                 ))
                 .ToArray()
         );
@@ -397,6 +391,6 @@ public class TwoParticleTest
                 .ToArray()
         );
 
-        plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
+        plt.SavePng(Path.Combine(_tempDir, "particleRotation.png"), 600, 400);
     }
 }
