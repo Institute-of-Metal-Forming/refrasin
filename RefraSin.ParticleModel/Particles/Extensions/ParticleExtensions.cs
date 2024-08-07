@@ -2,13 +2,12 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Nodes;
-using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.Particles.Extensions;
 
 public static class ParticleExtensions
 {
-    public static bool MayHaveContactToByRectangularApproximation(
+    public static bool MayHasContactToByRectangularApproximation(
         this IParticleMeasures self,
         IParticleMeasures other
     ) =>
@@ -30,7 +29,7 @@ public static class ParticleExtensions
         return false;
     }
 
-    public static bool PointIsInParticle(
+    public static bool ContainsPoint(
         this IParticle<IParticleNode> self,
         IPoint point,
         double precision = 1e-8
@@ -61,13 +60,13 @@ public static class ParticleExtensions
     public static IParticleMeasures ToMeasures(this IParticle<IParticleNode> self) =>
         self as IParticleMeasures ?? new ParticleMeasures(self);
 
-    public static bool HaveContact(
+    public static bool HasContactTo(
         this IParticle<IParticleNode> self,
         IParticle<IParticleNode> other,
         bool checkSymmetrically = true
     )
     {
-        if (!MayHaveContactToByRectangularApproximation(self.ToMeasures(), other.ToMeasures()))
+        if (!MayHasContactToByRectangularApproximation(self.ToMeasures(), other.ToMeasures()))
             return false;
 
         var othersCenterPolar = new PolarPoint(other.Coordinates, self);
@@ -79,7 +78,7 @@ public static class ParticleExtensions
             self.Nodes.NextUpperNodeFrom(maxAngle).Index
         ];
 
-        return possibleNodes.Any(n => other.PointIsInParticle(n.Coordinates))
-            || (checkSymmetrically && other.HaveContact(self, false)); // fallback reverse calculation for edge cases where one particle contains another
+        return possibleNodes.Any(n => other.ContainsPoint(n.Coordinates))
+            || (checkSymmetrically && other.HasContactTo(self, false)); // fallback reverse calculation for edge cases where one particle contains another
     }
 }

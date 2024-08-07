@@ -19,7 +19,7 @@ public class ParticleExtensionsTests
         Guid.Empty
     ).GetParticle();
 
-    public static IEnumerable<TestCaseData> GenerateMayHaveContactToByRectangularApproximationData()
+    public static IEnumerable<TestCaseData> GenerateMayHasContactToByRectangularApproximationData()
     {
         // self
         yield return new TestCaseData(Particle, true);
@@ -188,23 +188,23 @@ public class ParticleExtensionsTests
     }
 
     [Test]
-    [TestCaseSource(nameof(GenerateMayHaveContactToByRectangularApproximationData))]
-    public void TestMayHaveContactToByRectangularApproximation(
+    [TestCaseSource(nameof(GenerateMayHasContactToByRectangularApproximationData))]
+    public void TestMayHasContactToByRectangularApproximation(
         Particle<ParticleNode> other,
         bool expectedResult
     )
     {
         Assert.That(
-            Particle.MayHaveContactToByRectangularApproximation(other),
+            Particle.MayHasContactToByRectangularApproximation(other),
             Is.EqualTo(expectedResult)
         );
         Assert.That(
-            other.MayHaveContactToByRectangularApproximation(Particle),
+            other.MayHasContactToByRectangularApproximation(Particle),
             Is.EqualTo(expectedResult)
         );
     }
 
-    public static IEnumerable<TestCaseData> GeneratePointIsInParticleData()
+    public static IEnumerable<TestCaseData> GenerateContainsPointData()
     {
         yield return new TestCaseData(new AbsolutePoint(0, 0), true);
         yield return new TestCaseData(new AbsolutePoint(1, 0), true);
@@ -228,13 +228,13 @@ public class ParticleExtensionsTests
     }
 
     [Test]
-    [TestCaseSource(nameof(GeneratePointIsInParticleData))]
-    public void TestPointIsInParticle(IPoint point, bool expectedResult)
+    [TestCaseSource(nameof(GenerateContainsPointData))]
+    public void TestContainsPoint(IPoint point, bool expectedResult)
     {
-        Assert.That(Particle.PointIsInParticle(point), Is.EqualTo(expectedResult));
+        Assert.That(Particle.ContainsPoint(point), Is.EqualTo(expectedResult));
     }
 
-    public static IEnumerable<TestCaseData> GenerateHaveContactData()
+    public static IEnumerable<TestCaseData> GenerateHasContactToData()
     {
         // right away
         yield return new TestCaseData(
@@ -409,10 +409,10 @@ public class ParticleExtensionsTests
     }
 
     [Test]
-    [TestCaseSource(nameof(GenerateHaveContactData))]
-    public void TestHaveContact(Particle<ParticleNode> other, bool expectedResult)
+    [TestCaseSource(nameof(GenerateHasContactToData))]
+    public void TestHasContactTo(Particle<ParticleNode> other, bool expectedResult)
     {
-        Assert.That(Particle.HaveContact(other), Is.EqualTo(expectedResult));
-        Assert.That(other.HaveContact(Particle), Is.EqualTo(expectedResult));
+        Assert.That(Particle.HasContactTo(other), Is.EqualTo(expectedResult));
+        Assert.That(other.HasContactTo(Particle), Is.EqualTo(expectedResult));
     }
 }
