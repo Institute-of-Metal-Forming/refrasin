@@ -9,25 +9,32 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Stellt einen Punkt in Polarkoordinaten dar.
 /// </summary>
-public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
+public class PolarPoint
+    : PolarCoordinates,
+        ICloneable<PolarPoint>,
+        IPolarPoint,
+        IPointArithmetics<PolarPoint, PolarVector>
 {
     /// <summary>
     ///     Creates the point (0, 0).
     /// </summary>
-    public PolarPoint() : base(null) { }
+    public PolarPoint()
+        : base(null) { }
 
     /// <summary>
     ///     Creates the point (0, 0).
     /// </summary>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarPoint(IPolarCoordinateSystem? system) : base(system) { }
+    public PolarPoint(IPolarCoordinateSystem? system)
+        : base(system) { }
 
     /// <summary>
     ///     Creates the point (phi, r).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarPoint((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null) : base(coordinates, system) { }
+    public PolarPoint((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null)
+        : base(coordinates, system) { }
 
     /// <summary>
     ///     Creates the point (phi, r).
@@ -35,21 +42,32 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="phi">angle coordinate</param>
     /// <param name="r">radius coordinate</param>
-    public PolarPoint(Angle phi, double r, IPolarCoordinateSystem? system = null) : base(phi, r, system) { }
+    public PolarPoint(Angle phi, double r, IPolarCoordinateSystem? system = null)
+        : base(phi, r, system) { }
 
     /// <summary>
     ///     Creates a point based on a template. The coordinates systems are automatically cast.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarPoint(IPoint other, IPolarCoordinateSystem? system = null) : base(system)
+    public PolarPoint(IPoint other, IPolarCoordinateSystem? system = null)
+        : base(system)
     {
         var absoluteCoordinates = other.Absolute;
         var originCoordinates = System.Origin.Absolute;
         var x = absoluteCoordinates.X - originCoordinates.X;
         var y = absoluteCoordinates.Y - originCoordinates.Y;
         R = Sqrt(Pow(x, 2) + Pow(y, 2)) / System.RScale;
-        Phi = (y > 0 ? Acos(x / R) : y < 0 ? PI + Acos(-x / R) : x >= 0 ? 0 : PI) - System.RotationAngle;
+        Phi =
+            (
+                y > 0
+                    ? Acos(x / R)
+                    : y < 0
+                        ? PI + Acos(-x / R)
+                        : x >= 0
+                            ? 0
+                            : PI
+            ) - System.RotationAngle;
     }
 
     /// <inheritdoc />
@@ -61,8 +79,10 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
         get
         {
             var origin = System.Origin.Absolute;
-            return new AbsolutePoint(origin.X + R * System.RScale * Cos(Phi + System.RotationAngle),
-                origin.Y + R * System.RScale * Sin(Phi + System.RotationAngle));
+            return new AbsolutePoint(
+                origin.X + R * System.RScale * Cos(Phi + System.RotationAngle),
+                origin.Y + R * System.RScale * Sin(Phi + System.RotationAngle)
+            );
         }
     }
 
@@ -105,7 +125,7 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
-    public IPolarPoint PointHalfWayTo(IPolarPoint other)
+    public PolarPoint Centroid(PolarPoint other)
     {
         if (System.Equals(other.System))
         {
@@ -115,17 +135,17 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
             return new PolarPoint(Phi + Sign(angle) * CosLaw.Gamma(R, s, dist / 2), s, System);
         }
 
-        return PointHalfWayTo((IPoint)other);
+        return Centroid((IPoint)other);
     }
-    
+
     /// <summary>
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public IPolarPoint PointHalfWayTo(IPoint other)
+    public PolarPoint Centroid(IPoint other)
     {
-        var halfwayAbsolute = Absolute.PointHalfWayTo(other.Absolute);
+        var halfwayAbsolute = Absolute.Centroid(other.Absolute);
         return new PolarPoint(halfwayAbsolute, System);
     }
 
@@ -154,7 +174,14 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
             var y = p.R * Sin(p.Phi) + v.R * Sin(v.Phi);
 
             var r = Sqrt(Pow(x, 2) + Pow(y, 2));
-            var phi = y > 0 ? Acos(x / r) : y < 0 ? PI + Acos(-x / r) : x >= 0 ? 0 : PI;
+            var phi =
+                y > 0
+                    ? Acos(x / r)
+                    : y < 0
+                        ? PI + Acos(-x / r)
+                        : x >= 0
+                            ? 0
+                            : PI;
 
             return new PolarPoint(phi, r, p.System);
         }
@@ -184,7 +211,14 @@ public class PolarPoint : PolarCoordinates, ICloneable<PolarPoint>, IPolarPoint
             var y = p1.R * Sin(p1.Phi) - p2.R * Sin(p2.Phi);
 
             var r = Sqrt(Pow(x, 2) + Pow(y, 2));
-            var phi = y > 0 ? Acos(x / r) : y < 0 ? PI + Acos(-x / r) : x >= 0 ? 0 : PI;
+            var phi =
+                y > 0
+                    ? Acos(x / r)
+                    : y < 0
+                        ? PI + Acos(-x / r)
+                        : x >= 0
+                            ? 0
+                            : PI;
 
             return new PolarVector(phi, r, p1.System);
         }

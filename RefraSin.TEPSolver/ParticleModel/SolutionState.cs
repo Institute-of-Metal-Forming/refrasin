@@ -12,32 +12,51 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     {
         Time = time;
         Id = id;
-        Particles = state.Particles.Select(ps => new Particle(ps, solverSession)).ToReadOnlyParticleCollection<Particle, NodeBase>();
+        Particles = state
+            .Particles.Select(ps => new Particle(ps, solverSession))
+            .ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
-        NodeContacts = state.NodeContacts
-            .Select(c => new Edge<ContactNodeBase>((ContactNodeBase)Nodes[c.From.Id], (ContactNodeBase)Nodes[c.To.Id], true))
+        NodeContacts = state
+            .NodeContacts.Select(c => new Edge<ContactNodeBase>(
+                (ContactNodeBase)Nodes[c.From.Id],
+                (ContactNodeBase)Nodes[c.To.Id],
+                true
+            ))
             .ToReadOnlyContactCollection();
-        ParticleContacts = state.ParticleContacts.Select(c => new ParticleContact(Particles[c.From.Id], Particles[c.To.Id]))
+        ParticleContacts = state
+            .ParticleContacts.Select(c => new ParticleContact(
+                Particles[c.From.Id],
+                Particles[c.To.Id]
+            ))
             .ToReadOnlyContactCollection();
     }
 
-    private SolutionState(Guid id, double time, IEnumerable<Particle> particles, IEnumerable<ParticleContact> particleContacts,
-        IEnumerable<IEdge<ContactNodeBase>> nodeContacts)
+    private SolutionState(
+        Guid id,
+        double time,
+        IEnumerable<Particle> particles,
+        IEnumerable<ParticleContact> particleContacts,
+        IEnumerable<IEdge<ContactNodeBase>> nodeContacts
+    )
     {
-        
         Time = time;
         Id = id;
         Particles = particles.ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
         NodeContacts = nodeContacts
-            .Select(c => new Edge<ContactNodeBase>((ContactNodeBase)Nodes[c.From.Id], (ContactNodeBase)Nodes[c.To.Id], true))
+            .Select(c => new Edge<ContactNodeBase>(
+                (ContactNodeBase)Nodes[c.From.Id],
+                (ContactNodeBase)Nodes[c.To.Id],
+                true
+            ))
             .ToReadOnlyContactCollection();
-        ParticleContacts = particleContacts.Select(c => new ParticleContact(Particles[c.From.Id], Particles[c.To.Id]))
+        ParticleContacts = particleContacts
+            .Select(c => new ParticleContact(Particles[c.From.Id], Particles[c.To.Id]))
             .ToReadOnlyContactCollection();
     }
-    
+
     /// <inheritdoc />
     public Guid Id { get; }
 
@@ -55,21 +74,21 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; }
 
     IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
-    IReadOnlyParticleCollection<Particle, NodeBase> IParticleSystem<Particle, NodeBase>.Particles => Particles;
-    IReadOnlyContactCollection<IParticleContactEdge<Particle>> IParticleSystem<Particle, NodeBase>.ParticleContacts => ParticleContacts;
+    IReadOnlyParticleCollection<Particle, NodeBase> IParticleSystem<Particle, NodeBase>.Particles =>
+        Particles;
+    IReadOnlyContactCollection<IParticleContactEdge<Particle>> IParticleSystem<
+        Particle,
+        NodeBase
+    >.ParticleContacts => ParticleContacts;
 
-    IReadOnlyContactCollection<IEdge<NodeBase>> IParticleSystem<Particle, NodeBase>.NodeContacts => NodeContacts;
+    IReadOnlyContactCollection<IEdge<NodeBase>> IParticleSystem<Particle, NodeBase>.NodeContacts =>
+        NodeContacts;
 
     public SolutionState ApplyTimeStep(StepVector stepVector, double timeStepWidth)
     {
         var newParticles = new Dictionary<Guid, Particle>()
         {
-            [Particles.Root.Id] =
-                Particles.Root.ApplyTimeStep(
-                    null,
-                    stepVector,
-                    timeStepWidth
-                )
+            [Particles.Root.Id] = Particles.Root.ApplyTimeStep(null, stepVector, timeStepWidth)
         };
 
         foreach (var contact in ParticleContacts)
@@ -94,13 +113,15 @@ public class SolutionState : ISystemState<Particle, NodeBase>
 
     public void Sanitize()
     {
-        var newNodeCoordinates = NodeContacts.Select(e =>
-        {
-            var node = Nodes[e.From.Id];
-            var contactedNode = Nodes[e.To.Id];
-            var halfway = node.Coordinates.PointHalfWayTo(contactedNode.Coordinates);
-            return (node, halfway);
-        }).ToArray();
+        var newNodeCoordinates = NodeContacts
+            .Select(e =>
+            {
+                var node = Nodes[e.From.Id];
+                var contactedNode = Nodes[e.To.Id];
+                var halfway = node.Coordinates.Centroid(contactedNode.Coordinates);
+                return (node, halfway);
+            })
+            .ToArray();
 
         foreach (var (node, halfway) in newNodeCoordinates)
         {

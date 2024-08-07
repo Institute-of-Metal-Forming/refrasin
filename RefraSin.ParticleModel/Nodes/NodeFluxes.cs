@@ -8,8 +8,9 @@ namespace RefraSin.ParticleModel.Nodes;
 public record NodeFluxes(
     Guid Id,
     Guid ParticleId,
-    IPolarPoint Coordinates,
+    PolarPoint Coordinates,
     NodeType Type,
     ToUpperToLower<double> InterfaceFlux,
     ToUpperToLower<double> VolumeFlux,
-    double TransferFlux) : Node(Id, ParticleId, Coordinates, Type), INodeFluxes { }
+    double TransferFlux
+) : Node(Id, ParticleId, Coordinates, Type), INodeFluxes { }

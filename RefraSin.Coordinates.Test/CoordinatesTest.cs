@@ -4,10 +4,10 @@ using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Polar;
 using static System.Math;
-using static RefraSin.Coordinates.Angle.ReductionDomain;
-using static RefraSin.Coordinates.Constants;
 using static NUnit.Framework.Assert;
 using static NUnit.Framework.Legacy.ClassicAssert;
+using static RefraSin.Coordinates.Angle.ReductionDomain;
+using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.Coordinates.Test;
 
@@ -18,20 +18,13 @@ public class CoordinatesTest
     public void CartesianToPolarTest()
     {
         That(new PolarPoint(new AbsolutePoint(1, 0)).IsClose(new PolarPoint(0, 1)));
-        That(
-            new PolarPoint(new AbsolutePoint(1, 1)).IsClose(new PolarPoint(PI / 4, Sqrt2)));
+        That(new PolarPoint(new AbsolutePoint(1, 1)).IsClose(new PolarPoint(PI / 4, Sqrt2)));
         That(new PolarPoint(new AbsolutePoint(0, 1)).IsClose(new PolarPoint(PI / 2, 1)));
-        That(
-            new PolarPoint(new AbsolutePoint(-1, 1)).IsClose(
-                new PolarPoint(3 * PI / 4, Sqrt2)));
+        That(new PolarPoint(new AbsolutePoint(-1, 1)).IsClose(new PolarPoint(3 * PI / 4, Sqrt2)));
         That(new PolarPoint(new AbsolutePoint(-1, 0)).IsClose(new PolarPoint(PI, 1)));
         That(new PolarPoint(new AbsolutePoint(0, 0)).IsClose(new PolarPoint(0, 0)));
-        That(
-            new PolarPoint(new AbsolutePoint(0, -1)).IsClose(
-                new PolarPoint(3 * PI / 2, 1)));
-        That(
-            new PolarPoint(new AbsolutePoint(-1, -1)).IsClose(
-                new PolarPoint(5 * PI / 4, Sqrt2)));
+        That(new PolarPoint(new AbsolutePoint(0, -1)).IsClose(new PolarPoint(3 * PI / 2, 1)));
+        That(new PolarPoint(new AbsolutePoint(-1, -1)).IsClose(new PolarPoint(5 * PI / 4, Sqrt2)));
     }
 
     [Test]
@@ -54,15 +47,31 @@ public class CoordinatesTest
         That((-0.1 * PI - p1.Phi).Reduce(), Is.EqualTo(new Angle(1.5 * PI)).Within(1e-3));
 
         // reduced to [-π, π]
-        That((0.5 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(0.1 * PI)).Within(1e-3));
-        That((1.2 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(0.8 * PI)).Within(1e-3));
-        That((1.5 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(-0.9 * PI)).Within(1e-3));
-        That((0.3 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(-0.1 * PI)).Within(1e-3));
-        That((-0.1 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(-0.5 * PI)).Within(1e-3));
+        That(
+            (0.5 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(0.1 * PI)).Within(1e-3)
+        );
+        That(
+            (1.2 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(0.8 * PI)).Within(1e-3)
+        );
+        That(
+            (1.5 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(-0.9 * PI)).Within(1e-3)
+        );
+        That(
+            (0.3 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(-0.1 * PI)).Within(1e-3)
+        );
+        That(
+            (-0.1 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(-0.5 * PI)).Within(1e-3)
+        );
 
         That(p1.AngleTo(new PolarPoint(0.5 * PI, 2)), Is.EqualTo(new Angle(0.1 * PI)).Within(1e-3));
-        Throws<DifferentCoordinateSystemException>(() =>
-            p1.AngleTo(new PolarPoint(0, 1, new PolarCoordinateSystem(null, 1))));
+        Throws<DifferentCoordinateSystemException>(
+            () => p1.AngleTo(new PolarPoint(0, 1, new PolarCoordinateSystem(null, 1)))
+        );
     }
 
     [Test]
@@ -123,21 +132,21 @@ public class CoordinatesTest
     }
 
     [Test]
-    public void HalfWayTest()
+    public void CentroidsTest()
     {
         var p1 = new PolarPoint(0.1, 1);
         var p2 = new PolarPoint(0.3, 2);
         var p3 = new PolarPoint(-0.1, 0.5);
         var p4 = new PolarPoint(TwoPi + Pi + 0.3, 2);
 
-        var hw12 = p1.Absolute.PointHalfWayTo(p2.Absolute);
-        var hw13 = p1.Absolute.PointHalfWayTo(p3.Absolute);
-        var hw14 = p1.Absolute.PointHalfWayTo(p4.Absolute);
+        var hw12 = p1.Absolute.Centroid(p2.Absolute);
+        var hw13 = p1.Absolute.Centroid(p3.Absolute);
+        var hw14 = p1.Absolute.Centroid(p4.Absolute);
 
-        That(p1.PointHalfWayTo(p2).Absolute.IsClose(hw12));
-        That(p1.PointHalfWayTo(p3).Absolute.IsClose(hw13));
-        That(p3.PointHalfWayTo(p1).Absolute.IsClose(hw13));
-        That(p1.PointHalfWayTo(p4).Absolute.IsClose(hw14));
+        That(p1.Centroid((IPoint)p2).Absolute.IsClose(hw12));
+        That(p1.Centroid((IPoint)p3).Absolute.IsClose(hw13));
+        That(p3.Centroid((IPoint)p1).Absolute.IsClose(hw13));
+        That(p1.Centroid((IPoint)p4).Absolute.IsClose(hw14));
     }
 
     [Test]
@@ -345,10 +354,7 @@ public class CoordinatesTest
         Console.WriteLine(p1.Absolute.ToString("(,):f2", CultureInfo.InvariantCulture));
         That(new AbsolutePoint(1, 1).IsClose(p1.Absolute));
 
-        var instance = new OriginClass()
-        {
-            Point = new AbsolutePoint(-1, -1)
-        };
+        var instance = new OriginClass() { Point = new AbsolutePoint(-1, -1) };
         system.OriginSource = () => instance.Point;
         Console.WriteLine(p1.Absolute.ToString("(,):f2", CultureInfo.InvariantCulture));
         That(new AbsolutePoint(0, 0).IsClose(p1.Absolute));

@@ -7,7 +7,12 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a vector in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsoluteVector : AbsoluteCoordinates, ICartesianVector, IIsClose<AbsoluteVector>, ICloneable<AbsoluteVector>
+public class AbsoluteVector
+    : AbsoluteCoordinates,
+        ICartesianVector,
+        IIsClose<AbsoluteVector>,
+        ICloneable<AbsoluteVector>,
+        IVectorArithmetics<AbsolutePoint, AbsoluteVector>
 {
     /// <summary>
     ///     Creates the absolute vector (0,0).
@@ -19,19 +24,22 @@ public class AbsoluteVector : AbsoluteCoordinates, ICartesianVector, IIsClose<Ab
     /// </summary>
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vercircal coordinate</param>
-    public AbsoluteVector(double x, double y) : base(x, y) { }
+    public AbsoluteVector(double x, double y)
+        : base(x, y) { }
 
     /// <summary>
     ///     Creates the absolute vector (x, y).
     /// </summary>
     /// <param name="coordinates">tuple (x, y)</param>
-    public AbsoluteVector((double x, double y) coordinates) : base(coordinates) { }
+    public AbsoluteVector((double x, double y) coordinates)
+        : base(coordinates) { }
 
     /// <inheritdoc />
     public AbsoluteVector Clone() => new(X, Y);
 
     /// <inheritdoc />
-    public bool IsClose(AbsoluteVector other, double precision = 1e-8) => X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+    public bool IsClose(AbsoluteVector other, double precision = 1e-8) =>
+        X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
 
     /// <inheritdoc />
     public AbsoluteVector Absolute => this;
@@ -105,8 +113,7 @@ public class AbsoluteVector : AbsoluteCoordinates, ICartesianVector, IIsClose<Ab
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
     /// </summary>
-    public static AbsoluteVector operator *(double d, AbsoluteVector v) =>
-        new(d * v.X, d * v.Y);
+    public static AbsoluteVector operator *(double d, AbsoluteVector v) => new(d * v.X, d * v.Y);
 
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
@@ -116,7 +123,8 @@ public class AbsoluteVector : AbsoluteCoordinates, ICartesianVector, IIsClose<Ab
     /// <summary>
     ///     Scalar product. See <see cref="ScalarProduct" />.
     /// </summary>
-    public static double operator *(AbsoluteVector v1, AbsoluteVector v2) => v1.X * v2.X + v1.Y * v2.Y;
+    public static double operator *(AbsoluteVector v1, AbsoluteVector v2) =>
+        v1.X * v2.X + v1.Y * v2.Y;
 
     /// <inheritdoc />
     public bool IsClose(ICartesianVector other, double precision)
@@ -125,4 +133,8 @@ public class AbsoluteVector : AbsoluteCoordinates, ICartesianVector, IIsClose<Ab
             return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
         return Absolute.IsClose(other.Absolute, precision);
     }
+
+    /// <inheritdoc />
+    public static AbsoluteVector operator /(AbsoluteVector left, double right) =>
+        new(left.X / right, left.Y / right);
 }

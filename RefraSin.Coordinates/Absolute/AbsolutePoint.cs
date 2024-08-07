@@ -7,7 +7,12 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a point in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsolutePoint : AbsoluteCoordinates, ICartesianPoint, ICloneable<AbsolutePoint>, IIsClose<AbsolutePoint>
+public class AbsolutePoint
+    : AbsoluteCoordinates,
+        ICartesianPoint,
+        ICloneable<AbsolutePoint>,
+        IIsClose<AbsolutePoint>,
+        IPointArithmetics<AbsolutePoint, AbsoluteVector>
 {
     /// <summary>
     ///     Creates the absolute point (0,0).
@@ -19,13 +24,15 @@ public class AbsolutePoint : AbsoluteCoordinates, ICartesianPoint, ICloneable<Ab
     /// </summary>
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vercircal coordinate</param>
-    public AbsolutePoint(double x, double y) : base(x, y) { }
+    public AbsolutePoint(double x, double y)
+        : base(x, y) { }
 
     /// <summary>
     ///     Creates the absolute point (x, y).
     /// </summary>
     /// <param name="coordinates">tuple (x, y)</param>
-    public AbsolutePoint((double x, double y) coordinates) : base(coordinates) { }
+    public AbsolutePoint((double x, double y) coordinates)
+        : base(coordinates) { }
 
     /// <inheritdoc />
     public AbsolutePoint Clone() => new(X, Y);
@@ -60,22 +67,23 @@ public class AbsolutePoint : AbsoluteCoordinates, ICartesianPoint, ICloneable<Ab
     }
 
     /// <inheritdoc />
-    public bool IsClose(AbsolutePoint other, double precision = 1e-8) => X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+    public bool IsClose(AbsolutePoint other, double precision = 1e-8) =>
+        X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
 
     /// <summary>
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
     /// <returns></returns>
-    public AbsolutePoint PointHalfWayTo(AbsolutePoint other) =>
+    public AbsolutePoint Centroid(AbsolutePoint other) =>
         new(0.5 * (X + other.X), 0.5 * (Y + other.Y));
-    
+
     /// <summary>
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public AbsolutePoint PointHalfWayTo(IPoint other) => PointHalfWayTo(other.Absolute);
+    public AbsolutePoint Centroid(IPoint other) => Centroid(other.Absolute);
 
     /// <summary>
     ///     Parse from string representation.

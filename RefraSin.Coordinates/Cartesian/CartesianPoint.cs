@@ -7,19 +7,28 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Represents a point in cartesian coordinate system.
 /// </summary>
-public class CartesianPoint : CartesianCoordinates, ICartesianPoint, ICloneable<CartesianPoint>
+public class CartesianPoint
+    : CartesianCoordinates,
+        ICartesianPoint,
+        ICloneable<CartesianPoint>,
+        IPointArithmetics<CartesianPoint, CartesianVector>
 {
     /// <summary>
     ///     Creates the point (0, 0) in the default system.
     /// </summary>
-    public CartesianPoint() : base(null) { }
+    public CartesianPoint()
+        : base(null) { }
 
     /// <summary>
     ///     Creates the point (x, y).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianPoint((double x, double y) coordinates, ICartesianCoordinateSystem? system = null) : base(coordinates, system) { }
+    public CartesianPoint(
+        (double x, double y) coordinates,
+        ICartesianCoordinateSystem? system = null
+    )
+        : base(coordinates, system) { }
 
     /// <summary>
     ///     Creates the point (x, y).
@@ -27,14 +36,16 @@ public class CartesianPoint : CartesianCoordinates, ICartesianPoint, ICloneable<
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vertical coordinate</param>
-    public CartesianPoint(double x, double y, ICartesianCoordinateSystem? system = null) : base(x, y, system) { }
+    public CartesianPoint(double x, double y, ICartesianCoordinateSystem? system = null)
+        : base(x, y, system) { }
 
     /// <summary>
     ///     Creates a point based on a template. The coordinates systems are automatically castd.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianPoint(IPoint other, ICartesianCoordinateSystem? system = null) : base(system)
+    public CartesianPoint(IPoint other, ICartesianCoordinateSystem? system = null)
+        : base(system)
     {
         var absoluteCoords = other.Absolute;
         var baseCoords = System.Origin.Absolute;
@@ -101,21 +112,21 @@ public class CartesianPoint : CartesianCoordinates, ICartesianPoint, ICloneable<
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
-    public CartesianPoint PointHalfWayTo(CartesianPoint other)
+    public CartesianPoint Centroid(CartesianPoint other)
     {
         if (System.Equals(other.System))
             return new CartesianPoint(0.5 * (X + other.X), 0.5 * (Y + other.Y));
-        return PointHalfWayTo((IPoint)other);
+        return Centroid((IPoint)other);
     }
-    
+
     /// <summary>
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public CartesianPoint PointHalfWayTo(IPoint other)
+    public CartesianPoint Centroid(IPoint other)
     {
-        var halfwayAbsolute = Absolute.PointHalfWayTo(other.Absolute);
+        var halfwayAbsolute = Absolute.Centroid(other.Absolute);
         return new CartesianPoint(halfwayAbsolute, System);
     }
 

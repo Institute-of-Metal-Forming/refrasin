@@ -15,7 +15,7 @@ public class GeometryTest
     record DummyNode(
         Guid Id,
         Guid ParticleId,
-        IPolarPoint Coordinates,
+        PolarPoint Coordinates,
         NodeType Type,
         INode Upper,
         INode Lower
@@ -201,7 +201,10 @@ public class GeometryTest
             lower
         );
 
-        That((double)node.SurfaceTangentAngle.ToUpper, Is.EqualTo(2.564106 - HalfOfPi).Within(1e-4));
+        That(
+            (double)node.SurfaceTangentAngle.ToUpper,
+            Is.EqualTo(2.564106 - HalfOfPi).Within(1e-4)
+        );
         That(
             node.SurfaceTangentAngle.ToLower,
             Is.EqualTo(node.SurfaceTangentAngle.ToUpper).Within(1e-8)
@@ -351,6 +354,9 @@ public class GeometryTest
         );
 
         That((double)node.RadiusNormalAngle.ToUpper, Is.EqualTo(2.564106 + 0.50047).Within(1e-4));
-        That((double)node.RadiusNormalAngle.ToLower, Is.EqualTo(2.564106 + (Pi - QuarterOfPi - ThirdOfPi) / 2).Within(1e-4));
+        That(
+            (double)node.RadiusNormalAngle.ToLower,
+            Is.EqualTo(2.564106 + (Pi - QuarterOfPi - ThirdOfPi) / 2).Within(1e-4)
+        );
     }
 }

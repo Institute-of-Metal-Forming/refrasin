@@ -8,25 +8,35 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Stellt einen Vektor im kartesischen Koordinatensystem dar.
 /// </summary>
-public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneable<CartesianVector>
+public class CartesianVector
+    : CartesianCoordinates,
+        ICartesianVector,
+        ICloneable<CartesianVector>,
+        IVectorArithmetics<CartesianPoint, CartesianVector>
 {
     /// <summary>
     ///     Creates the vector (0, 0) in the default system.
     /// </summary>
-    public CartesianVector() : base(null) { }
+    public CartesianVector()
+        : base(null) { }
 
     /// <summary>
     ///     Creates the vector (0, 0).
     /// </summary>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector(CartesianCoordinateSystem? system) : base(system) { }
+    public CartesianVector(CartesianCoordinateSystem? system)
+        : base(system) { }
 
     /// <summary>
     ///     Creates the vector (x, y).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector((double x, double y) coordinates, ICartesianCoordinateSystem? system = null) : base(coordinates, system) { }
+    public CartesianVector(
+        (double x, double y) coordinates,
+        ICartesianCoordinateSystem? system = null
+    )
+        : base(coordinates, system) { }
 
     /// <summary>
     ///     Creates the vector (x, y).
@@ -34,14 +44,16 @@ public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneabl
     /// <param name="system">coordinate system, if null the default system is used</param>
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vertical coordinate</param>
-    public CartesianVector(double x, double y, ICartesianCoordinateSystem? system = null) : base(x, y, system) { }
+    public CartesianVector(double x, double y, ICartesianCoordinateSystem? system = null)
+        : base(x, y, system) { }
 
     /// <summary>
     ///     Creates a vector based on a template. The coordinates systems are automatically castd.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector(IVector other, ICartesianCoordinateSystem? system = null) : base(system)
+    public CartesianVector(IVector other, ICartesianCoordinateSystem? system = null)
+        : base(system)
     {
         var absoluteCoords = other.Absolute;
         X = absoluteCoords.X;
@@ -172,4 +184,8 @@ public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneabl
             return v1.X * v2.X + v1.Y * v2.Y;
         throw new DifferentCoordinateSystemException(v1, v2);
     }
+
+    /// <inheritdoc />
+    public static CartesianVector operator /(CartesianVector left, double right) =>
+        new(left.X / right, left.Y / right);
 }

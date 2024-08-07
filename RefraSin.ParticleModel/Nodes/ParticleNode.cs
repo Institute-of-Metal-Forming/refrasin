@@ -8,7 +8,12 @@ namespace RefraSin.ParticleModel.Nodes;
 /// <summary>
 /// Record of geometry data on a node.
 /// </summary>
-public record ParticleNode(Guid Id, IParticle<IParticleNode> Particle, IPolarPoint Coordinates, NodeType Type)
+public record ParticleNode(
+    Guid Id,
+    IParticle<IParticleNode> Particle,
+    PolarPoint Coordinates,
+    NodeType Type
+)
     : Node(Id, Particle.Id, new PolarPoint(Coordinates.Phi, Coordinates.R, Particle), Type),
         IParticleNode
 {
@@ -46,8 +51,10 @@ public record ParticleNode(Guid Id, IParticle<IParticleNode> Particle, IPolarPoi
         _surfaceTangentAngle ??= this.SurfaceTangentAngle();
 
     /// <inheritdoc />
-    public ToUpperToLower<Angle> RadiusNormalAngle => _radiusNormalAngle ??= this.RadiusNormalAngle();
+    public ToUpperToLower<Angle> RadiusNormalAngle =>
+        _radiusNormalAngle ??= this.RadiusNormalAngle();
 
     /// <inheritdoc />
-    public ToUpperToLower<Angle> RadiusTangentAngle => _radiusTangentAngle ??= this.RadiusTangentAngle();
+    public ToUpperToLower<Angle> RadiusTangentAngle =>
+        _radiusTangentAngle ??= this.RadiusTangentAngle();
 }
