@@ -57,7 +57,7 @@ public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
     {
         angle = angle.Reduce();
         var nextUpperIndex = _nodeAngles.BinarySearch(angle);
-        return nextUpperIndex > 0 ? _nodes[nextUpperIndex] : this[~nextUpperIndex - 1]; // this indexer to allow cyclic indexing
+        return nextUpperIndex >= 0 ? _nodes[nextUpperIndex] : this[~nextUpperIndex - 1]; // this indexer to allow cyclic indexing
     }
 
     /// <inheritdoc />
@@ -65,7 +65,7 @@ public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
     {
         angle = angle.Reduce();
         var nextUpperIndex = _nodeAngles.BinarySearch(angle);
-        return nextUpperIndex > 0 ? _nodes[nextUpperIndex] : this[~nextUpperIndex]; // this indexer to allow cyclic indexing
+        return nextUpperIndex >= 0 ? _nodes[nextUpperIndex] : this[~nextUpperIndex]; // this indexer to allow cyclic indexing
     }
 
     /// <inheritdoc />

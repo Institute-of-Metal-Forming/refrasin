@@ -2,6 +2,7 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Nodes;
+using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.Particles.Extensions;
 
@@ -29,7 +30,11 @@ public static class ParticleExtensions
         return false;
     }
 
-    public static bool PointIsInParticle(this IParticle<IParticleNode> self, IPoint point)
+    public static bool PointIsInParticle(
+        this IParticle<IParticleNode> self,
+        IPoint point,
+        double precision = 1e-8
+    )
     {
         var nodesPolarCoordinates = new PolarPoint(point, self);
 
@@ -42,13 +47,39 @@ public static class ParticleExtensions
         )
             return false;
 
-        var radiusAtAngle = SinLaw.A(
-            upperNeighbor.Coordinates.R,
-            upperNeighbor.SurfaceRadiusAngle.ToLower,
-            upperNeighbor.SurfaceRadiusAngle.ToLower
-                + nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
-        );
+        var radiusAtAngle =
+            SinLaw.A(
+                upperNeighbor.Coordinates.R,
+                upperNeighbor.SurfaceRadiusAngle.ToLower,
+                upperNeighbor.SurfaceRadiusAngle.ToLower
+                    + nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
+            ) + precision;
 
-        return radiusAtAngle > nodesPolarCoordinates.R;
+        return radiusAtAngle >= nodesPolarCoordinates.R;
+    }
+
+    public static IParticleMeasures ToMeasures(this IParticle<IParticleNode> self) =>
+        self as IParticleMeasures ?? new ParticleMeasures(self);
+
+    public static bool HaveContact(
+        this IParticle<IParticleNode> self,
+        IParticle<IParticleNode> other,
+        bool checkSymmetrically = true
+    )
+    {
+        if (!MayHaveContactToByRectangularApproximation(self.ToMeasures(), other.ToMeasures()))
+            return false;
+
+        var othersCenterPolar = new PolarPoint(other.Coordinates, self);
+        var minAngle = othersCenterPolar.Phi - Angle.Right;
+        var maxAngle = othersCenterPolar.Phi + Angle.Right;
+
+        var possibleNodes = self.Nodes[
+            self.Nodes.NextLowerNodeFrom(minAngle).Index,
+            self.Nodes.NextUpperNodeFrom(maxAngle).Index
+        ];
+
+        return possibleNodes.Any(n => other.PointIsInParticle(n.Coordinates))
+            || (checkSymmetrically && other.HaveContact(self, false)); // fallback reverse calculation for edge cases where one particle contains another
     }
 }
