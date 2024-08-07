@@ -2,6 +2,7 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Nodes;
+using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.Particles.Extensions;
 
@@ -62,23 +63,31 @@ public static class ParticleExtensions
 
     public static bool HasContactTo(
         this IParticle<IParticleNode> self,
-        IParticle<IParticleNode> other,
-        bool checkSymmetrically = true
+        IParticle<IParticleNode> other
     )
     {
-        if (!MayHasContactToByRectangularApproximation(self.ToMeasures(), other.ToMeasures()))
+        var selfMeasures = self.ToMeasures();
+        var otherMeasures = other.ToMeasures();
+        if (!MayHasContactToByRectangularApproximation(selfMeasures, otherMeasures))
             return false;
 
         var othersCenterPolar = new PolarPoint(other.Coordinates, self);
-        var minAngle = othersCenterPolar.Phi - Angle.Right;
-        var maxAngle = othersCenterPolar.Phi + Angle.Right;
+        var sightAngle = SinLaw.Alpha(otherMeasures.MaxRadius, othersCenterPolar.R, HalfOfPi);
+        IReadOnlyList<IParticleNode> possibleNodes;
 
-        var possibleNodes = self.Nodes[
-            self.Nodes.NextLowerNodeFrom(minAngle).Index,
-            self.Nodes.NextUpperNodeFrom(maxAngle).Index
-        ];
+        if (!double.IsNaN(sightAngle))
+        {
+            var minAngle = othersCenterPolar.Phi - sightAngle;
+            var maxAngle = othersCenterPolar.Phi + sightAngle;
 
-        return possibleNodes.Any(n => other.ContainsPoint(n.Coordinates))
-            || (checkSymmetrically && other.HasContactTo(self, false)); // fallback reverse calculation for edge cases where one particle contains another
+            var lowestPossibleNode = self.Nodes.NextLowerNodeFrom(minAngle);
+            var highestPossibleNode = self.Nodes.NextUpperNodeFrom(maxAngle);
+            possibleNodes = self.Nodes[lowestPossibleNode.Index, highestPossibleNode.Index];
+        }
+        else
+            possibleNodes = self.Nodes;
+
+        return self.ContainsPoint(other.Nodes[0].Coordinates) // to catch edge case when other is fully contained in self
+            || possibleNodes.Any(n => other.ContainsPoint(n.Coordinates));
     }
 }
