@@ -35,8 +35,10 @@ public class GrainBoundaryRemeshingTest
         };
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> particle) =>
-            baseParticleFactory.GetParticle()
-                .Nodes.Skip(2).SkipLast(1)
+            baseParticleFactory
+                .GetParticle()
+                .Nodes.Skip(2)
+                .SkipLast(1)
                 .Select(n => new ParticleNode(n, particle))
                 .Concat(
                     [
@@ -62,10 +64,10 @@ public class GrainBoundaryRemeshingTest
                 );
 
         var particle1 = new Particle<IParticleNode>(
-            Guid.NewGuid(), 
+            Guid.NewGuid(),
             new AbsolutePoint(0, 0),
             0,
-            Guid.Empty, 
+            Guid.Empty,
             NodeFactory
         );
         var particle2 = new Particle<IParticleNode>(
@@ -75,7 +77,9 @@ public class GrainBoundaryRemeshingTest
             Guid.Empty,
             NodeFactory
         );
-        var particleSystem = new ParticleSystem<IParticle<IParticleNode>, IParticleNode>([particle1, particle2]);
+        var particleSystem = new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
+            [particle1, particle2]
+        );
 
         var remesher = new GrainBoundaryRemesher(additionLimit: 1.2);
         var remeshedParticleSystem = remesher.RemeshSystem(particleSystem);
@@ -83,10 +87,10 @@ public class GrainBoundaryRemeshingTest
         var plt = new Plot();
         plt.Axes.SquareUnits();
 
-        PlotParticle(plt, particle1);
-        PlotParticle(plt, particle2);
-        PlotParticle(plt, remeshedParticleSystem.Particles[0]);
-        PlotParticle(plt, remeshedParticleSystem.Particles[1]);
+        plt.PlotParticle(particle1);
+        plt.PlotParticle(particle2);
+        plt.PlotParticle(remeshedParticleSystem.Particles[0]);
+        plt.PlotParticle(remeshedParticleSystem.Particles[1]);
 
         plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.png"), 1600, 900);
 
@@ -97,19 +101,6 @@ public class GrainBoundaryRemeshingTest
         Assert.That(
             remeshedParticleSystem.Particles[1].Nodes.Count,
             Is.EqualTo(particle2.Nodes.Count + expectedAddedNodeCount)
-        );
-    }
-
-    void PlotParticle(Plot plot, IParticle<IParticleNode> particle)
-    {
-        plot.Add.Scatter(
-            particle
-                .Nodes.Append(particle.Nodes[0])
-                .Select(n => new ScottPlot.Coordinates(
-                    n.Coordinates.Absolute.X,
-                    n.Coordinates.Absolute.Y
-                ))
-                .ToArray()
         );
     }
 }

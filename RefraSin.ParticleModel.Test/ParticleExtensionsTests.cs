@@ -1,3 +1,4 @@
+using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
@@ -5,6 +6,7 @@ using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Particles.Extensions;
+using ScottPlot;
 
 namespace RefraSin.ParticleModel.Test;
 
@@ -18,6 +20,14 @@ public class ParticleExtensionsTests
         0.2,
         Guid.Empty
     ).GetParticle();
+
+    private readonly string _tempDir;
+
+    public ParticleExtensionsTests()
+    {
+        _tempDir = Path.GetTempFileName().Replace(".tmp", "");
+        Directory.CreateDirectory(_tempDir);
+    }
 
     public static IEnumerable<TestCaseData> GenerateMayHasContactToByRectangularApproximationData()
     {
@@ -414,5 +424,83 @@ public class ParticleExtensionsTests
     {
         Assert.That(Particle.HasContactTo(other), Is.EqualTo(expectedResult));
         Assert.That(other.HasContactTo(Particle), Is.EqualTo(expectedResult));
+    }
+
+    public static IEnumerable<TestCaseData> GenerateIntersectionPointsToData()
+    {
+        yield return new TestCaseData(
+            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+            {
+                CenterCoordinates = new(2.36, 0),
+                RotationAngle = Angle.Straight
+            }.GetParticle(),
+            new AbsolutePoint[] { new(1.18, -0.317), new(1.18, 0.317), }
+        );
+
+        yield return new TestCaseData(
+            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+            {
+                CenterCoordinates = new(-2.06, 0),
+                RotationAngle = Angle.Straight
+            }.GetParticle(),
+            new AbsolutePoint[]
+            {
+                new(-1.03, 0.732),
+                new(-1.03, 0.1485),
+                new(-1.03, -0.1485),
+                new(-1.03, -0.732),
+            }
+        );
+
+        yield return new TestCaseData(
+            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+            {
+                CenterCoordinates = new(3, 0),
+                RotationAngle = Angle.Straight
+            }.GetParticle(),
+            Array.Empty<AbsolutePoint>()
+        );
+    }
+
+    [Test]
+    [TestCaseSource(nameof(GenerateIntersectionPointsToData))]
+    public void TestIntersectionPointsTo(
+        IParticle<IParticleNode> other,
+        IReadOnlyList<IPoint> expectedIntersections
+    )
+    {
+        var intersections = Particle.IntersectionPointsTo(other).ToArray();
+
+        var plot = new Plot();
+        plot.Axes.SquareUnits();
+
+        plot.PlotParticle(Particle);
+        plot.PlotParticle(other);
+
+        foreach (var intersection in intersections)
+        {
+            plot.Add.Scatter(
+                new ScottPlot.Coordinates(intersection.Absolute.X, intersection.Absolute.Y),
+                Colors.Magenta
+            );
+        }
+
+        plot.SavePng(
+            Path.Combine(
+                _tempDir,
+                $"{nameof(TestIntersectionPointsTo)}{TestContext.CurrentContext.Test.ID}.png"
+            ),
+            1000,
+            1000
+        );
+
+        Assert.That(
+            intersections.Select(p => p.Absolute.X),
+            Is.EqualTo(expectedIntersections.Select(p => p.Absolute.X)).Within(1e-3)
+        );
+        Assert.That(
+            intersections.Select(p => p.Absolute.Y),
+            Is.EqualTo(expectedIntersections.Select(p => p.Absolute.Y)).Within(1e-3)
+        );
     }
 }

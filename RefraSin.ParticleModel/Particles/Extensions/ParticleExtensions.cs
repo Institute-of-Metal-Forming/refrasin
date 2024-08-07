@@ -1,4 +1,5 @@
 using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Nodes;
@@ -89,5 +90,85 @@ public static class ParticleExtensions
 
         return self.ContainsPoint(other.Nodes[0].Coordinates) // to catch edge case when other is fully contained in self
             || possibleNodes.Any(n => other.ContainsPoint(n.Coordinates));
+    }
+
+    public static IEnumerable<IPolarPoint> IntersectionPointsTo(
+        this IParticle<IParticleNode> self,
+        IParticle<IParticleNode> other
+    )
+    {
+        var othersCenterPolar = new PolarPoint(other.Coordinates, self);
+        var sightAngle = SinLaw.Alpha(other.ToMeasures().MaxRadius, othersCenterPolar.R, HalfOfPi);
+        IReadOnlyList<IParticleNode> possibleNodes;
+
+        if (!double.IsNaN(sightAngle))
+        {
+            var minAngle = othersCenterPolar.Phi - sightAngle;
+            var maxAngle = othersCenterPolar.Phi + sightAngle;
+
+            var lowestPossibleNode = self.Nodes.NextLowerNodeFrom(minAngle);
+            var highestPossibleNode = self.Nodes.NextUpperNodeFrom(maxAngle);
+            possibleNodes = self.Nodes[lowestPossibleNode.Index, highestPossibleNode.Index];
+        }
+        else
+            possibleNodes = self.Nodes;
+
+        IPolarPoint? firstPoint = null;
+        bool yieldFirstAtEnd = false;
+        bool currentlyIn = other.ContainsPoint(possibleNodes[0].Coordinates);
+
+        foreach (var node in possibleNodes.Skip(1))
+        {
+            var nodeIn = other.ContainsPoint(node.Coordinates);
+
+            if (nodeIn == currentlyIn)
+                continue; // no changes
+
+            if (currentlyIn) // exiting
+            {
+                currentlyIn = false;
+                var intersection = CalculateIntersetionTo(self, other, node);
+
+                if (firstPoint is not null)
+                {
+                    yield return intersection;
+                }
+                else
+                {
+                    firstPoint = intersection;
+                    yieldFirstAtEnd = true;
+                }
+            }
+            else // entering
+            {
+                currentlyIn = true;
+                var intersection = CalculateIntersetionTo(self, other, node);
+
+                firstPoint ??= intersection;
+                yield return intersection;
+            }
+        }
+
+        if (yieldFirstAtEnd)
+            yield return firstPoint!;
+    }
+
+    private static IPolarPoint CalculateIntersetionTo(
+        IParticle<IParticleNode> self,
+        IParticle<IParticleNode> other,
+        IParticleNode selfUpperNode
+    )
+    {
+        var selfLine = new AbsoluteLine(selfUpperNode.Lower.Coordinates, selfUpperNode.Coordinates);
+        var otherUpperNode = other.Nodes.NextUpperNodeFrom(
+            new PolarPoint(selfUpperNode.Coordinates, other).Phi
+        );
+        var otherLine = new AbsoluteLine(
+            otherUpperNode.Lower.Coordinates,
+            otherUpperNode.Coordinates
+        );
+
+        var intersection = selfLine.IntersectionTo(otherLine);
+        return new PolarPoint(intersection, self);
     }
 }
