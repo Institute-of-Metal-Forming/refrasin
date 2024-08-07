@@ -1,5 +1,3 @@
-using System;
-
 namespace RefraSin.Coordinates;
 
 /// <summary>

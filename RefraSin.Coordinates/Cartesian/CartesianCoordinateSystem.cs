@@ -1,12 +1,9 @@
-using RefraSin.Coordinates.Helpers;
-using RefraSin.Coordinates.Polar;
-
 namespace RefraSin.Coordinates.Cartesian;
 
 /// <summary>
 ///     Represents a cartesian coordinate system.
 /// </summary>
-public class CartesianCoordinateSystem : CoordinateSystem, ICartesianCoordinateSystem, ICloneable<CartesianCoordinateSystem>
+public class CartesianCoordinateSystem : CoordinateSystem, ICartesianCoordinateSystem
 {
     /// <summary>
     ///     Creates a standard cartesian system: <see cref="CoordinateSystem.Origin" /> in (0,0),
@@ -21,8 +18,12 @@ public class CartesianCoordinateSystem : CoordinateSystem, ICartesianCoordinateS
     /// <param name="rotationAngle">rotation angle</param>
     /// <param name="xScale">scale along X</param>
     /// <param name="yScale">scale along Y</param>
-    public CartesianCoordinateSystem(IPoint? origin, double rotationAngle = 0, double xScale = 1,
-        double yScale = 1)
+    public CartesianCoordinateSystem(
+        IPoint? origin,
+        double rotationAngle = 0,
+        double xScale = 1,
+        double yScale = 1
+    )
         : base(origin, rotationAngle)
     {
         XScale = xScale;
@@ -37,15 +38,12 @@ public class CartesianCoordinateSystem : CoordinateSystem, ICartesianCoordinateS
     /// <summary>
     ///     Gets or sets the scale along X axis.
     /// </summary>
-    public double XScale { get; set; } = 1;
+    public double XScale { get; } = 1;
 
     /// <summary>
     ///     Gets or sets the scale along Y axis.
     /// </summary>
-    public double YScale { get; set; } = 1;
-
-    /// <inheritdoc />
-    public CartesianCoordinateSystem Clone() => new(Origin, RotationAngle, XScale, YScale);
+    public double YScale { get; } = 1;
 
     /// <inheritdoc />
     public override string ToString() => $"{nameof(CartesianCoordinateSystem)} {Label}".Trim();

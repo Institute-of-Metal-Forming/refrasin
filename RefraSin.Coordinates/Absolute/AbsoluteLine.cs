@@ -1,5 +1,3 @@
-using RefraSin.Coordinates.Helpers;
-
 namespace RefraSin.Coordinates.Absolute;
 
 public class AbsoluteLine : ILine
@@ -17,7 +15,7 @@ public class AbsoluteLine : ILine
     }
 
     public AbsoluteLine(IPoint referencePoint, IPoint secondPoint)
-        : this(referencePoint, referencePoint.VectorTo(secondPoint)) { }
+        : this(referencePoint, referencePoint.Absolute.VectorTo(secondPoint.Absolute)) { }
 
     public AbsolutePoint ReferencePoint { get; }
 

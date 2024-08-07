@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.CompilerServices;
 
 namespace RefraSin.Coordinates.Helpers;
@@ -16,7 +15,8 @@ public static class SinLaw
     /// <param name="beta">Winkel ggü. der anderen Seite</param>
     /// <returns>Länge der Seite ggü. alpha</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double A(double b, double alpha, double beta) => b * Math.Sin(alpha) / Math.Sin(beta);
+    public static double A(double b, double alpha, double beta) =>
+        b * Math.Sin(alpha) / Math.Sin(beta);
 
     /// <summary>
     ///     Berechnet einen Winkel
@@ -26,5 +26,6 @@ public static class SinLaw
     /// <param name="beta">Winkel ggü. der anderen Seite</param>
     /// <returns>Winkel ggü. a</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Alpha(double a, double b, double beta) => Math.Asin(a / b * Math.Sin(beta));
+    public static double Alpha(double a, double b, double beta) =>
+        Math.Asin(a / b * Math.Sin(beta));
 }

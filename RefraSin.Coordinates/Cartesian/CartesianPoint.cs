@@ -7,17 +7,19 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Represents a point in cartesian coordinate system.
 /// </summary>
-public class CartesianPoint
-    : CartesianCoordinates,
-        ICartesianPoint,
-        ICloneable<CartesianPoint>,
+public readonly struct CartesianPoint
+    : ICartesianPoint,
         IPointArithmetics<CartesianPoint, CartesianVector>
 {
     /// <summary>
     ///     Creates the point (0, 0) in the default system.
     /// </summary>
-    public CartesianPoint()
-        : base(null) { }
+    public CartesianPoint(ICartesianCoordinateSystem? system = null)
+    {
+        X = 0;
+        Y = 0;
+        System = system ?? CartesianCoordinateSystem.Default;
+    }
 
     /// <summary>
     ///     Creates the point (x, y).
@@ -28,7 +30,10 @@ public class CartesianPoint
         (double x, double y) coordinates,
         ICartesianCoordinateSystem? system = null
     )
-        : base(coordinates, system) { }
+        : this(system)
+    {
+        (X, Y) = coordinates;
+    }
 
     /// <summary>
     ///     Creates the point (x, y).
@@ -37,7 +42,11 @@ public class CartesianPoint
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vertical coordinate</param>
     public CartesianPoint(double x, double y, ICartesianCoordinateSystem? system = null)
-        : base(x, y, system) { }
+        : this(system)
+    {
+        X = x;
+        Y = y;
+    }
 
     /// <summary>
     ///     Creates a point based on a template. The coordinates systems are automatically castd.
@@ -45,59 +54,42 @@ public class CartesianPoint
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
     public CartesianPoint(IPoint other, ICartesianCoordinateSystem? system = null)
-        : base(system)
+        : this(system)
     {
-        var absoluteCoords = other.Absolute;
-        var baseCoords = System.Origin.Absolute;
-        X = absoluteCoords.X - baseCoords.X;
-        Y = absoluteCoords.Y - baseCoords.Y;
-        RotateBy(-System.RotationAngle);
-        X /= System.XScale;
-        Y /= System.YScale;
+        var origin = System.Origin.Absolute;
+        var transformed = other
+            .Absolute.MoveBy(-origin.X, -origin.Y)
+            .RotateBy(-System.RotationAngle)
+            .ScaleBy(1 / System.XScale, 1 / System.YScale);
+        X = transformed.X;
+        Y = transformed.Y;
     }
-
-    /// <inheritdoc />
-    public CartesianPoint Clone() => new(X, Y, System);
 
     /// <inheritdoc />
     public AbsolutePoint Absolute
     {
         get
         {
-            var absolute = new AbsolutePoint(X * System.XScale, Y * System.YScale);
-            absolute.RotateBy(System.RotationAngle);
             var origin = System.Origin.Absolute;
-            absolute.X += origin.X;
-            absolute.Y += origin.Y;
-            return absolute;
+            return new AbsolutePoint(X, Y)
+                .ScaleBy(System.XScale, System.YScale)
+                .RotateBy(System.RotationAngle)
+                .MoveBy(origin.X, origin.Y);
         }
     }
 
-    /// <inheritdoc />
-    public IPoint AddVector(IVector v)
-    {
-        if (v is CartesianVector cv)
-            return this + cv;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
+    public CartesianPoint AddVector(CartesianVector v) => this + v;
+
+    public CartesianVector VectorTo(CartesianPoint p) => p - this;
 
     /// <inheritdoc />
-    public IVector VectorTo(IPoint p)
+    public double DistanceTo(CartesianPoint other)
     {
-        if (p is CartesianPoint cp)
-            return cp - this;
-        throw new DifferentCoordinateSystemException(this, p);
-    }
-
-    IPoint ICloneable<IPoint>.Clone() => Clone();
-
-    /// <inheritdoc />
-    public double DistanceTo(IPoint other)
-    {
-        if (other is CartesianCoordinates c)
-            if (System.Equals(c.System))
-                return Sqrt(Pow((X - c.X) * System.XScale, 2) + Pow((Y - c.Y) * System.YScale, 2));
-        throw new DifferentCoordinateSystemException(this, other);
+        if (System.Equals(other.System))
+            return Sqrt(
+                Pow((X - other.X) * System.XScale, 2) + Pow((Y - other.Y) * System.YScale, 2)
+            );
+        return Absolute.DistanceTo(other.Absolute);
     }
 
     /// <inheritdoc />
@@ -116,18 +108,7 @@ public class CartesianPoint
     {
         if (System.Equals(other.System))
             return new CartesianPoint(0.5 * (X + other.X), 0.5 * (Y + other.Y));
-        return Centroid((IPoint)other);
-    }
-
-    /// <summary>
-    ///     Computes the point halfway on the straight line between two points.
-    /// </summary>
-    /// <param name="other">other point</param>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public CartesianPoint Centroid(IPoint other)
-    {
-        var halfwayAbsolute = Absolute.Centroid(other.Absolute);
-        return new CartesianPoint(halfwayAbsolute, System);
+        return new CartesianPoint(Absolute.Centroid(other.Absolute), System);
     }
 
     /// <summary>
@@ -139,7 +120,7 @@ public class CartesianPoint
     /// </remarks>
     public static CartesianPoint Parse(string s)
     {
-        var (value1, value2) = Parse(s, nameof(CartesianPoint));
+        var (value1, value2) = s.ParseCoordinateString(nameof(CartesianPoint));
         return new CartesianPoint(double.Parse(value1), double.Parse(value2));
     }
 
@@ -174,4 +155,30 @@ public class CartesianPoint
             return new CartesianVector(p1.X - p2.X, p1.Y - p2.Y, p1.System);
         throw new DifferentCoordinateSystemException(p1, p2);
     }
+
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        this.FormatCartesianCoordinates(format, formatProvider);
+
+    /// <inheritdoc />
+    public double[] ToArray() => [X, Y];
+
+    /// <inheritdoc />
+    public double X { get; }
+
+    /// <inheritdoc />
+    public double Y { get; }
+
+    /// <inheritdoc />
+    public ICartesianCoordinateSystem System { get; }
+
+    /// <inheritdoc />
+    public static CartesianPoint operator -(CartesianPoint value) => new(-value.X, -value.Y);
+
+    /// <inheritdoc />
+    public CartesianPoint ScaleBy(double scale) => new(scale * X, scale * Y);
+
+    /// <inheritdoc />
+    public CartesianPoint RotateBy(double rotation) =>
+        new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
 }

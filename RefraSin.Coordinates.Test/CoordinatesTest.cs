@@ -143,10 +143,10 @@ public class CoordinatesTest
         var hw13 = p1.Absolute.Centroid(p3.Absolute);
         var hw14 = p1.Absolute.Centroid(p4.Absolute);
 
-        That(p1.Centroid((IPoint)p2).Absolute.IsClose(hw12));
-        That(p1.Centroid((IPoint)p3).Absolute.IsClose(hw13));
-        That(p3.Centroid((IPoint)p1).Absolute.IsClose(hw13));
-        That(p1.Centroid((IPoint)p4).Absolute.IsClose(hw14));
+        That(p1.Centroid(p2).Absolute.IsClose(hw12));
+        That(p1.Centroid(p3).Absolute.IsClose(hw13));
+        That(p3.Centroid(p1).Absolute.IsClose(hw13));
+        That(p1.Centroid(p4).Absolute.IsClose(hw14));
     }
 
     [Test]
@@ -295,30 +295,6 @@ public class CoordinatesTest
         }
     }
 
-    [Test]
-    public void VectorEnumerableTest()
-    {
-        var vectors = new[]
-        {
-            new PolarVector(0, 1),
-            new PolarVector(HalfOfPi, 1),
-            new PolarVector(Pi, 1),
-            new PolarVector(ThreeHalfsOfPi, 2)
-        };
-
-        That(new PolarVector(-HalfOfPi, 1).IsClose(vectors.Sum()));
-
-        var vectors2 = new[]
-        {
-            new PolarVector(0, Sqrt2),
-            new PolarVector(HalfOfPi, Sqrt2),
-            new PolarVector(QuarterOfPi, 1)
-        };
-
-        That(new PolarVector(QuarterOfPi, 1).IsClose(vectors2.Average()));
-        That(new PolarVector(QuarterOfPi, 1).IsClose(vectors2.AverageDirection()));
-    }
-
     class OriginClass
     {
         public IPoint Point { get; set; }
@@ -397,15 +373,5 @@ public class CoordinatesTest
         IsFalse(p32.Phi.IsInDomain(AllPositive));
         IsTrue(p32.Phi.IsInDomain(WithNegative));
         AreEqual(-Pi, p32.Phi.Radians);
-
-        s3.AngleReductionDomain = AllPositive;
-        Console.WriteLine($"p31:\t{p31}");
-        IsTrue(p31.Phi.IsInDomain(AllPositive));
-        IsFalse(p31.Phi.IsInDomain(WithNegative));
-        AreEqual(1.5 * Pi, p31.Phi.Radians);
-        Console.WriteLine($"p32:\t{p32}");
-        IsTrue(p32.Phi.IsInDomain(AllPositive));
-        IsFalse(p32.Phi.IsInDomain(WithNegative));
-        AreEqual(Pi, p32.Phi.Radians);
     }
 }

@@ -7,17 +7,19 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a point in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsolutePoint
-    : AbsoluteCoordinates,
-        ICartesianPoint,
-        ICloneable<AbsolutePoint>,
+public readonly struct AbsolutePoint
+    : ICartesianPoint,
         IIsClose<AbsolutePoint>,
         IPointArithmetics<AbsolutePoint, AbsoluteVector>
 {
     /// <summary>
     ///     Creates the absolute point (0,0).
     /// </summary>
-    public AbsolutePoint() { }
+    public AbsolutePoint()
+    {
+        X = 0;
+        Y = 0;
+    }
 
     /// <summary>
     ///     Creates the absolute point (x, y).
@@ -25,46 +27,41 @@ public class AbsolutePoint
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vercircal coordinate</param>
     public AbsolutePoint(double x, double y)
-        : base(x, y) { }
+    {
+        X = x;
+        Y = y;
+    }
 
     /// <summary>
     ///     Creates the absolute point (x, y).
     /// </summary>
     /// <param name="coordinates">tuple (x, y)</param>
     public AbsolutePoint((double x, double y) coordinates)
-        : base(coordinates) { }
+    {
+        (X, Y) = coordinates;
+    }
 
     /// <inheritdoc />
-    public AbsolutePoint Clone() => new(X, Y);
+    public double X { get; }
+
+    /// <inheritdoc />
+    public double Y { get; }
+
+    /// <inheritdoc />
+    public ICartesianCoordinateSystem System => CartesianCoordinateSystem.Default;
 
     /// <inheritdoc />
     public AbsolutePoint Absolute => this;
 
     /// <inheritdoc />
-    public IPoint AddVector(IVector v)
-    {
-        if (v is AbsoluteVector av)
-            return this + av;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
+    public AbsolutePoint AddVector(AbsoluteVector v) => this + v;
 
     /// <inheritdoc />
-    public IVector VectorTo(IPoint p)
-    {
-        if (p is AbsolutePoint ap)
-            return ap - this;
-        throw new DifferentCoordinateSystemException(this, p);
-    }
-
-    IPoint ICloneable<IPoint>.Clone() => Clone();
+    public AbsoluteVector VectorTo(AbsolutePoint p) => p - this;
 
     /// <inheritdoc />
-    public double DistanceTo(IPoint other)
-    {
-        if (other is AbsolutePoint a)
-            return Sqrt(Pow(X - a.X, 2) + Pow(Y - a.Y, 2));
-        throw new DifferentCoordinateSystemException(this, other);
-    }
+    public double DistanceTo(AbsolutePoint other) =>
+        Sqrt(Pow(X - other.X, 2) + Pow(Y - other.Y, 2));
 
     /// <inheritdoc />
     public bool IsClose(AbsolutePoint other, double precision = 1e-8) =>
@@ -83,18 +80,18 @@ public class AbsolutePoint
     /// </summary>
     /// <param name="other">other point</param>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public AbsolutePoint Centroid(IPoint other) => Centroid(other.Absolute);
+    public IPoint Centroid(IPoint other) => Centroid(other.Absolute);
 
     /// <summary>
     ///     Parse from string representation.
     /// </summary>
     /// <param name="s">string to parse</param>
     /// <remarks>
-    ///     supports all formats of <see cref="AbsoluteCoordinates.ToString(string, string, IFormatProvider)" />
+    ///     supports all formats of <see cref="AbsolutePoint.ToString(string, IFormatProvider)" />
     /// </remarks>
     public static AbsolutePoint Parse(string s)
     {
-        var (value1, value2) = Parse(s, nameof(AbsolutePoint));
+        var (value1, value2) = s.ParseCoordinateString(nameof(AbsolutePoint));
         return new AbsolutePoint(double.Parse(value1), double.Parse(value2));
     }
 
@@ -121,10 +118,31 @@ public class AbsolutePoint
         new(p1.X - p2.X, p1.Y - p2.Y);
 
     /// <inheritdoc />
+    public static AbsolutePoint operator -(AbsolutePoint self) => new(-self.X, -self.Y);
+
+    /// <inheritdoc />
     public bool IsClose(ICartesianPoint other, double precision = 1e-8)
     {
         if (System.Equals(other.System))
             return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
         return Absolute.IsClose(other.Absolute, precision);
     }
+
+    /// <inheritdoc />
+    public double[] ToArray() => [X, Y];
+
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        this.FormatCartesianCoordinates(format, formatProvider);
+
+    /// <inheritdoc />
+    public AbsolutePoint ScaleBy(double scale) => new(scale * X, scale * Y);
+
+    /// <inheritdoc />
+    public AbsolutePoint RotateBy(double rotation) =>
+        new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
+
+    public AbsolutePoint MoveBy(double dx, double dy) => new(X + dx, Y + dy);
+
+    public AbsolutePoint ScaleBy(double scaleX, double scaleY) => new(scaleX * X, scaleY * Y);
 }

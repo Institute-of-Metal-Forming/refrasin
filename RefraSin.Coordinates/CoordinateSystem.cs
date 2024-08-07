@@ -1,4 +1,3 @@
-using System;
 using RefraSin.Coordinates.Absolute;
 using static System.String;
 

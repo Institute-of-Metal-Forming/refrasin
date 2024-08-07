@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.Intrinsics.X86;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
@@ -9,24 +7,18 @@ namespace RefraSin.Coordinates.Polar;
 /// <summary>
 ///     Stellt einen Punkt in Polarkoordinaten dar.
 /// </summary>
-public class PolarPoint
-    : PolarCoordinates,
-        ICloneable<PolarPoint>,
-        IPolarPoint,
-        IPointArithmetics<PolarPoint, PolarVector>
+public readonly struct PolarPoint : IPolarPoint, IPointArithmetics<PolarPoint, PolarVector>
 {
     /// <summary>
     ///     Creates the point (0, 0).
     /// </summary>
-    public PolarPoint()
-        : base(null) { }
-
-    /// <summary>
-    ///     Creates the point (0, 0).
-    /// </summary>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarPoint(IPolarCoordinateSystem? system)
-        : base(system) { }
+    public PolarPoint(IPolarCoordinateSystem? system = null)
+    {
+        Phi = 0;
+        R = 0;
+        System = system ?? PolarCoordinateSystem.Default;
+    }
 
     /// <summary>
     ///     Creates the point (phi, r).
@@ -34,7 +26,10 @@ public class PolarPoint
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
     public PolarPoint((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null)
-        : base(coordinates, system) { }
+        : this(system)
+    {
+        (Phi, R) = coordinates;
+    }
 
     /// <summary>
     ///     Creates the point (phi, r).
@@ -43,7 +38,11 @@ public class PolarPoint
     /// <param name="phi">angle coordinate</param>
     /// <param name="r">radius coordinate</param>
     public PolarPoint(Angle phi, double r, IPolarCoordinateSystem? system = null)
-        : base(phi, r, system) { }
+        : this(system)
+    {
+        Phi = phi;
+        R = r;
+    }
 
     /// <summary>
     ///     Creates a point based on a template. The coordinates systems are automatically cast.
@@ -51,7 +50,7 @@ public class PolarPoint
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
     public PolarPoint(IPoint other, IPolarCoordinateSystem? system = null)
-        : base(system)
+        : this(system)
     {
         var absoluteCoordinates = other.Absolute;
         var originCoordinates = System.Origin.Absolute;
@@ -71,7 +70,27 @@ public class PolarPoint
     }
 
     /// <inheritdoc />
-    public PolarPoint Clone() => new(Phi, R, System);
+    public Angle Phi { get; }
+
+    /// <inheritdoc />
+    public double R { get; }
+
+    /// <inheritdoc />
+    public IPolarCoordinateSystem System { get; }
+
+    /// <inheritdoc />
+    public Angle AngleTo(IPolarCoordinates other, bool allowNegative = false)
+    {
+        if (System.Equals(other.System))
+        {
+            var diff = (other.Phi - Phi).Reduce(Angle.ReductionDomain.WithNegative);
+            if (allowNegative)
+                return diff;
+            return Abs(diff);
+        }
+
+        throw new DifferentCoordinateSystemException(this, other);
+    }
 
     /// <inheritdoc />
     public AbsolutePoint Absolute
@@ -87,30 +106,17 @@ public class PolarPoint
     }
 
     /// <inheritdoc />
-    public IPoint AddVector(IVector v)
-    {
-        if (v is PolarVector pv)
-            return this + pv;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
+    public PolarPoint AddVector(PolarVector v) => this + v;
 
     /// <inheritdoc />
-    public IVector VectorTo(IPoint p)
-    {
-        if (p is PolarPoint pp)
-            return pp - this;
-        throw new DifferentCoordinateSystemException(this, p);
-    }
-
-    IPoint ICloneable<IPoint>.Clone() => Clone();
+    public PolarVector VectorTo(PolarPoint p) => p - this;
 
     /// <inheritdoc />
-    public double DistanceTo(IPoint other)
+    public double DistanceTo(PolarPoint other)
     {
-        if (other is PolarPoint p)
-            if (System.Equals(p.System))
-                return CosLaw.C(R, p.R, Abs(p.Phi - Phi));
-        throw new DifferentCoordinateSystemException(this, other);
+        if (System.Equals(other.System))
+            return CosLaw.C(R, other.R, Abs(other.Phi - Phi));
+        return Absolute.DistanceTo(other.Absolute);
     }
 
     /// <inheritdoc />
@@ -135,18 +141,7 @@ public class PolarPoint
             return new PolarPoint(Phi + Sign(angle) * CosLaw.Gamma(R, s, dist / 2), s, System);
         }
 
-        return Centroid((IPoint)other);
-    }
-
-    /// <summary>
-    ///     Computes the point halfway on the straight line between two points.
-    /// </summary>
-    /// <param name="other">other point</param>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public PolarPoint Centroid(IPoint other)
-    {
-        var halfwayAbsolute = Absolute.Centroid(other.Absolute);
-        return new PolarPoint(halfwayAbsolute, System);
+        return new PolarPoint(Absolute.Centroid(other.Absolute), System);
     }
 
     /// <summary>
@@ -158,7 +153,7 @@ public class PolarPoint
     /// </remarks>
     public static PolarPoint Parse(string s)
     {
-        var (value1, value2) = Parse(s, nameof(PolarPoint));
+        var (value1, value2) = s.ParseCoordinateString(nameof(PolarPoint));
         return new PolarPoint(Angle.Parse(value1), double.Parse(value2));
     }
 
@@ -225,4 +220,21 @@ public class PolarPoint
 
         throw new DifferentCoordinateSystemException(p1, p2);
     }
+
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        this.FormatPolarCoordinates(format, formatProvider);
+
+    /// <inheritdoc />
+    public double[] ToArray() => [Phi, R];
+
+    /// <inheritdoc />
+    public static PolarPoint operator -(PolarPoint value) =>
+        new(value.Phi + Angle.Straight, value.R);
+
+    /// <inheritdoc />
+    public PolarPoint ScaleBy(double scale) => new(Phi, scale * R);
+
+    /// <inheritdoc />
+    public PolarPoint RotateBy(double rotation) => new(Phi + rotation, R);
 }

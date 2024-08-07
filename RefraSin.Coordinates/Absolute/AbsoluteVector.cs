@@ -7,17 +7,19 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a vector in the absolute coordinate system (overall base system).
 /// </summary>
-public class AbsoluteVector
-    : AbsoluteCoordinates,
-        ICartesianVector,
+public readonly struct AbsoluteVector
+    : ICartesianVector,
         IIsClose<AbsoluteVector>,
-        ICloneable<AbsoluteVector>,
-        IVectorArithmetics<AbsolutePoint, AbsoluteVector>
+        IVectorArithmetics<AbsoluteVector>
 {
     /// <summary>
     ///     Creates the absolute vector (0,0).
     /// </summary>
-    public AbsoluteVector() { }
+    public AbsoluteVector()
+    {
+        X = 0;
+        Y = 0;
+    }
 
     /// <summary>
     ///     Creates the absolute vector (x, y).
@@ -25,17 +27,28 @@ public class AbsoluteVector
     /// <param name="x">horizontal coordinate</param>
     /// <param name="y">vercircal coordinate</param>
     public AbsoluteVector(double x, double y)
-        : base(x, y) { }
+    {
+        X = x;
+        Y = y;
+    }
 
     /// <summary>
     ///     Creates the absolute vector (x, y).
     /// </summary>
     /// <param name="coordinates">tuple (x, y)</param>
     public AbsoluteVector((double x, double y) coordinates)
-        : base(coordinates) { }
+    {
+        (X, Y) = coordinates;
+    }
 
     /// <inheritdoc />
-    public AbsoluteVector Clone() => new(X, Y);
+    public double X { get; }
+
+    /// <inheritdoc />
+    public double Y { get; }
+
+    /// <inheritdoc />
+    public ICartesianCoordinateSystem System => CartesianCoordinateSystem.Default;
 
     /// <inheritdoc />
     public bool IsClose(AbsoluteVector other, double precision = 1e-8) =>
@@ -47,49 +60,16 @@ public class AbsoluteVector
     /// <inheritdoc />
     public double Norm => Sqrt(Pow(X, 2) + Pow(Y, 2));
 
-    /// <inheritdoc />
-    public IVector Add(IVector v)
-    {
-        if (v is AbsoluteVector av)
-            return this + av;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
-
-    /// <inheritdoc />
-    public IVector Subtract(IVector v)
-    {
-        if (v is AbsoluteVector av)
-            return this - av;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
-
-    /// <inheritdoc />
-    public double ScalarProduct(IVector v)
-    {
-        if (v is AbsoluteVector av)
-            return this * av;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
-
-    /// <inheritdoc />
-    public void ScaleBy(double scale)
-    {
-        X *= scale;
-        Y *= scale;
-    }
-
-    IVector ICloneable<IVector>.Clone() => Clone();
-
     /// <summary>
     ///     Parse from string representation.
     /// </summary>
     /// <param name="s">string to parse</param>
     /// <remarks>
-    ///     supports all formats of <see cref="AbsoluteCoordinates.ToString(string, string, IFormatProvider)" />
+    ///     supports all formats of <see cref="AbsoluteVector.ToString(string, IFormatProvider)" />
     /// </remarks>
     public static AbsoluteVector Parse(string s)
     {
-        var (value1, value2) = Parse(s, nameof(AbsoluteVector));
+        var (value1, value2) = s.ParseCoordinateString(nameof(AbsoluteVector));
         return new AbsoluteVector(double.Parse(value1), double.Parse(value2));
     }
 
@@ -99,29 +79,29 @@ public class AbsoluteVector
     public static AbsoluteVector operator -(AbsoluteVector v) => new(-v.X, -v.Y);
 
     /// <summary>
-    ///     Vectorial addition. See <see cref="Add" />.
+    ///     Vectorial addition.
     /// </summary>
     public static AbsoluteVector operator +(AbsoluteVector v1, AbsoluteVector v2) =>
         new(v1.X + v2.X, v1.Y + v2.Y);
 
     /// <summary>
-    ///     Vectorial subtraction. See <see cref="Subtract" />.
+    ///     Vectorial subtraction.
     /// </summary>
     public static AbsoluteVector operator -(AbsoluteVector v1, AbsoluteVector v2) =>
         new(v1.X - v2.X, v1.Y - v2.Y);
 
     /// <summary>
-    ///     Scales the vector. See <see cref="ScaleBy" />.
+    ///     Scales the vector.
     /// </summary>
     public static AbsoluteVector operator *(double d, AbsoluteVector v) => new(d * v.X, d * v.Y);
 
     /// <summary>
-    ///     Scales the vector. See <see cref="ScaleBy" />.
+    ///     Scales the vector.
     /// </summary>
     public static AbsoluteVector operator *(AbsoluteVector v, double d) => d * v;
 
     /// <summary>
-    ///     Scalar product. See <see cref="ScalarProduct" />.
+    ///     Scalar product.
     /// </summary>
     public static double operator *(AbsoluteVector v1, AbsoluteVector v2) =>
         v1.X * v2.X + v1.Y * v2.Y;
@@ -137,4 +117,29 @@ public class AbsoluteVector
     /// <inheritdoc />
     public static AbsoluteVector operator /(AbsoluteVector left, double right) =>
         new(left.X / right, left.Y / right);
+
+    /// <inheritdoc />
+    public double[] ToArray() => [X, Y];
+
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        this.FormatCartesianCoordinates(format, formatProvider);
+
+    /// <inheritdoc />
+    public AbsoluteVector Add(AbsoluteVector v) => this + v;
+
+    /// <inheritdoc />
+    public AbsoluteVector Subtract(AbsoluteVector v) => this - v;
+
+    /// <inheritdoc />
+    public double ScalarProduct(AbsoluteVector v) => this * v;
+
+    /// <inheritdoc />
+    public AbsoluteVector ScaleBy(double scale) => scale * this;
+
+    /// <inheritdoc />
+    public AbsoluteVector RotateBy(double rotation) =>
+        new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
+
+    public AbsoluteVector ScaleBy(double scaleX, double scaleY) => new(scaleX * X, scaleY * Y);
 }
