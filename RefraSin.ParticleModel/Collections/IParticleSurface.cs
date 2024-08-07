@@ -1,8 +1,10 @@
+using RefraSin.Coordinates;
 using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Collections;
 
-public interface IParticleSurface<TNode> : IReadOnlyParticleSurface<TNode> where TNode : INode
+public interface IParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
+    where TNode : INode
 {
     /// <summary>
     /// Insert a node above a specified position.

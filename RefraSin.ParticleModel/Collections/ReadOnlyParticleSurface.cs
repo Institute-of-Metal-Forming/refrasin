@@ -1,23 +1,21 @@
 using System.Collections;
+using RefraSin.Coordinates;
 using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Collections;
 
-public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode> where TNode : INode
+public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
+    where TNode : INode
 {
     private TNode[] _nodes;
     private Dictionary<Guid, int> _nodeIndices;
-
-    private ReadOnlyParticleSurface()
-    {
-        _nodes = Array.Empty<TNode>();
-        _nodeIndices = new Dictionary<Guid, int>();
-    }
+    private List<Angle> _nodeAngles;
 
     public ReadOnlyParticleSurface(IEnumerable<TNode> nodes)
     {
         _nodes = nodes.ToArray();
         _nodeIndices = _nodes.Select((n, i) => (n.Id, i)).ToDictionary(t => t.Id, t => t.i);
+        _nodeAngles = _nodes.Select(n => n.Coordinates.Phi).ToList();
     }
 
     /// <inheritdoc />
@@ -51,16 +49,28 @@ public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode> wh
     public IReadOnlyList<TNode> this[int start, int end] => GetSlice(start, end);
 
     /// <inheritdoc />
-    public IReadOnlyList<TNode> this[Guid start, Guid end] => GetSlice(_nodeIndices[start], _nodeIndices[end]);
+    public IReadOnlyList<TNode> this[Guid start, Guid end] =>
+        GetSlice(_nodeIndices[start], _nodeIndices[end]);
+
+    /// <inheritdoc />
+    public TNode NextLowerNodeFrom(Angle angle)
+    {
+        angle = angle.Reduce();
+        var nextUpperIndex = _nodeAngles.BinarySearch(angle);
+        return nextUpperIndex > 0 ? _nodes[nextUpperIndex] : this[~nextUpperIndex - 1]; // this indexer to allow cyclic indexing
+    }
+
+    /// <inheritdoc />
+    public TNode NextUpperNodeFrom(Angle angle)
+    {
+        angle = angle.Reduce();
+        var nextUpperIndex = _nodeAngles.BinarySearch(angle);
+        return nextUpperIndex > 0 ? _nodes[nextUpperIndex] : this[~nextUpperIndex]; // this indexer to allow cyclic indexing
+    }
 
     /// <inheritdoc />
     public int IndexOf(Guid nodeId) => _nodeIndices[nodeId];
 
     /// <inheritdoc />
     public bool Contains(Guid nodeId) => _nodeIndices.ContainsKey(nodeId);
-
-    /// <summary>
-    /// Returns an empty singleton instance.
-    /// </summary>
-    public static ReadOnlyParticleSurface<TNode> Empty { get; } = new();
 }

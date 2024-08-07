@@ -468,7 +468,7 @@ public readonly struct Angle
 
     /// <summary>
     ///     Greater. Determines if <paramref name="a1" /> is in the half circle above <paramref name="a2" />.
-    ///     For <paramref name="a1" />=<paramref name="a2" />+Pi always false.
+    ///     For <paramref name="a1" />=<paramref name="a2" />+Pi true.
     /// </summary>
     /// <param name="a1"></param>
     /// <param name="a2"></param>
@@ -476,14 +476,14 @@ public readonly struct Angle
     public static bool operator >(Angle a1, Angle a2)
     {
         var diff = (a1 - a2).Reduce(WithNegative);
-        if (diff.Radians > 0 && diff.Radians < Pi)
+        if (diff.Radians > 0 && diff.Radians <= Pi)
             return true;
         return false;
     }
 
     /// <summary>
     ///     Smaller. Determines if <paramref name="a1" /> is in the half circle below <paramref name="a2" />.
-    ///     For <paramref name="a1" />=<paramref name="a2" />+Pi always false.
+    ///     For <paramref name="a1" />=<paramref name="a2" />-Pi false.
     /// </summary>
     /// <param name="a1"></param>
     /// <param name="a2"></param>
@@ -498,7 +498,7 @@ public readonly struct Angle
 
     /// <summary>
     ///     Greater or equal. Determines if <paramref name="a1" /> is in the half circle above <paramref name="a2" />.
-    ///     For <paramref name="a1" />=<paramref name="a2" />+Pi always false.
+    ///     For <paramref name="a1" />=<paramref name="a2" />+Pi true.
     /// </summary>
     /// <param name="a1"></param>
     /// <param name="a2"></param>
@@ -507,7 +507,7 @@ public readonly struct Angle
 
     /// <summary>
     ///     Smaller or equal. Determines if <paramref name="a1" /> is in the half circle below <paramref name="a2" />.
-    ///     For <paramref name="a1" />=<paramref name="a2" />+Pi always false.
+    ///     For <paramref name="a1" />=<paramref name="a2" />-Pi false.
     /// </summary>
     /// <param name="a1"></param>
     /// <param name="a2"></param>
