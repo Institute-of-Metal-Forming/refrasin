@@ -4,16 +4,16 @@ using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Collections;
 
-public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
+public class ParticleSurface<TNode> : IParticleSurface<TNode>
     where TNode : INode
 {
-    private readonly TNode[] _nodes;
-    private readonly Dictionary<Guid, int> _nodeIndices;
-    private readonly List<Angle> _nodeAngles;
+    private List<TNode> _nodes;
+    private Dictionary<Guid, int> _nodeIndices;
+    private List<Angle> _nodeAngles;
 
-    public ReadOnlyParticleSurface(IEnumerable<TNode> nodes)
+    public ParticleSurface(IEnumerable<TNode> nodes)
     {
-        _nodes = nodes.ToArray();
+        _nodes = nodes.ToList();
         _nodeIndices = _nodes.Select((n, i) => (n.Id, i)).ToDictionary(t => t.Id, t => t.i);
         _nodeAngles = _nodes.Select(n => n.Coordinates.Phi).ToList();
     }
@@ -25,7 +25,7 @@ public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <inheritdoc />
-    public int Count => _nodes.Length;
+    public int Count => _nodes.Count;
 
     private int ReduceIndex(int index) => index >= 0 ? index % Count : Count + (index % Count);
 
@@ -35,7 +35,7 @@ public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
         var endIndex = ReduceIndex(end) + 1;
 
         return endIndex >= startIndex
-            ? _nodes[startIndex..endIndex]
+            ? _nodes.Slice(startIndex, endIndex - startIndex).ToArray()
             : _nodes[startIndex..].Concat(_nodes[..endIndex]).ToArray();
     }
 
@@ -72,5 +72,53 @@ public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
     public int IndexOf(Guid nodeId) => _nodeIndices[nodeId];
 
     /// <inheritdoc />
-    public bool Contains(Guid nodeId) => _nodeIndices.ContainsKey(nodeId);
+    public bool Contains(Guid nodeId) => _nodes.Any(n => n.Id == nodeId);
+
+    /// <inheritdoc />
+    public void InsertAbove(TNode position, TNode item) => InsertAbove(position.Id, item);
+
+    /// <inheritdoc />
+    public void InsertAbove(Guid position, TNode item) => InsertAbove(_nodeIndices[position], item);
+
+    /// <inheritdoc />
+    public void InsertAbove(int position, TNode item) => InsertBelow(position + 1, item);
+
+    /// <inheritdoc />
+    public void InsertBelow(TNode position, TNode item) => InsertBelow(position.Id, item);
+
+    /// <inheritdoc />
+    public void InsertBelow(Guid position, TNode item) => InsertBelow(_nodeIndices[position], item);
+
+    /// <inheritdoc />
+    public void InsertBelow(int position, TNode item)
+    {
+        _nodes.Insert(position, item);
+        _nodeAngles.Insert(position, item.Coordinates.Phi);
+        _nodeIndices.Add(item.Id, position);
+
+        for (int i = position + 1; i < _nodes.Count; i++)
+        {
+            _nodeIndices[_nodes[i].Id] += 1;
+        }
+    }
+
+    /// <inheritdoc />
+    public void Remove(TNode item) => Remove(item.Id);
+
+    /// <inheritdoc />
+    public void Remove(Guid id) => Remove(_nodeIndices[id]);
+
+    /// <inheritdoc />
+    public void Remove(int index)
+    {
+        var id = _nodes[index].Id;
+        _nodes.RemoveAt(index);
+        _nodeAngles.RemoveAt(index);
+        _nodeIndices.Remove(id);
+
+        for (int i = index; i < _nodes.Count; i++)
+        {
+            _nodeIndices[_nodes[i].Id] -= 1;
+        }
+    }
 }
