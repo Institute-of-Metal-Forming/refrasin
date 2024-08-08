@@ -1,9 +1,12 @@
+using MoreLinq;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
+using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using static RefraSin.Coordinates.Constants;
+using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Particles.Extensions;
 
@@ -127,7 +130,7 @@ public static class ParticleExtensions
             if (currentlyIn) // exiting
             {
                 currentlyIn = false;
-                var intersection = CalculateIntersetionTo(self, other, node);
+                var intersection = CalculateIntersectionTo(self, other, node);
 
                 if (firstPoint is not null)
                 {
@@ -142,7 +145,7 @@ public static class ParticleExtensions
             else // entering
             {
                 currentlyIn = true;
-                var intersection = CalculateIntersetionTo(self, other, node);
+                var intersection = CalculateIntersectionTo(self, other, node);
 
                 firstPoint ??= intersection;
                 yield return intersection;
@@ -153,7 +156,7 @@ public static class ParticleExtensions
             yield return firstPoint!;
     }
 
-    private static IPolarPoint CalculateIntersetionTo(
+    private static IPolarPoint CalculateIntersectionTo(
         IParticle<IParticleNode> self,
         IParticle<IParticleNode> other,
         IParticleNode selfUpperNode
@@ -170,5 +173,86 @@ public static class ParticleExtensions
 
         var intersection = selfLine.IntersectionTo(otherLine);
         return new PolarPoint(intersection, self);
+    }
+
+    public static (
+        Particle<ParticleNode> self,
+        Particle<ParticleNode> other
+    ) CreateGrainBoundariesAtIntersections(
+        this IParticle<IParticleNode> self,
+        IParticle<IParticleNode> other
+    )
+    {
+        var intersections = self.IntersectionPointsTo(other).ToArray();
+
+        var selfNeckPairs = intersections
+            .TakeEvery(2)
+            .Zip(intersections.Skip(1).TakeEvery(2))
+            .ToArray();
+        var otherNeckPairs = selfNeckPairs
+            .Reverse()
+            .Select(p =>
+                (
+                    (IPolarPoint)new PolarPoint(p.First, other),
+                    (IPolarPoint)new PolarPoint(p.Second, other)
+                )
+            )
+            .ToArray();
+
+        var newSelf = new Particle<ParticleNode>(
+            self.Id,
+            self.Coordinates,
+            self.RotationAngle,
+            self.MaterialId,
+            particle => NodeFactory(self, particle, selfNeckPairs)
+        );
+        var newOther = new Particle<ParticleNode>(
+            other.Id,
+            other.Coordinates,
+            other.RotationAngle,
+            other.MaterialId,
+            particle => NodeFactory(other, particle, otherNeckPairs)
+        );
+
+        return (newSelf, newOther);
+
+        IEnumerable<ParticleNode> NodeFactory(
+            IParticle<IParticleNode> template,
+            IParticle<ParticleNode> particle,
+            IEnumerable<(IPolarPoint Lower, IPolarPoint Upper)> neckPairs
+        )
+        {
+            var nodes = new ParticleSurface<ParticleNode>(
+                template.Nodes.Select(n => new ParticleNode(n, particle))
+            );
+
+            foreach (var neckPair in neckPairs)
+            {
+                var lower = nodes.NextUpperNodeFrom(neckPair.Lower.Phi);
+                var upper = nodes.NextLowerNodeFrom(neckPair.Upper.Phi);
+                var startIndex = nodes.IndexOf(lower.Id) - 1;
+                nodes.Remove(lower, upper);
+
+                var lowerNeckPoint = new PolarPoint(neckPair.Lower, particle);
+                var upperNeckPoint = new PolarPoint(neckPair.Upper, particle);
+                var grainBoundaryPoint = lowerNeckPoint.Centroid(upperNeckPoint);
+
+                nodes.InsertAbove(
+                    startIndex,
+                    [
+                        new ParticleNode(Guid.NewGuid(), particle, lowerNeckPoint, Neck),
+                        new ParticleNode(
+                            Guid.NewGuid(),
+                            particle,
+                            grainBoundaryPoint,
+                            GrainBoundary
+                        ),
+                        new ParticleNode(Guid.NewGuid(), particle, upperNeckPoint, Neck)
+                    ]
+                );
+            }
+
+            return nodes;
+        }
     }
 }

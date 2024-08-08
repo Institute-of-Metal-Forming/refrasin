@@ -503,4 +503,31 @@ public class ParticleExtensionsTests
             Is.EqualTo(expectedIntersections.Select(p => p.Y)).Within(1e-3)
         );
     }
+
+    [Test]
+    [TestCaseSource(nameof(GenerateIntersectionPointsToData))]
+    public void TestCreateGrainBoundariesAtIntersections(
+        IParticle<IParticleNode> other,
+        IReadOnlyList<AbsolutePoint> expectedIntersections
+    )
+    {
+        var newParticles = Particle.CreateGrainBoundariesAtIntersections(other);
+
+        var plot = new Plot();
+        plot.Axes.SquareUnits();
+
+        plot.PlotParticle(Particle);
+        plot.PlotParticle(other);
+        plot.PlotParticle(newParticles.self);
+        plot.PlotParticle(newParticles.other);
+
+        plot.SavePng(
+            Path.Combine(
+                _tempDir,
+                $"{nameof(TestCreateGrainBoundariesAtIntersections)}{TestContext.CurrentContext.Test.ID}.png"
+            ),
+            10000,
+            10000
+        );
+    }
 }
