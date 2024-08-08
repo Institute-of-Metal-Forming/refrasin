@@ -83,7 +83,7 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
     private static void AddNodePair(
         List<IParticleNode> allNodes,
         IParticleContactEdge<IParticle<IParticleNode>> particleContact,
-        IPolarPoint coordinates
+        PolarPoint coordinates
     )
     {
         allNodes.Add(

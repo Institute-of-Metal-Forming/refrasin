@@ -7,7 +7,7 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a point in the absolute coordinate system (overall base system).
 /// </summary>
-public readonly struct AbsolutePoint
+public readonly struct AbsolutePoint(double x, double y)
     : ICartesianPoint,
         IIsClose<AbsolutePoint>,
         IPointArithmetics<AbsolutePoint, AbsoluteVector>
@@ -16,36 +16,20 @@ public readonly struct AbsolutePoint
     ///     Creates the absolute point (0,0).
     /// </summary>
     public AbsolutePoint()
-    {
-        X = 0;
-        Y = 0;
-    }
-
-    /// <summary>
-    ///     Creates the absolute point (x, y).
-    /// </summary>
-    /// <param name="x">horizontal coordinate</param>
-    /// <param name="y">vercircal coordinate</param>
-    public AbsolutePoint(double x, double y)
-    {
-        X = x;
-        Y = y;
-    }
+        : this(0, 0) { }
 
     /// <summary>
     ///     Creates the absolute point (x, y).
     /// </summary>
     /// <param name="coordinates">tuple (x, y)</param>
     public AbsolutePoint((double x, double y) coordinates)
-    {
-        (X, Y) = coordinates;
-    }
+        : this(coordinates.x, coordinates.y) { }
 
     /// <inheritdoc />
-    public double X { get; }
+    public double X { get; } = x;
 
     /// <inheritdoc />
-    public double Y { get; }
+    public double Y { get; } = y;
 
     /// <inheritdoc />
     public ICartesianCoordinateSystem System => CartesianCoordinateSystem.Default;

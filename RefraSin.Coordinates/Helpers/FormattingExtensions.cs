@@ -131,7 +131,7 @@ internal static class FormattingExtensions
         return self.FormatPolarCoordinates(
             coordinatesFormat,
             numberFormat,
-            angleFormat,
+            $"{numberFormat}:{angleFormat}",
             formatProvider
         );
     }

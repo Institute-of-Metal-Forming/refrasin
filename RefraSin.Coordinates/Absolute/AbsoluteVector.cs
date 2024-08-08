@@ -7,7 +7,7 @@ namespace RefraSin.Coordinates.Absolute;
 /// <summary>
 ///     Represents a vector in the absolute coordinate system (overall base system).
 /// </summary>
-public readonly struct AbsoluteVector
+public readonly struct AbsoluteVector(double x, double y)
     : ICartesianVector,
         IIsClose<AbsoluteVector>,
         IVectorArithmetics<AbsoluteVector>
@@ -16,36 +16,20 @@ public readonly struct AbsoluteVector
     ///     Creates the absolute vector (0,0).
     /// </summary>
     public AbsoluteVector()
-    {
-        X = 0;
-        Y = 0;
-    }
-
-    /// <summary>
-    ///     Creates the absolute vector (x, y).
-    /// </summary>
-    /// <param name="x">horizontal coordinate</param>
-    /// <param name="y">vercircal coordinate</param>
-    public AbsoluteVector(double x, double y)
-    {
-        X = x;
-        Y = y;
-    }
+        : this(0, 0) { }
 
     /// <summary>
     ///     Creates the absolute vector (x, y).
     /// </summary>
     /// <param name="coordinates">tuple (x, y)</param>
     public AbsoluteVector((double x, double y) coordinates)
-    {
-        (X, Y) = coordinates;
-    }
+        : this(coordinates.x, coordinates.y) { }
 
     /// <inheritdoc />
-    public double X { get; }
+    public double X { get; } = x;
 
     /// <inheritdoc />
-    public double Y { get; }
+    public double Y { get; } = y;
 
     /// <inheritdoc />
     public ICartesianCoordinateSystem System => CartesianCoordinateSystem.Default;

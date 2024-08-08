@@ -7,17 +7,17 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Stellt einen Vektor im kartesischen Koordinatensystem dar.
 /// </summary>
-public readonly struct CartesianVector : ICartesianVector, IVectorArithmetics<CartesianVector>
+public readonly struct CartesianVector(
+    double x,
+    double y,
+    ICartesianCoordinateSystem? system = null
+) : ICartesianVector, IVectorArithmetics<CartesianVector>
 {
     /// <summary>
     ///     Creates the vector (0, 0) in the default system.
     /// </summary>
     public CartesianVector(ICartesianCoordinateSystem? system = null)
-    {
-        X = 0;
-        Y = 0;
-        System = system ?? CartesianCoordinateSystem.Default;
-    }
+        : this(0, 0, system) { }
 
     /// <summary>
     ///     Creates the vector (x, y).
@@ -28,23 +28,7 @@ public readonly struct CartesianVector : ICartesianVector, IVectorArithmetics<Ca
         (double x, double y) coordinates,
         ICartesianCoordinateSystem? system = null
     )
-        : this(system)
-    {
-        (X, Y) = coordinates;
-    }
-
-    /// <summary>
-    ///     Creates the vector (x, y).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    /// <param name="x">horizontal coordinate</param>
-    /// <param name="y">vertical coordinate</param>
-    public CartesianVector(double x, double y, ICartesianCoordinateSystem? system = null)
-        : this(system)
-    {
-        X = x;
-        Y = y;
-    }
+        : this(coordinates.x, coordinates.y, system) { }
 
     /// <summary>
     ///     Creates a vector based on a template. The coordinates systems are automatically castd.
@@ -62,13 +46,13 @@ public readonly struct CartesianVector : ICartesianVector, IVectorArithmetics<Ca
     }
 
     /// <inheritdoc />
-    public double X { get; }
+    public double X { get; } = x;
 
     /// <inheritdoc />
-    public double Y { get; }
+    public double Y { get; } = y;
 
     /// <inheritdoc />
-    public ICartesianCoordinateSystem System { get; }
+    public ICartesianCoordinateSystem System { get; } = system ?? CartesianCoordinateSystem.Default;
 
     /// <inheritdoc />
     public bool IsClose(ICartesianVector other, double precision)

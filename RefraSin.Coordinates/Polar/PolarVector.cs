@@ -4,51 +4,16 @@ using static System.Math;
 
 namespace RefraSin.Coordinates.Polar;
 
-/// <summary>
-///     Stellt einen Vektor in Polarkoordinaten dar.
-/// </summary>
-public readonly struct PolarVector : IPolarVector, IVectorArithmetics<PolarVector>
+public readonly struct PolarVector(Angle phi, double r, IPolarCoordinateSystem? system = null)
+    : IPolarVector,
+        IVectorArithmetics<PolarVector>
 {
-    /// <summary>
-    ///     Creates the vector (0, 0).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
     public PolarVector(IPolarCoordinateSystem? system = null)
-    {
-        Phi = 0;
-        R = 0;
-        System = system ?? PolarCoordinateSystem.Default;
-    }
+        : this(0, 0, system) { }
 
-    /// <summary>
-    ///     Creates the vector (phi, r).
-    /// </summary>
-    /// <param name="coordinates">tuple of coordinates</param>
-    /// <param name="system">coordinate system, if null the default system is used</param>
     public PolarVector((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null)
-        : this(system)
-    {
-        (Phi, R) = coordinates;
-    }
+        : this(coordinates.phi, coordinates.r, system) { }
 
-    /// <summary>
-    ///     Creates the vector (phi, r).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    /// <param name="phi">angle coordinate</param>
-    /// <param name="r">radius coordinate</param>
-    public PolarVector(Angle phi, double r, IPolarCoordinateSystem? system = null)
-        : this(system)
-    {
-        Phi = phi;
-        R = r;
-    }
-
-    /// <summary>
-    ///     Creates a vector based on a template. The coordinates systems are automatically castd.
-    /// </summary>
-    /// <param name="other">template</param>
-    /// <param name="system">coordinate system, if null the default system is used</param>
     public PolarVector(IVector other, IPolarCoordinateSystem? system = null)
         : this(system)
     {
@@ -69,13 +34,16 @@ public readonly struct PolarVector : IPolarVector, IVectorArithmetics<PolarVecto
     }
 
     /// <inheritdoc />
-    public Angle Phi { get; }
+    public Angle Phi { get; } =
+        (r >= 0 ? phi : phi + Angle.Straight).Reduce(
+            system?.AngleReductionDomain ?? PolarCoordinateSystem.Default.AngleReductionDomain
+        );
 
     /// <inheritdoc />
-    public double R { get; }
+    public double R { get; } = Abs(r);
 
     /// <inheritdoc />
-    public IPolarCoordinateSystem System { get; }
+    public IPolarCoordinateSystem System { get; } = system ?? PolarCoordinateSystem.Default;
 
     /// <inheritdoc />
     public Angle AngleTo(IPolarCoordinates other, bool allowNegative = false)

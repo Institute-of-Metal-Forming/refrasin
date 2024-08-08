@@ -80,9 +80,9 @@ public class CoordinatesTest
         var p1 = new CartesianPoint(1, 2);
         var p2 = new CartesianPoint(-1, -2);
 
-        p1.RotateBy(PI);
+        var rotated = p1.RotateBy(PI);
 
-        That(p1.IsClose(p2));
+        That(p2.IsClose(rotated));
     }
 
     [Test]
@@ -258,7 +258,11 @@ public class CoordinatesTest
     }
 
     [Test]
-    public void CoordinatesToStringAndParseTest()
+    [TestCase(":e3:deg")]
+    [TestCase("V[]:f2:rad")]
+    [TestCase("<;>::grad")]
+    [TestCase("N{V,}:f2:gon")]
+    public void CoordinatesToStringAndParseTest(string format)
     {
         var pp = new PolarPoint(PI, 1.2);
         var pv = new PolarVector(PI, 1.2);
@@ -267,32 +271,29 @@ public class CoordinatesTest
         var ap = new AbsolutePoint(1.3, 1.2);
         var av = new AbsoluteVector(1.3, 1.2);
 
-        foreach (var format in new[] { ":e3:deg", "V[]:f2:rad", "<;>::grad", "N{V,}:f2:gon" })
-        {
-            var s = pp.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(PolarPoint.Parse(s).IsClose(pp, 2));
+        var s = pp.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(PolarPoint.Parse(s).IsClose(pp, 2));
 
-            s = pv.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(PolarVector.Parse(s).IsClose(pv, 2));
+        s = pv.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(PolarVector.Parse(s).IsClose(pv, 2));
 
-            s = cp.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(CartesianPoint.Parse(s).IsClose(cp, 2));
+        s = cp.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(CartesianPoint.Parse(s).IsClose(cp, 2));
 
-            s = cv.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(CartesianVector.Parse(s).IsClose(cv, 2));
+        s = cv.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(CartesianVector.Parse(s).IsClose(cv, 2));
 
-            s = ap.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(AbsolutePoint.Parse(s).IsClose(ap, 2));
+        s = ap.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(AbsolutePoint.Parse(s).IsClose(ap, 2));
 
-            s = av.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(AbsoluteVector.Parse(s).IsClose(av, 2));
-        }
+        s = av.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(AbsoluteVector.Parse(s).IsClose(av, 2));
     }
 
     class OriginClass

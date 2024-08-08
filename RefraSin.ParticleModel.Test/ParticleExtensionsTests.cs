@@ -466,7 +466,7 @@ public class ParticleExtensionsTests
     [TestCaseSource(nameof(GenerateIntersectionPointsToData))]
     public void TestIntersectionPointsTo(
         IParticle<IParticleNode> other,
-        IReadOnlyList<IPoint> expectedIntersections
+        IReadOnlyList<AbsolutePoint> expectedIntersections
     )
     {
         var intersections = Particle.IntersectionPointsTo(other).ToArray();
@@ -496,11 +496,11 @@ public class ParticleExtensionsTests
 
         Assert.That(
             intersections.Select(p => p.Absolute.X),
-            Is.EqualTo(expectedIntersections.Select(p => p.Absolute.X)).Within(1e-3)
+            Is.EqualTo(expectedIntersections.Select(p => p.X)).Within(1e-3)
         );
         Assert.That(
             intersections.Select(p => p.Absolute.Y),
-            Is.EqualTo(expectedIntersections.Select(p => p.Absolute.Y)).Within(1e-3)
+            Is.EqualTo(expectedIntersections.Select(p => p.Y)).Within(1e-3)
         );
     }
 }

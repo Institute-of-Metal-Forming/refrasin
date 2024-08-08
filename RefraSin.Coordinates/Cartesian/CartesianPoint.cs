@@ -7,7 +7,7 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Represents a point in cartesian coordinate system.
 /// </summary>
-public readonly struct CartesianPoint
+public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSystem? system = null)
     : ICartesianPoint,
         IPointArithmetics<CartesianPoint, CartesianVector>
 {
@@ -15,11 +15,7 @@ public readonly struct CartesianPoint
     ///     Creates the point (0, 0) in the default system.
     /// </summary>
     public CartesianPoint(ICartesianCoordinateSystem? system = null)
-    {
-        X = 0;
-        Y = 0;
-        System = system ?? CartesianCoordinateSystem.Default;
-    }
+        : this(0, 0, system) { }
 
     /// <summary>
     ///     Creates the point (x, y).
@@ -30,23 +26,7 @@ public readonly struct CartesianPoint
         (double x, double y) coordinates,
         ICartesianCoordinateSystem? system = null
     )
-        : this(system)
-    {
-        (X, Y) = coordinates;
-    }
-
-    /// <summary>
-    ///     Creates the point (x, y).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    /// <param name="x">horizontal coordinate</param>
-    /// <param name="y">vertical coordinate</param>
-    public CartesianPoint(double x, double y, ICartesianCoordinateSystem? system = null)
-        : this(system)
-    {
-        X = x;
-        Y = y;
-    }
+        : this(coordinates.x, coordinates.y, system) { }
 
     /// <summary>
     ///     Creates a point based on a template. The coordinates systems are automatically castd.
@@ -64,6 +44,15 @@ public readonly struct CartesianPoint
         X = transformed.X;
         Y = transformed.Y;
     }
+
+    /// <inheritdoc />
+    public double X { get; } = x;
+
+    /// <inheritdoc />
+    public double Y { get; } = y;
+
+    /// <inheritdoc />
+    public ICartesianCoordinateSystem System { get; } = system ?? CartesianCoordinateSystem.Default;
 
     /// <inheritdoc />
     public AbsolutePoint Absolute
@@ -162,15 +151,6 @@ public readonly struct CartesianPoint
 
     /// <inheritdoc />
     public double[] ToArray() => [X, Y];
-
-    /// <inheritdoc />
-    public double X { get; }
-
-    /// <inheritdoc />
-    public double Y { get; }
-
-    /// <inheritdoc />
-    public ICartesianCoordinateSystem System { get; }
 
     /// <inheritdoc />
     public static CartesianPoint operator -(CartesianPoint value) => new(-value.X, -value.Y);
