@@ -11,7 +11,7 @@ namespace RefraSin.ParticleModel.Nodes;
 public record ParticleNode(
     Guid Id,
     IParticle<IParticleNode> Particle,
-    PolarPoint Coordinates,
+    IPolarPoint Coordinates,
     NodeType Type
 )
     : Node(Id, Particle.Id, new PolarPoint(Coordinates.Phi, Coordinates.R, Particle), Type),

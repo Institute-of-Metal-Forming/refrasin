@@ -37,34 +37,72 @@ public readonly struct AbsolutePoint(double x, double y)
     /// <inheritdoc />
     public AbsolutePoint Absolute => this;
 
-    /// <inheritdoc />
-    public AbsolutePoint AddVector(AbsoluteVector v) => this + v;
+    public AbsolutePoint AddVector(IVector v)
+    {
+        var abs = v.Absolute;
+        return new AbsolutePoint(X + abs.X, Y + abs.Y);
+    }
+
+    ICartesianPoint IPointOperations<ICartesianPoint, ICartesianVector>.AddVector(
+        ICartesianVector v
+    ) => AddVector(v);
+
+    AbsolutePoint IPointOperations<AbsolutePoint, AbsoluteVector>.AddVector(AbsoluteVector v) =>
+        AddVector(v);
+
+    public AbsoluteVector VectorTo(IPoint p)
+    {
+        var abs = p.Absolute;
+        return new AbsoluteVector(X - abs.X, Y - abs.Y);
+    }
+
+    ICartesianVector IPointOperations<ICartesianPoint, ICartesianVector>.VectorTo(
+        ICartesianPoint p
+    ) => VectorTo(p);
+
+    AbsoluteVector IPointOperations<AbsolutePoint, AbsoluteVector>.VectorTo(AbsolutePoint p) =>
+        VectorTo(p);
 
     /// <inheritdoc />
-    public AbsoluteVector VectorTo(AbsolutePoint p) => p - this;
+    public double DistanceTo(IPoint other)
+    {
+        var abs = other.Absolute;
+        return Sqrt(Pow((X - abs.X) * System.XScale, 2) + Pow((Y - abs.Y) * System.YScale, 2));
+    }
 
-    /// <inheritdoc />
-    public double DistanceTo(AbsolutePoint other) =>
-        Sqrt(Pow(X - other.X, 2) + Pow(Y - other.Y, 2));
+    double IPointOperations<ICartesianPoint, ICartesianVector>.DistanceTo(ICartesianPoint p) =>
+        DistanceTo(p);
+
+    double IPointOperations<AbsolutePoint, AbsoluteVector>.DistanceTo(AbsolutePoint p) =>
+        DistanceTo(p);
+
+    /// <summary>
+    ///     Computes the point halfway on the straight line between two points.
+    /// </summary>
+    /// <param name="other">other point</param>
+    public AbsolutePoint Centroid(IPoint other)
+    {
+        var abs = other.Absolute;
+        return new AbsolutePoint(0.5 * (X + abs.X), 0.5 * (Y + abs.Y));
+    }
+
+    AbsolutePoint IPointOperations<AbsolutePoint, AbsoluteVector>.Centroid(AbsolutePoint other) =>
+        Centroid(other);
+
+    ICartesianPoint IPointOperations<ICartesianPoint, ICartesianVector>.Centroid(
+        ICartesianPoint other
+    ) => Centroid(other);
 
     /// <inheritdoc />
     public bool IsClose(AbsolutePoint other, double precision = 1e-8) =>
         X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
 
-    /// <summary>
-    ///     Computes the point halfway on the straight line between two points.
-    /// </summary>
-    /// <param name="other">other point</param>
-    /// <returns></returns>
-    public AbsolutePoint Centroid(AbsolutePoint other) =>
-        new(0.5 * (X + other.X), 0.5 * (Y + other.Y));
-
-    /// <summary>
-    ///     Computes the point halfway on the straight line between two points.
-    /// </summary>
-    /// <param name="other">other point</param>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public IPoint Centroid(IPoint other) => Centroid(other.Absolute);
+    public bool IsClose(ICartesianPoint other, double precision = 1e-8)
+    {
+        if (System.Equals(other.System))
+            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
 
     /// <summary>
     ///     Parse from string representation.
@@ -82,13 +120,7 @@ public readonly struct AbsolutePoint(double x, double y)
     /// <summary>
     ///     Addition of a vector to a point, see <see cref="AddVector" />.
     /// </summary>
-    public static AbsolutePoint operator +(AbsolutePoint p, AbsoluteVector v) =>
-        new(p.X + v.X, p.Y + v.Y);
-
-    /// <summary>
-    ///     Addition of a vector to a point, see <see cref="AddVector" />.
-    /// </summary>
-    public static AbsolutePoint operator +(AbsoluteVector v, AbsolutePoint p) => p + v;
+    public static AbsolutePoint operator +(AbsolutePoint p, AbsoluteVector v) => p.AddVector(v);
 
     /// <summary>
     ///     Subtraction of a vector from a point, see <see cref="AddVector" />.
@@ -98,19 +130,7 @@ public readonly struct AbsolutePoint(double x, double y)
     /// <summary>
     ///     Computes the vector between two points. See <see cref="VectorTo" />.
     /// </summary>
-    public static AbsoluteVector operator -(AbsolutePoint p1, AbsolutePoint p2) =>
-        new(p1.X - p2.X, p1.Y - p2.Y);
-
-    /// <inheritdoc />
-    public static AbsolutePoint operator -(AbsolutePoint self) => new(-self.X, -self.Y);
-
-    /// <inheritdoc />
-    public bool IsClose(ICartesianPoint other, double precision = 1e-8)
-    {
-        if (System.Equals(other.System))
-            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
-        return Absolute.IsClose(other.Absolute, precision);
-    }
+    public static AbsoluteVector operator -(AbsolutePoint p1, AbsolutePoint p2) => p1.VectorTo(p2);
 
     /// <inheritdoc />
     public double[] ToArray() => [X, Y];

@@ -84,7 +84,7 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
     /// <summary>
     /// Coordinates of the node in terms of particle's local coordinate system <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
     /// </summary>
-    public PolarPoint Coordinates { get; internal set; }
+    public IPolarPoint Coordinates { get; internal set; }
 
     /// <inheritdoc />
     public abstract NodeType Type { get; }

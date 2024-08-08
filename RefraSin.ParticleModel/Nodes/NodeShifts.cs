@@ -8,7 +8,7 @@ namespace RefraSin.ParticleModel.Nodes;
 public record NodeShifts(
     Guid Id,
     Guid ParticleId,
-    PolarPoint Coordinates,
+    IPolarPoint Coordinates,
     NodeType Type,
     NormalTangential<double> Shift
 ) : Node(Id, ParticleId, Coordinates, Type), INodeShifts { }

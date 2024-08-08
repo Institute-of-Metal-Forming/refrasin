@@ -58,7 +58,7 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
 
     public Guid Id { get; }
     public Guid ParticleId { get; }
-    public PolarPoint Coordinates { get; }
+    public IPolarPoint Coordinates { get; }
     public NodeType Type { get; }
     public ToUpperToLower<double> SurfaceDistance { get; }
     public ToUpperToLower<Angle> SurfaceRadiusAngle { get; }

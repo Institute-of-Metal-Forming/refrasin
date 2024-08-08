@@ -13,7 +13,7 @@ public interface INode : IVertex
     /// <summary>
     /// Polar coordinates in the particle's coordinate system.
     /// </summary>
-    public PolarPoint Coordinates { get; }
+    public IPolarPoint Coordinates { get; }
 
     /// <summary>
     /// Type of the node.

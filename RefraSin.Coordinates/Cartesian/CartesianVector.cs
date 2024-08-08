@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
@@ -55,14 +57,6 @@ public readonly struct CartesianVector(
     public ICartesianCoordinateSystem System { get; } = system ?? CartesianCoordinateSystem.Default;
 
     /// <inheritdoc />
-    public bool IsClose(ICartesianVector other, double precision)
-    {
-        if (System.Equals(other.System))
-            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
-        return Absolute.IsClose(other.Absolute, precision);
-    }
-
-    /// <inheritdoc />
     public AbsoluteVector Absolute =>
         new AbsoluteVector(X, Y)
             .ScaleBy(System.XScale, System.YScale)
@@ -72,13 +66,38 @@ public readonly struct CartesianVector(
     public double Norm => Sqrt(Pow(X, 2) + Pow(Y, 2));
 
     /// <inheritdoc />
-    public CartesianVector Add(CartesianVector v) => this + v;
+    public bool IsClose(ICartesianVector other, double precision)
+    {
+        if (System.Equals(other.System))
+            return X.IsClose(other.X, precision) && Y.IsClose(other.Y, precision);
+        return Absolute.IsClose(other.Absolute, precision);
+    }
+
+    public CartesianVector Add(ICartesianVector v)
+    {
+        if (System == v.System)
+            return new CartesianVector(X + v.X, Y + v.Y, System);
+        throw new DifferentCoordinateSystemException(this, v);
+    }
+
+    ICartesianVector IVectorOperations<ICartesianVector>.Add(ICartesianVector v) => Add(v);
+
+    CartesianVector IVectorOperations<CartesianVector>.Add(CartesianVector v) => Add(v);
 
     /// <inheritdoc />
-    public CartesianVector Subtract(CartesianVector v) => this - v;
+    public CartesianVector Reverse() => new(-X, -Y);
+
+    ICartesianVector IVectorOperations<ICartesianVector>.Reverse() => Reverse();
 
     /// <inheritdoc />
-    public double ScalarProduct(CartesianVector v) => this * v;
+    public double ScalarProduct(ICartesianVector v)
+    {
+        if (System == v.System)
+            return X * v.X + Y * v.Y;
+        throw new DifferentCoordinateSystemException(this, v);
+    }
+
+    double IVectorOperations<CartesianVector>.ScalarProduct(CartesianVector v) => ScalarProduct(v);
 
     /// <summary>
     ///     Parse from string representation.
@@ -98,35 +117,18 @@ public readonly struct CartesianVector(
     /// </summary>
     /// <param name="v"></param>
     /// <returns></returns>
-    public static CartesianVector operator -(CartesianVector v) => new(-v.X, -v.Y);
+    public static CartesianVector operator -(CartesianVector v) => v.Reverse();
 
     /// <summary>
     ///     Vectorial addition. See <see cref="Add" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static CartesianVector operator +(CartesianVector v1, CartesianVector v2)
-    {
-        if (v1.System == v2.System)
-            return new CartesianVector(v1.X + v2.X, v1.Y + v2.Y, v1.System);
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
-
-    /// <summary>
-    ///     Vectorial subtacrtion. See <see cref="Subtract" />.
-    /// </summary>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static CartesianVector operator -(CartesianVector v1, CartesianVector v2)
-    {
-        if (v1.System == v2.System)
-            return new CartesianVector(v1.X - v2.X, v1.Y - v2.Y, v1.System);
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
+    public static CartesianVector operator +(CartesianVector v1, CartesianVector v2) => v1.Add(v2);
 
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
     /// </summary>
-    public static CartesianVector operator *(double d, CartesianVector v) =>
-        new(d * v.X, d * v.Y, v.System);
+    public static CartesianVector operator *(double d, CartesianVector v) => v.ScaleBy(d);
 
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
@@ -137,16 +139,11 @@ public readonly struct CartesianVector(
     ///     Scalar product. See <see cref="ScalarProduct" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static double operator *(CartesianVector v1, CartesianVector v2)
-    {
-        if (v1.System == v2.System)
-            return v1.X * v2.X + v1.Y * v2.Y;
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
+    public static double operator *(CartesianVector v1, CartesianVector v2) => v1.ScalarProduct(v2);
 
     /// <inheritdoc />
     public static CartesianVector operator /(CartesianVector left, double right) =>
-        new(left.X / right, left.Y / right);
+        left.ScaleBy(1 / right);
 
     /// <inheritdoc />
     public string ToString(string? format, IFormatProvider? formatProvider) =>
@@ -156,9 +153,13 @@ public readonly struct CartesianVector(
     public double[] ToArray() => [X, Y];
 
     /// <inheritdoc />
-    public CartesianVector ScaleBy(double scale) => scale * this;
+    public CartesianVector ScaleBy(double scale) => new(scale * X, scale * Y);
 
     /// <inheritdoc />
     public CartesianVector RotateBy(double rotation) =>
         new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
+
+    /// <inheritdoc />
+    public static CartesianVector operator -(CartesianVector left, CartesianVector right) =>
+        left + -right;
 }

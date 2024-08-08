@@ -67,12 +67,36 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
         }
     }
 
-    public CartesianPoint AddVector(CartesianVector v) => this + v;
+    public CartesianPoint AddVector(ICartesianVector v)
+    {
+        if (System.Equals(v.System))
+            return new CartesianPoint(X + v.X, Y + v.Y, System);
+        throw new DifferentCoordinateSystemException(this, v);
+    }
 
-    public CartesianVector VectorTo(CartesianPoint p) => p - this;
+    ICartesianPoint IPointOperations<ICartesianPoint, ICartesianVector>.AddVector(
+        ICartesianVector v
+    ) => AddVector(v);
+
+    CartesianPoint IPointOperations<CartesianPoint, CartesianVector>.AddVector(CartesianVector v) =>
+        AddVector(v);
+
+    public CartesianVector VectorTo(ICartesianPoint p)
+    {
+        if (System.Equals(p.System))
+            return new CartesianVector(X - p.X, Y - p.Y, System);
+        throw new DifferentCoordinateSystemException(this, p);
+    }
+
+    ICartesianVector IPointOperations<ICartesianPoint, ICartesianVector>.VectorTo(
+        ICartesianPoint p
+    ) => VectorTo(p);
+
+    CartesianVector IPointOperations<CartesianPoint, CartesianVector>.VectorTo(CartesianPoint p) =>
+        VectorTo(p);
 
     /// <inheritdoc />
-    public double DistanceTo(CartesianPoint other)
+    public double DistanceTo(ICartesianPoint other)
     {
         if (System.Equals(other.System))
             return Sqrt(
@@ -80,6 +104,9 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
             );
         return Absolute.DistanceTo(other.Absolute);
     }
+
+    double IPointOperations<CartesianPoint, CartesianVector>.DistanceTo(CartesianPoint p) =>
+        DistanceTo(p);
 
     /// <inheritdoc />
     public bool IsClose(ICartesianPoint other, double precision = 1e-8)
@@ -93,12 +120,20 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
-    public CartesianPoint Centroid(CartesianPoint other)
+    public CartesianPoint Centroid(ICartesianPoint other)
     {
         if (System.Equals(other.System))
             return new CartesianPoint(0.5 * (X + other.X), 0.5 * (Y + other.Y));
         return new CartesianPoint(Absolute.Centroid(other.Absolute), System);
     }
+
+    CartesianPoint IPointOperations<CartesianPoint, CartesianVector>.Centroid(
+        CartesianPoint other
+    ) => Centroid(other);
+
+    ICartesianPoint IPointOperations<ICartesianPoint, ICartesianVector>.Centroid(
+        ICartesianPoint other
+    ) => Centroid(other);
 
     /// <summary>
     ///     Parse from string representation.
@@ -118,32 +153,13 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
     /// </summary>
     /// ///
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static CartesianPoint operator +(CartesianPoint p, CartesianVector v)
-    {
-        if (p.System.Equals(v.System))
-            return new CartesianPoint(p.X + v.X, p.Y + v.Y, p.System);
-        throw new DifferentCoordinateSystemException(p, v);
-    }
-
-    /// <summary>
-    ///     Addition of a vector to a point, see <see cref="AddVector" />.
-    /// </summary>
-    public static CartesianPoint operator +(CartesianVector v, CartesianPoint p) => p + v;
-
-    /// <summary>
-    ///     Subtraction of a vector from a point, see <see cref="AddVector" />.
-    /// </summary>
-    public static CartesianPoint operator -(CartesianPoint p, CartesianVector v) => p + -v;
+    public static CartesianPoint operator +(CartesianPoint p, CartesianVector v) => p.AddVector(v);
 
     /// <summary>
     ///     Computes the vector between two points. See <see cref="VectorTo" />.
     /// </summary>
-    public static CartesianVector operator -(CartesianPoint p1, CartesianPoint p2)
-    {
-        if (p1.System.Equals(p2.System))
-            return new CartesianVector(p1.X - p2.X, p1.Y - p2.Y, p1.System);
-        throw new DifferentCoordinateSystemException(p1, p2);
-    }
+    public static CartesianVector operator -(CartesianPoint p1, CartesianPoint p2) =>
+        p1.VectorTo(p2);
 
     /// <inheritdoc />
     public string ToString(string? format, IFormatProvider? formatProvider) =>
@@ -151,9 +167,6 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
 
     /// <inheritdoc />
     public double[] ToArray() => [X, Y];
-
-    /// <inheritdoc />
-    public static CartesianPoint operator -(CartesianPoint value) => new(-value.X, -value.Y);
 
     /// <inheritdoc />
     public CartesianPoint ScaleBy(double scale) => new(scale * X, scale * Y);

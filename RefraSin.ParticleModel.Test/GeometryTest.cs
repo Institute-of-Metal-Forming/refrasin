@@ -15,7 +15,7 @@ public class GeometryTest
     record DummyNode(
         Guid Id,
         Guid ParticleId,
-        PolarPoint Coordinates,
+        IPolarPoint Coordinates,
         NodeType Type,
         INode Upper,
         INode Lower

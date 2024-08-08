@@ -73,19 +73,73 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
         }
     }
 
-    /// <inheritdoc />
-    public PolarPoint AddVector(PolarVector v) => this + v;
+    public PolarPoint AddVector(IPolarVector v)
+    {
+        if (System.Equals(v.System))
+        {
+            var x = R * Cos(Phi) + v.R * Cos(v.Phi);
+            var y = R * Sin(Phi) + v.R * Sin(v.Phi);
 
-    /// <inheritdoc />
-    public PolarVector VectorTo(PolarPoint p) => p - this;
+            var r = Sqrt(Pow(x, 2) + Pow(y, 2));
+            var phi =
+                y > 0
+                    ? Acos(x / r)
+                    : y < 0
+                        ? PI + Acos(-x / r)
+                        : x >= 0
+                            ? 0
+                            : PI;
 
-    /// <inheritdoc />
-    public double DistanceTo(PolarPoint other)
+            return new PolarPoint(phi, r, System);
+        }
+
+        throw new DifferentCoordinateSystemException(this, v);
+    }
+
+    IPolarPoint IPointOperations<IPolarPoint, IPolarVector>.AddVector(IPolarVector other) =>
+        AddVector(other);
+
+    PolarPoint IPointOperations<PolarPoint, PolarVector>.AddVector(PolarVector other) =>
+        AddVector(other);
+
+    public PolarVector VectorTo(IPolarPoint p)
+    {
+        if (System.Equals(p.System))
+        {
+            var x = R * Cos(Phi) - p.R * Cos(p.Phi);
+            var y = R * Sin(Phi) - p.R * Sin(p.Phi);
+
+            var r = Sqrt(Pow(x, 2) + Pow(y, 2));
+            var phi =
+                y > 0
+                    ? Acos(x / r)
+                    : y < 0
+                        ? PI + Acos(-x / r)
+                        : x >= 0
+                            ? 0
+                            : PI;
+
+            return new PolarVector(phi, r, System);
+        }
+
+        throw new DifferentCoordinateSystemException(this, p);
+    }
+
+    IPolarVector IPointOperations<IPolarPoint, IPolarVector>.VectorTo(IPolarPoint other) =>
+        VectorTo(other);
+
+    PolarVector IPointOperations<PolarPoint, PolarVector>.VectorTo(PolarPoint other) =>
+        VectorTo(other);
+
+    public double DistanceTo(IPolarPoint other)
     {
         if (System.Equals(other.System))
             return CosLaw.C(R, other.R, Abs(other.Phi - Phi));
         return Absolute.DistanceTo(other.Absolute);
     }
+
+    double IPointOperations<PolarPoint, PolarVector>.DistanceTo(PolarPoint other) =>
+        DistanceTo(other);
 
     /// <inheritdoc />
     public bool IsClose(IPolarPoint other, double precision = 1e-8)
@@ -99,7 +153,7 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
     ///     Computes the point halfway on the straight line between two points.
     /// </summary>
     /// <param name="other">other point</param>
-    public PolarPoint Centroid(PolarPoint other)
+    public PolarPoint Centroid(IPolarPoint other)
     {
         if (System.Equals(other.System))
         {
@@ -111,6 +165,12 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
 
         return new PolarPoint(Absolute.Centroid(other.Absolute), System);
     }
+
+    IPolarPoint IPointOperations<IPolarPoint, IPolarVector>.Centroid(IPolarPoint other) =>
+        Centroid(other);
+
+    PolarPoint IPointOperations<PolarPoint, PolarVector>.Centroid(PolarPoint other) =>
+        Centroid(other);
 
     /// <summary>
     ///     Parse from string representation.
@@ -129,65 +189,13 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
     ///     Addition of a vector to a point, see <see cref="AddVector" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static PolarPoint operator +(PolarPoint p, PolarVector v)
-    {
-        if (p.System.Equals(v.System))
-        {
-            var x = p.R * Cos(p.Phi) + v.R * Cos(v.Phi);
-            var y = p.R * Sin(p.Phi) + v.R * Sin(v.Phi);
-
-            var r = Sqrt(Pow(x, 2) + Pow(y, 2));
-            var phi =
-                y > 0
-                    ? Acos(x / r)
-                    : y < 0
-                        ? PI + Acos(-x / r)
-                        : x >= 0
-                            ? 0
-                            : PI;
-
-            return new PolarPoint(phi, r, p.System);
-        }
-
-        throw new DifferentCoordinateSystemException(p, v);
-    }
-
-    /// <summary>
-    ///     Addition of a vector to a point, see <see cref="AddVector" />.
-    /// </summary>
-    public static PolarPoint operator +(PolarVector v, PolarPoint p) => p + v;
-
-    /// <summary>
-    ///     Subtraction of a vector from a point, see <see cref="AddVector" />.
-    /// </summary>
-    public static PolarPoint operator -(PolarPoint p, PolarVector v) => p + -v;
+    public static PolarPoint operator +(PolarPoint p, PolarVector v) => p.AddVector(v);
 
     /// <summary>
     ///     Computes the vector between two points. See <see cref="VectorTo" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static PolarVector operator -(PolarPoint p1, PolarPoint p2)
-    {
-        if (p1.System.Equals(p2.System))
-        {
-            var x = p1.R * Cos(p1.Phi) - p2.R * Cos(p2.Phi);
-            var y = p1.R * Sin(p1.Phi) - p2.R * Sin(p2.Phi);
-
-            var r = Sqrt(Pow(x, 2) + Pow(y, 2));
-            var phi =
-                y > 0
-                    ? Acos(x / r)
-                    : y < 0
-                        ? PI + Acos(-x / r)
-                        : x >= 0
-                            ? 0
-                            : PI;
-
-            return new PolarVector(phi, r, p1.System);
-        }
-
-        throw new DifferentCoordinateSystemException(p1, p2);
-    }
+    public static PolarVector operator -(PolarPoint p1, PolarPoint p2) => p1.VectorTo(p2);
 
     /// <inheritdoc />
     public string ToString(string? format, IFormatProvider? formatProvider) =>

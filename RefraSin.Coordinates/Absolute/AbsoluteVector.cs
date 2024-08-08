@@ -44,6 +44,33 @@ public readonly struct AbsoluteVector(double x, double y)
     /// <inheritdoc />
     public double Norm => Sqrt(Pow(X, 2) + Pow(Y, 2));
 
+    public AbsoluteVector Add(IVector v)
+    {
+        var abs = v.Absolute;
+        return new AbsoluteVector(X + abs.X, Y + abs.Y);
+    }
+
+    ICartesianVector IVectorOperations<ICartesianVector>.Add(ICartesianVector v) => Add(v);
+
+    AbsoluteVector IVectorOperations<AbsoluteVector>.Add(AbsoluteVector v) => Add(v);
+
+    /// <inheritdoc />
+    public AbsoluteVector Reverse() => new(-X, -Y);
+
+    ICartesianVector IVectorOperations<ICartesianVector>.Reverse() => Reverse();
+
+    /// <inheritdoc />
+    public double ScalarProduct(IVector v)
+    {
+        var abs = v.Absolute;
+        return X * abs.X + Y * abs.Y;
+    }
+
+    double IVectorOperations<ICartesianVector>.ScalarProduct(ICartesianVector v) =>
+        ScalarProduct(v);
+
+    double IVectorOperations<AbsoluteVector>.ScalarProduct(AbsoluteVector v) => ScalarProduct(v);
+
     /// <summary>
     ///     Parse from string representation.
     /// </summary>
@@ -60,24 +87,22 @@ public readonly struct AbsoluteVector(double x, double y)
     /// <summary>
     ///     Negotiation (rotate by Pi).
     /// </summary>
-    public static AbsoluteVector operator -(AbsoluteVector v) => new(-v.X, -v.Y);
+    public static AbsoluteVector operator -(AbsoluteVector v) => v.Reverse();
 
     /// <summary>
     ///     Vectorial addition.
     /// </summary>
-    public static AbsoluteVector operator +(AbsoluteVector v1, AbsoluteVector v2) =>
-        new(v1.X + v2.X, v1.Y + v2.Y);
+    public static AbsoluteVector operator +(AbsoluteVector v1, AbsoluteVector v2) => v1.Add(v2);
 
     /// <summary>
     ///     Vectorial subtraction.
     /// </summary>
-    public static AbsoluteVector operator -(AbsoluteVector v1, AbsoluteVector v2) =>
-        new(v1.X - v2.X, v1.Y - v2.Y);
+    public static AbsoluteVector operator -(AbsoluteVector v1, AbsoluteVector v2) => v1 + -v2;
 
     /// <summary>
     ///     Scales the vector.
     /// </summary>
-    public static AbsoluteVector operator *(double d, AbsoluteVector v) => new(d * v.X, d * v.Y);
+    public static AbsoluteVector operator *(double d, AbsoluteVector v) => v.ScaleBy(d);
 
     /// <summary>
     ///     Scales the vector.
@@ -87,8 +112,7 @@ public readonly struct AbsoluteVector(double x, double y)
     /// <summary>
     ///     Scalar product.
     /// </summary>
-    public static double operator *(AbsoluteVector v1, AbsoluteVector v2) =>
-        v1.X * v2.X + v1.Y * v2.Y;
+    public static double operator *(AbsoluteVector v1, AbsoluteVector v2) => v1.ScalarProduct(v2);
 
     /// <inheritdoc />
     public bool IsClose(ICartesianVector other, double precision)
@@ -100,7 +124,7 @@ public readonly struct AbsoluteVector(double x, double y)
 
     /// <inheritdoc />
     public static AbsoluteVector operator /(AbsoluteVector left, double right) =>
-        new(left.X / right, left.Y / right);
+        left.ScaleBy(1 / right);
 
     /// <inheritdoc />
     public double[] ToArray() => [X, Y];
@@ -108,15 +132,6 @@ public readonly struct AbsoluteVector(double x, double y)
     /// <inheritdoc />
     public string ToString(string? format, IFormatProvider? formatProvider) =>
         this.FormatCartesianCoordinates(format, formatProvider);
-
-    /// <inheritdoc />
-    public AbsoluteVector Add(AbsoluteVector v) => this + v;
-
-    /// <inheritdoc />
-    public AbsoluteVector Subtract(AbsoluteVector v) => this - v;
-
-    /// <inheritdoc />
-    public double ScalarProduct(AbsoluteVector v) => this * v;
 
     /// <inheritdoc />
     public AbsoluteVector ScaleBy(double scale) => scale * this;
