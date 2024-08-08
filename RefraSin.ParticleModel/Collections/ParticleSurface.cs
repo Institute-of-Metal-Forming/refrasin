@@ -84,6 +84,18 @@ public class ParticleSurface<TNode> : IParticleSurface<TNode>
     public void InsertAbove(int position, TNode item) => InsertBelow(position + 1, item);
 
     /// <inheritdoc />
+    public void InsertAbove(TNode position, IEnumerable<TNode> items) =>
+        InsertAbove(position.Id, items);
+
+    /// <inheritdoc />
+    public void InsertAbove(Guid position, IEnumerable<TNode> items) =>
+        InsertAbove(_nodeIndices[position], items);
+
+    /// <inheritdoc />
+    public void InsertAbove(int position, IEnumerable<TNode> items) =>
+        InsertBelow(position + 1, items);
+
+    /// <inheritdoc />
     public void InsertBelow(TNode position, TNode item) => InsertBelow(position.Id, item);
 
     /// <inheritdoc />
@@ -99,6 +111,34 @@ public class ParticleSurface<TNode> : IParticleSurface<TNode>
         for (int i = position + 1; i < _nodes.Count; i++)
         {
             _nodeIndices[_nodes[i].Id] += 1;
+        }
+    }
+
+    /// <inheritdoc />
+    public void InsertBelow(TNode position, IEnumerable<TNode> items) =>
+        InsertBelow(position.Id, items);
+
+    /// <inheritdoc />
+    public void InsertBelow(Guid position, IEnumerable<TNode> items) =>
+        InsertBelow(_nodeIndices[position], items);
+
+    /// <inheritdoc />
+    public void InsertBelow(int position, IEnumerable<TNode> items)
+    {
+        var count = 0;
+
+        foreach (var item in items)
+        {
+            _nodes.Insert(position, item);
+            _nodeAngles.Insert(position, item.Coordinates.Phi);
+            _nodeIndices.Add(item.Id, position);
+            position++;
+            count++;
+        }
+
+        for (int i = position; i < _nodes.Count; i++)
+        {
+            _nodeIndices[_nodes[i].Id] += count;
         }
     }
 
@@ -119,6 +159,32 @@ public class ParticleSurface<TNode> : IParticleSurface<TNode>
         for (int i = index; i < _nodes.Count; i++)
         {
             _nodeIndices[_nodes[i].Id] -= 1;
+        }
+    }
+
+    /// <inheritdoc />
+    public void Remove(TNode start, TNode end) => Remove(start.Id, end.Id);
+
+    /// <inheritdoc />
+    public void Remove(Guid start, Guid end) => Remove(_nodeIndices[start], _nodeIndices[end]);
+
+    /// <inheritdoc />
+    public void Remove(int start, int end)
+    {
+        var count = 0;
+
+        for (int i = start; i <= end; i++)
+        {
+            var id = _nodes[start].Id;
+            _nodes.RemoveAt(start);
+            _nodeAngles.RemoveAt(start);
+            _nodeIndices.Remove(id);
+            count++;
+        }
+
+        for (int i = start; i < _nodes.Count; i++)
+        {
+            _nodeIndices[_nodes[i].Id] -= count;
         }
     }
 }

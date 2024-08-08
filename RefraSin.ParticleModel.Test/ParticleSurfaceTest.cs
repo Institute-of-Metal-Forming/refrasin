@@ -78,6 +78,27 @@ public class ParticleSurfaceTest
     }
 
     [Test]
+    public void TestInsertAboveMultiple([Values(1, 2, 3)] int count)
+    {
+        var nodes = Enumerable
+            .Repeat(0, count)
+            .Select(i => new ParticleNode(
+                Guid.NewGuid(),
+                _particle,
+                new PolarPoint(),
+                NodeType.Surface
+            ))
+            .ToArray();
+        _surface.InsertAbove(_nodeAtIndex, nodes);
+
+        Assert.That(_surface.IndexOf(_nodeBelowIndex), Is.EqualTo(_index - 1));
+        Assert.That(_surface.IndexOf(_nodeAtIndex), Is.EqualTo(_index));
+        Assert.That(_surface.IndexOf(_nodeAboveIndex), Is.EqualTo(_index + count + 1));
+        Assert.That(_surface.Count, Is.EqualTo(100 + count));
+        Assert.That(_surface.Skip(_index + 1).Take(count), Is.EqualTo(nodes));
+    }
+
+    [Test]
     public void TestInsertBelow()
     {
         var node = new ParticleNode(Guid.NewGuid(), _particle, new PolarPoint(), NodeType.Surface);
@@ -91,6 +112,27 @@ public class ParticleSurfaceTest
     }
 
     [Test]
+    public void TestInsertBelowMultiple([Values(1, 2, 3)] int count)
+    {
+        var nodes = Enumerable
+            .Repeat(0, count)
+            .Select(i => new ParticleNode(
+                Guid.NewGuid(),
+                _particle,
+                new PolarPoint(),
+                NodeType.Surface
+            ))
+            .ToArray();
+        _surface.InsertBelow(_nodeAtIndex, nodes);
+
+        Assert.That(_surface.IndexOf(_nodeBelowIndex), Is.EqualTo(_index - 1));
+        Assert.That(_surface.IndexOf(_nodeAtIndex), Is.EqualTo(_index + count));
+        Assert.That(_surface.IndexOf(_nodeAboveIndex), Is.EqualTo(_index + count + 1));
+        Assert.That(_surface.Count, Is.EqualTo(100 + count));
+        Assert.That(_surface.Skip(_index).Take(count), Is.EqualTo(nodes));
+    }
+
+    [Test]
     public void TestRemove()
     {
         _surface.Remove(_nodeAtIndex);
@@ -98,5 +140,17 @@ public class ParticleSurfaceTest
         Assert.That(_surface.IndexOf(_nodeBelowIndex), Is.EqualTo(_index - 1));
         Assert.That(_surface.IndexOf(_nodeAboveIndex), Is.EqualTo(_index));
         Assert.Throws<KeyNotFoundException>(() => _surface.IndexOf(_nodeAtIndex));
+    }
+
+    [Test]
+    public void TestRemoveMultiple([Values(1, 2, 3)] int count)
+    {
+        var firstRemaining = _surface[_index + count];
+        _surface.Remove(_index, _index + (count - 1));
+
+        Assert.That(_surface.IndexOf(_nodeBelowIndex), Is.EqualTo(_index - 1));
+        Assert.That(_surface.IndexOf(firstRemaining), Is.EqualTo(_index));
+        Assert.Throws<KeyNotFoundException>(() => _surface.IndexOf(_nodeAtIndex));
+        Assert.That(_surface.Count, Is.EqualTo(100 - count));
     }
 }
