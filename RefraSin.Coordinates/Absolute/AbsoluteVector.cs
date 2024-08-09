@@ -133,6 +133,8 @@ public readonly struct AbsoluteVector(double x, double y)
     public string ToString(string? format, IFormatProvider? formatProvider) =>
         this.FormatCartesianCoordinates(format, formatProvider);
 
+    public override string ToString() => ToString(null, null);
+
     /// <inheritdoc />
     public AbsoluteVector ScaleBy(double scale) => scale * this;
 

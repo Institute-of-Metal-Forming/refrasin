@@ -201,6 +201,8 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
     public string ToString(string? format, IFormatProvider? formatProvider) =>
         this.FormatPolarCoordinates(format, formatProvider);
 
+    public override string ToString() => ToString(null, null);
+
     /// <inheritdoc />
     public double[] ToArray() => [Phi, R];
 

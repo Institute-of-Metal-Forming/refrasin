@@ -139,6 +139,8 @@ public readonly struct AbsolutePoint(double x, double y)
     public string ToString(string? format, IFormatProvider? formatProvider) =>
         this.FormatCartesianCoordinates(format, formatProvider);
 
+    public override string ToString() => ToString(null, null);
+
     /// <inheritdoc />
     public AbsolutePoint ScaleBy(double scale) => new(scale * X, scale * Y);
 

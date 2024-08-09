@@ -165,6 +165,8 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
     public string ToString(string? format, IFormatProvider? formatProvider) =>
         this.FormatCartesianCoordinates(format, formatProvider);
 
+    public override string ToString() => ToString(null, null);
+
     /// <inheritdoc />
     public double[] ToArray() => [X, Y];
 
