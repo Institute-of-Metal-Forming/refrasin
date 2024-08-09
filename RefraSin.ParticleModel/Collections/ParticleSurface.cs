@@ -171,6 +171,13 @@ public class ParticleSurface<TNode> : IParticleSurface<TNode>
     /// <inheritdoc />
     public void Remove(int start, int end)
     {
+        if (start > end)
+        {
+            Remove(start, Count-1);
+            Remove(0, end);
+            return;
+        }
+        
         var count = 0;
 
         for (int i = start; i <= end; i++)

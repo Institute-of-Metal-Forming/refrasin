@@ -190,11 +190,10 @@ public static class ParticleExtensions
             .Zip(intersections.Skip(1).TakeEvery(2))
             .ToArray();
         var otherNeckPairs = selfNeckPairs
-            .Reverse()
             .Select(p =>
                 (
-                    (IPolarPoint)new PolarPoint(p.First, other),
-                    (IPolarPoint)new PolarPoint(p.Second, other)
+                    (IPolarPoint)new PolarPoint(p.Second, other),
+                    (IPolarPoint)new PolarPoint(p.First, other)
                 )
             )
             .ToArray();
@@ -222,23 +221,23 @@ public static class ParticleExtensions
             IEnumerable<(IPolarPoint Lower, IPolarPoint Upper)> neckPairs
         )
         {
-            var nodes = new ParticleSurface<ParticleNode>(
+            var nodes = (IParticleSurface<ParticleNode>)new ParticleSurface<ParticleNode>(
                 template.Nodes.Select(n => new ParticleNode(n, particle))
             );
 
             foreach (var neckPair in neckPairs)
             {
-                var lower = nodes.NextUpperNodeFrom(neckPair.Lower.Phi);
-                var upper = nodes.NextLowerNodeFrom(neckPair.Upper.Phi);
-                var startIndex = nodes.IndexOf(lower.Id) - 1;
-                nodes.Remove(lower, upper);
+                var lowerToRemove = nodes.NextUpperNodeFrom(neckPair.Lower.Phi);
+                var upperToRemove = nodes.NextLowerNodeFrom(neckPair.Upper.Phi);
+                var lowerRemaining = nodes.LowerNeighborOf(lowerToRemove); 
+                nodes.Remove(lowerToRemove, upperToRemove);
 
                 var lowerNeckPoint = new PolarPoint(neckPair.Lower, particle);
                 var upperNeckPoint = new PolarPoint(neckPair.Upper, particle);
                 var grainBoundaryPoint = lowerNeckPoint.Centroid(upperNeckPoint);
 
                 nodes.InsertAbove(
-                    startIndex,
+                    lowerRemaining.Id,
                     [
                         new ParticleNode(Guid.NewGuid(), particle, lowerNeckPoint, Neck),
                         new ParticleNode(
