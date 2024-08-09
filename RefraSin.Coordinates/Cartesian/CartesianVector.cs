@@ -65,6 +65,19 @@ public readonly struct CartesianVector(
     /// <inheritdoc />
     public double Norm => Sqrt(Pow(X, 2) + Pow(Y, 2));
 
+    public CartesianVector Direction
+    {
+        get
+        {
+            var scale = 1 / Norm;
+            if (!double.IsFinite(scale))
+                return new CartesianVector(System);
+            return this * scale;
+        }
+    }
+
+    IVector IVector.Direction => Direction;
+
     /// <inheritdoc />
     public bool IsClose(ICartesianVector other, double precision)
     {
@@ -164,6 +177,6 @@ public readonly struct CartesianVector(
     /// <inheritdoc />
     public static CartesianVector operator -(CartesianVector left, CartesianVector right) =>
         left + -right;
-    
-    public static implicit operator CartesianVector((double x, double y) t) => new(t.x,t.y);
+
+    public static implicit operator CartesianVector((double x, double y) t) => new(t.x, t.y);
 }

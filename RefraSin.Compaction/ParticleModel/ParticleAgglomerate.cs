@@ -8,7 +8,7 @@ using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.Compaction.ParticleModel;
 
-internal class ParticleAgglomerate : IRigidBody, ICartesianCoordinateSystem, IParticle<Node>
+internal class ParticleAgglomerate : ICartesianCoordinateSystem, IAgglomerate
 {
     public ParticleAgglomerate(Guid id, IEnumerable<IParticle<IParticleNode>> particles)
     {
@@ -20,7 +20,7 @@ internal class ParticleAgglomerate : IRigidBody, ICartesianCoordinateSystem, IPa
         Particles = particlesArray
             .Select(p => new AgglomeratedParticle(p, this))
             .ToReadOnlyParticleCollection<AgglomeratedParticle, Node>();
-        Nodes = CreateOuterSurface().ToReadOnlyParticleSurface();
+        Surface = new ParticleSurface<Node>(CreateOuterSurface());
     }
 
     IEnumerable<Node> CreateOuterSurface()
@@ -59,7 +59,7 @@ internal class ParticleAgglomerate : IRigidBody, ICartesianCoordinateSystem, IPa
     /// <inheritdoc />
     public Guid MaterialId => Guid.Empty;
 
-    /// <inheritdoc cref="IRigidBody.RotationAngle" />
+    /// <inheritdoc cref="IMoveableParticle.RotationAngle" />
     public Angle RotationAngle { get; private set; }
 
     ICartesianPoint IParticle.Coordinates => Coordinates;
@@ -69,14 +69,16 @@ internal class ParticleAgglomerate : IRigidBody, ICartesianCoordinateSystem, IPa
 
     public IReadOnlyParticleCollection<AgglomeratedParticle, Node> Particles { get; }
 
+    IEnumerable<IMutableParticle<Node>> IAgglomerate.Elements => Particles;
+
     /// <inheritdoc />
-    public void MoveTowards(IRigidBody target, double distance) =>
+    public void MoveTowards(IMoveableParticle target, double distance) =>
         MoveTowards(target.Coordinates, distance);
 
     public void MoveTowards(IPoint target, double distance)
     {
-        var direction = target.Absolute - Coordinates;
-        var movement = distance / direction.Norm * direction;
+        var direction = (target.Absolute - Coordinates).Direction;
+        var movement = distance * direction;
 
         Coordinates += movement;
     }
@@ -97,5 +99,8 @@ internal class ParticleAgglomerate : IRigidBody, ICartesianCoordinateSystem, IPa
     public Guid Id { get; }
 
     /// <inheritdoc />
-    public IReadOnlyParticleSurface<Node> Nodes { get; }
+    public IReadOnlyParticleSurface<Node> Nodes => Surface;
+
+    /// <inheritdoc />
+    public IParticleSurface<Node> Surface { get; }
 }

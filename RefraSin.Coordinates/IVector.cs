@@ -1,4 +1,5 @@
 using RefraSin.Coordinates.Absolute;
+using RefraSin.Coordinates.Helpers;
 
 namespace RefraSin.Coordinates;
 
@@ -26,4 +27,6 @@ public interface IVector : ICoordinates, IVectorOperations<IVector>
     /// <inheritdoc />
     double IVectorOperations<IVector>.ScalarProduct(IVector v) =>
         Absolute.ScalarProduct(v.Absolute);
+
+    public IVector Direction { get; }
 }

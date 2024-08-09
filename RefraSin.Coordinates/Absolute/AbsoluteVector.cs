@@ -66,6 +66,19 @@ public readonly struct AbsoluteVector(double x, double y)
         return X * abs.X + Y * abs.Y;
     }
 
+    public AbsoluteVector Direction
+    {
+        get
+        {
+            var scale = 1 / Norm;
+            if (!double.IsFinite(scale))
+                return new AbsoluteVector();
+            return this * scale;
+        }
+    }
+
+    IVector IVector.Direction => Direction;
+
     double IVectorOperations<ICartesianVector>.ScalarProduct(ICartesianVector v) =>
         ScalarProduct(v);
 
@@ -136,13 +149,13 @@ public readonly struct AbsoluteVector(double x, double y)
     public override string ToString() => ToString(null, null);
 
     /// <inheritdoc />
-    public AbsoluteVector ScaleBy(double scale) => scale * this;
+    public AbsoluteVector ScaleBy(double scale) => new(scale * X, scale * Y);
 
     /// <inheritdoc />
     public AbsoluteVector RotateBy(double rotation) =>
         new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
 
     public AbsoluteVector ScaleBy(double scaleX, double scaleY) => new(scaleX * X, scaleY * Y);
-    
-    public static implicit operator AbsoluteVector((double x, double y) t) => new(t.x,t.y);
+
+    public static implicit operator AbsoluteVector((double x, double y) t) => new(t.x, t.y);
 }

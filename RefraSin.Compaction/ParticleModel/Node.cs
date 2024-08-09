@@ -1,3 +1,4 @@
+using System.Globalization;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
@@ -84,4 +85,7 @@ internal class Node : IParticleNode
     public Node Upper => Particle.Nodes.UpperNeighborOf(this);
 
     public Node Lower => Particle.Nodes.LowerNeighborOf(this);
+
+    public override string ToString() =>
+        $"{nameof(Node)} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
 }

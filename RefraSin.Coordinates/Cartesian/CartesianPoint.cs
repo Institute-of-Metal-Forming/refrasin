@@ -176,6 +176,6 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
     /// <inheritdoc />
     public CartesianPoint RotateBy(double rotation) =>
         new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
-    
-    public static implicit operator CartesianPoint((double x, double y) t) => new(t.x,t.y);
+
+    public static implicit operator CartesianPoint((double x, double y) t) => new(t.x, t.y);
 }

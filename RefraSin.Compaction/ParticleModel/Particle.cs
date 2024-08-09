@@ -1,3 +1,4 @@
+using System.Globalization;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Cartesian;
@@ -7,7 +8,7 @@ using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.Compaction.ParticleModel;
 
-internal class Particle : IParticle<Node>, IRigidBody
+internal class Particle : IMutableParticle<Node>, IMoveableParticle
 {
     public Particle(IParticle<IParticleNode> template)
     {
@@ -15,7 +16,7 @@ internal class Particle : IParticle<Node>, IRigidBody
         RotationAngle = template.RotationAngle;
         Coordinates = template.Coordinates.Absolute;
         MaterialId = template.MaterialId;
-        Nodes = template.Nodes.Select(n => new Node(n, this)).ToReadOnlyParticleSurface();
+        Surface = new ParticleSurface<Node>(template.Nodes.Select(n => new Node(n, this)));
     }
 
     /// <inheritdoc />
@@ -32,15 +33,15 @@ internal class Particle : IParticle<Node>, IRigidBody
     public Guid MaterialId { get; }
 
     /// <inheritdoc />
-    public IReadOnlyParticleSurface<Node> Nodes { get; }
+    public IReadOnlyParticleSurface<Node> Nodes => Surface;
 
-    public void MoveTowards(IRigidBody target, double distance) =>
+    public void MoveTowards(IMoveableParticle target, double distance) =>
         MoveTowards(target.Coordinates, distance);
 
     public void MoveTowards(IPoint target, double distance)
     {
-        var direction = target.Absolute - Coordinates;
-        var movement = distance / direction.Norm * direction;
+        var direction = (target.Absolute - Coordinates).Direction;
+        var movement = distance * direction;
 
         Coordinates += movement;
     }
@@ -50,4 +51,10 @@ internal class Particle : IParticle<Node>, IRigidBody
     {
         RotationAngle += angle;
     }
+
+    public override string ToString() =>
+        $"{nameof(Particle)} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
+
+    /// <inheritdoc />
+    public IParticleSurface<Node> Surface { get; }
 }

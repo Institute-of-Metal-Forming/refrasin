@@ -77,6 +77,19 @@ public readonly struct PolarVector(Angle phi, double r, IPolarCoordinateSystem? 
     /// <inheritdoc />
     public double Norm => R;
 
+    public PolarVector Direction
+    {
+        get
+        {
+            var scale = 1 / Norm;
+            if (!double.IsFinite(scale))
+                return new PolarVector(System);
+            return this * scale;
+        }
+    }
+
+    IVector IVector.Direction => Direction;
+
     public PolarVector Add(IPolarVector v)
     {
         if (System.Equals(v.System))
@@ -173,8 +186,8 @@ public readonly struct PolarVector(Angle phi, double r, IPolarCoordinateSystem? 
 
     /// <inheritdoc />
     public static PolarVector operator -(PolarVector left, PolarVector right) => left + -right;
-    
-    public static implicit operator PolarVector((double phi, double r) t) => new(t.phi,t.r);
-    
-    public static implicit operator PolarVector((Angle phi, double r) t) => new(t.phi,t.r);
+
+    public static implicit operator PolarVector((double phi, double r) t) => new(t.phi, t.r);
+
+    public static implicit operator PolarVector((Angle phi, double r) t) => new(t.phi, t.r);
 }

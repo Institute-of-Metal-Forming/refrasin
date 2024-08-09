@@ -4,7 +4,8 @@ namespace RefraSin.Coordinates.Helpers;
 /// Interface for equality determination within a specified precision.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public interface IIsClose<in T> where T : IIsClose<T>
+public interface IIsClose<in T>
+    where T : IIsClose<T>
 {
     /// <summary>
     /// Determines if two instances are equal with a specified precision.

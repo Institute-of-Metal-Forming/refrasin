@@ -62,9 +62,8 @@ public class AbsoluteLine : ILine, IFormattable
         var formats = format?.Split(':');
         var coordinateFormat = formats?[0];
         var numberFormat = formats?.Length > 1 ? formats[1] : null;
-        
-        return 
-            $"{nameof(AbsoluteLine)} @ {ReferencePoint.ToString(format, formatProvider)} -> {DirectionVector.ToString(format, formatProvider)} / {A.ToString(numberFormat, formatProvider)}x + {B.ToString(numberFormat,formatProvider)}y = {C.ToString(numberFormat,formatProvider)} ";
+
+        return $"{nameof(AbsoluteLine)} @ {ReferencePoint.ToString(format, formatProvider)} -> {DirectionVector.ToString(format, formatProvider)} / {A.ToString(numberFormat, formatProvider)}x + {B.ToString(numberFormat, formatProvider)}y = {C.ToString(numberFormat, formatProvider)} ";
     }
 
     /// <inheritdoc />

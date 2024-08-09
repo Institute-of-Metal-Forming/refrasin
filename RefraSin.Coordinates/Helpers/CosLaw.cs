@@ -1,5 +1,5 @@
-using static RefraSin.Coordinates.Constants;
 using static System.Math;
+using static RefraSin.Coordinates.Constants;
 using static RefraSin.Coordinates.Helpers.MathExt;
 
 namespace RefraSin.Coordinates.Helpers;
@@ -16,7 +16,8 @@ public static class CosLaw
     /// <param name="b">Länge Kathete</param>
     /// <param name="gamma">eingeschlossener Winkel</param>
     /// <returns>Länge Hypothenuse</returns>
-    public static double C(double a, double b, double gamma) => Sqrt(Pow(a, 2) + Pow(b, 2) - 2 * a * b * Cos(gamma));
+    public static double C(double a, double b, double gamma) =>
+        Sqrt(Pow(a, 2) + Pow(b, 2) - 2 * a * b * Cos(gamma));
 
     /// <summary>
     ///     Berechnet die möglichen Längen einer Kathete
@@ -29,10 +30,7 @@ public static class CosLaw
     {
         var p1 = 2 * b * Cos(gamma);
         var p2 = Sqrt2 * Sqrt(-Squared(b) + 2 * Squared(c) + Squared(b) * Cos(2 * gamma));
-        return (
-            0.5 * (p1 - p2),
-            0.5 * (p1 + p2)
-        );
+        return (0.5 * (p1 - p2), 0.5 * (p1 + p2));
     }
 
     /// <summary>
@@ -42,5 +40,6 @@ public static class CosLaw
     /// <param name="b">Länge Kathete</param>
     /// <param name="c">Länge Hypothenuse</param>
     /// <returns>eingeschlossener Winkel</returns>
-    public static double Gamma(double a, double b, double c) => Acos((Squared(a) + Squared(b) - Squared(c)) / (2 * a * b));
+    public static double Gamma(double a, double b, double c) =>
+        Acos((Squared(a) + Squared(b) - Squared(c)) / (2 * a * b));
 }

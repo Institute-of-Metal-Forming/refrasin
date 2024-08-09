@@ -1,15 +1,12 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
+using RefraSin.ParticleModel.Particles;
 
-namespace RefraSin.Compaction;
+namespace RefraSin.Compaction.ParticleModel;
 
-internal interface IRigidBody
+internal interface IMoveableParticle : IMutableParticle<Node>
 {
-    AbsolutePoint Coordinates { get; }
-
-    Angle RotationAngle { get; }
-
-    public void MoveTowards(IRigidBody target, double distance) =>
+    public void MoveTowards(IMoveableParticle target, double distance) =>
         MoveTowards(target.Coordinates, distance);
 
     public void MoveTowards(IPoint target, double distance);

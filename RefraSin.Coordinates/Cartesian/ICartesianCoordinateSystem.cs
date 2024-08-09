@@ -6,7 +6,7 @@ public interface ICartesianCoordinateSystem : ICoordinateSystem
     ///     Skalierung entlang der X-Achse.
     /// </summary>
     double XScale { get; }
-    
+
     /// <summary>
     ///     Skalierung entlang der X-Achse.
     /// </summary>

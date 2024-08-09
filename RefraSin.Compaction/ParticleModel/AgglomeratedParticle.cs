@@ -6,7 +6,7 @@ using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.Compaction.ParticleModel;
 
-internal class AgglomeratedParticle : IParticle<Node>
+internal class AgglomeratedParticle : IMutableParticle<Node>
 {
     public AgglomeratedParticle(IParticle<IParticleNode> template, ParticleAgglomerate agglomerate)
     {
@@ -14,7 +14,7 @@ internal class AgglomeratedParticle : IParticle<Node>
         RotationAngle = template.RotationAngle;
         Coordinates = new CartesianPoint(template.Coordinates, agglomerate);
         MaterialId = template.MaterialId;
-        Nodes = template.Nodes.Select(n => new Node(n, this)).ToReadOnlyParticleSurface();
+        Surface = new ParticleSurface<Node>(template.Nodes.Select(n => new Node(n, this)));
     }
 
     /// <inheritdoc />
@@ -30,5 +30,8 @@ internal class AgglomeratedParticle : IParticle<Node>
     public Guid MaterialId { get; }
 
     /// <inheritdoc />
-    public IReadOnlyParticleSurface<Node> Nodes { get; }
+    public IReadOnlyParticleSurface<Node> Nodes => Surface;
+
+    /// <inheritdoc />
+    public IParticleSurface<Node> Surface { get; }
 }

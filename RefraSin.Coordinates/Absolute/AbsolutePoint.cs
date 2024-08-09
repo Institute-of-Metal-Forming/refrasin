@@ -151,6 +151,6 @@ public readonly struct AbsolutePoint(double x, double y)
     public AbsolutePoint MoveBy(double dx, double dy) => new(X + dx, Y + dy);
 
     public AbsolutePoint ScaleBy(double scaleX, double scaleY) => new(scaleX * X, scaleY * Y);
-    
-    public static implicit operator AbsolutePoint((double x, double y) t) => new(t.x,t.y);
+
+    public static implicit operator AbsolutePoint((double x, double y) t) => new(t.x, t.y);
 }

@@ -67,7 +67,8 @@ public static class ParticleExtensions
 
     public static bool HasContactTo(
         this IParticle<IParticleNode> self,
-        IParticle<IParticleNode> other
+        IParticle<IParticleNode> other,
+        double precision = 1e-8
     )
     {
         var selfMeasures = self.ToMeasures();
@@ -91,8 +92,8 @@ public static class ParticleExtensions
         else
             possibleNodes = self.Nodes;
 
-        return self.ContainsPoint(other.Nodes[0].Coordinates) // to catch edge case when other is fully contained in self
-            || possibleNodes.Any(n => other.ContainsPoint(n.Coordinates));
+        return self.ContainsPoint(other.Nodes[0].Coordinates, precision) // to catch edge case when other is fully contained in self
+            || possibleNodes.Any(n => other.ContainsPoint(n.Coordinates, precision));
     }
 
     public static IEnumerable<IPolarPoint> IntersectionPointsTo(
@@ -176,14 +177,29 @@ public static class ParticleExtensions
     }
 
     public static (
-        Particle<ParticleNode> self,
-        Particle<ParticleNode> other
-    ) CreateGrainBoundariesAtIntersections(
-        this IParticle<IParticleNode> self,
+        IParticle<IParticleNode> self,
         IParticle<IParticleNode> other
-    )
+        ) CreateGrainBoundariesAtIntersections(
+            this IParticle<IParticleNode> self,
+            IParticle<IParticleNode> other
+        )
     {
-        var intersections = self.IntersectionPointsTo(other).ToArray();
+        var mutableSelf = new MutableParticle<IParticleNode>(self, (n, p) => new ParticleNode(n, p));
+        var mutableOther = new MutableParticle<IParticleNode>(other, (n, p) => new ParticleNode(n, p));
+        
+        mutableSelf.CreateGrainBoundariesAtIntersections(mutableOther, (point, particle) => new ParticleNode(Guid.NewGuid(), particle, point, Neck),(point, particle) => new ParticleNode(Guid.NewGuid(), particle, point, GrainBoundary));
+
+        return (mutableSelf, mutableOther);
+    }
+
+    public static void CreateGrainBoundariesAtIntersections<TNode>(
+        this IMutableParticle<TNode> self,
+        IMutableParticle<TNode> other,
+        Func<IPolarPoint , IMutableParticle<TNode> , TNode> neckNodeConstructor,
+        Func<IPolarPoint , IMutableParticle<TNode> , TNode> grainBoundaryNodeConstructor
+    ) where TNode : IParticleNode
+    {
+        var intersections = ((IParticle<IParticleNode>)self).IntersectionPointsTo((IParticle<IParticleNode>)other).ToArray();
 
         var selfNeckPairs = intersections
             .TakeEvery(2)
@@ -198,60 +214,34 @@ public static class ParticleExtensions
             )
             .ToArray();
 
-        var newSelf = new Particle<ParticleNode>(
-            self.Id,
-            self.Coordinates,
-            self.RotationAngle,
-            self.MaterialId,
-            particle => NodeFactory(self, particle, selfNeckPairs)
-        );
-        var newOther = new Particle<ParticleNode>(
-            other.Id,
-            other.Coordinates,
-            other.RotationAngle,
-            other.MaterialId,
-            particle => NodeFactory(other, particle, otherNeckPairs)
-        );
-
-        return (newSelf, newOther);
-
-        IEnumerable<ParticleNode> NodeFactory(
-            IParticle<IParticleNode> template,
-            IParticle<ParticleNode> particle,
+        MutateNodes(self, selfNeckPairs);
+        MutateNodes(other, otherNeckPairs);
+        
+        void MutateNodes(
+            IMutableParticle<TNode> target,
             IEnumerable<(IPolarPoint Lower, IPolarPoint Upper)> neckPairs
         )
         {
-            var nodes = (IParticleSurface<ParticleNode>)new ParticleSurface<ParticleNode>(
-                template.Nodes.Select(n => new ParticleNode(n, particle))
-            );
-
             foreach (var neckPair in neckPairs)
             {
-                var lowerToRemove = nodes.NextUpperNodeFrom(neckPair.Lower.Phi);
-                var upperToRemove = nodes.NextLowerNodeFrom(neckPair.Upper.Phi);
-                var lowerRemaining = nodes.LowerNeighborOf(lowerToRemove); 
-                nodes.Remove(lowerToRemove, upperToRemove);
+                var lowerToRemove = target.Surface.NextUpperNodeFrom(neckPair.Lower.Phi);
+                var upperToRemove = target.Surface.NextLowerNodeFrom(neckPair.Upper.Phi);
+                var lowerRemaining = target.Surface.LowerNeighborOf(lowerToRemove); 
+                target.Surface.Remove(lowerToRemove, upperToRemove);
 
-                var lowerNeckPoint = new PolarPoint(neckPair.Lower, particle);
-                var upperNeckPoint = new PolarPoint(neckPair.Upper, particle);
+                var lowerNeckPoint = new PolarPoint(neckPair.Lower, target);
+                var upperNeckPoint = new PolarPoint(neckPair.Upper, target);
                 var grainBoundaryPoint = lowerNeckPoint.Centroid(upperNeckPoint);
 
-                nodes.InsertAbove(
+                target.Surface.InsertAbove(
                     lowerRemaining.Id,
                     [
-                        new ParticleNode(Guid.NewGuid(), particle, lowerNeckPoint, Neck),
-                        new ParticleNode(
-                            Guid.NewGuid(),
-                            particle,
-                            grainBoundaryPoint,
-                            GrainBoundary
-                        ),
-                        new ParticleNode(Guid.NewGuid(), particle, upperNeckPoint, Neck)
+                        neckNodeConstructor(lowerNeckPoint, target),
+                       grainBoundaryNodeConstructor(grainBoundaryPoint, target),
+                        neckNodeConstructor(upperNeckPoint, target)
                     ]
                 );
             }
-
-            return nodes;
         }
     }
 }

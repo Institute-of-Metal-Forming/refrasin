@@ -215,8 +215,8 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
 
     /// <inheritdoc />
     public PolarPoint RotateBy(double rotation) => new(Phi + rotation, R);
-    
-    public static implicit operator PolarPoint((double phi, double r) t) => new(t.phi,t.r);
-    
-    public static implicit operator PolarPoint((Angle phi, double r) t) => new(t.phi,t.r);
+
+    public static implicit operator PolarPoint((double phi, double r) t) => new(t.phi, t.r);
+
+    public static implicit operator PolarPoint((Angle phi, double r) t) => new(t.phi, t.r);
 }
