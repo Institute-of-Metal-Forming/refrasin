@@ -143,4 +143,6 @@ public readonly struct AbsoluteVector(double x, double y)
         new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
 
     public AbsoluteVector ScaleBy(double scaleX, double scaleY) => new(scaleX * X, scaleY * Y);
+    
+    public static implicit operator AbsoluteVector((double x, double y) t) => new(t.x,t.y);
 }

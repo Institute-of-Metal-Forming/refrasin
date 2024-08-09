@@ -173,4 +173,8 @@ public readonly struct PolarVector(Angle phi, double r, IPolarCoordinateSystem? 
 
     /// <inheritdoc />
     public static PolarVector operator -(PolarVector left, PolarVector right) => left + -right;
+    
+    public static implicit operator PolarVector((double phi, double r) t) => new(t.phi,t.r);
+    
+    public static implicit operator PolarVector((Angle phi, double r) t) => new(t.phi,t.r);
 }
