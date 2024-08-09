@@ -1,6 +1,8 @@
+using System.Globalization;
+
 namespace RefraSin.Coordinates.Absolute;
 
-public class AbsoluteLine : ILine
+public class AbsoluteLine : ILine, IFormattable
 {
     public AbsoluteLine(IPoint referencePoint, IVector directionVector)
     {
@@ -53,4 +55,18 @@ public class AbsoluteLine : ILine
         ReferencePoint + parameter * DirectionVector;
 
     IPoint ILine.EvaluateAtParameter(double parameter) => EvaluateAtParameter(parameter);
+
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        var formats = format?.Split(':');
+        var coordinateFormat = formats?[0];
+        var numberFormat = formats?.Length > 1 ? formats[1] : null;
+        
+        return 
+            $"{nameof(AbsoluteLine)} @ {ReferencePoint.ToString(format, formatProvider)} -> {DirectionVector.ToString(format, formatProvider)} / {A.ToString(numberFormat, formatProvider)}x + {B.ToString(numberFormat,formatProvider)}y = {C.ToString(numberFormat,formatProvider)} ";
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => ToString("(,)", CultureInfo.InvariantCulture);
 }
