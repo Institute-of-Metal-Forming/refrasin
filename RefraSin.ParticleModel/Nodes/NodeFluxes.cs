@@ -12,4 +12,5 @@ public record NodeFluxes(
     NodeType Type,
     ToUpperToLower<double> InterfaceFlux,
     ToUpperToLower<double> VolumeFlux,
-    double TransferFlux) : Node(Id, ParticleId, Coordinates, Type), INodeFluxes { }
+    double TransferFlux
+) : Node(Id, ParticleId, Coordinates, Type), INodeFluxes { }

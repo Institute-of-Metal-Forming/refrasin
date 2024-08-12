@@ -1,3 +1,4 @@
+using System.Globalization;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Nodes.Extensions;
@@ -8,7 +9,12 @@ namespace RefraSin.ParticleModel.Nodes;
 /// <summary>
 /// Record of geometry data on a node.
 /// </summary>
-public record ParticleNode(Guid Id, IParticle<IParticleNode> Particle, IPolarPoint Coordinates, NodeType Type)
+public record ParticleNode(
+    Guid Id,
+    IParticle<IParticleNode> Particle,
+    IPolarPoint Coordinates,
+    NodeType Type
+)
     : Node(Id, Particle.Id, new PolarPoint(Coordinates.Phi, Coordinates.R, Particle), Type),
         IParticleNode
 {
@@ -46,8 +52,21 @@ public record ParticleNode(Guid Id, IParticle<IParticleNode> Particle, IPolarPoi
         _surfaceTangentAngle ??= this.SurfaceTangentAngle();
 
     /// <inheritdoc />
-    public ToUpperToLower<Angle> RadiusNormalAngle => _radiusNormalAngle ??= this.RadiusNormalAngle();
+    public ToUpperToLower<Angle> RadiusNormalAngle =>
+        _radiusNormalAngle ??= this.RadiusNormalAngle();
 
     /// <inheritdoc />
-    public ToUpperToLower<Angle> RadiusTangentAngle => _radiusTangentAngle ??= this.RadiusTangentAngle();
+    public ToUpperToLower<Angle> RadiusTangentAngle =>
+        _radiusTangentAngle ??= this.RadiusTangentAngle();
+    
+    public IParticleNode Upper => Particle.Nodes.UpperNeighborOf(this);
+    
+    INode INodeNeighbors.Upper => Upper;
+
+    public IParticleNode Lower => Particle.Nodes.LowerNeighborOf(this);
+    
+    INode INodeNeighbors.Lower => Lower;
+
+    /// <inheritdoc />
+    public override string ToString() => $"""{nameof(ParticleNode)}({Type}) @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}""";
 }

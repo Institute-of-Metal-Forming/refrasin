@@ -64,7 +64,7 @@ public class FreeSurfaceRemesher(
                         yield return new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            node.Coordinates.PointHalfWayTo(node.Lower.Coordinates),
+                            node.Coordinates.Centroid(node.Lower.Coordinates),
                             Surface
                         );
                     yield return new ParticleNode((INode)node, particle);
@@ -72,7 +72,7 @@ public class FreeSurfaceRemesher(
                         yield return new ParticleNode(
                             Guid.NewGuid(),
                             particle,
-                            node.Coordinates.PointHalfWayTo(node.Upper.Coordinates),
+                            node.Coordinates.Centroid(node.Upper.Coordinates),
                             Surface
                         );
                     wasInsertedAtLastNode = true;

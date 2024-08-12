@@ -1,4 +1,5 @@
-using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
@@ -8,51 +9,74 @@ namespace RefraSin.Coordinates.Cartesian;
 /// <summary>
 ///     Stellt einen Vektor im kartesischen Koordinatensystem dar.
 /// </summary>
-public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneable<CartesianVector>
+public readonly struct CartesianVector(
+    double x,
+    double y,
+    ICartesianCoordinateSystem? system = null
+) : ICartesianVector, IVectorArithmetics<CartesianVector>
 {
     /// <summary>
     ///     Creates the vector (0, 0) in the default system.
     /// </summary>
-    public CartesianVector() : base(null) { }
-
-    /// <summary>
-    ///     Creates the vector (0, 0).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector(CartesianCoordinateSystem? system) : base(system) { }
+    public CartesianVector(ICartesianCoordinateSystem? system = null)
+        : this(0, 0, system) { }
 
     /// <summary>
     ///     Creates the vector (x, y).
     /// </summary>
     /// <param name="coordinates">tuple of coordinates</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector((double x, double y) coordinates, ICartesianCoordinateSystem? system = null) : base(coordinates, system) { }
-
-    /// <summary>
-    ///     Creates the vector (x, y).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    /// <param name="x">horizontal coordinate</param>
-    /// <param name="y">vertical coordinate</param>
-    public CartesianVector(double x, double y, ICartesianCoordinateSystem? system = null) : base(x, y, system) { }
+    public CartesianVector(
+        (double x, double y) coordinates,
+        ICartesianCoordinateSystem? system = null
+    )
+        : this(coordinates.x, coordinates.y, system) { }
 
     /// <summary>
     ///     Creates a vector based on a template. The coordinates systems are automatically castd.
     /// </summary>
     /// <param name="other">template</param>
     /// <param name="system">coordinate system, if null the default system is used</param>
-    public CartesianVector(IVector other, ICartesianCoordinateSystem? system = null) : base(system)
+    public CartesianVector(IVector other, ICartesianCoordinateSystem? system = null)
+        : this(system)
     {
-        var absoluteCoords = other.Absolute;
-        X = absoluteCoords.X;
-        Y = absoluteCoords.Y;
-        RotateBy(-System.RotationAngle);
-        X /= System.XScale;
-        Y /= System.YScale;
+        var transformed = other
+            .Absolute.ScaleBy(1 / System.XScale, 1 / System.YScale)
+            .RotateBy(System.RotationAngle);
+        X = transformed.X;
+        Y = transformed.Y;
     }
 
     /// <inheritdoc />
-    public CartesianVector Clone() => new(X, Y, System);
+    public double X { get; } = x;
+
+    /// <inheritdoc />
+    public double Y { get; } = y;
+
+    /// <inheritdoc />
+    public ICartesianCoordinateSystem System { get; } = system ?? CartesianCoordinateSystem.Default;
+
+    /// <inheritdoc />
+    public AbsoluteVector Absolute =>
+        new AbsoluteVector(X, Y)
+            .ScaleBy(System.XScale, System.YScale)
+            .RotateBy(System.RotationAngle);
+
+    /// <inheritdoc />
+    public double Norm => Sqrt(Pow(X, 2) + Pow(Y, 2));
+
+    public CartesianVector Direction
+    {
+        get
+        {
+            var scale = 1 / Norm;
+            if (!double.IsFinite(scale))
+                return new CartesianVector(System);
+            return this * scale;
+        }
+    }
+
+    IVector IVector.Direction => Direction;
 
     /// <inheritdoc />
     public bool IsClose(ICartesianVector other, double precision)
@@ -62,52 +86,31 @@ public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneabl
         return Absolute.IsClose(other.Absolute, precision);
     }
 
-    /// <inheritdoc />
-    public AbsoluteVector Absolute
+    public CartesianVector Add(ICartesianVector v)
     {
-        get
-        {
-            var absolute = new AbsoluteVector(X * System.XScale, Y * System.YScale);
-            absolute.RotateBy(System.RotationAngle);
-            return absolute;
-        }
-    }
-
-    /// <inheritdoc />
-    public double Norm => Sqrt(Pow(X, 2) + Pow(Y, 2));
-
-    /// <inheritdoc />
-    public IVector Add(IVector v)
-    {
-        if (v is CartesianVector cv)
-            return this + cv;
+        if (System == v.System)
+            return new CartesianVector(X + v.X, Y + v.Y, System);
         throw new DifferentCoordinateSystemException(this, v);
     }
 
+    ICartesianVector IVectorOperations<ICartesianVector>.Add(ICartesianVector v) => Add(v);
+
+    CartesianVector IVectorOperations<CartesianVector>.Add(CartesianVector v) => Add(v);
+
     /// <inheritdoc />
-    public IVector Subtract(IVector v)
+    public CartesianVector Reverse() => new(-X, -Y);
+
+    ICartesianVector IVectorOperations<ICartesianVector>.Reverse() => Reverse();
+
+    /// <inheritdoc />
+    public double ScalarProduct(ICartesianVector v)
     {
-        if (v is CartesianVector cv)
-            return this - cv;
+        if (System == v.System)
+            return X * v.X + Y * v.Y;
         throw new DifferentCoordinateSystemException(this, v);
     }
 
-    /// <inheritdoc />
-    public double ScalarProduct(IVector v)
-    {
-        if (v is CartesianVector cv)
-            return this * cv;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
-
-    /// <inheritdoc />
-    public void ScaleBy(double scale)
-    {
-        X *= scale;
-        Y *= scale;
-    }
-
-    IVector ICloneable<IVector>.Clone() => Clone();
+    double IVectorOperations<CartesianVector>.ScalarProduct(CartesianVector v) => ScalarProduct(v);
 
     /// <summary>
     ///     Parse from string representation.
@@ -118,7 +121,7 @@ public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneabl
     /// </remarks>
     public static CartesianVector Parse(string s)
     {
-        var (value1, value2) = Parse(s, nameof(CartesianVector));
+        var (value1, value2) = s.ParseCoordinateString(nameof(CartesianVector));
         return new CartesianVector(double.Parse(value1), double.Parse(value2));
     }
 
@@ -127,35 +130,18 @@ public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneabl
     /// </summary>
     /// <param name="v"></param>
     /// <returns></returns>
-    public static CartesianVector operator -(CartesianVector v) => new(-v.X, -v.Y);
+    public static CartesianVector operator -(CartesianVector v) => v.Reverse();
 
     /// <summary>
     ///     Vectorial addition. See <see cref="Add" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static CartesianVector operator +(CartesianVector v1, CartesianVector v2)
-    {
-        if (v1.System == v2.System)
-            return new CartesianVector(v1.X + v2.X, v1.Y + v2.Y, v1.System);
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
-
-    /// <summary>
-    ///     Vectorial subtacrtion. See <see cref="Subtract" />.
-    /// </summary>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static CartesianVector operator -(CartesianVector v1, CartesianVector v2)
-    {
-        if (v1.System == v2.System)
-            return new CartesianVector(v1.X - v2.X, v1.Y - v2.Y, v1.System);
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
+    public static CartesianVector operator +(CartesianVector v1, CartesianVector v2) => v1.Add(v2);
 
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
     /// </summary>
-    public static CartesianVector operator *(double d, CartesianVector v) =>
-        new(d * v.X, d * v.Y, v.System);
+    public static CartesianVector operator *(double d, CartesianVector v) => v.ScaleBy(d);
 
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
@@ -166,10 +152,31 @@ public class CartesianVector : CartesianCoordinates, ICartesianVector, ICloneabl
     ///     Scalar product. See <see cref="ScalarProduct" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static double operator *(CartesianVector v1, CartesianVector v2)
-    {
-        if (v1.System == v2.System)
-            return v1.X * v2.X + v1.Y * v2.Y;
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
+    public static double operator *(CartesianVector v1, CartesianVector v2) => v1.ScalarProduct(v2);
+
+    /// <inheritdoc />
+    public static CartesianVector operator /(CartesianVector left, double right) =>
+        left.ScaleBy(1 / right);
+
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        this.FormatCartesianCoordinates(format, formatProvider);
+
+    public override string ToString() => ToString(null, null);
+
+    /// <inheritdoc />
+    public double[] ToArray() => [X, Y];
+
+    /// <inheritdoc />
+    public CartesianVector ScaleBy(double scale) => new(scale * X, scale * Y);
+
+    /// <inheritdoc />
+    public CartesianVector RotateBy(double rotation) =>
+        new(X * Cos(rotation) - Y * Sin(rotation), Y * Cos(rotation) + X * Sin(rotation));
+
+    /// <inheritdoc />
+    public static CartesianVector operator -(CartesianVector left, CartesianVector right) =>
+        left + -right;
+
+    public static implicit operator CartesianVector((double x, double y) t) => new(t.x, t.y);
 }

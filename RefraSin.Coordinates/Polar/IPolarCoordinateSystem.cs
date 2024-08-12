@@ -11,5 +11,4 @@ public interface IPolarCoordinateSystem : ICoordinateSystem
     /// The angle domain where all angles of coordinates in this system are reduced to.
     /// </summary>
     Angle.ReductionDomain AngleReductionDomain { get; }
-    
 }

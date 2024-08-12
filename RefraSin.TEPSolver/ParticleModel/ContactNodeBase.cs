@@ -1,10 +1,6 @@
 using RefraSin.Coordinates;
-using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.Particles;
-using static System.Math;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -35,7 +31,7 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     public new TContacted ContactedNode =>
         _contactedNode ??=
             SolverSession.CurrentState.Nodes[ContactedNodeId] as TContacted
-         ?? throw new InvalidCastException(
+            ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(TContacted)}."
             );
 
@@ -67,10 +63,19 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     public override NormalTangential<Angle> TorqueProjectionAngle =>
         _torqueProjectionAngle ??= IsParentsNode
             ? new NormalTangential<Angle>(
-                SurfaceNormalAngle.ToLower - (Pi - SurfaceRadiusAngle.ToLower - AngleDistanceToContactDirection +
-                                              ContactedNode.AngleDistanceToContactDirection),
-                (Pi - SurfaceRadiusAngle.ToLower - AngleDistanceToContactDirection + ContactedNode.AngleDistanceToContactDirection) -
-                SurfaceTangentAngle.ToLower
+                SurfaceNormalAngle.ToLower
+                    - (
+                        Pi
+                        - SurfaceRadiusAngle.ToLower
+                        - AngleDistanceToContactDirection
+                        + ContactedNode.AngleDistanceToContactDirection
+                    ),
+                (
+                    Pi
+                    - SurfaceRadiusAngle.ToLower
+                    - AngleDistanceToContactDirection
+                    + ContactedNode.AngleDistanceToContactDirection
+                ) - SurfaceTangentAngle.ToLower
             )
             : new NormalTangential<Angle>(
                 Pi - RadiusNormalAngle.ToUpper,
@@ -80,8 +85,11 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     private NormalTangential<Angle>? _torqueProjectionAngle;
 
     public override NormalTangential<double> TorqueLeverArm =>
-        _torqueLeverArm ??= new NormalTangential<double>(Sin(TorqueProjectionAngle.Normal), Sin(TorqueProjectionAngle.Tangential)) *
-                            (IsParentsNode ? ContactedNode.Coordinates.R : Coordinates.R);
+        _torqueLeverArm ??=
+            new NormalTangential<double>(
+                Sin(TorqueProjectionAngle.Normal),
+                Sin(TorqueProjectionAngle.Tangential)
+            ) * (IsParentsNode ? ContactedNode.Coordinates.R : Coordinates.R);
 
     private NormalTangential<double>? _torqueLeverArm;
 
@@ -152,16 +160,17 @@ public abstract class ContactNodeBase
         _contactedParticleId ??= SolverSession.CurrentState.Nodes[ContactedNodeId].ParticleId;
 
     /// <inheritdoc />
-    public Guid ContactedNodeId => _contactedNodeId ??= SolverSession.CurrentState.NodeContacts.From(Id).Single().To.Id;
+    public Guid ContactedNodeId =>
+        _contactedNodeId ??= SolverSession.CurrentState.NodeContacts.From(Id).Single().To.Id;
 
     public Particle ContactedParticle => ContactedNode.Particle;
 
-    IParticle<IParticleNode> INodeContactNeighbors.ContactedParticle => Particle;
+    IParticle INodeContactNeighbors.ContactedParticle => Particle;
 
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
             SolverSession.CurrentState.Nodes[ContactedNodeId] as ContactNodeBase
-         ?? throw new InvalidCastException(
+            ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(ContactNodeBase)}."
             );
 
@@ -169,7 +178,8 @@ public abstract class ContactNodeBase
 
     INodeContactNeighbors INodeContactNeighbors.ContactedNode => ContactedNode;
 
-    public IPolarVector ContactVector => IsParentsNode ? Contact.ContactVector : Contact.Reversed().ContactVector;
+    public IPolarVector ContactVector =>
+        IsParentsNode ? Contact.ContactVector : Contact.Reversed().ContactVector;
 
     public double ContactDistance => ContactVector.R;
 

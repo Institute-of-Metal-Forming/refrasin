@@ -5,34 +5,24 @@ namespace RefraSin.Coordinates;
 /// <summary>
 ///     Schnittstelle für Punkte.
 /// </summary>
-public interface IPoint : ICoordinates, ICloneable<IPoint>
+public interface IPoint : ICoordinates, IPointOperations<IPoint, IVector>
 {
     /// <summary>
     ///     Gets the absolute coordinate representation of this point.
     /// </summary>
     public AbsolutePoint Absolute { get; }
 
-    /// <summary>
-    ///     Addition of a vector to this point. Only defined for points and vectors of the same coordinate system.
-    /// </summary>
-    /// <param name="v">vector</param>
-    /// <returns></returns>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public IPoint AddVector(IVector v);
+    /// <inheritdoc />
+    IPoint IPointOperations<IPoint, IVector>.Centroid(IPoint other) =>
+        Absolute.Centroid(other.Absolute);
 
-    /// <summary>
-    ///     Gets the vector between two points. Only defined for points of the same coordinate system.
-    /// </summary>
-    /// <param name="p">other point</param>
-    /// <returns></returns>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public IVector VectorTo(IPoint p);
+    /// <inheritdoc />
+    IPoint IPointOperations<IPoint, IVector>.AddVector(IVector v) => Absolute.AddVector(v.Absolute);
 
-    /// <summary>
-    ///     Gets euclidean distance between two points. Only defined for points of the same coordinate system.
-    /// </summary>
-    /// <param name="p">other point</param>
-    /// <returns></returns>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public double DistanceTo(IPoint p);
+    /// <inheritdoc />
+    IVector IPointOperations<IPoint, IVector>.VectorTo(IPoint p) => Absolute.VectorTo(p.Absolute);
+
+    /// <inheritdoc />
+    double IPointOperations<IPoint, IVector>.DistanceTo(IPoint p) =>
+        Absolute.DistanceTo(p.Absolute);
 }

@@ -1,57 +1,63 @@
-using System;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using static System.Math;
 
 namespace RefraSin.Coordinates.Polar;
 
-/// <summary>
-///     Stellt einen Vektor in Polarkoordinaten dar.
-/// </summary>
-public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IPolarVector
+public readonly struct PolarVector(Angle phi, double r, IPolarCoordinateSystem? system = null)
+    : IPolarVector,
+        IVectorArithmetics<PolarVector>
 {
-    /// <summary>
-    ///     Creates the vector (0, 0).
-    /// </summary>
-    public PolarVector() : base(null) { }
+    public PolarVector(IPolarCoordinateSystem? system = null)
+        : this(0, 0, system) { }
 
-    /// <summary>
-    ///     Creates the vector (0, 0).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarVector(IPolarCoordinateSystem? system) : base(system) { }
+    public PolarVector((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null)
+        : this(coordinates.phi, coordinates.r, system) { }
 
-    /// <summary>
-    ///     Creates the vector (phi, r).
-    /// </summary>
-    /// <param name="coordinates">tuple of coordinates</param>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarVector((Angle phi, double r) coordinates, IPolarCoordinateSystem? system = null) : base(coordinates, system) { }
-
-    /// <summary>
-    ///     Creates the vector (phi, r).
-    /// </summary>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    /// <param name="phi">angle coordinate</param>
-    /// <param name="r">radius coordinate</param>
-    public PolarVector(Angle phi, double r, IPolarCoordinateSystem? system = null) : base(phi, r, system) { }
-
-    /// <summary>
-    ///     Creates a vector based on a template. The coordinates systems are automatically castd.
-    /// </summary>
-    /// <param name="other">template</param>
-    /// <param name="system">coordinate system, if null the default system is used</param>
-    public PolarVector(IVector other, IPolarCoordinateSystem? system = null) : base(system)
+    public PolarVector(IVector other, IPolarCoordinateSystem? system = null)
+        : this(system)
     {
         var absoluteCoordinates = other.Absolute;
         var x = absoluteCoordinates.X;
         var y = absoluteCoordinates.Y;
         R = Sqrt(Pow(x, 2) + Pow(y, 2)) / System.RScale;
-        Phi = (y > 0 ? Acos(x / R) : y < 0 ? PI + Acos(-x / R) : x >= 0 ? 0 : PI) - System.RotationAngle;
+        Phi =
+            (
+                y > 0
+                    ? Acos(x / R)
+                    : y < 0
+                        ? PI + Acos(-x / R)
+                        : x >= 0
+                            ? 0
+                            : PI
+            ) - System.RotationAngle;
     }
 
     /// <inheritdoc />
-    public PolarVector Clone() => new(Phi, R, System);
+    public Angle Phi { get; } =
+        (r >= 0 ? phi : phi + Angle.Straight).Reduce(
+            system?.AngleReductionDomain ?? PolarCoordinateSystem.Default.AngleReductionDomain
+        );
+
+    /// <inheritdoc />
+    public double R { get; } = Abs(r);
+
+    /// <inheritdoc />
+    public IPolarCoordinateSystem System { get; } = system ?? PolarCoordinateSystem.Default;
+
+    /// <inheritdoc />
+    public Angle AngleTo(IPolarCoordinates other, bool allowNegative = false)
+    {
+        if (System.Equals(other.System))
+        {
+            var diff = (other.Phi - Phi).Reduce(Angle.ReductionDomain.WithNegative);
+            if (allowNegative)
+                return diff;
+            return Abs(diff);
+        }
+
+        throw new DifferentCoordinateSystemException(this, other);
+    }
 
     /// <inheritdoc />
     public bool IsClose(IPolarVector other, double precision = 1e-8)
@@ -63,43 +69,67 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IPolarVect
 
     /// <inheritdoc />
     public AbsoluteVector Absolute =>
-        new(R * System.RScale * Cos(Phi + System.RotationAngle),
-            R * System.RScale * Sin(Phi + System.RotationAngle));
+        new(
+            R * System.RScale * Cos(Phi + System.RotationAngle),
+            R * System.RScale * Sin(Phi + System.RotationAngle)
+        );
 
     /// <inheritdoc />
     public double Norm => R;
 
-    /// <inheritdoc />
-    public IVector Add(IVector v)
+    public PolarVector Direction
     {
-        if (v is PolarVector pv)
-            return this + pv;
+        get
+        {
+            var scale = 1 / Norm;
+            if (!double.IsFinite(scale))
+                return new PolarVector(System);
+            return this * scale;
+        }
+    }
+
+    IVector IVector.Direction => Direction;
+
+    public PolarVector Add(IPolarVector v)
+    {
+        if (System.Equals(v.System))
+        {
+            var x = R * Cos(Phi) + v.R * Cos(v.Phi);
+            var y = R * Sin(Phi) + v.R * Sin(v.Phi);
+
+            var r = Sqrt(Pow(x, 2) + Pow(y, 2));
+            var phi = double.Atan2(y, x);
+            return new PolarVector(phi, r, System);
+        }
+
         throw new DifferentCoordinateSystemException(this, v);
     }
 
+    IPolarVector IVectorOperations<IPolarVector>.Add(IPolarVector v) => Add(v);
+
+    PolarVector IVectorOperations<PolarVector>.Add(PolarVector v) => Add(v);
+
     /// <inheritdoc />
-    public IVector Subtract(IVector v)
+    public PolarVector Reverse() => new(Phi + Angle.Straight, R);
+
+    IPolarVector IVectorOperations<IPolarVector>.Reverse() => Reverse();
+
+    public double ScalarProduct(IPolarVector v)
     {
-        if (v is PolarVector pv)
-            return this - pv;
+        if (System == v.System)
+            return R * v.R * Cos(Abs(Phi - v.Phi));
         throw new DifferentCoordinateSystemException(this, v);
     }
 
-    /// <inheritdoc />
-    public double ScalarProduct(IVector v)
-    {
-        if (v is PolarVector pv)
-            return this * pv;
-        throw new DifferentCoordinateSystemException(this, v);
-    }
+    double IVectorOperations<IPolarVector>.ScalarProduct(IPolarVector v) => ScalarProduct(v);
+
+    double IVectorOperations<PolarVector>.ScalarProduct(PolarVector v) => ScalarProduct(v);
 
     /// <inheritdoc />
-    public void ScaleBy(double scale)
-    {
-        R *= scale;
-    }
+    public PolarVector ScaleBy(double scale) => new(Phi, R * scale);
 
-    IVector ICloneable<IVector>.Clone() => Clone();
+    /// <inheritdoc />
+    public PolarVector RotateBy(double rotation) => new(Phi + rotation, R);
 
     /// <summary>
     ///     Parse from string representation.
@@ -110,7 +140,7 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IPolarVect
     /// </remarks>
     public static PolarVector Parse(string s)
     {
-        var (value1, value2) = Parse(s, nameof(PolarVector));
+        var (value1, value2) = s.ParseCoordinateString(nameof(PolarVector));
         return new PolarVector(Angle.Parse(value1), double.Parse(value2));
     }
 
@@ -118,51 +148,17 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IPolarVect
     ///     Vectorial addition. See <see cref="Add" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static PolarVector operator +(PolarVector v1, PolarVector v2)
-    {
-        if (v1.System.Equals(v2.System))
-        {
-            var x = v1.R * Cos(v1.Phi) + v2.R * Cos(v2.Phi);
-            var y = v1.R * Sin(v1.Phi) + v2.R * Sin(v2.Phi);
-
-            var r = Sqrt(Pow(x, 2) + Pow(y, 2));
-            var phi = double.Atan2(y, x);
-            return new PolarVector(phi, r, v1.System);
-        }
-
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
-
-    /// <summary>
-    ///     Vectorial subtraction. See <see cref="Subtract" />.
-    /// </summary>
-    /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static PolarVector operator -(PolarVector v1, PolarVector v2)
-    {
-        if (v1.System.Equals(v2.System))
-        {
-            var x = v1.R * Cos(v1.Phi) - v2.R * Cos(v2.Phi);
-            var y = v1.R * Sin(v1.Phi) - v2.R * Sin(v2.Phi);
-
-            var r = Sqrt(Pow(x, 2) + Pow(y, 2));
-            var phi = y > 0 ? Acos(x / r) : y < 0 ? PI + Acos(-x / r) : x >= 0 ? 0 : PI;
-
-            return new PolarVector(phi, r, v1.System);
-        }
-
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
+    public static PolarVector operator +(PolarVector v1, PolarVector v2) => v1.Add(v2);
 
     /// <summary>
     ///     Negotiation (rotate by Pi).
     /// </summary>
-    public static PolarVector operator -(PolarVector v) => new(v.Phi + PI, v.R);
+    public static PolarVector operator -(PolarVector v) => v.Reverse();
 
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
     /// </summary>
-    public static PolarVector operator *(double d, PolarVector v) =>
-        new(v.Phi, d * v.R, v.System);
+    public static PolarVector operator *(double d, PolarVector v) => v.ScaleBy(d);
 
     /// <summary>
     ///     Scales the vector. See <see cref="ScaleBy" />.
@@ -173,10 +169,25 @@ public class PolarVector : PolarCoordinates, ICloneable<PolarVector>, IPolarVect
     ///     Scalar product. See <see cref="ScalarProduct" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static double operator *(PolarVector v1, PolarVector v2)
-    {
-        if (v1.System == v2.System)
-            return v1.R * v2.R * Cos(Abs(v1.Phi - v2.Phi));
-        throw new DifferentCoordinateSystemException(v1, v2);
-    }
+    public static double operator *(PolarVector v1, PolarVector v2) => v1.ScalarProduct(v2);
+
+    /// <inheritdoc />
+    public static PolarVector operator /(PolarVector left, double right) =>
+        new(left.Phi, left.R / right);
+
+    /// <inheritdoc />
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        this.FormatPolarCoordinates(format, formatProvider);
+
+    public override string ToString() => ToString(null, null);
+
+    /// <inheritdoc />
+    public double[] ToArray() => [Phi, R];
+
+    /// <inheritdoc />
+    public static PolarVector operator -(PolarVector left, PolarVector right) => left + -right;
+
+    public static implicit operator PolarVector((double phi, double r) t) => new(t.phi, t.r);
+
+    public static implicit operator PolarVector((Angle phi, double r) t) => new(t.phi, t.r);
 }

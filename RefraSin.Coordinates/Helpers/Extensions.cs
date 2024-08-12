@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using static System.Math;
 
 namespace RefraSin.Coordinates.Helpers;
@@ -37,7 +36,7 @@ public static class Extensions
 
         if (double.IsNaN(self) || double.IsNaN(other))
             return false;
-        
+
         return Abs(self - other) < precision;
     }
 }

@@ -1,3 +1,4 @@
+using RefraSin.Coordinates;
 using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Collections;
@@ -7,7 +8,8 @@ namespace RefraSin.ParticleModel.Collections;
 /// Integer indices may be larger than the count of elements, which means counting from the beginning again (cyclic indexing).
 /// Integer indices may be negative, which means counting from the end.
 /// </summary>
-public interface IReadOnlyParticleSurface<out TNode> : IReadOnlyNodeCollection<TNode> where TNode : INode
+public interface IReadOnlyParticleSurface<out TNode> : IReadOnlyNodeCollection<TNode>
+    where TNode : INode
 // IReadOnlyDictionary is not implemented, since this would break covariance
 {
     /// <summary>
@@ -28,23 +30,37 @@ public interface IReadOnlyParticleSurface<out TNode> : IReadOnlyNodeCollection<T
     /// Returns the node that is the first upper neighbor of the specified one in the surface.
     /// </summary>
     /// <param name="node"></param>
-    public INode UpperNeighborOf(INode node) => this[IndexOf(node.Id) + 1];
+    public TNode UpperNeighborOf(INode node) => this[IndexOf(node.Id) + 1];
 
     /// <summary>
     /// Returns the node that is the first upper neighbor of the specified one in the surface.
     /// </summary>
     /// <param name="nodeId"></param>
-    public INode UpperNeighborOf(Guid nodeId) => this[IndexOf(nodeId) + 1];
+    public TNode UpperNeighborOf(Guid nodeId) => this[IndexOf(nodeId) + 1];
 
     /// <summary>
     /// Returns the node that is the first lower neighbor of the specified one in the surface.
     /// </summary>
     /// <param name="node"></param>
-    public INode LowerNeighborOf(INode node) => this[IndexOf(node.Id) - 1];
+    public TNode LowerNeighborOf(INode node) => this[IndexOf(node.Id) - 1];
 
     /// <summary>
     /// Returns the node that is the first lower neighbor of the specified one in the surface.
     /// </summary>
     /// <param name="nodeId"></param>
-    public INode LowerNeighborOf(Guid nodeId) => this[IndexOf(nodeId) - 1];
+    public TNode LowerNeighborOf(Guid nodeId) => this[IndexOf(nodeId) - 1];
+
+    /// <summary>
+    /// Returns the closest node to a given angle that lies below.
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <returns></returns>
+    TNode NextLowerNodeFrom(Angle angle);
+
+    /// <summary>
+    /// Returns the closest node to a given angle that lies above.
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <returns></returns>
+    TNode NextUpperNodeFrom(Angle angle);
 }

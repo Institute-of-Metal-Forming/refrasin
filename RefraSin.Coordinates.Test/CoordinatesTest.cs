@@ -4,10 +4,10 @@ using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Polar;
 using static System.Math;
-using static RefraSin.Coordinates.Angle.ReductionDomain;
-using static RefraSin.Coordinates.Constants;
 using static NUnit.Framework.Assert;
 using static NUnit.Framework.Legacy.ClassicAssert;
+using static RefraSin.Coordinates.Angle.ReductionDomain;
+using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.Coordinates.Test;
 
@@ -18,20 +18,13 @@ public class CoordinatesTest
     public void CartesianToPolarTest()
     {
         That(new PolarPoint(new AbsolutePoint(1, 0)).IsClose(new PolarPoint(0, 1)));
-        That(
-            new PolarPoint(new AbsolutePoint(1, 1)).IsClose(new PolarPoint(PI / 4, Sqrt2)));
+        That(new PolarPoint(new AbsolutePoint(1, 1)).IsClose(new PolarPoint(PI / 4, Sqrt2)));
         That(new PolarPoint(new AbsolutePoint(0, 1)).IsClose(new PolarPoint(PI / 2, 1)));
-        That(
-            new PolarPoint(new AbsolutePoint(-1, 1)).IsClose(
-                new PolarPoint(3 * PI / 4, Sqrt2)));
+        That(new PolarPoint(new AbsolutePoint(-1, 1)).IsClose(new PolarPoint(3 * PI / 4, Sqrt2)));
         That(new PolarPoint(new AbsolutePoint(-1, 0)).IsClose(new PolarPoint(PI, 1)));
         That(new PolarPoint(new AbsolutePoint(0, 0)).IsClose(new PolarPoint(0, 0)));
-        That(
-            new PolarPoint(new AbsolutePoint(0, -1)).IsClose(
-                new PolarPoint(3 * PI / 2, 1)));
-        That(
-            new PolarPoint(new AbsolutePoint(-1, -1)).IsClose(
-                new PolarPoint(5 * PI / 4, Sqrt2)));
+        That(new PolarPoint(new AbsolutePoint(0, -1)).IsClose(new PolarPoint(3 * PI / 2, 1)));
+        That(new PolarPoint(new AbsolutePoint(-1, -1)).IsClose(new PolarPoint(5 * PI / 4, Sqrt2)));
     }
 
     [Test]
@@ -54,15 +47,31 @@ public class CoordinatesTest
         That((-0.1 * PI - p1.Phi).Reduce(), Is.EqualTo(new Angle(1.5 * PI)).Within(1e-3));
 
         // reduced to [-π, π]
-        That((0.5 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(0.1 * PI)).Within(1e-3));
-        That((1.2 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(0.8 * PI)).Within(1e-3));
-        That((1.5 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(-0.9 * PI)).Within(1e-3));
-        That((0.3 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(-0.1 * PI)).Within(1e-3));
-        That((-0.1 * PI - p1.Phi).Reduce(WithNegative), Is.EqualTo(new Angle(-0.5 * PI)).Within(1e-3));
+        That(
+            (0.5 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(0.1 * PI)).Within(1e-3)
+        );
+        That(
+            (1.2 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(0.8 * PI)).Within(1e-3)
+        );
+        That(
+            (1.5 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(-0.9 * PI)).Within(1e-3)
+        );
+        That(
+            (0.3 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(-0.1 * PI)).Within(1e-3)
+        );
+        That(
+            (-0.1 * PI - p1.Phi).Reduce(WithNegative),
+            Is.EqualTo(new Angle(-0.5 * PI)).Within(1e-3)
+        );
 
         That(p1.AngleTo(new PolarPoint(0.5 * PI, 2)), Is.EqualTo(new Angle(0.1 * PI)).Within(1e-3));
-        Throws<DifferentCoordinateSystemException>(() =>
-            p1.AngleTo(new PolarPoint(0, 1, new PolarCoordinateSystem(null, 1))));
+        Throws<DifferentCoordinateSystemException>(
+            () => p1.AngleTo(new PolarPoint(0, 1, new PolarCoordinateSystem(null, 1)))
+        );
     }
 
     [Test]
@@ -71,9 +80,9 @@ public class CoordinatesTest
         var p1 = new CartesianPoint(1, 2);
         var p2 = new CartesianPoint(-1, -2);
 
-        p1.RotateBy(PI);
+        var rotated = p1.RotateBy(PI);
 
-        That(p1.IsClose(p2));
+        That(p2.IsClose(rotated));
     }
 
     [Test]
@@ -123,21 +132,21 @@ public class CoordinatesTest
     }
 
     [Test]
-    public void HalfWayTest()
+    public void CentroidsTest()
     {
         var p1 = new PolarPoint(0.1, 1);
         var p2 = new PolarPoint(0.3, 2);
         var p3 = new PolarPoint(-0.1, 0.5);
         var p4 = new PolarPoint(TwoPi + Pi + 0.3, 2);
 
-        var hw12 = p1.Absolute.PointHalfWayTo(p2.Absolute);
-        var hw13 = p1.Absolute.PointHalfWayTo(p3.Absolute);
-        var hw14 = p1.Absolute.PointHalfWayTo(p4.Absolute);
+        var hw12 = p1.Absolute.Centroid(p2.Absolute);
+        var hw13 = p1.Absolute.Centroid(p3.Absolute);
+        var hw14 = p1.Absolute.Centroid(p4.Absolute);
 
-        That(p1.PointHalfWayTo(p2).Absolute.IsClose(hw12));
-        That(p1.PointHalfWayTo(p3).Absolute.IsClose(hw13));
-        That(p3.PointHalfWayTo(p1).Absolute.IsClose(hw13));
-        That(p1.PointHalfWayTo(p4).Absolute.IsClose(hw14));
+        That(p1.Centroid(p2).Absolute.IsClose(hw12));
+        That(p1.Centroid(p3).Absolute.IsClose(hw13));
+        That(p3.Centroid(p1).Absolute.IsClose(hw13));
+        That(p1.Centroid(p4).Absolute.IsClose(hw14));
     }
 
     [Test]
@@ -249,7 +258,11 @@ public class CoordinatesTest
     }
 
     [Test]
-    public void CoordinatesToStringAndParseTest()
+    [TestCase(":e3:deg")]
+    [TestCase("V[]:f2:rad")]
+    [TestCase("<;>::grad")]
+    [TestCase("N{V,}:f2:gon")]
+    public void CoordinatesToStringAndParseTest(string format)
     {
         var pp = new PolarPoint(PI, 1.2);
         var pv = new PolarVector(PI, 1.2);
@@ -258,56 +271,29 @@ public class CoordinatesTest
         var ap = new AbsolutePoint(1.3, 1.2);
         var av = new AbsoluteVector(1.3, 1.2);
 
-        foreach (var format in new[] { ":e3:deg", "V[]:f2:rad", "<;>::grad", "N{V,}:f2:gon" })
-        {
-            var s = pp.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(PolarPoint.Parse(s).IsClose(pp, 2));
+        var s = pp.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(PolarPoint.Parse(s).IsClose(pp, 2));
 
-            s = pv.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(PolarVector.Parse(s).IsClose(pv, 2));
+        s = pv.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(PolarVector.Parse(s).IsClose(pv, 2));
 
-            s = cp.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(CartesianPoint.Parse(s).IsClose(cp, 2));
+        s = cp.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(CartesianPoint.Parse(s).IsClose(cp, 2));
 
-            s = cv.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(CartesianVector.Parse(s).IsClose(cv, 2));
+        s = cv.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(CartesianVector.Parse(s).IsClose(cv, 2));
 
-            s = ap.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(AbsolutePoint.Parse(s).IsClose(ap, 2));
+        s = ap.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(AbsolutePoint.Parse(s).IsClose(ap, 2));
 
-            s = av.ToString(format, null);
-            Console.WriteLine(s);
-            IsTrue(AbsoluteVector.Parse(s).IsClose(av, 2));
-        }
-    }
-
-    [Test]
-    public void VectorEnumerableTest()
-    {
-        var vectors = new[]
-        {
-            new PolarVector(0, 1),
-            new PolarVector(HalfOfPi, 1),
-            new PolarVector(Pi, 1),
-            new PolarVector(ThreeHalfsOfPi, 2)
-        };
-
-        That(new PolarVector(-HalfOfPi, 1).IsClose(vectors.Sum()));
-
-        var vectors2 = new[]
-        {
-            new PolarVector(0, Sqrt2),
-            new PolarVector(HalfOfPi, Sqrt2),
-            new PolarVector(QuarterOfPi, 1)
-        };
-
-        That(new PolarVector(QuarterOfPi, 1).IsClose(vectors2.Average()));
-        That(new PolarVector(QuarterOfPi, 1).IsClose(vectors2.AverageDirection()));
+        s = av.ToString(format, null);
+        Console.WriteLine(s);
+        IsTrue(AbsoluteVector.Parse(s).IsClose(av, 2));
     }
 
     class OriginClass
@@ -345,10 +331,7 @@ public class CoordinatesTest
         Console.WriteLine(p1.Absolute.ToString("(,):f2", CultureInfo.InvariantCulture));
         That(new AbsolutePoint(1, 1).IsClose(p1.Absolute));
 
-        var instance = new OriginClass()
-        {
-            Point = new AbsolutePoint(-1, -1)
-        };
+        var instance = new OriginClass() { Point = new AbsolutePoint(-1, -1) };
         system.OriginSource = () => instance.Point;
         Console.WriteLine(p1.Absolute.ToString("(,):f2", CultureInfo.InvariantCulture));
         That(new AbsolutePoint(0, 0).IsClose(p1.Absolute));
@@ -391,15 +374,5 @@ public class CoordinatesTest
         IsFalse(p32.Phi.IsInDomain(AllPositive));
         IsTrue(p32.Phi.IsInDomain(WithNegative));
         AreEqual(-Pi, p32.Phi.Radians);
-
-        s3.AngleReductionDomain = AllPositive;
-        Console.WriteLine($"p31:\t{p31}");
-        IsTrue(p31.Phi.IsInDomain(AllPositive));
-        IsFalse(p31.Phi.IsInDomain(WithNegative));
-        AreEqual(1.5 * Pi, p31.Phi.Radians);
-        Console.WriteLine($"p32:\t{p32}");
-        IsTrue(p32.Phi.IsInDomain(AllPositive));
-        IsFalse(p32.Phi.IsInDomain(WithNegative));
-        AreEqual(Pi, p32.Phi.Radians);
     }
 }

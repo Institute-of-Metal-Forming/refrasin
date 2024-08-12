@@ -82,7 +82,7 @@ internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeConta
     /// <inheritdoc />
     public ContactNodeReturn(
         ContactNodeBase template,
-        StepVector stepVector,
+        StepVector? stepVector,
         ParticleReturn particle,
         INorm norm
     )
