@@ -40,6 +40,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Compaction.Tests",
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RefraSin.Plotting", "RefraSin.Plotting\RefraSin.Plotting.fsproj", "{53CF41DD-0FBB-4226-9D48-7448C7F7A853}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Plotting.Tests", "RefraSin.Plotting.Tests\RefraSin.Plotting.Tests.csproj", "{918C5869-5A8C-4B6A-938E-FB967C241E1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -126,6 +128,10 @@ Global
 		{53CF41DD-0FBB-4226-9D48-7448C7F7A853}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53CF41DD-0FBB-4226-9D48-7448C7F7A853}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53CF41DD-0FBB-4226-9D48-7448C7F7A853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{918C5869-5A8C-4B6A-938E-FB967C241E1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{918C5869-5A8C-4B6A-938E-FB967C241E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{918C5869-5A8C-4B6A-938E-FB967C241E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{918C5869-5A8C-4B6A-938E-FB967C241E1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

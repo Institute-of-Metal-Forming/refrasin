@@ -15,7 +15,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="Commons.fs" />
         <Compile Include="ParticlePlot.fs"/>
+        <Compile Include="ProcessPlot.fs" />
     </ItemGroup>
 
 </Project>

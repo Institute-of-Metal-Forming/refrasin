@@ -3,19 +3,10 @@ module RefraSin.Plotting.ParticlePlot
 open System.Collections.Generic
 open System.Globalization
 open Plotly.NET
-open Plotly.NET.LayoutObjects
 open Plotly.NET.StyleParam
 open RefraSin.Coordinates
 open RefraSin.ParticleModel.Nodes
 open RefraSin.ParticleModel.Particles
-
-let ApplyDefaultPlotProperties plot =
-    plot
-    |> Chart.withXAxisStyle (TitleText = "X")
-    |> Chart.withYAxis (
-        LinearAxis.init (Title = Title.init (Text = "Y"), ScaleAnchor = ScaleAnchor.X 1, ScaleRatio = 1)
-    )
-    |> Chart.withSize (1920, 1080)
 
 let PlotParticle (particle: IParticle<IParticleNode>) : GenericChart =
     let absolutePoints =
@@ -24,8 +15,8 @@ let PlotParticle (particle: IParticle<IParticleNode>) : GenericChart =
 
     let xy = [ for p in absolutePoints -> (p.X, p.Y) ]
 
-    Chart.Line(xy = xy, Name = particle.ToString(), ShowMarkers = true, MarkerSymbol = MarkerSymbol.X)
-    |> ApplyDefaultPlotProperties
+    Chart.Line(xy = xy, Name = particle.Id.ToString().Substring(0,8), ShowMarkers = true, MarkerSymbol = MarkerSymbol.X)
+    |> Commons.ApplyPlainSpaceDefaultPlotProperties
 
 
 let PlotParticles (particles: IEnumerable<IParticle<IParticleNode>>) : GenericChart =
@@ -44,19 +35,26 @@ let PlotPoint (point: IPoint) (label: string) =
         TextPosition = TextPosition.TopRight,
         MultiText = [ abs.ToString("(,)", CultureInfo.InvariantCulture) ]
     )
-    |> ApplyDefaultPlotProperties
+    |> Commons.ApplyPlainSpaceDefaultPlotProperties
 
 let PlotPoints (points: IPoint seq) (label: string) =
     let absolutePoints = [ for p in points -> p.Absolute ]
     let xy = [ for p in absolutePoints -> (p.X, p.Y) ]
     let labels = [ for p in absolutePoints -> p.ToString("(,)", CultureInfo.InvariantCulture) ]
 
-    Chart.Point(xy = xy, Name = label, MultiText = labels, TextPosition=TextPosition.TopRight, MarkerSymbol=MarkerSymbol.Cross)
-    |> ApplyDefaultPlotProperties
+    Chart.Point(
+        xy = xy,
+        Name = label,
+        MultiText = labels,
+        TextPosition = TextPosition.TopRight,
+        MarkerSymbol = MarkerSymbol.Cross
+    )
+    |> Commons.ApplyPlainSpaceDefaultPlotProperties
 
 let PlotContactEdge (edge: IParticleContactEdge<_>) : GenericChart =
     let from = edge.From.Coordinates.Absolute
     let _to = edge.To.Coordinates.Absolute
-    let xy = [(from.X, from.Y); (_to.X, _to.Y)]
-    
-    Chart.Line(xy=xy, MarkerSymbol=MarkerSymbol.Cross, Name=edge.ToString())
+    let xy = [ (from.X, from.Y); (_to.X, _to.Y) ]
+
+    Chart.Line(xy = xy, MarkerSymbol = MarkerSymbol.Cross, Name = $"%s{edge.From.Id.ToString().Substring(0,8)} -> %s{edge.To.Id.ToString().Substring(0,8)}")
+    |> Commons.ApplyPlainSpaceDefaultPlotProperties
