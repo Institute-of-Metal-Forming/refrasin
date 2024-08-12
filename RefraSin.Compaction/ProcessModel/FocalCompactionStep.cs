@@ -23,14 +23,6 @@ public class FocalCompactionStep(IPoint focusPoint, double stepDistance, double 
 
         for (int i = 0; i < MaxStepCount; i++)
         {
-            if (bodies.Count <= 1)
-                break;
-            
-            foreach (var body in bodies)
-            {
-                body.MoveTowards(FocusPoint, StepDistance);
-            }
-
             var combinationPairs = BuildCombinationPairs(bodies);
 
             foreach (var pair in combinationPairs)
@@ -64,6 +56,14 @@ public class FocalCompactionStep(IPoint focusPoint, double stepDistance, double 
                     
                     bodies.Add(new ParticleAgglomerate(Guid.NewGuid(), particles0.Concat(particles1)));
                 }
+            }
+            
+            if (bodies.Count <= 1)
+                break;
+            
+            foreach (var body in bodies)
+            {
+                body.MoveTowards(FocusPoint, StepDistance);
             }
         }
 
