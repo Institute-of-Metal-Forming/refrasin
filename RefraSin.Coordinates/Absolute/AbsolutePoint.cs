@@ -53,7 +53,7 @@ public readonly struct AbsolutePoint(double x, double y)
     public AbsoluteVector VectorTo(IPoint p)
     {
         var abs = p.Absolute;
-        return new AbsoluteVector(X - abs.X, Y - abs.Y);
+        return new AbsoluteVector(abs.X - X, abs.Y - Y);
     }
 
     ICartesianVector IPointOperations<ICartesianPoint, ICartesianVector>.VectorTo(
