@@ -40,16 +40,15 @@ public class ShapeFunctionParticleFactory : IParticleFactory<Particle<ParticleNo
     public virtual double ParticleShapeFunction(double phi) => BaseRadius * (1 + PeakHeight * Cos(PeakCount * phi) + Ovality * Cos(2 * phi));
 
     /// <inheritdoc />
-    public Particle<ParticleNode> GetParticle()
+    public Particle<ParticleNode> GetParticle(Guid? id = null)
     {
         var nodeCount = NodeCountFunction?.Invoke(this) ?? NodeCount;
 
         var phis = Enumerable.Range(0, nodeCount).Select(i => TwoPi * i / nodeCount).ToArray();
         var rs = phis.Select(ParticleShapeFunction).ToArray();
-        var particleId = Guid.NewGuid();
 
         return new Particle<ParticleNode>(
-            particleId,
+            id ?? Guid.NewGuid(),
             CenterCoordinates,
             RotationAngle,
             MaterialId,

@@ -5,5 +5,5 @@ namespace RefraSin.ParticleModel.ParticleFactories;
 
 public interface IParticleFactory<out TParticle, out TNode> where TParticle : IParticle<TNode> where TNode : IParticleNode
 {
-    TParticle GetParticle();
+    TParticle GetParticle(Guid? id = null);
 }
