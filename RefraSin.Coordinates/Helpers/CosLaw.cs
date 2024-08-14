@@ -16,7 +16,7 @@ public static class CosLaw
     /// <param name="b">Länge Kathete</param>
     /// <param name="gamma">eingeschlossener Winkel</param>
     /// <returns>Länge Hypothenuse</returns>
-    public static double C(double a, double b, double gamma) =>
+    public static double C(double a, double b, Angle gamma) =>
         Sqrt(Pow(a, 2) + Pow(b, 2) - 2 * a * b * Cos(gamma));
 
     /// <summary>
@@ -26,7 +26,7 @@ public static class CosLaw
     /// <param name="c">Länge Hypothenuse</param>
     /// <param name="gamma">eingeschlossener Winkel</param>
     /// <returns>Tupel der möglichen Längen der Kathete</returns>
-    public static (double, double) A(double b, double c, double gamma)
+    public static (double, double) A(double b, double c, Angle gamma)
     {
         var p1 = 2 * b * Cos(gamma);
         var p2 = Sqrt2 * Sqrt(-Squared(b) + 2 * Squared(c) + Squared(b) * Cos(2 * gamma));
@@ -40,6 +40,6 @@ public static class CosLaw
     /// <param name="b">Länge Kathete</param>
     /// <param name="c">Länge Hypothenuse</param>
     /// <returns>eingeschlossener Winkel</returns>
-    public static double Gamma(double a, double b, double c) =>
+    public static Angle Gamma(double a, double b, double c) =>
         Acos((Squared(a) + Squared(b) - Squared(c)) / (2 * a * b));
 }
