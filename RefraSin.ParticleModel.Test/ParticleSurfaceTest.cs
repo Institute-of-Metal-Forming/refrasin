@@ -153,4 +153,18 @@ public class ParticleSurfaceTest
         Assert.Throws<KeyNotFoundException>(() => _surface.IndexOf(_nodeAtIndex));
         Assert.That(_surface.Count, Is.EqualTo(100 - count));
     }
+
+    [Test]
+    [TestCase(0, 3, 4)]
+    [TestCase(3, 6, 4)]
+    [TestCase(98, 2, 5)]
+    [TestCase(21, 21, 1)]
+    [TestCase(21, 20, 100)]
+    public void TestSliceInt(int start, int end, int expectedLength)
+    {
+        var slice = _surface[start, end];
+        Assert.That(slice.Count, Is.EqualTo(expectedLength));
+        Assert.That(slice[0], Is.EqualTo(_surface[start]));
+        Assert.That(slice[^1], Is.EqualTo(_surface[end]));
+    }
 }
