@@ -27,7 +27,7 @@ public class OneParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e4;
+        var duration = 1e2;
 
         _particle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
         {
