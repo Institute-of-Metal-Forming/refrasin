@@ -130,7 +130,7 @@ public readonly struct AbsolutePoint(double x, double y)
     /// <summary>
     ///     Computes the vector between two points. See <see cref="VectorTo" />.
     /// </summary>
-    public static AbsoluteVector operator -(AbsolutePoint p1, AbsolutePoint p2) => p1.VectorTo(p2);
+    public static AbsoluteVector operator -(AbsolutePoint p1, AbsolutePoint p2) => p2.VectorTo(p1);
 
     /// <inheritdoc />
     public double[] ToArray() => [X, Y];
