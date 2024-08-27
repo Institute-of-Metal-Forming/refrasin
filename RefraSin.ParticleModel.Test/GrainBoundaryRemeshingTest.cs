@@ -1,4 +1,4 @@
-using System.Globalization;
+using Plotly.NET;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Nodes;
@@ -6,7 +6,7 @@ using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ParticleModel.System;
-using ScottPlot;
+using RefraSin.Plotting;
 using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.Test;
@@ -84,15 +84,8 @@ public class GrainBoundaryRemeshingTest
         var remesher = new GrainBoundaryRemesher(additionLimit: 1.2);
         var remeshedParticleSystem = remesher.RemeshSystem(particleSystem);
 
-        var plt = new Plot();
-        plt.Axes.SquareUnits();
-
-        plt.PlotParticle(particle1);
-        plt.PlotParticle(particle2);
-        plt.PlotParticle(remeshedParticleSystem.Particles[0]);
-        plt.PlotParticle(remeshedParticleSystem.Particles[1]);
-
-        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.png"), 1600, 900);
+        var plot = ParticlePlot.PlotParticles(particleSystem.Particles);
+        plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}-{initialNeck}.html"));
 
         Assert.That(
             remeshedParticleSystem.Particles[0].Nodes.Count,

@@ -1,5 +1,6 @@
 using System.Globalization;
 using RefraSin.Coordinates;
+using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Cartesian;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
@@ -18,7 +19,7 @@ public record Particle<TNode> : IParticle<TNode>, IParticleMeasures
     )
     {
         Id = id;
-        Coordinates = centerCoordinates;
+        Coordinates = centerCoordinates.Absolute;
         RotationAngle = rotationAngle;
         MaterialId = materialId;
         var nodes = nodesFactory(this).ToArray();
@@ -47,7 +48,8 @@ public record Particle<TNode> : IParticle<TNode>, IParticleMeasures
 
     public IReadOnlyParticleSurface<TNode> Nodes => _nodes;
     public Guid Id { get; }
-    public ICartesianPoint Coordinates { get; }
+    public AbsolutePoint Coordinates { get; }
+    ICartesianPoint IParticle.Coordinates => Coordinates;
     public Angle RotationAngle { get; }
     public Guid MaterialId { get; }
 

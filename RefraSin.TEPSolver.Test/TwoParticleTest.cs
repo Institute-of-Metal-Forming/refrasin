@@ -2,6 +2,7 @@ using System.Globalization;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
+using Plotly.NET;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
@@ -9,6 +10,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -27,7 +29,7 @@ public class TwoParticleTest
     [SetUp]
     public void Setup()
     {
-        var duration = 1e5;
+        var duration = 1e4;
         var initialNeck = 2 * PI / 100 / 2 * 120e-6 * 5;
         var nodeCountPerParticle = 20;
 
@@ -259,138 +261,33 @@ public class TwoParticleTest
             PlotParticles();
             PlotTimeSteps();
             PlotParticleCenter();
-            PlotParticleRotation();
         }
     }
 
     private void PlotParticles()
     {
+       
         var dir = Path.Combine(_tempDir, "p");
         Directory.CreateDirectory(dir);
 
         foreach (var (i, state) in _solutionStorage.States.Index())
         {
-            var plt = new Plot();
-            plt.Axes.SquareUnits();
-
-            foreach (var particle in state.Particles)
-            {
-                var coordinates = particle
-                    .Nodes.Append(particle.Nodes[0])
-                    .Select(n => new ScottPlot.Coordinates(
-                        n.Coordinates.Absolute.X,
-                        n.Coordinates.Absolute.Y
-                    ))
-                    .ToArray();
-                plt.Add.Scatter(coordinates);
-            }
-
-            plt.Title($"t = {state.Time.ToString(CultureInfo.InvariantCulture)}");
-
-            plt.SavePng(Path.Combine(dir, $"{i}.png"), 1600, 900);
-        }
-    }
-
-    private void PlotDisplacements()
-    {
-        var dir = Path.Combine(_tempDir, "nd");
-        Directory.CreateDirectory(dir);
-
-        foreach (var (i, step) in _solutionStorage.States.Index())
-        {
-            var plt = new Plot();
-
-            foreach (var particle in step.Particles)
-            {
-                var coordinates = step.Particles[0]
-                    .Nodes.Select(
-                        (n, j) =>
-                            n switch
-                            {
-                                INodeShifts shifts
-                                    => new ScottPlot.Coordinates(j, shifts.Shift.Normal),
-                                _ => new ScottPlot.Coordinates()
-                            }
-                    )
-                    .ToArray();
-                plt.Add.Scatter(coordinates);
-            }
-
-            plt.Add.Line(0, 0, step.Particles[0].Nodes.Count, 0);
-
-            plt.Title($"t = {step.Time.ToString(CultureInfo.InvariantCulture)}");
-
-            plt.SavePng(Path.Combine(dir, $"{i}.png"), 600, 400);
+            var plot = ParticlePlot.PlotParticles(state.Particles);
+            plot.SaveHtml(Path.Combine(dir, $"{i}.html"));
         }
     }
 
     private void PlotTimeSteps()
     {
-        var plt = new Plot();
-
-        var steps = _solutionStorage
-            .States.Skip(1)
-            .Zip(_solutionStorage.States)
-            .Select(
-                (s, i) => new ScottPlot.Coordinates(i, Math.Log10(s.First.Time - s.Second.Time))
-            )
-            .ToArray();
-        plt.Add.Scatter(steps);
-
-        var meanStepWidth = Math.Log10(steps.Select(s => Math.Pow(10, s.Y)).Mean());
-        var meanLine = plt.Add.HorizontalLine(meanStepWidth);
-        meanLine.Text = "mean";
-
-        plt.SavePng(Path.Combine(_tempDir, "timeSteps.png"), 600, 400);
+        var plot = ProcessPlot.PlotTimeSteps(_solutionStorage.States);
+        plot.SaveHtml(Path.Combine(_tempDir, "timeSteps.html"));
     }
 
     private void PlotParticleCenter()
     {
-        var plt = new Plot();
-
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    s.Particles[1].Coordinates.X - _particle2.Coordinates.X
-                ))
-                .ToArray()
-        );
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    s.Particles[1].Coordinates.Y - _particle2.Coordinates.Y
-                ))
-                .ToArray()
-        );
-
-        plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
-    }
-
-    private void PlotParticleRotation()
-    {
-        var plt = new Plot();
-
-        var initialAngle = new PolarVector(_particle1.Coordinates.VectorTo(_particle2.Coordinates), _particle1).Phi;
-
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    new PolarVector(s.Particles[0].Coordinates.VectorTo(s.Particles[1].Coordinates), s.Particles[0]).Phi - initialAngle
-                ))
-                .ToArray()
-        );
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    s.Particles[1].RotationAngle - _particle2.RotationAngle
-                ))
-                .ToArray()
-        );
-
-        plt.SavePng(Path.Combine(_tempDir, "particleRotation.png"), 600, 400);
+        var centers = ProcessPlot.PlotParticleCenters(_solutionStorage.States);
+        var start = ParticlePlot.PlotParticles(_solutionStorage.States[0].Particles);
+        var end = ParticlePlot.PlotParticles(_solutionStorage.States[^1].Particles);
+        Chart.Combine([centers, start, end]).SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
     }
 }

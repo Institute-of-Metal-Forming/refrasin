@@ -2,11 +2,13 @@ using System.Globalization;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
+using Plotly.NET;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
@@ -146,7 +148,6 @@ public class OneParticleTest
             PlotParticles();
             PlotDisplacements();
             PlotTimeSteps();
-            PlotParticleCenter();
         }
     }
 
@@ -157,22 +158,8 @@ public class OneParticleTest
 
         foreach (var (i, state) in _solutionStorage.States.Index())
         {
-            var plt = new Plot();
-            plt.Axes.SquareUnits();
-
-            var coordinates = state
-                .Particles[0]
-                .Nodes.Append(state.Particles[0].Nodes[0])
-                .Select(n => new ScottPlot.Coordinates(
-                    n.Coordinates.Absolute.X,
-                    n.Coordinates.Absolute.Y
-                ))
-                .ToArray();
-            plt.Add.Scatter(coordinates);
-
-            plt.Title($"t = {state.Time.ToString(CultureInfo.InvariantCulture)}");
-
-            plt.SavePng(Path.Combine(dir, $"{i}.png"), 1600, 900);
+            var plot = ParticlePlot.PlotParticles(state.Particles);
+            plot.SaveHtml(Path.Combine(dir, $"{i}.html"));
         }
     }
 
@@ -207,45 +194,7 @@ public class OneParticleTest
 
     private void PlotTimeSteps()
     {
-        var plt = new Plot();
-
-        var steps = _solutionStorage
-            .States.Skip(1)
-            .Zip(_solutionStorage.States)
-            .Select(
-                (s, i) => new ScottPlot.Coordinates(i, Math.Log10(s.First.Time - s.Second.Time))
-            )
-            .ToArray();
-        plt.Add.Scatter(steps);
-
-        var meanStepWidth = steps.Select(s => s.Y).Mean();
-        var meanLine = plt.Add.HorizontalLine(meanStepWidth);
-        meanLine.Text = "mean";
-
-        plt.SavePng(Path.Combine(_tempDir, "timeSteps.png"), 600, 400);
-    }
-
-    private void PlotParticleCenter()
-    {
-        var plt = new Plot();
-
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    s.Particles[0].Coordinates.Absolute.X
-                ))
-                .ToArray()
-        );
-        plt.Add.Scatter(
-            _solutionStorage
-                .States.Select(s => new ScottPlot.Coordinates(
-                    s.Time,
-                    s.Particles[0].Coordinates.Absolute.Y
-                ))
-                .ToArray()
-        );
-
-        plt.SavePng(Path.Combine(_tempDir, "particleCenter.png"), 600, 400);
+        var plot = ProcessPlot.PlotTimeSteps(_solutionStorage.States);
+        plot.SaveHtml(Path.Combine(_tempDir, "timeSteps.html"));
     }
 }
