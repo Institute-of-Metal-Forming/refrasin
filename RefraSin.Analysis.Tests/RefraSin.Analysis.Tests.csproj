@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RefraSin.Analysis\RefraSin.Analysis.fsproj" />
+      <ProjectReference Include="..\RefraSin.Plotting\RefraSin.Plotting.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

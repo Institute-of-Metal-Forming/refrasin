@@ -1,7 +1,8 @@
+using Plotly.NET;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
-using ScottPlot;
+using RefraSin.Plotting;
 
 namespace RefraSin.Analysis.Tests;
 
@@ -43,16 +44,9 @@ public class ParticleAnalysisTests
     public void TestConvexHull()
     {
         var hull = ParticleAnalysis.ConvexHull(_particle);
-        var plot = new Plot();
-        plot.PlotParticle(_particle);
-        plot.PlotPoints(hull);
-        plot.SavePng(
-            Path.Combine(
-                _tempDir,
-                $"{nameof(TestConvexHull)}-{TestContext.CurrentContext.Test.ID}"
-            ),
-            640,
-            480
-        );
+        Chart.Combine([
+            ParticlePlot.PlotParticle(_particle),
+            ParticlePlot.PlotLineRing(hull, "convex hull")
+        ]).Show();
     }
 }

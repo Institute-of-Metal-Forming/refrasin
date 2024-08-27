@@ -50,6 +50,22 @@ let PlotPoints (points: IPoint seq) (label: string) =
         MarkerSymbol = MarkerSymbol.Cross
     )
     |> Commons.ApplyPlainSpaceDefaultPlotProperties
+    
+let PlotLineString (points: IPoint seq) (label: string) =
+    let absolutePoints = [ for p in points -> p.Absolute ]
+    let xy = [ for p in absolutePoints -> (p.X, p.Y) ]
+
+    Chart.Line(
+        xy = xy,
+        Name = label,
+        ShowMarkers = true,
+        MarkerSymbol = MarkerSymbol.Cross
+    )
+    |> Commons.ApplyPlainSpaceDefaultPlotProperties
+    
+let PlotLineRing (points: IPoint seq) (label: string) =
+    let pointsList = points |> Seq.toList
+    PlotLineString ( pointsList @ [pointsList[0]]) label
 
 let PlotContactEdge (edge: IParticleContactEdge<_>) : GenericChart =
     let from = edge.From.Coordinates.Absolute
