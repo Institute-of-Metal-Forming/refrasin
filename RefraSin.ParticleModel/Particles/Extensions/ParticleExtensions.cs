@@ -17,7 +17,7 @@ public static class ParticleExtensions
         IParticleMeasures other
     ) =>
         DoOverlap(self.MinX, self.MaxX, other.MinX, other.MaxX)
-        && DoOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
+     && DoOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
 
     private static bool DoOverlap(double selfMin, double selfMax, double otherMin, double otherMax)
     {
@@ -47,7 +47,7 @@ public static class ParticleExtensions
 
         if (
             nodesPolarCoordinates.R > upperNeighbor.Coordinates.R
-            && nodesPolarCoordinates.R > lowerNeighbor.Coordinates.R
+         && nodesPolarCoordinates.R > lowerNeighbor.Coordinates.R
         )
             return false;
 
@@ -56,7 +56,7 @@ public static class ParticleExtensions
                 upperNeighbor.Coordinates.R,
                 upperNeighbor.SurfaceRadiusAngle.ToLower,
                 upperNeighbor.SurfaceRadiusAngle.ToLower
-                    + nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
+              + nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
             ) + precision;
 
         return radiusAtAngle >= nodesPolarCoordinates.R;
@@ -166,14 +166,28 @@ public static class ParticleExtensions
         var selfLine = new AbsoluteLine(selfUpperNode.Lower.Coordinates, selfUpperNode.Coordinates);
         var otherUpperNode = other.Nodes.NextUpperNodeFrom(
             new PolarPoint(selfUpperNode.Coordinates, other).Phi
-        );
-        var otherLine = new AbsoluteLine(
-            otherUpperNode.Lower.Coordinates,
-            otherUpperNode.Coordinates
-        );
+        ).Lower.Lower.Lower;
+        while (true)
+        {
+            var otherLine = new AbsoluteLine(
+                otherUpperNode.Lower.Coordinates,
+                otherUpperNode.Coordinates
+            );
 
-        var intersection = selfLine.IntersectionTo(otherLine);
-        return new PolarPoint(intersection, self);
+            try
+            {
+                var intersection = selfLine.IntersectionTo(otherLine);
+                var intersectionSelfsPolar = new PolarPoint(intersection, self);
+                var intersectionOthersPolar = new PolarPoint(intersection, other);
+                if (intersectionSelfsPolar.Phi < selfUpperNode.Coordinates.Phi && intersectionOthersPolar.Phi < otherUpperNode.Coordinates.Phi &&
+                    intersectionOthersPolar.Phi > otherUpperNode.Lower.Coordinates.Phi)
+                    return intersectionSelfsPolar;
+            }
+            catch(InvalidOperationException)
+            {}
+
+            otherUpperNode = otherUpperNode.Upper;
+        }
     }
 
     public static (
@@ -186,8 +200,9 @@ public static class ParticleExtensions
     {
         var mutableSelf = new MutableParticle<IParticleNode>(self, (n, p) => new ParticleNode(n, p));
         var mutableOther = new MutableParticle<IParticleNode>(other, (n, p) => new ParticleNode(n, p));
-        
-        mutableSelf.CreateGrainBoundariesAtIntersections(mutableOther, (point, particle) => new ParticleNode(Guid.NewGuid(), particle, point, Neck),(point, particle) => new ParticleNode(Guid.NewGuid(), particle, point, GrainBoundary));
+
+        mutableSelf.CreateGrainBoundariesAtIntersections(mutableOther, (point, particle) => new ParticleNode(Guid.NewGuid(), particle, point, Neck),
+            (point, particle) => new ParticleNode(Guid.NewGuid(), particle, point, GrainBoundary));
 
         return (mutableSelf, mutableOther);
     }
@@ -195,8 +210,8 @@ public static class ParticleExtensions
     public static void CreateGrainBoundariesAtIntersections<TNode>(
         this IMutableParticle<TNode> self,
         IMutableParticle<TNode> other,
-        Func<IPolarPoint , IMutableParticle<TNode> , TNode> neckNodeConstructor,
-        Func<IPolarPoint , IMutableParticle<TNode> , TNode> grainBoundaryNodeConstructor
+        Func<IPolarPoint, IMutableParticle<TNode>, TNode> neckNodeConstructor,
+        Func<IPolarPoint, IMutableParticle<TNode>, TNode> grainBoundaryNodeConstructor
     ) where TNode : IParticleNode
     {
         var intersections = ((IParticle<IParticleNode>)self).IntersectionPointsTo((IParticle<IParticleNode>)other).ToArray();
@@ -216,7 +231,7 @@ public static class ParticleExtensions
 
         MutateNodes(self, selfNeckPairs);
         MutateNodes(other, otherNeckPairs);
-        
+
         void MutateNodes(
             IMutableParticle<TNode> target,
             IEnumerable<(IPolarPoint Lower, IPolarPoint Upper)> neckPairs
@@ -226,7 +241,7 @@ public static class ParticleExtensions
             {
                 var lowerToRemove = target.Surface.NextUpperNodeFrom(neckPair.Lower.Phi);
                 var upperToRemove = target.Surface.NextLowerNodeFrom(neckPair.Upper.Phi);
-                var lowerRemaining = target.Surface.LowerNeighborOf(lowerToRemove); 
+                var lowerRemaining = target.Surface.LowerNeighborOf(lowerToRemove);
                 target.Surface.Remove(lowerToRemove, upperToRemove);
 
                 var lowerNeckPoint = new PolarPoint(neckPair.Lower, target);
@@ -237,7 +252,7 @@ public static class ParticleExtensions
                     lowerRemaining.Id,
                     [
                         neckNodeConstructor(lowerNeckPoint, target),
-                       grainBoundaryNodeConstructor(grainBoundaryPoint, target),
+                        grainBoundaryNodeConstructor(grainBoundaryPoint, target),
                         neckNodeConstructor(upperNeckPoint, target)
                     ]
                 );
