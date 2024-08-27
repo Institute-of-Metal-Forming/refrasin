@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions;
+using Plotly.NET;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
@@ -6,7 +6,10 @@ using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Particles.Extensions;
-using ScottPlot;
+using RefraSin.Plotting;
+using static Plotly.NET.Color;
+using static Plotly.NET.ColorKeyword;
+using static Plotly.NET.StyleParam.MarkerSymbol;
 
 namespace RefraSin.ParticleModel.Test;
 
@@ -471,28 +474,10 @@ public class ParticleExtensionsTests
     {
         var intersections = Particle.IntersectionPointsTo(other).ToArray();
 
-        var plot = new Plot();
-        plot.Axes.SquareUnits();
-
-        plot.PlotParticle(Particle);
-        plot.PlotParticle(other);
-
-        foreach (var intersection in intersections)
-        {
-            plot.Add.Scatter(
-                new ScottPlot.Coordinates(intersection.Absolute.X, intersection.Absolute.Y),
-                Colors.Magenta
-            );
-        }
-
-        plot.SavePng(
-            Path.Combine(
-                _tempDir,
-                $"{nameof(TestIntersectionPointsTo)}{TestContext.CurrentContext.Test.ID}.png"
-            ),
-            1000,
-            1000
-        );
+        var plot = ParticlePlot.PlotParticles([Particle, other]);
+        var points = ParticlePlot.PlotPoints(intersections, "Intersections").WithMarkerStyle(Color:fromKeyword(Magenta), Symbol: Cross);
+        
+        Chart.Combine([plot, points]).SaveHtml(Path.Combine(_tempDir, $"{nameof(TestIntersectionPointsTo)}-{other}.html"));
 
         Assert.That(
             intersections.Select(p => p.Absolute.X),
@@ -513,21 +498,7 @@ public class ParticleExtensionsTests
     {
         var newParticles = Particle.CreateGrainBoundariesAtIntersections(other);
 
-        var plot = new Plot();
-        plot.Axes.SquareUnits();
-
-        plot.PlotParticle(Particle);
-        plot.PlotParticle(other);
-        plot.PlotParticle(newParticles.self);
-        plot.PlotParticle(newParticles.other);
-
-        plot.SavePng(
-            Path.Combine(
-                _tempDir,
-                $"{nameof(TestCreateGrainBoundariesAtIntersections)}{TestContext.CurrentContext.Test.ID}.png"
-            ),
-            10000,
-            10000
-        );
+        var plot = ParticlePlot.PlotParticles([Particle, other, newParticles.self, newParticles.other]);
+        plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestCreateGrainBoundariesAtIntersections)}-{other}.html"));
     }
 }

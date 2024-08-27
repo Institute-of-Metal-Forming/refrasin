@@ -1,11 +1,11 @@
-using System.Globalization;
+using Plotly.NET;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
-using ScottPlot;
+using RefraSin.Plotting;
 using static RefraSin.Coordinates.Constants;
 
 namespace RefraSin.ParticleModel.Test;
@@ -71,13 +71,8 @@ public class NeckRemeshingTest
         var remesher = new NeckNeighborhoodRemesher(deletionLimit: 0.4);
         var remeshedParticle = remesher.Remesh(particle);
 
-        var plt = new Plot();
-        plt.Axes.SquareUnits();
-
-        plt.PlotParticle(particle);
-        plt.PlotParticle(remeshedParticle);
-
-        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
+        var plot = ParticlePlot.PlotParticle(particle);
+        plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}-{initialNeck}.html"));
 
         Assert.That(
             remeshedParticle.Nodes.Count,

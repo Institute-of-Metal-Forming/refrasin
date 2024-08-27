@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Plotly.NET"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj"/>
+        <ProjectReference Include="..\RefraSin.ProcessModel\RefraSin.ProcessModel.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="ParticlePlot.fs"/>
+    </ItemGroup>
+
+</Project>

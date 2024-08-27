@@ -1,9 +1,7 @@
-using System.Globalization;
-using RefraSin.ParticleModel.Nodes;
+using Plotly.NET;
 using RefraSin.ParticleModel.ParticleFactories;
-using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
-using ScottPlot;
+using RefraSin.Plotting;
 
 namespace RefraSin.ParticleModel.Test;
 
@@ -28,14 +26,8 @@ public class SurfaceRemeshingTest
         var remesher = new FreeSurfaceRemesher(deletionLimit: 0.05);
         var remeshedParticle = remesher.Remesh(particle);
 
-        var plt = new Plot();
-        plt.Axes.SquareUnits();
-
-        PlotParticle(plt, particle);
-        PlotParticle(plt, remeshedParticle);
-
-
-        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.png"), 1600, 900);
+        var plot = ParticlePlot.PlotParticles([particle, remeshedParticle]);
+        plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.html"));
     }
 
     [Test]
@@ -46,24 +38,7 @@ public class SurfaceRemeshingTest
         var remesher = new FreeSurfaceRemesher(deletionLimit: 0.05);
         var remeshedParticle = remesher.Remesh(particle);
 
-        var plt = new Plot();
-        plt.Axes.SquareUnits();
-
-        PlotParticle(plt, particle);
-        PlotParticle(plt, remeshedParticle);
-
-        plt.SavePng(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.png"), 1600, 900);
-    }
-
-    void PlotParticle(Plot plot, IParticle<IParticleNode> particle)
-    {
-        
-        plot.Add.Scatter(particle
-            .Nodes.Append(particle.Nodes[0])
-            .Select(n => new ScottPlot.Coordinates(
-                n.Coordinates.Absolute.X,
-                n.Coordinates.Absolute.Y
-            ))
-            .ToArray());
+        var plot = ParticlePlot.PlotParticles([particle, remeshedParticle]);
+        plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.html"));
     }
 }
