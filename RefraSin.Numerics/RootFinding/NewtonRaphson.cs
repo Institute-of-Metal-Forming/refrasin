@@ -1,6 +1,8 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearAlgebra.Solvers;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.Numerics.LinearSolvers;
 
@@ -19,9 +21,12 @@ public class NewtonRaphsonRootFinder(
     public Vector<double> FindRoot(
         Func<Vector<double>, Vector<double>> function,
         Func<Vector<double>, Matrix<double>> jacobian,
-        Vector<double> initialGuess
+        Vector<double> initialGuess,
+        ILogger? logger = null
     )
     {
+        logger ??= NullLogger<NewtonRaphsonRootFinder>.Instance;
+        
         int i;
 
         var x = initialGuess;
@@ -31,12 +36,19 @@ public class NewtonRaphsonRootFinder(
 
         for (i = 0; i < MaxIterationCount; i++)
         {
-            if (y.L2Norm() <= AbsoluteTolerance)
+            var error = y.L2Norm();
+            logger.LogDebug("Current error {Error}.", error);
+            
+            if (error <= AbsoluteTolerance)
+            {
+                logger.LogDebug("Solution found.");
                 return x;
+            }
 
             var jac = jacobian(x);
             jac.CoerceZero(1e-8);
             var dx = JacobianStepSolver.Solve(jac, -y);
+            logger.LogDebug("Next step {Step}.", dx);
 
             if (!dx.ForAll(double.IsFinite))
                 throw new UncriticalIterationInterceptedException(
@@ -60,6 +72,7 @@ public class NewtonRaphsonRootFinder(
 
             if (fnew > f + AverageDecreaseRateFactor * gradf * (xnew - x))
             {
+                logger.LogDebug("Lowering step by line search.");
                 var gprime0 = gradf * dx;
 
                 var stepFactor = gprime0 / (2 * (fnew - f - gprime0));
@@ -81,11 +94,8 @@ public class NewtonRaphsonRootFinder(
             dxold = dx;
         }
 
-        throw new UncriticalIterationInterceptedException(
-            nameof(NewtonRaphsonRootFinder),
-            InterceptReason.MaxIterationCountExceeded,
-            i
-        );
+        logger.LogWarning("Maximum iteration count exceeded. Continuing anyway.");
+        return x;
     }
 
     public int MaxIterationCount { get; } = maxIterattionCount;

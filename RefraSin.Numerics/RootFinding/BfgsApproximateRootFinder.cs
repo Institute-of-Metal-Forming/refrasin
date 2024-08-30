@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Optimization;
+using Microsoft.Extensions.Logging;
 
 namespace RefraSin.Numerics.RootFinding;
 
@@ -13,7 +14,8 @@ public class BfgsApproximateRootFinder(
     public Vector<double> FindRoot(
         Func<Vector<double>, Vector<double>> function,
         Func<Vector<double>, Matrix<double>> jacobian,
-        Vector<double> initialGuess
+        Vector<double> initialGuess,
+        ILogger? logger = null
     )
     {
         double Fun(Vector<double> x)
