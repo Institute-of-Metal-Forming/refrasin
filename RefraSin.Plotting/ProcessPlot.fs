@@ -5,6 +5,7 @@ open Plotly.NET.StyleParam
 open RefraSin.Coordinates.Absolute
 open RefraSin.ParticleModel.Particles
 open RefraSin.ProcessModel
+open RefraSin.Analysis
 
 let PlotTimeSteps (states: ISystemState<_,_> seq) =
     let times = [for s in states -> s.Time]
@@ -12,6 +13,12 @@ let PlotTimeSteps (states: ISystemState<_,_> seq) =
     let timeSteps = List.mapi (fun i t1 -> t1 - times[i]) times.Tail
     
     Chart.Line(x=indices, y=timeSteps) |> Chart.withXAxisStyle(TitleText="# of Step", AxisType=AxisType.Category) |> Chart.withYAxisStyle(TitleText="Time Step Width")
+    
+let PlotShrinkages (states: ISystemState<_,_> seq) =
+    let times = [for s in states -> s.Time]
+    let shrinkages = states |> SinteringAnalysis.Shrinkages |> Seq.map (fun s -> s * 100.0) |> Seq.toList
+    
+    Chart.Line(x=times, y=shrinkages) |> Chart.withXAxisStyle(TitleText="Time", AxisType=AxisType.Category) |> Chart.withYAxisStyle(TitleText="Shrinkage in %")
     
 
 let PlotParticleCenter (states: IParticle<_> seq) =

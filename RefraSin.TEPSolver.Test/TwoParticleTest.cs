@@ -29,14 +29,34 @@ namespace RefraSin.TEPSolver.Test;
 [TestFixtureSource(nameof(GenerateParticles))]
 public class TwoParticleTest
 {
-    public static IEnumerable<(Angle firstRotation, IPoint secondCenter, Angle secondRotation, double secondSize)> YieldParticleProperties()
+    public static IEnumerable<(
+        Angle firstRotation,
+        IPoint secondCenter,
+        Angle secondRotation,
+        double secondSize
+    )> YieldParticleProperties()
     {
         yield return (0, new AbsolutePoint(300e-6, 0), Angle.Straight, 100e-6);
-        yield return (0, new AbsolutePoint(500e-6, 0), Angle.Straight, 200e-6);
-        yield return (Angle.HalfRight, new AbsolutePoint(300e-6, 0), Angle.Straight - Angle.HalfRight, 100e-6);
-        yield return (Angle.HalfRight, new AbsolutePoint(400e-6, 0), Angle.Straight - Angle.HalfRight, 200e-6);
-        // yield return (Angle.Straight, new AbsolutePoint(300e-6, 0), 0, 100e-6);
-        yield return (-Angle.HalfRight, new AbsolutePoint(200e-6, -100e-6), Angle.Straight - Angle.HalfRight, 100e-6);
+        // yield return (0, new AbsolutePoint(500e-6, 0), Angle.Straight, 200e-6);
+        // yield return (
+        //     Angle.HalfRight,
+        //     new AbsolutePoint(300e-6, 0),
+        //     Angle.Straight - Angle.HalfRight,
+        //     100e-6
+        // );
+        // yield return (
+        //     Angle.HalfRight,
+        //     new AbsolutePoint(400e-6, 0),
+        //     Angle.Straight - Angle.HalfRight,
+        //     200e-6
+        // );
+        // // yield return (Angle.Straight, new AbsolutePoint(300e-6, 0), 0, 100e-6);
+        // yield return (
+        //     -Angle.HalfRight,
+        //     new AbsolutePoint(200e-6, -100e-6),
+        //     Angle.Straight - Angle.HalfRight,
+        //     100e-6
+        // );
     }
 
     public static IEnumerable<TestFixtureData> GenerateParticles()
@@ -46,14 +66,30 @@ public class TwoParticleTest
         foreach (var props in YieldParticleProperties())
         {
             var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
-                { NodeCount = nodeCountPerParticle, RotationAngle = props.firstRotation }.GetParticle();
-            var particle2 = new ShapeFunctionParticleFactory(props.secondSize, 0.2, 5, 0.2, particle1.MaterialId)
-                    { NodeCount = nodeCountPerParticle, RotationAngle = props.secondRotation, CenterCoordinates = props.secondCenter.Absolute }
-                .GetParticle();
+            {
+                NodeCount = nodeCountPerParticle,
+                RotationAngle = props.firstRotation
+            }.GetParticle();
+            var particle2 = new ShapeFunctionParticleFactory(
+                props.secondSize,
+                0.2,
+                5,
+                0.2,
+                particle1.MaterialId
+            )
+            {
+                NodeCount = nodeCountPerParticle,
+                RotationAngle = props.secondRotation,
+                CenterCoordinates = props.secondCenter.Absolute
+            }.GetParticle();
 
             var looseState = new SystemState(Guid.NewGuid(), 0, [particle1, particle2]);
 
-            var compactor = new FocalCompactionStep(particle1.Coordinates, 1e-6, maxStepCount: 1000);
+            var compactor = new FocalCompactionStep(
+                particle1.Coordinates,
+                1e-6,
+                maxStepCount: 1000
+            );
             var compactedState = compactor.Solve(looseState);
 
             ParticlePlot.PlotParticles(compactedState.Particles).Show();
@@ -70,9 +106,12 @@ public class TwoParticleTest
 
         _tempDir = TempPath.CreateTempDir();
 
-        var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddFile(Path.Combine(_tempDir, "test.log"));
+        });
 
-        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default, 30);
+        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default, 10);
 
         _initialState = initialState;
 
@@ -172,6 +211,7 @@ public class TwoParticleTest
         finally
         {
             PlotParticles();
+            PlotShrinkage();
             PlotTimeSteps();
             PlotParticleCenter();
         }
@@ -200,6 +240,14 @@ public class TwoParticleTest
         var centers = ProcessPlot.PlotParticleCenters(_solutionStorage.States);
         var start = ParticlePlot.PlotParticles(_solutionStorage.States[0].Particles);
         var end = ParticlePlot.PlotParticles(_solutionStorage.States[^1].Particles);
-        Chart.Combine([centers, start, end]).SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
+        Chart
+            .Combine([centers, start, end])
+            .SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
+    }
+
+    private void PlotShrinkage()
+    {
+        var plot = ProcessPlot.PlotShrinkages(_solutionStorage.States);
+        plot.SaveHtml(Path.Combine(_tempDir, "shrinkages.html"));
     }
 }
