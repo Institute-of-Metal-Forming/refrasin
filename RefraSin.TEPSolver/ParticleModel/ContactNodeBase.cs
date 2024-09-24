@@ -70,13 +70,11 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
                         - AngleDistanceToContactDirection
                         + ContactedNode.AngleDistanceToContactDirection
                     ),
-                (
-                    Pi
-                    - SurfaceRadiusAngle.ToLower
+                Pi
+                    - RadiusTangentAngle.ToLower
                     - AngleDistanceToContactDirection
                     + ContactedNode.AngleDistanceToContactDirection
-                ) - SurfaceTangentAngle.ToLower
-            )
+            ) * -1
             : new NormalTangential<Angle>(
                 Pi - RadiusNormalAngle.ToUpper,
                 RadiusTangentAngle.ToUpper
