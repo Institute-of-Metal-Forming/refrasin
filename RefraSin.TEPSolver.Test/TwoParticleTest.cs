@@ -1,17 +1,12 @@
-using System.Globalization;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
+using Microsoft.FSharp.Core;
 using Plotly.NET;
 using RefraSin.Compaction.ProcessModel;
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
-using RefraSin.ParticleModel.Particles;
 using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
@@ -20,7 +15,6 @@ using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
-using static System.Math;
 using static MoreLinq.Extensions.IndexExtension;
 
 namespace RefraSin.TEPSolver.Test;
@@ -37,13 +31,13 @@ public class TwoParticleTest
     )> YieldParticleProperties()
     {
         yield return (0, new AbsolutePoint(300e-6, 0), Angle.Straight, 100e-6);
-        // yield return (0, new AbsolutePoint(500e-6, 0), Angle.Straight, 200e-6);
-        // yield return (
-        //     Angle.HalfRight,
-        //     new AbsolutePoint(300e-6, 0),
-        //     Angle.Straight - Angle.HalfRight,
-        //     100e-6
-        // );
+        yield return (0, new AbsolutePoint(500e-6, 0), Angle.Straight, 200e-6);
+        yield return (
+            Angle.HalfRight,
+            new AbsolutePoint(300e-6, 0),
+            Angle.Straight - Angle.HalfRight,
+            100e-6
+        );
         // yield return (
         //     Angle.HalfRight,
         //     new AbsolutePoint(400e-6, 0),
@@ -61,7 +55,7 @@ public class TwoParticleTest
 
     public static IEnumerable<TestFixtureData> GenerateParticles()
     {
-        var nodeCountPerParticle = 50;
+        var nodeCountPerParticle = 100;
 
         foreach (var props in YieldParticleProperties())
         {
@@ -100,7 +94,7 @@ public class TwoParticleTest
 
     public TwoParticleTest(SystemState initialState)
     {
-        var duration = 1e2;
+        var duration = 3.6e4;
 
         _solutionStorage = new InMemorySolutionStorage();
 
@@ -212,6 +206,7 @@ public class TwoParticleTest
         {
             PlotParticles();
             PlotShrinkage();
+            PlotNeckWidths();
             PlotTimeSteps();
             PlotParticleCenter();
         }
@@ -225,6 +220,14 @@ public class TwoParticleTest
         foreach (var (i, state) in _solutionStorage.States.Index())
         {
             var plot = ParticlePlot.PlotParticles(state.Particles);
+            plot.WithXAxisStyle(
+                Title.init(Text: "X in m"),
+                MinMax: FSharpOption<Tuple<IConvertible, IConvertible>>.Some(new(-200e-6, 700e-6))
+            );
+            plot.WithYAxisStyle(
+                Title.init(Text: "Y in m"),
+                MinMax: FSharpOption<Tuple<IConvertible, IConvertible>>.Some(new(-200e-6, 200e-6))
+            );
             plot.SaveHtml(Path.Combine(dir, $"{i}.html"));
         }
     }
@@ -240,14 +243,19 @@ public class TwoParticleTest
         var centers = ProcessPlot.PlotParticleCenters(_solutionStorage.States);
         var start = ParticlePlot.PlotParticles(_solutionStorage.States[0].Particles);
         var end = ParticlePlot.PlotParticles(_solutionStorage.States[^1].Particles);
-        Chart
-            .Combine([centers, start, end])
-            .SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
+        var plot = Chart.Combine([centers, start, end]);
+        plot.SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
     }
 
     private void PlotShrinkage()
     {
-        var plot = ProcessPlot.PlotShrinkages(_solutionStorage.States);
+        var plot = ProcessPlot.PlotShrinkagesByDistance(_solutionStorage.States);
         plot.SaveHtml(Path.Combine(_tempDir, "shrinkages.html"));
+    }
+
+    private void PlotNeckWidths()
+    {
+        var plot = ProcessPlot.PlotNeckWidths(_solutionStorage.States);
+        plot.SaveHtml(Path.Combine(_tempDir, "necks.html"));
     }
 }
