@@ -2,6 +2,7 @@ using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.RootFinding;
+using Microsoft.Extensions.Logging;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.EquationSystem;
@@ -14,24 +15,34 @@ public class TearingLagrangianRootFinder(
     IRootFinder particleBlockRootFinder,
     IRootFinder borderBlockRootFinder,
     double iterationPrecision = 1e-4,
-    int maxIterationCount = 100) : ILagrangianRootFinder
+    int maxIterationCount = 100
+) : ILagrangianRootFinder
 {
     /// <inheritdoc />
-    public StepVector FindRoot(
-        SolutionState currentState,
-        StepVector initialGuess
-    )
+    public StepVector FindRoot(SolutionState currentState, StepVector initialGuess, ILogger logger)
     {
         var stepVector = initialGuess.Copy();
 
-        var dissipationEqualitySolution = SolveDissipationEquality(currentState, stepVector);
+        var dissipationEqualitySolution = SolveDissipationEquality(
+            currentState,
+            stepVector,
+            logger
+        );
         stepVector[^1] = dissipationEqualitySolution;
         return stepVector;
     }
 
-    private double SolveDissipationEquality(SolutionState currentState, StepVector stepVector)
+    private double SolveDissipationEquality(
+        SolutionState currentState,
+        StepVector stepVector,
+        ILogger logger
+    )
     {
-        var solution = Brent.FindRootExpand(Fun, stepVector.LambdaDissipation() * 0.9, stepVector.LambdaDissipation() * 1.1);
+        var solution = Brent.FindRootExpand(
+            Fun,
+            stepVector.LambdaDissipation() * 0.9,
+            stepVector.LambdaDissipation() * 1.1
+        );
 
         return solution;
 
@@ -39,7 +50,7 @@ public class TearingLagrangianRootFinder(
         {
             stepVector[^1] = lambdaDissipation;
 
-            stepVector = SolveParticleAndBorderBlocks(currentState, stepVector);
+            stepVector = SolveParticleAndBorderBlocks(currentState, stepVector, logger);
 
             var result = Lagrangian.DissipationEquality(currentState, stepVector);
             return result;
@@ -48,7 +59,8 @@ public class TearingLagrangianRootFinder(
 
     private StepVector SolveParticleAndBorderBlocks(
         SolutionState currentState,
-        StepVector stepVector
+        StepVector stepVector,
+        ILogger logger
     )
     {
         int i;
@@ -59,30 +71,39 @@ public class TearingLagrangianRootFinder(
 
             foreach (var particle in currentState.Particles)
             {
-                var particleSolution = SolveParticleBlock(particle, stepVector);
+                var particleSolution = SolveParticleBlock(particle, stepVector, logger);
                 stepVector.UpdateParticleBlock(particle, particleSolution.AsArray());
             }
 
-            var borderSolution = SolveBorderBlockWithoutDissipationEquality(currentState, stepVector);
+            var borderSolution = SolveBorderBlockWithoutDissipationEquality(
+                currentState,
+                stepVector,
+                logger
+            );
             stepVector.UpdateBorderBlock(borderSolution.AsArray());
 
             if ((stepVector - oldVector).L2Norm() < IterationPrecision * stepVector.L2Norm())
                 return stepVector;
         }
 
-        throw new UncriticalIterationInterceptedException($"{nameof(TearingLagrangianRootFinder)}.{nameof(FindRoot)}",
-            InterceptReason.MaxIterationCountExceeded, i);
+        throw new UncriticalIterationInterceptedException(
+            $"{nameof(TearingLagrangianRootFinder)}.{nameof(FindRoot)}",
+            InterceptReason.MaxIterationCountExceeded,
+            i
+        );
     }
 
     private Vector<double> SolveBorderBlockWithoutDissipationEquality(
         SolutionState currentState,
-        StepVector stepVector
+        StepVector stepVector,
+        ILogger logger
     )
     {
         var solution = BorderBlockRootFinder.FindRoot(
             Fun,
             Jac,
-            new DenseVector(stepVector.BorderBlock()[..^1])
+            new DenseVector(stepVector.BorderBlock()[..^1]),
+            logger
         );
 
         return solution;
@@ -105,13 +126,15 @@ public class TearingLagrangianRootFinder(
 
     private Vector<double> SolveParticleBlock(
         Particle particle,
-        StepVector stepVector
+        StepVector stepVector,
+        ILogger logger
     )
     {
         var solution = ParticleBlockRootFinder.FindRoot(
             Fun,
             Jac,
-            new DenseVector(stepVector.ParticleBlock(particle))
+            new DenseVector(stepVector.ParticleBlock(particle)),
+            logger
         );
 
         return solution;

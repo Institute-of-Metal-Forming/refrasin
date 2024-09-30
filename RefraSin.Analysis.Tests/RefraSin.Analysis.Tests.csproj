@@ -10,20 +10,23 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FSharp.Core" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
         <PackageReference Include="NUnit" Version="3.13.3"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.2.1"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.6.1"/>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+        <PackageReference Include="SkiaSharp" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RefraSin.Numerics\RefraSin.Numerics.csproj" />
+      <ProjectReference Include="..\RefraSin.Analysis\RefraSin.Analysis.fsproj" />
+      <ProjectReference Include="..\RefraSin.Plotting\RefraSin.Plotting.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-        <HintPath>..\..\..\.nuget\packages\microsoft.extensions.logging.abstractions\8.0.0\lib\net8.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      <Reference Include="ScottPlot">
+        <HintPath>..\..\..\..\.nuget\packages\scottplot\5.0.34\lib\net8.0\ScottPlot.dll</HintPath>
       </Reference>
     </ItemGroup>
 

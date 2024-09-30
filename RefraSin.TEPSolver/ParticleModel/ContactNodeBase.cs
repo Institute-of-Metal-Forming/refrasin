@@ -63,20 +63,17 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     public override NormalTangential<Angle> TorqueProjectionAngle =>
         _torqueProjectionAngle ??= IsParentsNode
             ? new NormalTangential<Angle>(
-                SurfaceNormalAngle.ToLower
+                RadiusNormalAngle.ToLower
                     - (
                         Pi
-                        - SurfaceRadiusAngle.ToLower
                         - AngleDistanceToContactDirection
                         + ContactedNode.AngleDistanceToContactDirection
                     ),
-                (
-                    Pi
-                    - SurfaceRadiusAngle.ToLower
+                Pi
+                    - RadiusTangentAngle.ToLower
                     - AngleDistanceToContactDirection
                     + ContactedNode.AngleDistanceToContactDirection
-                ) - SurfaceTangentAngle.ToLower
-            )
+            ) * -1
             : new NormalTangential<Angle>(
                 Pi - RadiusNormalAngle.ToUpper,
                 RadiusTangentAngle.ToUpper
@@ -165,7 +162,7 @@ public abstract class ContactNodeBase
 
     public Particle ContactedParticle => ContactedNode.Particle;
 
-    IParticle INodeContactNeighbors.ContactedParticle => Particle;
+    IParticle INodeContactNeighbors.ContactedParticle => ContactedParticle;
 
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=

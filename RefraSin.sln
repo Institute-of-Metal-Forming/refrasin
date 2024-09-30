@@ -42,6 +42,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RefraSin.Plotting", "RefraS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Plotting.Tests", "RefraSin.Plotting.Tests\RefraSin.Plotting.Tests.csproj", "{918C5869-5A8C-4B6A-938E-FB967C241E1F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RefraSin.Analysis", "RefraSin.Analysis\RefraSin.Analysis.fsproj", "{3572B6CA-791A-431A-A943-BAE745E8AFBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Analysis.Tests", "RefraSin.Analysis.Tests\RefraSin.Analysis.Tests.csproj", "{1A8604C6-F4AB-4D28-A87A-78561EC4BAB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +136,14 @@ Global
 		{918C5869-5A8C-4B6A-938E-FB967C241E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{918C5869-5A8C-4B6A-938E-FB967C241E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{918C5869-5A8C-4B6A-938E-FB967C241E1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3572B6CA-791A-431A-A943-BAE745E8AFBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3572B6CA-791A-431A-A943-BAE745E8AFBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3572B6CA-791A-431A-A943-BAE745E8AFBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3572B6CA-791A-431A-A943-BAE745E8AFBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A8604C6-F4AB-4D28-A87A-78561EC4BAB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A8604C6-F4AB-4D28-A87A-78561EC4BAB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A8604C6-F4AB-4D28-A87A-78561EC4BAB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A8604C6-F4AB-4D28-A87A-78561EC4BAB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

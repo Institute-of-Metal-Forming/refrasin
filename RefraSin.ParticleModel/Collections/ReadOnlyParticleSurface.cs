@@ -34,7 +34,7 @@ public class ReadOnlyParticleSurface<TNode> : IReadOnlyParticleSurface<TNode>
         var startIndex = ReduceIndex(start);
         var endIndex = ReduceIndex(end) + 1;
 
-        return endIndex >= startIndex
+        return endIndex > startIndex
             ? _nodes[startIndex..endIndex]
             : _nodes[startIndex..].Concat(_nodes[..endIndex]).ToArray();
     }

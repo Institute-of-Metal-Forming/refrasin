@@ -15,7 +15,7 @@ public static class SinLaw
     /// <param name="beta">Winkel ggü. der anderen Seite</param>
     /// <returns>Länge der Seite ggü. alpha</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double A(double b, double alpha, double beta) =>
+    public static double A(double b, Angle alpha, Angle beta) =>
         b * Math.Sin(alpha) / Math.Sin(beta);
 
     /// <summary>
@@ -26,6 +26,5 @@ public static class SinLaw
     /// <param name="beta">Winkel ggü. der anderen Seite</param>
     /// <returns>Winkel ggü. a</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Alpha(double a, double b, double beta) =>
-        Math.Asin(a / b * Math.Sin(beta));
+    public static Angle Alpha(double a, double b, Angle beta) => Math.Asin(a / b * Math.Sin(beta));
 }

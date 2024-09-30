@@ -34,7 +34,7 @@ public class ParticleSurface<TNode> : IParticleSurface<TNode>
         var startIndex = ReduceIndex(start);
         var endIndex = ReduceIndex(end) + 1;
 
-        return endIndex >= startIndex
+        return endIndex > startIndex
             ? _nodes.Slice(startIndex, endIndex - startIndex).ToArray()
             : _nodes[startIndex..].Concat(_nodes[..endIndex]).ToArray();
     }
@@ -173,11 +173,11 @@ public class ParticleSurface<TNode> : IParticleSurface<TNode>
     {
         if (start > end)
         {
-            Remove(start, Count-1);
+            Remove(start, Count - 1);
             Remove(0, end);
             return;
         }
-        
+
         var count = 0;
 
         for (int i = start; i <= end; i++)

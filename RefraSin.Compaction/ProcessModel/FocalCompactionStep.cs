@@ -1,6 +1,7 @@
 using MoreLinq.Extensions;
 using RefraSin.Compaction.ParticleModel;
 using RefraSin.Coordinates;
+using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Particles.Extensions;
@@ -10,10 +11,13 @@ using Node = RefraSin.Compaction.ParticleModel.Node;
 
 namespace RefraSin.Compaction.ProcessModel;
 
-public class FocalCompactionStep(IPoint focusPoint, double stepDistance, double minimumRelativeIntrusion = 0.2, int maxStepCount = 100)
-    : ProcessStepBase
+public class FocalCompactionStep(
+    IPoint focusPoint,
+    double stepDistance,
+    double minimumRelativeIntrusion = 0.2,
+    int maxStepCount = 100
+) : ProcessStepBase
 {
-
     /// <inheritdoc />
     public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(
         ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
@@ -53,24 +57,31 @@ public class FocalCompactionStep(IPoint focusPoint, double stepDistance, double 
                             );
                         }
                     }
-                    
-                    bodies.Add(new ParticleAgglomerate(Guid.NewGuid(), particles0.Concat(particles1)));
+
+                    bodies.Add(
+                        new ParticleAgglomerate(Guid.NewGuid(), particles0.Concat(particles1))
+                    );
                 }
             }
-            
+
             if (bodies.Count <= 1)
                 break;
-            
+
             foreach (var body in bodies)
             {
                 body.MoveTowards(FocusPoint, StepDistance);
             }
         }
 
+        var particles = bodies
+            .FlattenAgglomerates()
+            .Select(b => new Particle<ParticleNode>(b, (n, p) => new ParticleNode(n, p)))
+            .ToReadOnlyParticleCollection<Particle<ParticleNode>, ParticleNode>();
+
         return new SystemState(
             Guid.NewGuid(),
             inputState.Time,
-            bodies.FlattenAgglomerates().Select(b => new Particle<IParticleNode>(b, (n, p) => new ParticleNode(n, p)))
+            inputState.Particles.Select(pOld => particles[pOld.Id])
         );
     }
 
@@ -82,7 +93,7 @@ public class FocalCompactionStep(IPoint focusPoint, double stepDistance, double 
     public int MaxStepCount { get; } = maxStepCount;
 
     public double StepDistance { get; } = stepDistance;
-    
+
     public double MinimumRelativeIntrusion { get; } = minimumRelativeIntrusion;
 
     public double MinimumIntrusion { get; } = stepDistance * minimumRelativeIntrusion;

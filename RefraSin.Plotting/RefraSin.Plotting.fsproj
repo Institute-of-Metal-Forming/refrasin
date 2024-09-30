@@ -10,6 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\RefraSin.Analysis\RefraSin.Analysis.fsproj" />
         <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj"/>
         <ProjectReference Include="..\RefraSin.ProcessModel\RefraSin.ProcessModel.csproj"/>
     </ItemGroup>

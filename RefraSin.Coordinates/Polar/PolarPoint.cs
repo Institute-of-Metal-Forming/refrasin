@@ -106,8 +106,8 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
     {
         if (System.Equals(p.System))
         {
-            var x = R * Cos(Phi) - p.R * Cos(p.Phi);
-            var y = R * Sin(Phi) - p.R * Sin(p.Phi);
+            var x = p.R * Cos(p.Phi) - R * Cos(Phi);
+            var y = p.R * Sin(p.Phi) - R * Sin(Phi) ;
 
             var r = Sqrt(Pow(x, 2) + Pow(y, 2));
             var phi =
@@ -195,7 +195,7 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
     ///     Computes the vector between two points. See <see cref="VectorTo" />.
     /// </summary>
     /// <exception cref="DifferentCoordinateSystemException">if systems are not equal</exception>
-    public static PolarVector operator -(PolarPoint p1, PolarPoint p2) => p1.VectorTo(p2);
+    public static PolarVector operator -(PolarPoint p1, PolarPoint p2) => p2.VectorTo(p1);
 
     /// <inheritdoc />
     public string ToString(string? format, IFormatProvider? formatProvider) =>

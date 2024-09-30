@@ -1,15 +1,12 @@
-using System.Globalization;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.Statistics;
 using Microsoft.Extensions.Logging;
+using Microsoft.FSharp.Core;
 using Plotly.NET;
+using RefraSin.Compaction.ProcessModel;
+using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Polar;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
-using RefraSin.ParticleModel.Particles;
 using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
@@ -18,176 +15,125 @@ using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
-using static System.Math;
 using static MoreLinq.Extensions.IndexExtension;
 
 namespace RefraSin.TEPSolver.Test;
 
 [TestFixture]
+[TestFixtureSource(nameof(GenerateParticles))]
 public class TwoParticleTest
 {
-    [SetUp]
-    public void Setup()
+    public static IEnumerable<(
+        Angle firstRotation,
+        IPoint secondCenter,
+        Angle secondRotation,
+        double secondSize
+    )> YieldParticleProperties()
     {
-        var duration = 1e4;
-        var initialNeck = 2 * PI / 100 / 2 * 120e-6 * 5;
-        var nodeCountPerParticle = 20;
-
-        var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
-        {
-            NodeCount = nodeCountPerParticle
-        }.GetParticle();
-
-        IEnumerable<IParticleNode> NodeFactory1(IParticle<IParticleNode> particle) =>
-            baseParticle1
-                .Nodes.Skip(1)
-                .Select(n => new ParticleNode(n, particle))
-                .Concat(
-                    [
-                        new ParticleNode(
-                            Guid.NewGuid(),
-                            particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, -initialNeck)),
-                            NodeType.Neck
-                        ),
-                        // new ParticleNode(
-                        //     Guid.NewGuid(),
-                        //     particle,
-                        //     new PolarPoint(new AbsolutePoint(120e-6, -initialNeck / 2)),
-                        //     NodeType.GrainBoundary
-                        // ),
-                        new ParticleNode(
-                            Guid.NewGuid(),
-                            particle,
-                            new PolarPoint(new AbsolutePoint(125e-6, -0.5 * initialNeck)),
-                            // new PolarPoint(new AbsolutePoint(125e-6, 0)),
-                            // new PolarPoint(new AbsolutePoint(120e-6, 0)),
-                            NodeType.GrainBoundary
-                        ),
-                        // new ParticleNode(
-                        //     Guid.NewGuid(),
-                        //     particle,
-                        //     new PolarPoint(new AbsolutePoint(120e-6, initialNeck / 2)),
-                        //     NodeType.GrainBoundary
-                        // ),
-                        new ParticleNode(
-                            Guid.NewGuid(),
-                            particle,
-                            new PolarPoint(new AbsolutePoint(120e-6, initialNeck)),
-                            NodeType.Neck
-                        ),
-                    ]
-                );
-
-        _particle1 = new Particle<IParticleNode>(
-            baseParticle1.Id,
-            new AbsolutePoint(0, 0),
-            0,
-            baseParticle1.MaterialId,
-            NodeFactory1
+        yield return (0, new AbsolutePoint(300e-6, 0), Angle.Straight, 100e-6);
+        yield return (0, new AbsolutePoint(500e-6, 0), Angle.Straight, 200e-6);
+        yield return (
+            Angle.HalfRight,
+            new AbsolutePoint(300e-6, 0),
+            Angle.Straight - Angle.HalfRight,
+            100e-6
         );
+        // yield return (
+        //     Angle.HalfRight,
+        //     new AbsolutePoint(400e-6, 0),
+        //     Angle.Straight - Angle.HalfRight,
+        //     200e-6
+        // );
+        // // yield return (Angle.Straight, new AbsolutePoint(300e-6, 0), 0, 100e-6);
+        // yield return (
+        //     -Angle.HalfRight,
+        //     new AbsolutePoint(200e-6, -100e-6),
+        //     Angle.Straight - Angle.HalfRight,
+        //     100e-6
+        // );
+    }
 
-        var baseParticle2 = new ShapeFunctionParticleFactory(
-            200e-6,
-            0.1,
-            5,
-            0.1,
-            _particle1.MaterialId
-        )
+    public static IEnumerable<TestFixtureData> GenerateParticles()
+    {
+        var nodeCountPerParticle = 100;
+
+        foreach (var props in YieldParticleProperties())
         {
-            NodeCount = nodeCountPerParticle
-        }.GetParticle();
+            var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
+            {
+                NodeCount = nodeCountPerParticle,
+                RotationAngle = props.firstRotation
+            }.GetParticle();
+            var particle2 = new ShapeFunctionParticleFactory(
+                props.secondSize,
+                0.2,
+                5,
+                0.2,
+                particle1.MaterialId
+            )
+            {
+                NodeCount = nodeCountPerParticle,
+                RotationAngle = props.secondRotation,
+                CenterCoordinates = props.secondCenter.Absolute
+            }.GetParticle();
 
-        IEnumerable<IParticleNode> NodeFactory2(IParticle<IParticleNode> particle) =>
-            baseParticle2
-                .Nodes.Skip(1)
-                .Select(n => new ParticleNode(n, particle))
-                .Concat(
-                    [
-                        new ParticleNode(
-                            Guid.NewGuid(),
-                            particle,
-                            new PolarPoint(new AbsolutePoint(240e-6, -initialNeck)),
-                            NodeType.Neck
-                        ),
-                        // new ParticleNode(
-                        //     Guid.NewGuid(),
-                        //     particle,
-                        //     new PolarPoint(new AbsolutePoint(240e-6, -initialNeck / 2)),
-                        //     NodeType.GrainBoundary
-                        // ),
-                        new ParticleNode(
-                            Guid.NewGuid(),
-                            particle,
-                            new PolarPoint(new AbsolutePoint(235e-6, 0.5 * initialNeck)),
-                            // new PolarPoint(new AbsolutePoint(235e-6, 0)),
-                            // new PolarPoint(new AbsolutePoint(240e-6, 0)),
-                            NodeType.GrainBoundary
-                        ),
-                        // new ParticleNode(
-                        //     Guid.NewGuid(),
-                        //     particle,
-                        //     new PolarPoint(new AbsolutePoint(240e-6, initialNeck / 2)),
-                        //     NodeType.GrainBoundary
-                        // ),
-                        new ParticleNode(
-                            Guid.NewGuid(),
-                            particle,
-                            new PolarPoint(new AbsolutePoint(240e-6, initialNeck)),
-                            NodeType.Neck
-                        ),
-                    ]
-                );
+            var looseState = new SystemState(Guid.NewGuid(), 0, [particle1, particle2]);
 
-        _particle2 = new Particle<IParticleNode>(
-            baseParticle2.Id,
-            new AbsolutePoint(360e-6, 0),
-            PI,
-            baseParticle2.MaterialId,
-            NodeFactory2
-        );
+            var compactor = new FocalCompactionStep(
+                particle1.Coordinates,
+                1e-6,
+                maxStepCount: 1000
+            );
+            var compactedState = compactor.Solve(looseState);
+
+            ParticlePlot.PlotParticles(compactedState.Particles).Show();
+
+            yield return new TestFixtureData(compactedState);
+        }
+    }
+
+    public TwoParticleTest(SystemState initialState)
+    {
+        var duration = 3.6e4;
 
         _solutionStorage = new InMemorySolutionStorage();
 
-        _tempDir = Path.GetTempFileName().Replace(".tmp", "");
-        Directory.CreateDirectory(_tempDir);
-        TestContext.WriteLine(_tempDir);
+        _tempDir = TempPath.CreateTempDir();
 
-        var loggerFactory = LoggerFactory.Create(builder => { builder.AddFile(Path.Combine(_tempDir, "test.log")); });
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddFile(Path.Combine(_tempDir, "test.log"));
+        });
 
-        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default, 30);
+        _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default, 10);
 
-        _material = new Material(
-            _particle1.MaterialId,
+        _initialState = initialState;
+
+        var material = new Material(
+            initialState.Particles[0].MaterialId,
             "Al2O3",
             new BulkProperties(0, 1e-4),
             new SubstanceProperties(1.8e3, 101.96e-3),
             new InterfaceProperties(1.65e-10, 0.9)
         );
 
-        _materialInterface = new MaterialInterface(
-            _material.Id,
-            _material.Id,
+        var materialInterface = new MaterialInterface(
+            material.Id,
+            material.Id,
             new InterfaceProperties(1.65e-10, 0.5)
         );
-
-        _initialState = new SystemState(Guid.NewGuid(), 0, new[] { _particle1, _particle2 });
 
         _sinteringProcess = new SinteringStep(
             duration,
             2073,
             _solver,
-            new[] { _material },
-            new[] { _materialInterface }
+            new[] { material },
+            new[] { materialInterface }
         );
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
-    private IParticle<IParticleNode> _particle1;
-    private IParticle<IParticleNode> _particle2;
     private SinteringSolver _solver;
-    private IMaterial _material;
-    private IMaterialInterface _materialInterface;
     private SystemState _initialState;
     private SinteringStep _sinteringProcess;
     private InMemorySolutionStorage _solutionStorage;
@@ -259,6 +205,8 @@ public class TwoParticleTest
         finally
         {
             PlotParticles();
+            PlotShrinkage();
+            PlotNeckWidths();
             PlotTimeSteps();
             PlotParticleCenter();
         }
@@ -266,13 +214,20 @@ public class TwoParticleTest
 
     private void PlotParticles()
     {
-       
         var dir = Path.Combine(_tempDir, "p");
         Directory.CreateDirectory(dir);
 
         foreach (var (i, state) in _solutionStorage.States.Index())
         {
             var plot = ParticlePlot.PlotParticles(state.Particles);
+            plot.WithXAxisStyle(
+                Title.init(Text: "X in m"),
+                MinMax: FSharpOption<Tuple<IConvertible, IConvertible>>.Some(new(-200e-6, 700e-6))
+            );
+            plot.WithYAxisStyle(
+                Title.init(Text: "Y in m"),
+                MinMax: FSharpOption<Tuple<IConvertible, IConvertible>>.Some(new(-200e-6, 200e-6))
+            );
             plot.SaveHtml(Path.Combine(dir, $"{i}.html"));
         }
     }
@@ -288,6 +243,19 @@ public class TwoParticleTest
         var centers = ProcessPlot.PlotParticleCenters(_solutionStorage.States);
         var start = ParticlePlot.PlotParticles(_solutionStorage.States[0].Particles);
         var end = ParticlePlot.PlotParticles(_solutionStorage.States[^1].Particles);
-        Chart.Combine([centers, start, end]).SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
+        var plot = Chart.Combine([centers, start, end]);
+        plot.SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
+    }
+
+    private void PlotShrinkage()
+    {
+        var plot = ProcessPlot.PlotShrinkagesByDistance(_solutionStorage.States);
+        plot.SaveHtml(Path.Combine(_tempDir, "shrinkages.html"));
+    }
+
+    private void PlotNeckWidths()
+    {
+        var plot = ProcessPlot.PlotNeckWidths(_solutionStorage.States);
+        plot.SaveHtml(Path.Combine(_tempDir, "necks.html"));
     }
 }

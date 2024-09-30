@@ -84,7 +84,7 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
     public CartesianVector VectorTo(ICartesianPoint p)
     {
         if (System.Equals(p.System))
-            return new CartesianVector(X - p.X, Y - p.Y, System);
+            return new CartesianVector(p.X - X, p.Y - Y, System);
         throw new DifferentCoordinateSystemException(this, p);
     }
 
@@ -159,7 +159,7 @@ public readonly struct CartesianPoint(double x, double y, ICartesianCoordinateSy
     ///     Computes the vector between two points. See <see cref="VectorTo" />.
     /// </summary>
     public static CartesianVector operator -(CartesianPoint p1, CartesianPoint p2) =>
-        p1.VectorTo(p2);
+        p2.VectorTo(p1);
 
     /// <inheritdoc />
     public string ToString(string? format, IFormatProvider? formatProvider) =>

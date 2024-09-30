@@ -8,7 +8,7 @@ public class AdamsMoultonTimeStepper : ITimeStepper
     /// <inheritdoc />
     public StepVector Step(ISolverSession solverSession, SolutionState baseState, StepVector initialGuess)
     {
-        var step = solverSession.Routines.LagrangianRootFinder.FindRoot(baseState, initialGuess);
+        var step = solverSession.Routines.LagrangianRootFinder.FindRoot(baseState, initialGuess, solverSession.Logger);
 
         if (_lastSteps.TryGetValue(solverSession.Id, out var lastStep))
             return (step + lastStep) / 2;
