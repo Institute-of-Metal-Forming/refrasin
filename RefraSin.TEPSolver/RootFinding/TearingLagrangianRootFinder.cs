@@ -83,7 +83,10 @@ public class TearingLagrangianRootFinder(
             stepVector.UpdateBorderBlock(borderSolution.AsArray());
 
             if ((stepVector - oldVector).L2Norm() < IterationPrecision * stepVector.L2Norm())
+            {
+                logger.LogInformation("{Loop} iterations: {Count}", nameof(SolveParticleAndBorderBlocks), i);
                 return stepVector;
+            }
         }
 
         throw new UncriticalIterationInterceptedException(
