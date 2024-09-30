@@ -1,23 +1,23 @@
 using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
-using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.RootFinding;
 
-public class BroydenLagrangianRootFinder(int maxIterationCount = 100, double accuracy = 1e-8) : ILagrangianRootFinder
+public class BroydenLagrangianRootFinder(int maxIterationCount = 100, double accuracy = 1e-8)
+    : ILagrangianRootFinder
 {
     /// <inheritdoc />
-    public StepVector FindRoot(
-        SolutionState currentState,
-        StepVector initialGuess,
-        ILogger logger
-    )
+    public StepVector FindRoot(SolutionState currentState, StepVector initialGuess, ILogger logger)
     {
+        var stepVector = initialGuess.Copy();
+        var system = new EquationSystem.EquationSystem(currentState, stepVector);
+
         double[] Fun(double[] vector)
         {
-            var result = Lagrangian.EvaluateAt(currentState, new StepVector(vector, initialGuess.StepVectorMap)).AsArray();
+            stepVector.Update(vector);
+            var result = system.Lagrangian().AsArray();
             return result;
         }
 

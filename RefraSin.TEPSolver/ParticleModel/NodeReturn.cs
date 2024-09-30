@@ -48,7 +48,7 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         Shift = stepVector is not null
             ? new NormalTangential<double>(
                 stepVector.NormalDisplacement(template),
-                stepVector.TangentialDisplacement(template)
+                template is NeckNode ? stepVector.TangentialDisplacement(template) : 0
             )
                 * norm.Length
                 / norm.Time

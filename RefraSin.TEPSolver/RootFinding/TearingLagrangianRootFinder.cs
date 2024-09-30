@@ -13,7 +13,8 @@ namespace RefraSin.TEPSolver.RootFinding;
 
 public class TearingLagrangianRootFinder(
     IRootFinder particleBlockRootFinder,
-    IRootFinder borderBlockRootFinder,
+    IRootFinder contactBlockRootFinder,
+    IRootFinder globalBlockRootFinder,
     double iterationPrecision = 1e-4,
     int maxIterationCount = 100
 ) : ILagrangianRootFinder
@@ -22,70 +23,39 @@ public class TearingLagrangianRootFinder(
     public StepVector FindRoot(SolutionState currentState, StepVector initialGuess, ILogger logger)
     {
         var stepVector = initialGuess.Copy();
+        var system = new EquationSystem.EquationSystem(currentState, stepVector);
 
-        var dissipationEqualitySolution = SolveDissipationEquality(
-            currentState,
-            stepVector,
-            logger
-        );
-        stepVector[^1] = dissipationEqualitySolution;
+        TearAndSolveBlocks(system, logger);
         return stepVector;
     }
 
-    private double SolveDissipationEquality(
-        SolutionState currentState,
-        StepVector stepVector,
-        ILogger logger
-    )
-    {
-        var solution = Brent.FindRootExpand(
-            Fun,
-            stepVector.LambdaDissipation() * 0.9,
-            stepVector.LambdaDissipation() * 1.1
-        );
-
-        return solution;
-
-        double Fun(double lambdaDissipation)
-        {
-            stepVector[^1] = lambdaDissipation;
-
-            stepVector = SolveParticleAndBorderBlocks(currentState, stepVector, logger);
-
-            var result = Lagrangian.DissipationEquality(currentState, stepVector);
-            return result;
-        }
-    }
-
-    private StepVector SolveParticleAndBorderBlocks(
-        SolutionState currentState,
-        StepVector stepVector,
-        ILogger logger
-    )
+    private void TearAndSolveBlocks(EquationSystem.EquationSystem system, ILogger logger)
     {
         int i;
 
         for (i = 0; i < MaxIterationCount; i++)
         {
-            var oldVector = stepVector.Copy();
+            var oldVector = system.StepVector.Copy();
 
-            foreach (var particle in currentState.Particles)
+            foreach (var particle in system.State.Particles)
             {
-                var particleSolution = SolveParticleBlock(particle, stepVector, logger);
-                stepVector.UpdateParticleBlock(particle, particleSolution.AsArray());
+                var particleSolution = SolveParticleBlock(system, particle, logger);
+                system.StepVector.UpdateParticleBlock(particle, particleSolution.AsArray());
             }
 
-            var borderSolution = SolveBorderBlockWithoutDissipationEquality(
-                currentState,
-                stepVector,
-                logger
-            );
-            stepVector.UpdateBorderBlock(borderSolution.AsArray());
-
-            if ((stepVector - oldVector).L2Norm() < IterationPrecision * stepVector.L2Norm())
+            foreach (var contact in system.State.ParticleContacts)
             {
-                logger.LogInformation("{Loop} iterations: {Count}", nameof(SolveParticleAndBorderBlocks), i);
-                return stepVector;
+                var contactSolution = SolveContactBlock(system, contact, logger);
+                system.StepVector.UpdateContactBlock(contact, contactSolution.AsArray());
+            }
+
+            var globalSolution = SolveGlobalBlock(system, logger);
+            system.StepVector.UpdateGlobalBlock(globalSolution.AsArray());
+
+            if ((system.StepVector - oldVector).L2Norm() < IterationPrecision * oldVector.L2Norm())
+            {
+                logger.LogInformation("{Loop} iterations: {Count}", nameof(TearAndSolveBlocks), i);
+                return;
             }
         }
 
@@ -96,16 +66,16 @@ public class TearingLagrangianRootFinder(
         );
     }
 
-    private Vector<double> SolveBorderBlockWithoutDissipationEquality(
-        SolutionState currentState,
-        StepVector stepVector,
+    private Vector<double> SolveContactBlock(
+        EquationSystem.EquationSystem system,
+        ParticleContact contact,
         ILogger logger
     )
     {
-        var solution = BorderBlockRootFinder.FindRoot(
+        var solution = ContactBlockRootFinder.FindRoot(
             Fun,
             Jac,
-            new DenseVector(stepVector.BorderBlock()[..^1]),
+            system.StepVector.ContactBlock(contact),
             logger
         );
 
@@ -113,30 +83,29 @@ public class TearingLagrangianRootFinder(
 
         Vector<double> Fun(Vector<double> vector)
         {
-            stepVector.UpdateBorderBlock(vector.AsArray());
-            var result = Lagrangian
-                .YieldLinearBorderBlockEquations(currentState, stepVector)
-                .ToArray();
-            return new DenseVector(result);
+            system.StepVector.UpdateContactBlock(contact, vector.AsArray());
+            var result = system.ContactBlockLagrangian(contact);
+            return result;
         }
 
         Matrix<double> Jac(Vector<double> vector)
         {
-            stepVector.UpdateBorderBlock(vector.AsArray());
-            return Jacobian.LinearBorderBlock(currentState, stepVector);
+            system.StepVector.UpdateContactBlock(contact, vector.AsArray());
+            var result = system.ContactBlockJacobian(contact);
+            return result;
         }
     }
 
     private Vector<double> SolveParticleBlock(
+        EquationSystem.EquationSystem system,
         Particle particle,
-        StepVector stepVector,
         ILogger logger
     )
     {
         var solution = ParticleBlockRootFinder.FindRoot(
             Fun,
             Jac,
-            new DenseVector(stepVector.ParticleBlock(particle)),
+            system.StepVector.ParticleBlock(particle),
             logger
         );
 
@@ -144,22 +113,51 @@ public class TearingLagrangianRootFinder(
 
         Vector<double> Fun(Vector<double> vector)
         {
-            stepVector.UpdateParticleBlock(particle, vector.AsArray());
-            var result = Lagrangian.YieldParticleBlockEquations(particle, stepVector).ToArray();
-            return new DenseVector(result);
+            system.StepVector.UpdateParticleBlock(particle, vector.AsArray());
+            var result = system.ParticleBlockLagrangian(particle);
+            return result;
         }
 
         Matrix<double> Jac(Vector<double> vector)
         {
-            stepVector.UpdateParticleBlock(particle, vector.AsArray());
-            var result = Jacobian.ParticleBlock(particle, stepVector);
+            system.StepVector.UpdateParticleBlock(particle, vector.AsArray());
+            var result = system.ParticleBlockJacobian(particle);
+            return result;
+        }
+    }
+
+    private Vector<double> SolveGlobalBlock(EquationSystem.EquationSystem system, ILogger logger)
+    {
+        var solution = GlobalBlockRootFinder.FindRoot(
+            Fun,
+            Jac,
+            system.StepVector.GlobalBlock(),
+            logger
+        );
+
+        return solution;
+
+        Vector<double> Fun(Vector<double> vector)
+        {
+            system.StepVector.UpdateGlobalBlock(vector.AsArray());
+            var result = system.GlobalBlockLagrangian();
+            return result;
+        }
+
+        Matrix<double> Jac(Vector<double> vector)
+        {
+            system.StepVector.UpdateGlobalBlock(vector.AsArray());
+            var result = system.GlobalBlockJacobian();
             return result;
         }
     }
 
     public IRootFinder ParticleBlockRootFinder { get; } = particleBlockRootFinder;
 
-    public IRootFinder BorderBlockRootFinder { get; } = borderBlockRootFinder;
+    public IRootFinder ContactBlockRootFinder { get; } = contactBlockRootFinder;
+
+    public IRootFinder GlobalBlockRootFinder { get; } = globalBlockRootFinder;
+
     public int MaxIterationCount { get; } = maxIterationCount;
 
     public double IterationPrecision { get; } = iterationPrecision;

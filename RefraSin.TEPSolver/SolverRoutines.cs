@@ -19,35 +19,30 @@ public record SolverRoutines(
     INormalizer Normalizer,
     IStepWidthController StepWidthController,
     IEnumerable<IStateRecoverer> StateRecoverers,
-    IEnumerable<IParticleSystemRemesher> Remeshers) : ISolverRoutines
+    IEnumerable<IParticleSystemRemesher> Remeshers
+) : ISolverRoutines
 {
-    public static readonly SolverRoutines Default = new(
-        new StepEstimator(),
-        new AdamsMoultonTimeStepper(),
-        [
-            // new InstabilityDetector()
-        ],
-        new TearingLagrangianRootFinder(
-            new NewtonRaphsonRootFinder(
-                new LUSolver(),
-                absoluteTolerance: 1e-4
+    public static readonly SolverRoutines Default =
+        new(
+            new StepEstimator(),
+            new AdamsMoultonTimeStepper(),
+            [
+                // new InstabilityDetector()
+            ],
+            new TearingLagrangianRootFinder(
+                new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
+                new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
+                new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4)
             ),
-            new NewtonRaphsonRootFinder(
-                new LUSolver(),
-                absoluteTolerance: 1e-4
-            )
-        ),
-        new DefaultNormalizer(),
-        new MaximumDisplacementAngleStepWidthController(),
-        [
-            new StepBackStateRecoverer()
-        ],
-        [
-            new FreeSurfaceRemesher(),
-            new NeckNeighborhoodRemesher(),
-            // new GrainBoundaryRemesher(),
-        ]
-    );
+            new DefaultNormalizer(),
+            new MaximumDisplacementAngleStepWidthController(),
+            [new StepBackStateRecoverer()],
+            [
+                new FreeSurfaceRemesher(),
+                new NeckNeighborhoodRemesher(),
+                // new GrainBoundaryRemesher(),
+            ]
+        );
 
     /// <inheritdoc />
     public void RegisterWithSolver(SinteringSolver solver)
