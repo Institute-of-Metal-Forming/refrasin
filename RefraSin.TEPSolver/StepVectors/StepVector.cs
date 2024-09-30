@@ -54,7 +54,36 @@ public class StepVector : DenseVector
 
     public double RotationDisplacement(ParticleContact contact) =>
         this[StepVectorMap.RotationDisplacement(contact)];
-    
+
+    public void LambdaDissipation(double value) => this[StepVectorMap.LambdaDissipation()] = value;
+
+    public void NormalDisplacement(INode node, double value) => this[StepVectorMap.NormalDisplacement(node)] = value;
+
+    public void FluxToUpper(INode node, double value) => this[StepVectorMap.FluxToUpper(node)] = value;
+
+    public void LambdaVolume(INode node, double value) => this[StepVectorMap.LambdaVolume(node)] = value;
+
+    public void TangentialDisplacement(INode node, double value) =>
+        this[StepVectorMap.TangentialDisplacement(node)] = value;
+
+    public void LambdaContactDistance(INode node, double value) =>
+        this[StepVectorMap.LambdaContactDistance(node)] = value;
+
+    public void LambdaContactDirection(INode node, double value) =>
+        this[StepVectorMap.LambdaContactDirection(node)] = value;
+
+    public void LambdaContactRotation(ParticleContact contact, double value) =>
+        this[StepVectorMap.LambdaContactRotation(contact)] = value;
+
+    public void RadialDisplacement(ParticleContact contact, double value) =>
+        this[StepVectorMap.RadialDisplacement(contact)] = value;
+
+    public void AngleDisplacement(ParticleContact contact, double value) =>
+        this[StepVectorMap.AngleDisplacement(contact)] = value;
+
+    public void RotationDisplacement(ParticleContact contact, double value) =>
+        this[StepVectorMap.RotationDisplacement(contact)] = value;
+
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);
 

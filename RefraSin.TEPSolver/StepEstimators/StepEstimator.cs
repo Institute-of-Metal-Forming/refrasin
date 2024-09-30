@@ -14,63 +14,58 @@ namespace RefraSin.TEPSolver.StepEstimators;
 
 class StepEstimator : IStepEstimator
 {
-    public StepVector EstimateStep(ISinteringConditions conditions, SolutionState currentState) =>
-        new(YieldInitialGuess(currentState).ToArray(), new StepVectorMap(currentState));
-
-    private static IEnumerable<double> YieldInitialGuess(SolutionState currentState) =>
-        Join(
-            currentState.Particles.SelectMany(p => YieldParticleBlockGuesses(p)),
-            YieldFunctionalBlockGuesses(currentState)
-        ).Append(1);
-
-    private static IEnumerable<double> YieldFunctionalBlockGuesses(SolutionState currentState) =>
-        YieldContactUnknownsInitialGuess(currentState);
-
-    private static IEnumerable<double> YieldParticleBlockGuesses(Particle particle) =>
-        YieldNodeUnknownsInitialGuess(particle.Nodes);
-
-    private static IEnumerable<double> YieldContactUnknownsInitialGuess(SolutionState currentState)
+    public StepVector EstimateStep(ISinteringConditions conditions, SolutionState currentState)
     {
+        var map = new StepVectorMap(currentState);
+        var vector = new StepVector(new double[map.TotalLength], map);
+        FillStepVector(vector, currentState);
+        return vector;
+    }
+
+    private static void FillStepVector(StepVector stepVector, SolutionState currentState)
+    {
+        stepVector.LambdaDissipation(1);
+        
+        foreach (var particle in currentState.Particles)
+        {
+            foreach (var node in particle.Nodes)
+            {
+                if (node is not INodeContact)
+                {
+                    stepVector.LambdaVolume(node, 0);
+                    stepVector.FluxToUpper(node, GuessFluxToUpper(node));
+                    stepVector.NormalDisplacement(node, GuessNormalDisplacement(node));
+                }
+            }
+        }
+
         foreach (var contact in currentState.ParticleContacts)
         {
             var averageNormalDisplacement = contact.FromNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement) +
                                             contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);
-            yield return averageNormalDisplacement;
-            yield return 0;
-            yield return 0;
-            yield return 1;
+            stepVector.RadialDisplacement(contact, averageNormalDisplacement);
+            stepVector.AngleDisplacement(contact, 0);
+            stepVector.RotationDisplacement(contact, 0);
+            stepVector.LambdaContactRotation(contact, 1);
 
             foreach (var node in contact.FromNodes)
             {
-                yield return 0;
-                yield return 0;
+                stepVector.LambdaContactDistance(node, 0);
+                stepVector.LambdaContactDirection(node, 0);
+                
+                stepVector.LambdaVolume(node, 0);
+                stepVector.FluxToUpper(node, GuessFluxToUpper(node));
+                stepVector.NormalDisplacement(node, averageNormalDisplacement);
 
-                yield return 0;
-                yield return GuessFluxToUpper(node);
-                yield return averageNormalDisplacement;
-
-                yield return 0;
-                yield return GuessFluxToUpper(node.ContactedNode);
-                yield return averageNormalDisplacement;
+                stepVector.LambdaVolume(node.ContactedNode, 0);
+                stepVector.FluxToUpper(node.ContactedNode, GuessFluxToUpper(node.ContactedNode));
+                stepVector.NormalDisplacement(node.ContactedNode, averageNormalDisplacement);
 
                 if (node is NeckNode)
                 {
-                    yield return GuessTangentialDisplacement(node);
-                    yield return GuessTangentialDisplacement(node.ContactedNode);
+                    stepVector.TangentialDisplacement(node, GuessTangentialDisplacement(node));
+                    stepVector.TangentialDisplacement(node.ContactedNode, GuessTangentialDisplacement(node.ContactedNode));
                 }
-            }
-        }
-    }
-
-    private static IEnumerable<double> YieldNodeUnknownsInitialGuess(IEnumerable<NodeBase> nodes)
-    {
-        foreach (var node in nodes)
-        {
-            if (node is not INodeContact)
-            {
-                yield return 0;
-                yield return GuessFluxToUpper(node);
-                yield return GuessNormalDisplacement(node);
             }
         }
     }

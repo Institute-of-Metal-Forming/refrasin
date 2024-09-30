@@ -63,7 +63,10 @@ public class StepVectorMap
         AddUnknown(Guid.Empty, Unknown.LambdaDissipation);
 
         BorderLength = _index - BorderStart;
+        TotalLength = _index;
     }
+
+    public int TotalLength { get; }
 
     private void AddUnknown(Guid id, Unknown unknown)
     {
