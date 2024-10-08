@@ -13,11 +13,11 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>
 {
     /// <inheritdoc />
-    public GrainBoundaryNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
+    public GrainBoundaryNode(INode node, Particle particle) : base(node, particle) { }
 
-    private GrainBoundaryNode(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession, Guid contactedNodeId,
+    private GrainBoundaryNode(Guid id, double r, Angle phi, Particle particle, Guid contactedNodeId,
         Guid contactedParticleId) : base(id, r, phi, particle,
-        solverSession, contactedNodeId, contactedParticleId) { }
+         contactedNodeId, contactedParticleId) { }
 
     /// <inheritdoc />
     public override NodeType Type => NodeType.GrainBoundary;
@@ -46,6 +46,6 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>
         var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
         var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
 
-        return new GrainBoundaryNode(Id, newR, Coordinates.Phi + dPhi, particle, SolverSession, ContactedNodeId, ContactedParticleId);
+        return new GrainBoundaryNode(Id, newR, Coordinates.Phi + dPhi, particle, ContactedNodeId, ContactedParticleId);
     }
 }

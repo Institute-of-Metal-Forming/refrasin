@@ -11,26 +11,25 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     where TContacted : ContactNodeBase<TContacted>
 {
     /// <inheritdoc />
-    protected ContactNodeBase(INode node, Particle particle, ISolverSession solverSession)
-        : base(node, particle, solverSession) { }
+    protected ContactNodeBase(INode node, Particle particle)
+        : base(node, particle) { }
 
     protected ContactNodeBase(
         Guid id,
         double r,
         Angle phi,
         Particle particle,
-        ISolverSession solverSession,
         Guid contactedNodeId,
         Guid contactedParticleId
     )
-        : base(id, r, phi, particle, solverSession, contactedNodeId, contactedParticleId) { }
+        : base(id, r, phi, particle, contactedNodeId, contactedParticleId) { }
 
     /// <summary>
     /// Verbundener Knoten des anderen Partikels.
     /// </summary>
     public new TContacted ContactedNode =>
         _contactedNode ??=
-            SolverSession.CurrentState.Nodes[ContactedNodeId] as TContacted
+            Particle.SolutionState.Nodes[ContactedNodeId] as TContacted
             ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(TContacted)}."
             );
@@ -122,8 +121,8 @@ public abstract class ContactNodeBase
     private Guid? _contactedNodeId;
 
     /// <inheritdoc />
-    protected ContactNodeBase(INode node, Particle particle, ISolverSession solverSession)
-        : base(node, particle, solverSession)
+    protected ContactNodeBase(INode node, Particle particle)
+        : base(node, particle)
     {
         if (node is INodeContact nodeContact)
         {
@@ -142,11 +141,10 @@ public abstract class ContactNodeBase
         double r,
         Angle phi,
         Particle particle,
-        ISolverSession solverSession,
         Guid contactedNodeId,
         Guid contactedParticleId
     )
-        : base(id, r, phi, particle, solverSession)
+        : base(id, r, phi, particle)
     {
         _contactedNodeId = contactedNodeId;
         _contactedParticleId = contactedParticleId;
@@ -154,11 +152,11 @@ public abstract class ContactNodeBase
 
     /// <inheritdoc />
     public Guid ContactedParticleId =>
-        _contactedParticleId ??= SolverSession.CurrentState.Nodes[ContactedNodeId].ParticleId;
+        _contactedParticleId ??= Particle.SolutionState.Nodes[ContactedNodeId].ParticleId;
 
     /// <inheritdoc />
     public Guid ContactedNodeId =>
-        _contactedNodeId ??= SolverSession.CurrentState.NodeContacts.From(Id).Single().To.Id;
+        _contactedNodeId ??= Particle.SolutionState.NodeContacts.From(Id).Single().To.Id;
 
     public Particle ContactedParticle => ContactedNode.Particle;
 
@@ -166,7 +164,7 @@ public abstract class ContactNodeBase
 
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
-            SolverSession.CurrentState.Nodes[ContactedNodeId] as ContactNodeBase
+            Particle.SolutionState.Nodes[ContactedNodeId] as ContactNodeBase
             ?? throw new InvalidCastException(
                 $"Given contacted node {ContactedNodeId} does not refer to an instance of type {typeof(ContactNodeBase)}."
             );
@@ -214,14 +212,14 @@ public abstract class ContactNodeBase
             if (_contact is not null)
                 return _contact;
 
-            _contact = SolverSession.CurrentState.ParticleContacts.FirstOrDefault(c =>
+            _contact = Particle.SolutionState.ParticleContacts.FirstOrDefault(c =>
                 c.From.Id == ParticleId && c.To.Id == ContactedParticleId
             );
 
             if (_contact is not null)
                 return _contact;
 
-            _contact = SolverSession.CurrentState.ParticleContacts.FirstOrDefault(c =>
+            _contact = Particle.SolutionState.ParticleContacts.FirstOrDefault(c =>
                 c.To.Id == ParticleId && c.From.Id == ContactedParticleId
             );
 

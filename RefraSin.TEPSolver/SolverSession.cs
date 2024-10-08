@@ -41,19 +41,10 @@ internal class SolverSession : ISolverSession
 
         Materials = step.Materials.ToDictionary(m => m.Id, m => Norm.NormalizeMaterial(m));
 
-        MaterialInterfaces = step
-            .MaterialInterfaces.Select(mi => new MaterialInterface(
-                mi.From,
-                mi.To,
-                Norm.NormalizeInterfaceProperties(mi.Properties)
-            ))
-            .GroupBy(mi => mi.From)
-            .ToDictionary(g => g.Key, g => (IReadOnlyList<IMaterialInterface>)g.ToArray());
-
         Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
         Routines = sinteringSolver.Routines;
 
-        CurrentState = new SolutionState(normalizedState.Id, StartTime, normalizedState, this);
+        CurrentState = new SolutionState(normalizedState.Id, StartTime, normalizedState, Materials, Temperature, GasConstant);
         CurrentState.Sanitize();
     }
 
@@ -70,11 +61,10 @@ internal class SolverSession : ISolverSession
         _reportSystemState = parentSession._reportSystemState;
 
         Materials = parentSession.Materials;
-        MaterialInterfaces = parentSession.MaterialInterfaces;
         Logger = parentSession.Logger;
         Routines = parentSession.Routines;
 
-        CurrentState = new SolutionState(inputState.Id, StartTime, inputState, this);
+        CurrentState = new SolutionState(inputState.Id, StartTime, inputState, Materials, Temperature, GasConstant);
         CurrentState.Sanitize();
     }
 
@@ -100,8 +90,6 @@ internal class SolverSession : ISolverSession
     public StepVector? LastStep { get; set; }
 
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
-
-    public IReadOnlyDictionary<Guid, IReadOnlyList<IMaterialInterface>> MaterialInterfaces { get; }
 
     /// <inheritdoc />
     public ILogger<SinteringSolver> Logger { get; }

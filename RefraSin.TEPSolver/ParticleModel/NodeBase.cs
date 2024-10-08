@@ -16,7 +16,7 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// </summary>
 public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialProperties
 {
-    protected NodeBase(INode node, Particle particle, ISolverSession solverSession)
+    protected NodeBase(INode node, Particle particle)
     {
         Id = node.Id;
 
@@ -27,27 +27,19 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
 
         Particle = particle;
         Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R, particle);
-        SolverSession = solverSession;
     }
 
     protected NodeBase(
         Guid id,
         double r,
         Angle phi,
-        Particle particle,
-        ISolverSession solverSession
+        Particle particle
     )
     {
         Id = id;
         Particle = particle;
         Coordinates = new PolarPoint(phi.Reduce(AllPositive), r, Particle);
-        SolverSession = solverSession;
     }
-
-    /// <summary>
-    /// Reference to the current solver session.
-    /// </summary>
-    protected ISolverSession SolverSession { get; }
 
     public Guid Id { get; set; }
 
@@ -68,7 +60,6 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
     /// <summary>
     /// A reference to the upper neighbor of this node.
     /// </summary>
-    /// <exception cref="InvalidNeighborhoodException">If this node has currently no upper neighbor set.</exception>
     public NodeBase Upper => _upper ??= Particle.Nodes[Index + 1];
 
     private NodeBase? _upper;
@@ -76,13 +67,12 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
     /// <summary>
     /// A reference to the lower neighbor of this node.
     /// </summary>
-    /// <exception cref="InvalidNeighborhoodException">If this node has currently no lower neighbor set.</exception>
     public NodeBase Lower => _lower ??= Particle.Nodes[Index - 1];
 
     private NodeBase? _lower;
 
     /// <summary>
-    /// Coordinates of the node in terms of particle's local coordinate system <see cref="ParticleModel.Particle.LocalCoordinateSystem" />
+    /// Coordinates of the node in terms of particle's local coordinate system.
     /// </summary>
     public IPolarPoint Coordinates { get; internal set; }
 

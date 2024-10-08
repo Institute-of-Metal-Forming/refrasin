@@ -1,4 +1,5 @@
 using RefraSin.Graphs;
+using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
@@ -8,12 +9,12 @@ namespace RefraSin.TEPSolver.ParticleModel;
 
 public class SolutionState : ISystemState<Particle, NodeBase>
 {
-    public SolutionState(Guid id, double time, ISystemState state, ISolverSession solverSession)
+    public SolutionState(Guid id, double time, ISystemState state, IReadOnlyDictionary<Guid, IMaterial> materials, double temperature, double gasConstant)
     {
         Time = time;
         Id = id;
         Particles = state
-            .Particles.Select(ps => new Particle(ps, solverSession))
+            .Particles.Select(ps => new Particle(ps, this, temperature, gasConstant))
             .ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
@@ -30,14 +31,17 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
+        Materials = materials;
     }
+
 
     private SolutionState(
         Guid id,
         double time,
         IEnumerable<Particle> particles,
         IEnumerable<ParticleContact> particleContacts,
-        IEnumerable<IEdge<ContactNodeBase>> nodeContacts
+        IEnumerable<IEdge<ContactNodeBase>> nodeContacts,
+        IReadOnlyDictionary<Guid, IMaterial> materials
     )
     {
         Time = time;
@@ -55,7 +59,10 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         ParticleContacts = particleContacts
             .Select(c => new ParticleContact(Particles[c.From.Id], Particles[c.To.Id]))
             .ToReadOnlyContactCollection();
+        Materials = materials;
     }
+    
+    public IReadOnlyDictionary<Guid,IMaterial> Materials { get; set; }
 
     /// <inheritdoc />
     public Guid Id { get; }
@@ -105,7 +112,8 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             Time + timeStepWidth,
             newParticles.Values,
             ParticleContacts,
-            NodeContacts
+            NodeContacts,
+            Materials
         );
 
         return newState;
