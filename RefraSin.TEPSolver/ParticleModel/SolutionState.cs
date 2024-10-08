@@ -3,18 +3,20 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
 public class SolutionState : ISystemState<Particle, NodeBase>
 {
-    public SolutionState(Guid id, double time, ISystemState state, IReadOnlyDictionary<Guid, IMaterial> materials, double temperature, double gasConstant)
+    public SolutionState(ISystemState state, IEnumerable<IMaterial> materials, ISinteringConditions conditions)
     {
-        Time = time;
-        Id = id;
+        Time = state.Time;
+        Id = state.Id;
+        Materials = materials.ToDictionary(m => m.Id);
         Particles = state
-            .Particles.Select(ps => new Particle(ps, this, temperature, gasConstant))
+            .Particles.Select(ps => new Particle(ps, this, conditions))
             .ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
@@ -31,7 +33,6 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
-        Materials = materials;
     }
 
 
@@ -46,6 +47,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     {
         Time = time;
         Id = id;
+        Materials = materials;
         Particles = particles.ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
@@ -59,10 +61,9 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         ParticleContacts = particleContacts
             .Select(c => new ParticleContact(Particles[c.From.Id], Particles[c.To.Id]))
             .ToReadOnlyContactCollection();
-        Materials = materials;
     }
     
-    public IReadOnlyDictionary<Guid,IMaterial> Materials { get; set; }
+    public IReadOnlyDictionary<Guid,IMaterial> Materials { get; }
 
     /// <inheritdoc />
     public Guid Id { get; }

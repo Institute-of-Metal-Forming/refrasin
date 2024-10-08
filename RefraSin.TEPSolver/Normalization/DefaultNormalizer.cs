@@ -1,3 +1,4 @@
+using RefraSin.MaterialData;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using static System.Math;
@@ -7,28 +8,41 @@ namespace RefraSin.TEPSolver.Normalization;
 public class DefaultNormalizer : INormalizer
 {
     /// <inheritdoc />
-    public INorm GetNorm(ISystemState referenceState, ISinteringStep sinteringStep) =>
-        new Norm(
-            referenceState, sinteringStep
-        );
+    public INorm GetNorm(
+        ISystemState referenceState,
+        ISinteringConditions conditions,
+        IEnumerable<IMaterial> materials
+    ) => new Norm(referenceState, conditions, materials);
 
     private class Norm : INorm
     {
         public Norm(
-            ISystemState referenceState, ISinteringStep sinteringStep
+            ISystemState referenceState,
+            ISinteringConditions sinteringStep,
+            IEnumerable<IMaterial> materials
         )
         {
             var referenceParticle = referenceState.Particles[0];
-            var referenceMaterial = sinteringStep.Materials.FirstOrDefault(m => m.Id == referenceParticle.MaterialId) ??
-                                    throw new InvalidOperationException("Material of reference particle not present.");
+            var referenceMaterial =
+                materials.FirstOrDefault(m => m.Id == referenceParticle.MaterialId)
+                ?? throw new InvalidOperationException(
+                    "Material of reference particle not present."
+                );
 
             Length = referenceParticle.Nodes.Average(n => n.Coordinates.R);
             Area = Pow(Length, 2);
             Volume = Pow(Length, 3);
 
-            Time = sinteringStep.GasConstant * sinteringStep.Temperature * Pow(Length, 4) /
-                   (referenceMaterial.Bulk.EquilibriumVacancyConcentration * referenceMaterial.Substance.MolarVolume *
-                    referenceMaterial.Surface.DiffusionCoefficient * referenceMaterial.Surface.Energy);
+            Time =
+                sinteringStep.GasConstant
+                * sinteringStep.Temperature
+                * Pow(Length, 4)
+                / (
+                    referenceMaterial.Bulk.EquilibriumVacancyConcentration
+                    * referenceMaterial.Substance.MolarVolume
+                    * referenceMaterial.Surface.DiffusionCoefficient
+                    * referenceMaterial.Surface.Energy
+                );
 
             InterfaceEnergy = referenceMaterial.Surface.Energy;
             Energy = InterfaceEnergy * Area;

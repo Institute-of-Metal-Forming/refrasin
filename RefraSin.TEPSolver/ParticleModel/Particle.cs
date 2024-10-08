@@ -3,6 +3,7 @@ using RefraSin.Coordinates;
 using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -13,10 +14,9 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 {
     private ReadOnlyParticleSurface<NodeBase> _nodes;
-    private double? _meanRadius;
     private IReadOnlyContactCollection<IParticleContactEdge<Particle>>? _contacts;
 
-    public Particle(IParticle<IParticleNode> particle, SolutionState solutionState, double temperature, double gasConstant)
+    public Particle(IParticle<IParticleNode> particle, SolutionState solutionState, ISinteringConditions conditions)
     {
         Id = particle.Id;
         Coordinates = particle.Coordinates.Absolute;
@@ -27,8 +27,8 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
         MaterialId = particle.MaterialId;
         var material = solutionState.Materials[particle.MaterialId];
         VacancyVolumeEnergy =
-            temperature
-            * gasConstant
+            conditions.Temperature
+            * conditions.GasConstant
             / (material.Substance.MolarVolume * material.Bulk.EquilibriumVacancyConcentration);
 
         SurfaceProperties = material.Surface;

@@ -17,8 +17,6 @@ public interface ISolverSession : ISinteringConditions
     /// </summary>
     Guid Id { get; }
     
-    public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
-    
     public SolutionState CurrentState { get; }
     
     public StepVector? LastStep { get; }
