@@ -33,10 +33,6 @@ public class StepVector : DenseVector
     public double TangentialDisplacement(INode node) =>
         this[StepVectorMap.TangentialDisplacement(node)];
 
-    public double NormalStress(INode node) => this[StepVectorMap.NormalStress(node)];
-
-    public double TangentialStress(INode node) => this[StepVectorMap.TangentialStress(node)];
-
     public double LambdaContactDistance(INode node) =>
         this[StepVectorMap.LambdaContactDistance(node)];
 
@@ -56,12 +52,6 @@ public class StepVector : DenseVector
 
     public void NormalDisplacement(INode node, double value) =>
         this[StepVectorMap.NormalDisplacement(node)] = value;
-
-    public void NormalStress(INode node, double value) =>
-        this[StepVectorMap.NormalStress(node)] = value;
-
-    public void TangentialStress(INode node, double value) =>
-        this[StepVectorMap.TangentialStress(node)] = value;
 
     public void FluxToUpper(INode node, double value) =>
         this[StepVectorMap.FluxToUpper(node)] = value;

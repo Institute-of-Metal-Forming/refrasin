@@ -100,24 +100,28 @@ public class EquationSystemTest
         PlotState(state);
 
         var guess = new StepEstimator().EstimateStep(conditions, state);
+        var eqns = new EquationSystem.EquationSystem(state, guess);
 
-        var jac = Jacobian.EvaluateAt(state, guess);
+        var jac = eqns.Jacobian();
         jac.CoerceZero(1e-8);
         SaveMatrix(jac, "full_jacobian");
 
         foreach (var p in state.Particles)
         {
-            var pJac = Jacobian.ParticleBlock(p, guess);
+            var pJac = eqns.ParticleBlockJacobian(p);
             pJac.CoerceZero(1e-8);
             SaveMatrix(pJac, $"particle_{p.Id}");
         }
 
-        var linBorderJac = Jacobian.LinearBorderBlock(state, guess);
-        linBorderJac.CoerceZero(1e-8);
-        SaveMatrix(linBorderJac, "linear_border");
+        foreach (var c in state.ParticleContacts)
+        {
+            var contactJac = eqns.ContactBlockJacobian(c);
+            contactJac.CoerceZero(1e-8);
+            SaveMatrix(contactJac, $"contact_{c.From.Id}_{c.To.Id}");
+        }
 
-        var borderJac = Jacobian.BorderBlock(state, guess);
-        borderJac.CoerceZero(1e-8);
-        SaveMatrix(borderJac, "border");
+        var globalJac = eqns.GlobalBlockJacobian();
+        globalJac.CoerceZero(1e-8);
+        SaveMatrix(globalJac, "global");
     }
 }

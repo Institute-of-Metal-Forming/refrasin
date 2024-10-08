@@ -21,7 +21,11 @@ public class ContactDirectionConstraint : NodeEquationBase<ContactNodeBase>
                     + Node.ContactedNode.ContactDirectionGradient.Tangential
                         * Step.TangentialDisplacement(Node.ContactedNode)
                 : 0
-        );
+        )
+        - Node.ContactedNode.Coordinates.R
+            / Node.ContactDistance
+            * Cos(Node.ContactedNode.AngleDistanceToContactDirection)
+            * Step.RotationDisplacement(Node.Contact);
 
     /// <inheritdoc />
     public override IEnumerable<(int, double)> Derivative()

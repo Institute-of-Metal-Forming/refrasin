@@ -97,10 +97,6 @@ public class StepVectorMap
     public int TangentialDisplacement(INode node) =>
         _indices[(node.Id, Unknown.TangentialDisplacement)];
 
-    public int NormalStress(INode node) => _indices[(node.Id, Unknown.NormalStress)];
-
-    public int TangentialStress(INode node) => _indices[(node.Id, Unknown.TangentialStress)];
-
     public int LambdaContactDistance(INode node) =>
         _indices[(node.Id, Unknown.LambdaContactDistance)];
 
@@ -124,8 +120,6 @@ public class StepVectorMap
         LambdaVolume,
         LambdaContactDistance,
         LambdaContactDirection,
-        NormalStress,
-        TangentialStress,
         RadialDisplacement,
         AngleDisplacement,
         RotationDisplacement,
