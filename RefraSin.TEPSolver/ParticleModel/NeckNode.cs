@@ -14,11 +14,11 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class NeckNode : ContactNodeBase<NeckNode>
 {
     /// <inheritdoc />
-    public NeckNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
+    public NeckNode(INode node, Particle particle) : base(node, particle) { }
 
-    private NeckNode(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession, Guid contactedNodeId,
+    private NeckNode(Guid id, double r, Angle phi, Particle particle, Guid contactedNodeId,
         Guid contactedParticleId) : base(id, r, phi, particle,
-        solverSession, contactedNodeId, contactedParticleId) { }
+        contactedNodeId, contactedParticleId) { }
 
     /// <inheritdoc />
     public override NodeType Type => NodeType.Neck;
@@ -50,6 +50,6 @@ public class NeckNode : ContactNodeBase<NeckNode>
         var newR = CosLaw.C(Coordinates.R, totalDisplacement.R, totalDisplacement.Phi);
         var dPhi = SinLaw.Alpha(totalDisplacement.R, newR, totalDisplacement.Phi);
 
-        return new NeckNode(Id, newR, Coordinates.Phi + dPhi, particle, SolverSession, ContactedNodeId, ContactedParticleId);
+        return new NeckNode(Id, newR, Coordinates.Phi + dPhi, particle, ContactedNodeId, ContactedParticleId);
     }
 }

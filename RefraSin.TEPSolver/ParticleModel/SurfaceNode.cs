@@ -12,9 +12,9 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class SurfaceNode : NodeBase 
 {
     /// <inheritdoc />
-    public SurfaceNode(INode node, Particle particle, ISolverSession solverSession) : base(node, particle, solverSession) { }
+    public SurfaceNode(INode node, Particle particle) : base(node, particle) { }
 
-    private SurfaceNode(Guid id, double r, Angle phi, Particle particle, ISolverSession solverSession) : base(id, r, phi, particle, solverSession) { }
+    private SurfaceNode(Guid id, double r, Angle phi, Particle particle) : base(id, r, phi, particle) { }
 
     /// <inheritdoc />
     public override NodeType Type => NodeType.Surface;
@@ -43,6 +43,6 @@ public class SurfaceNode : NodeBase
         var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
         var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
 
-        return new SurfaceNode(Id, newR, Coordinates.Phi + dPhi, particle, SolverSession);
+        return new SurfaceNode(Id, newR, Coordinates.Phi + dPhi, particle);
     }
 }

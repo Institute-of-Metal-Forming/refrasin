@@ -21,14 +21,13 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
     public SinteringStep(
         double duration,
         double temperature, IProcessStepSolver<ISinteringStep> solver, IReadOnlyList<IMaterial> materials,
-        IReadOnlyList<IMaterialInterface> materialInterfaces, double gasConstant = 8.31446261815324
+        double gasConstant = 8.31446261815324
     )
     {
         Duration = duration;
         Temperature = temperature;
         Solver = solver;
         Materials = materials;
-        MaterialInterfaces = materialInterfaces;
         Temperature = temperature;
         GasConstant = gasConstant;
     }
@@ -49,9 +48,6 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
 
     /// <inheritdoc />
     public IReadOnlyList<IMaterial> Materials { get; }
-
-    /// <inheritdoc />
-    public IReadOnlyList<IMaterialInterface> MaterialInterfaces { get; }
 
     /// <inheritdoc />
     public override ISystemState Solve(ISystemState inputState) => Solver.Solve(this, inputState);

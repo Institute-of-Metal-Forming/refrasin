@@ -45,19 +45,17 @@ public class OneParticleTest
         });
 
         _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default);
-
+        
         _material = new Material(
             _particle.MaterialId,
             "Al2O3",
             new BulkProperties(0, 1e-4),
             new SubstanceProperties(1.8e3, 101.96e-3),
-            new InterfaceProperties(1.65e-10, 0.9)
-        );
-
-        _materialInterface = new MaterialInterface(
-            _material.Id,
-            _material.Id,
-            new InterfaceProperties(1.65e-10, 0.5)
+            new InterfaceProperties(1.65e-10, 0.9),
+            new Dictionary<Guid, IInterfaceProperties>
+            {
+                {_particle.MaterialId, new InterfaceProperties(1.65e-10, 0.5)}
+            }
         );
 
         _initialState = new SystemState(Guid.NewGuid(), 0, new[] { _particle });
@@ -66,8 +64,7 @@ public class OneParticleTest
             duration,
             2073,
             _solver,
-            new[] { _material },
-            new[] { _materialInterface }
+            new[] { _material }
         );
         _sinteringProcess.UseStorage(_solutionStorage);
     }
@@ -75,7 +72,6 @@ public class OneParticleTest
     private IParticle<IParticleNode> _particle;
     private SinteringSolver _solver;
     private IMaterial _material;
-    private IMaterialInterface _materialInterface;
     private SystemState _initialState;
     private SinteringStep _sinteringProcess;
     private InMemorySolutionStorage _solutionStorage;

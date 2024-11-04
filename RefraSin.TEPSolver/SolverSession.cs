@@ -11,9 +11,6 @@ using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
-using static System.Math;
-using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver;
 
@@ -28,7 +25,7 @@ internal class SolverSession : ISolverSession
     )
     {
         Id = Guid.NewGuid();
-        Norm = sinteringSolver.Routines.Normalizer.GetNorm(inputState, step);
+        Norm = sinteringSolver.Routines.Normalizer.GetNorm(inputState, step, step.Materials);
 
         var normalizedState = Norm.NormalizeSystemState(inputState);
 
@@ -39,21 +36,12 @@ internal class SolverSession : ISolverSession
         GasConstant = step.GasConstant / Norm.Energy * Norm.Substance * Norm.Temperature;
         _reportSystemState = step.ReportSystemState;
 
-        Materials = step.Materials.ToDictionary(m => m.Id, m => Norm.NormalizeMaterial(m));
-
-        MaterialInterfaces = step
-            .MaterialInterfaces.Select(mi => new MaterialInterface(
-                mi.From,
-                mi.To,
-                Norm.NormalizeInterfaceProperties(mi.Properties)
-            ))
-            .GroupBy(mi => mi.From)
-            .ToDictionary(g => g.Key, g => (IReadOnlyList<IMaterialInterface>)g.ToArray());
+        Materials = step.Materials.Select(m => Norm.NormalizeMaterial(m)).ToArray();
 
         Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
         Routines = sinteringSolver.Routines;
 
-        CurrentState = new SolutionState(normalizedState.Id, StartTime, normalizedState, this);
+        CurrentState = new SolutionState(normalizedState, Materials, step);
         CurrentState.Sanitize();
     }
 
@@ -70,11 +58,10 @@ internal class SolverSession : ISolverSession
         _reportSystemState = parentSession._reportSystemState;
 
         Materials = parentSession.Materials;
-        MaterialInterfaces = parentSession.MaterialInterfaces;
         Logger = parentSession.Logger;
         Routines = parentSession.Routines;
 
-        CurrentState = new SolutionState(inputState.Id, StartTime, inputState, this);
+        CurrentState = new SolutionState(inputState, Materials, this);
         CurrentState.Sanitize();
     }
 
@@ -99,9 +86,7 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public StepVector? LastStep { get; set; }
 
-    public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
-
-    public IReadOnlyDictionary<Guid, IReadOnlyList<IMaterialInterface>> MaterialInterfaces { get; }
+    public IReadOnlyList<IMaterial> Materials { get; }
 
     /// <inheritdoc />
     public ILogger<SinteringSolver> Logger { get; }

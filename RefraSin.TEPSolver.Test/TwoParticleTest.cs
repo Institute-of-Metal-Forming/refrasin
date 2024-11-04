@@ -114,21 +114,18 @@ public class TwoParticleTest
             "Al2O3",
             new BulkProperties(0, 1e-4),
             new SubstanceProperties(1.8e3, 101.96e-3),
-            new InterfaceProperties(1.65e-10, 0.9)
-        );
-
-        var materialInterface = new MaterialInterface(
-            material.Id,
-            material.Id,
-            new InterfaceProperties(1.65e-10, 0.5)
+            new InterfaceProperties(1.65e-10, 0.9),
+            new Dictionary<Guid, IInterfaceProperties>
+            {
+                {initialState.Particles[1].MaterialId, new InterfaceProperties(1.65e-10, 0.5)}
+            }
         );
 
         _sinteringProcess = new SinteringStep(
             duration,
             2073,
             _solver,
-            new[] { material },
-            new[] { materialInterface }
+            new[] { material }
         );
         _sinteringProcess.UseStorage(_solutionStorage);
     }

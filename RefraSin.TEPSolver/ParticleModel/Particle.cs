@@ -1,15 +1,10 @@
 using System.Globalization;
 using RefraSin.Coordinates;
-using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Cartesian;
-using RefraSin.Coordinates.Polar;
 using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
-using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.Particles;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.StepVectors;
-using static System.Math;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -19,37 +14,34 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 {
     private ReadOnlyParticleSurface<NodeBase> _nodes;
-    private double? _meanRadius;
     private IReadOnlyContactCollection<IParticleContactEdge<Particle>>? _contacts;
 
-    public Particle(IParticle<IParticleNode> particle, ISolverSession solverSession)
+    public Particle(IParticle<IParticleNode> particle, SolutionState solutionState, ISinteringConditions conditions)
     {
         Id = particle.Id;
         Coordinates = particle.Coordinates.Absolute;
         RotationAngle = particle.RotationAngle;
 
+        SolutionState = solutionState;
+
         MaterialId = particle.MaterialId;
-        var material = solverSession.Materials[particle.MaterialId];
+        var material = solutionState.Materials[particle.MaterialId];
         VacancyVolumeEnergy =
-            solverSession.Temperature
-            * solverSession.GasConstant
+            conditions.Temperature
+            * conditions.GasConstant
             / (material.Substance.MolarVolume * material.Bulk.EquilibriumVacancyConcentration);
 
         SurfaceProperties = material.Surface;
+        InterfaceProperties = material.Interfaces;
 
-        InterfaceProperties = solverSession
-            .MaterialInterfaces[material.Id]
-            .ToDictionary(mi => mi.To, mi => mi.Properties);
-
-        SolverSession = solverSession;
         _nodes = particle
             .Nodes.Select(node =>
                 node switch
                 {
                     { Type: NodeType.GrainBoundary }
-                        => new GrainBoundaryNode(node, this, solverSession),
-                    { Type: NodeType.Neck } => new NeckNode(node, this, solverSession),
-                    _ => (NodeBase)new SurfaceNode(node, this, solverSession),
+                        => new GrainBoundaryNode(node, this),
+                    { Type: NodeType.Neck } => new NeckNode(node, this),
+                    _ => (NodeBase)new SurfaceNode(node, this),
                 }
             )
             .ToReadOnlyParticleSurface();
@@ -69,7 +61,7 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
         SurfaceProperties = previousState.SurfaceProperties;
         InterfaceProperties = previousState.InterfaceProperties;
 
-        SolverSession = previousState.SolverSession;
+        SolutionState = previousState.SolutionState;
 
         // Apply time step changes
         if (parent is null) // is root particle
@@ -79,7 +71,7 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
         }
         else
         {
-            var contact = SolverSession.CurrentState.ParticleContacts[parent.Id, previousState.Id];
+            var contact = SolutionState.ParticleContacts[parent.Id, previousState.Id];
             var polarCoordinates = contact.ContactVector;
             var newCoordinates = new PolarPoint(
                 polarCoordinates.Phi + stepVector.AngleDisplacement(contact) * timeStepWidth,
@@ -95,6 +87,8 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
             .Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, this))
             .ToReadOnlyParticleSurface();
     }
+
+    public SolutionState SolutionState { get; }
 
     /// <inheritdoc/>
     public Guid Id { get; }
@@ -123,13 +117,6 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 
     public IReadOnlyParticleSurface<NodeBase> Nodes => _nodes;
 
-    /// <summary>
-    /// Reference to the current solver session.
-    /// </summary>
-    private ISolverSession SolverSession { get; }
-
-    public double MeanRadius => _meanRadius ??= Sqrt(Nodes.Sum(n => n.Volume.ToUpper)) / PI;
-
     public double VacancyVolumeEnergy { get; }
 
     public Particle ApplyTimeStep(Particle? parent, StepVector stepVector, double timeStepWidth) =>
@@ -143,5 +130,5 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
     public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;
 
     /// <inheritdoc />
-    public IReadOnlyContactCollection<IParticleContactEdge<Particle>> Contacts => _contacts ??=  SolverSession.CurrentState.ParticleContacts.From(Id).ToReadOnlyContactCollection();
+    public IReadOnlyContactCollection<IParticleContactEdge<Particle>> Contacts => _contacts ??=  SolutionState.ParticleContacts.From(Id).ToReadOnlyContactCollection();
 }
