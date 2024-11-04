@@ -1,14 +1,8 @@
-using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Nodes;
-using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
-using static System.Math;
-using static RefraSin.TEPSolver.EquationSystem.Helper;
 using GrainBoundaryNode = RefraSin.TEPSolver.ParticleModel.GrainBoundaryNode;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
-using Particle = RefraSin.TEPSolver.ParticleModel.Particle;
 
 namespace RefraSin.TEPSolver.StepEstimators;
 
@@ -25,46 +19,44 @@ class StepEstimator : IStepEstimator
     private static void FillStepVector(StepVector stepVector, SolutionState currentState)
     {
         stepVector.LambdaDissipation(1);
-        
+
         foreach (var particle in currentState.Particles)
         {
             foreach (var node in particle.Nodes)
             {
-                if (node is not INodeContact)
+                if (node.Type is NodeType.Surface)
                 {
-                    stepVector.LambdaVolume(node, 0);
-                    stepVector.FluxToUpper(node, GuessFluxToUpper(node));
                     stepVector.NormalDisplacement(node, GuessNormalDisplacement(node));
                 }
+
+                stepVector.FluxToUpper(node, GuessFluxToUpper(node));
+                stepVector.LambdaVolume(node, 1);
             }
         }
 
         foreach (var contact in currentState.ParticleContacts)
         {
-            var averageNormalDisplacement = contact.FromNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement) +
-                                            contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);
+            var averageNormalDisplacement =
+                contact.FromNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement)
+                + contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);
+
             stepVector.RadialDisplacement(contact, averageNormalDisplacement);
-            stepVector.AngleDisplacement(contact, 0);
-            stepVector.RotationDisplacement(contact, 0);
-            stepVector.LambdaContactRotation(contact, 1);
 
             foreach (var node in contact.FromNodes)
             {
-                stepVector.LambdaContactDistance(node, 0);
-                stepVector.LambdaContactDirection(node, 0);
-                
-                stepVector.LambdaVolume(node, 0);
-                stepVector.FluxToUpper(node, GuessFluxToUpper(node));
-                stepVector.NormalDisplacement(node, averageNormalDisplacement);
+                stepVector.LambdaContactDistance(node, 1);
+                stepVector.LambdaContactDirection(node, 1);
 
-                stepVector.LambdaVolume(node.ContactedNode, 0);
-                stepVector.FluxToUpper(node.ContactedNode, GuessFluxToUpper(node.ContactedNode));
+                stepVector.NormalDisplacement(node, averageNormalDisplacement);
                 stepVector.NormalDisplacement(node.ContactedNode, averageNormalDisplacement);
 
-                if (node is NeckNode)
+                if (node.Type is NodeType.Neck)
                 {
                     stepVector.TangentialDisplacement(node, GuessTangentialDisplacement(node));
-                    stepVector.TangentialDisplacement(node.ContactedNode, GuessTangentialDisplacement(node.ContactedNode));
+                    stepVector.TangentialDisplacement(
+                        node.ContactedNode,
+                        GuessTangentialDisplacement(node.ContactedNode)
+                    );
                 }
             }
         }
@@ -87,12 +79,16 @@ class StepEstimator : IStepEstimator
     }
 
     private static double GuessFluxToUpper(NodeBase node) =>
-        -node.InterfaceDiffusionCoefficient.ToUpper * (GuessVacancyConcentration(node) - GuessVacancyConcentration(node.Upper))
-      / Pow(node.SurfaceDistance.ToUpper, 2);
+        -node.InterfaceDiffusionCoefficient.ToUpper
+        * (GuessVacancyConcentration(node) - GuessVacancyConcentration(node.Upper))
+        / Pow(node.SurfaceDistance.ToUpper, 2);
 
     private static double GuessVacancyConcentration(NodeBase node) =>
-        (node is not NeckNode ? node.GibbsEnergyGradient.Normal : -Abs(node.GibbsEnergyGradient.Tangential))
-      / node.Particle.VacancyVolumeEnergy;
+        (
+            node is not NeckNode
+                ? node.GibbsEnergyGradient.Normal
+                : -Abs(node.GibbsEnergyGradient.Tangential)
+        ) / node.Particle.VacancyVolumeEnergy;
 
     /// <inheritdoc />
     public void RegisterWithSolver(SinteringSolver solver) { }

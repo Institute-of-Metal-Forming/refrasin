@@ -1,9 +1,5 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using Microsoft.VisualBasic.CompilerServices;
-using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
@@ -35,16 +31,17 @@ public class StepVector : DenseVector
     public double LambdaVolume(INode node) => this[StepVectorMap.LambdaVolume(node)];
 
     public double TangentialDisplacement(INode node) =>
-        node.Type == NodeType.Neck ? this[StepVectorMap.TangentialDisplacement(node)] : 0;
+        this[StepVectorMap.TangentialDisplacement(node)];
+
+    public double NormalStress(INode node) => this[StepVectorMap.NormalStress(node)];
+
+    public double TangentialStress(INode node) => this[StepVectorMap.TangentialStress(node)];
 
     public double LambdaContactDistance(INode node) =>
         this[StepVectorMap.LambdaContactDistance(node)];
 
     public double LambdaContactDirection(INode node) =>
         this[StepVectorMap.LambdaContactDirection(node)];
-
-    public double LambdaContactRotation(ParticleContact contact) =>
-        this[StepVectorMap.LambdaContactRotation(contact)];
 
     public double RadialDisplacement(ParticleContact contact) =>
         this[StepVectorMap.RadialDisplacement(contact)];
@@ -57,11 +54,20 @@ public class StepVector : DenseVector
 
     public void LambdaDissipation(double value) => this[StepVectorMap.LambdaDissipation()] = value;
 
-    public void NormalDisplacement(INode node, double value) => this[StepVectorMap.NormalDisplacement(node)] = value;
+    public void NormalDisplacement(INode node, double value) =>
+        this[StepVectorMap.NormalDisplacement(node)] = value;
 
-    public void FluxToUpper(INode node, double value) => this[StepVectorMap.FluxToUpper(node)] = value;
+    public void NormalStress(INode node, double value) =>
+        this[StepVectorMap.NormalStress(node)] = value;
 
-    public void LambdaVolume(INode node, double value) => this[StepVectorMap.LambdaVolume(node)] = value;
+    public void TangentialStress(INode node, double value) =>
+        this[StepVectorMap.TangentialStress(node)] = value;
+
+    public void FluxToUpper(INode node, double value) =>
+        this[StepVectorMap.FluxToUpper(node)] = value;
+
+    public void LambdaVolume(INode node, double value) =>
+        this[StepVectorMap.LambdaVolume(node)] = value;
 
     public void TangentialDisplacement(INode node, double value) =>
         this[StepVectorMap.TangentialDisplacement(node)] = value;
@@ -71,9 +77,6 @@ public class StepVector : DenseVector
 
     public void LambdaContactDirection(INode node, double value) =>
         this[StepVectorMap.LambdaContactDirection(node)] = value;
-
-    public void LambdaContactRotation(ParticleContact contact, double value) =>
-        this[StepVectorMap.LambdaContactRotation(contact)] = value;
 
     public void RadialDisplacement(ParticleContact contact, double value) =>
         this[StepVectorMap.RadialDisplacement(contact)] = value;
@@ -101,14 +104,24 @@ public class StepVector : DenseVector
 
     public StepVector Copy() => new(Build.DenseOfVector(this), StepVectorMap);
 
-    public double[] ParticleBlock(IParticle particle)
+    public Vector<double> ParticleBlock(IParticle particle)
     {
         var block = StepVectorMap[particle];
-
-        return Values[block.start..(block.start + block.length)];
+        return new DenseVector(Values[block.start..(block.start + block.length)]);
     }
 
-    public double[] BorderBlock() => Values[StepVectorMap.BorderStart..];
+    public Vector<double> ContactBlock(IParticleContactEdge contact)
+    {
+        var block = StepVectorMap[contact];
+        return new DenseVector(Values[block.start..(block.start + block.length)]);
+    }
+
+    public Vector<double> GlobalBlock() => new DenseVector(Values[StepVectorMap.GlobalStart..]);
+
+    public void Update(double[] data)
+    {
+        data.CopyTo(Values, 0);
+    }
 
     public void UpdateParticleBlock(IParticle particle, double[] data)
     {
@@ -122,8 +135,25 @@ public class StepVector : DenseVector
         data.CopyTo(Values, block.start);
     }
 
-    public void UpdateBorderBlock(double[] data)
+    public void UpdateContactBlock(IParticleContactEdge contact, double[] data)
     {
-        data.CopyTo(Values, StepVectorMap.BorderStart);
+        var block = StepVectorMap[contact];
+
+        if (data.Length != block.length)
+            throw new InvalidOperationException(
+                "'data' must have exactly the length of the contact block."
+            );
+
+        data.CopyTo(Values, block.start);
+    }
+
+    public void UpdateGlobalBlock(double[] data)
+    {
+        if (data.Length != StepVectorMap.GlobalLength)
+            throw new InvalidOperationException(
+                "'data' must have exactly the length of the global block."
+            );
+
+        data.CopyTo(Values, StepVectorMap.GlobalStart);
     }
 }

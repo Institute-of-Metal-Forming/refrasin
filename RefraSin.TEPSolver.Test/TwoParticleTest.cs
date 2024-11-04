@@ -146,7 +146,9 @@ public class TwoParticleTest
         var initialState = session.CurrentState;
         var guess = session.Routines.StepEstimator.EstimateStep(session, initialState);
 
-        var matrix = Jacobian.EvaluateAt(initialState, guess).PointwiseSign();
+        var matrix = new EquationSystem.EquationSystem(initialState, guess)
+            .Jacobian()
+            .PointwiseSign();
 
         var plt = new Plot();
 
@@ -183,13 +185,13 @@ public class TwoParticleTest
         StepVector guess
     )
     {
-        var zero = Lagrangian.EvaluateAt(state, guess);
+        var zero = new EquationSystem.EquationSystem(state, guess).Lagrangian();
 
         for (int i = 0; i < guess.Count; i++)
         {
             var step = guess.Copy();
             step[i] += 1e-3;
-            var current = Lagrangian.EvaluateAt(state, step);
+            var current = new EquationSystem.EquationSystem(state, step).Lagrangian();
 
             yield return current - zero;
         }
