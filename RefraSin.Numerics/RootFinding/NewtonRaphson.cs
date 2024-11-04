@@ -29,7 +29,7 @@ public class NewtonRaphsonRootFinder(
         
         int i;
 
-        var x = initialGuess;
+        var x = initialGuess.Clone();
         var y = function(x);
         var f = 0.5 * y * y;
         var dxold = Vector<double>.Build.Dense(x.Count, double.NaN);
@@ -70,23 +70,23 @@ public class NewtonRaphsonRootFinder(
             var ynew = function(xnew);
             var fnew = 0.5 * ynew * ynew;
 
-            if (fnew > f + AverageDecreaseRateFactor * gradf * (xnew - x))
-            {
-                logger.LogDebug("Lowering step by line search.");
-                var gprime0 = gradf * dx;
-
-                var stepFactor = gprime0 / (2 * (fnew - f - gprime0));
-
-                if (stepFactor > MaxStepFactor)
-                    stepFactor = MaxStepFactor;
-                else if (stepFactor < MinStepFactor)
-                    stepFactor = MinStepFactor;
-
-                dx *= stepFactor;
-                xnew = x + dx;
-                ynew = function(xnew);
-                fnew = 0.5 * ynew * ynew;
-            }
+            // if (fnew > f + AverageDecreaseRateFactor * gradf * (xnew - x))
+            // {
+            //     logger.LogDebug("Lowering step by line search.");
+            //     var gprime0 = gradf * dx;
+            //
+            //     var stepFactor = gprime0 / (2 * (fnew - f - gprime0));
+            //
+            //     if (stepFactor > MaxStepFactor)
+            //         stepFactor = MaxStepFactor;
+            //     else if (stepFactor < MinStepFactor)
+            //         stepFactor = MinStepFactor;
+            //
+            //     dx *= stepFactor;
+            //     xnew = x + dx;
+            //     ynew = function(xnew);
+            //     fnew = 0.5 * ynew * ynew;
+            // }
 
             x = xnew;
             y = ynew;
