@@ -18,7 +18,7 @@ repos:
         always_run: true
         pass_filenames: false
         stages:
-          - commit
+          - pre-commit
           - post-checkout
           - post-rewrite
         description: Install the .NET tools listed at .config/dotnet-tools.json.
@@ -26,7 +26,12 @@ repos:
         name: Run CSharpier on C# files
         entry: dotnet tool run dotnet-csharpier
         language: system
-        types:
-          - c#
-        stages: [pre-commit, pre-merge-commit, pre-push, manual]
+        types: [ c# ]
+        stages: [ pre-commit, pre-merge-commit, pre-push, manual ]
         description: CSharpier is an opinionated C# formatter inspired by Prettier.
+      - id: fantomas
+        name: Run Fantomas on F# files
+        entry: dotnet tool run fantomas
+        language: system
+        files: \.(fs|fsx)$
+        stages: [ pre-commit, pre-merge-commit, pre-push, manual ]
