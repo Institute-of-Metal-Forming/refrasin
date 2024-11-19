@@ -6,7 +6,8 @@ namespace RefraSin.ProcessModel;
 /// Interface for classes representing the state of a particle group at a certain position in time and process line.
 /// </summary>
 public interface ISystemState<out TParticle, out TNode> : IParticleSystem<TParticle, TNode>
-    where TParticle : IParticle<TNode> where TNode : IParticleNode
+    where TParticle : IParticle<TNode>
+    where TNode : IParticleNode
 {
     /// <summary>
     /// Unique ID of this state.

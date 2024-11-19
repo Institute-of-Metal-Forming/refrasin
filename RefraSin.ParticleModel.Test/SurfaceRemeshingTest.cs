@@ -21,7 +21,10 @@ public class SurfaceRemeshingTest
     [Test]
     public void TestNodeDeletion()
     {
-        var particle = new ShapeFunctionParticleFactory(1, 0.2, 5, 0.1, Guid.Empty) { NodeCount = 200 }.GetParticle();
+        var particle = new ShapeFunctionParticleFactory(1, 0.2, 5, 0.1, Guid.Empty)
+        {
+            NodeCount = 200,
+        }.GetParticle();
 
         var remesher = new FreeSurfaceRemesher(deletionLimit: 0.05);
         var remeshedParticle = remesher.Remesh(particle);
@@ -33,7 +36,10 @@ public class SurfaceRemeshingTest
     [Test]
     public void TestNodeAddition()
     {
-        var particle = new ShapeFunctionParticleFactory(1, 0.2, 5, 0.1, Guid.Empty) { NodeCount = 20 }.GetParticle();
+        var particle = new ShapeFunctionParticleFactory(1, 0.2, 5, 0.1, Guid.Empty)
+        {
+            NodeCount = 20,
+        }.GetParticle();
 
         var remesher = new FreeSurfaceRemesher(deletionLimit: 0.05);
         var remeshedParticle = remesher.Remesh(particle);

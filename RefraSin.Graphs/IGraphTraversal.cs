@@ -1,6 +1,7 @@
 namespace RefraSin.Graphs;
 
-public interface IGraphTraversal<TVertex> where TVertex : IVertex
+public interface IGraphTraversal<TVertex>
+    where TVertex : IVertex
 {
     TVertex Start { get; }
 

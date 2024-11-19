@@ -18,23 +18,8 @@ public class VertexTests
     [Test]
     public void TestEquality()
     {
-        Assert.That(
-            _vertex1,
-            Is.EqualTo(
-                _vertex3
-            )
-        );
-        Assert.That(
-            _vertex3,
-            Is.EqualTo(
-                _vertex1
-            )
-        );
-        Assert.That(
-            _vertex1,
-            Is.Not.EqualTo(
-                _vertex2
-            )
-        );
+        Assert.That(_vertex1, Is.EqualTo(_vertex3));
+        Assert.That(_vertex3, Is.EqualTo(_vertex1));
+        Assert.That(_vertex1, Is.Not.EqualTo(_vertex2));
     }
 }

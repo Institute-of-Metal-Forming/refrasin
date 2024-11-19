@@ -1,6 +1,7 @@
 namespace RefraSin.Graphs;
 
-public class UndirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>> where TVertex : IVertex
+public class UndirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>>
+    where TVertex : IVertex
 {
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _adjacentsOf;
     private readonly Lazy<Dictionary<TVertex, Edge<TVertex>[]>> _edgesAt;
@@ -13,7 +14,8 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>> where TVe
         _edgesAt = new Lazy<Dictionary<TVertex, Edge<TVertex>[]>>(InitEdgesAt);
     }
 
-    public static UndirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
+    public static UndirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph)
+        where TEdge : IEdge<TVertex> =>
         new(graph.Vertices, (IEnumerable<IEdge<TVertex>>)graph.Edges);
 
     public static UndirectedGraph<TVertex> FromGraphSearch(IGraphTraversal<TVertex> graphTraversal)
@@ -54,7 +56,8 @@ public class UndirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>> where TVe
     public IEnumerable<Edge<TVertex>> EdgesAt(TVertex vertex) =>
         _edgesAt.Value.GetValueOrDefault(vertex, []);
 
-    public IEnumerable<TVertex> AdjacentsOf(TVertex vertex) => _adjacentsOf.Value.GetValueOrDefault(vertex, []);
+    public IEnumerable<TVertex> AdjacentsOf(TVertex vertex) =>
+        _adjacentsOf.Value.GetValueOrDefault(vertex, []);
 
     public IEnumerable<TVertex> ParentsOf(TVertex vertex) => AdjacentsOf(vertex);
 

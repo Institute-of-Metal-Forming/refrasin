@@ -10,18 +10,37 @@ public class InstabilityDetector : IStepValidator
     {
         foreach (var particle in currentState.Particles)
         {
-            var displacements = particle.Nodes.Select( n=> stepVector.NormalDisplacement(n)).ToArray();
-            var differences = displacements.Zip(displacements.Skip(1).Append(displacements[0]), (current, next) => next - current).ToArray();
+            var displacements = particle
+                .Nodes.Select(n => stepVector.NormalDisplacement(n))
+                .ToArray();
+            var differences = displacements
+                .Zip(
+                    displacements.Skip(1).Append(displacements[0]),
+                    (current, next) => next - current
+                )
+                .ToArray();
 
             for (int i = 0; i < differences.Length; i++)
             {
                 if (
-                    differences[i] * differences[(i + 1) % differences.Length] < 0 &&
-                    differences[(i + 1) % differences.Length] * differences[(i + 2) % differences.Length] < 0 &&
-                    differences[(i + 2) % differences.Length] * differences[(i + 3) % differences.Length] < 0 &&
-                    differences[(i + 3) % differences.Length] * differences[(i + 4) % differences.Length] < 0
+                    differences[i] * differences[(i + 1) % differences.Length] < 0
+                    && differences[(i + 1) % differences.Length]
+                        * differences[(i + 2) % differences.Length]
+                        < 0
+                    && differences[(i + 2) % differences.Length]
+                        * differences[(i + 3) % differences.Length]
+                        < 0
+                    && differences[(i + 3) % differences.Length]
+                        * differences[(i + 4) % differences.Length]
+                        < 0
                 )
-                    throw new InstabilityException(currentState, stepVector, particle.Id, particle.Nodes[i].Id, i);
+                    throw new InstabilityException(
+                        currentState,
+                        stepVector,
+                        particle.Id,
+                        particle.Nodes[i].Id,
+                        i
+                    );
             }
         }
     }

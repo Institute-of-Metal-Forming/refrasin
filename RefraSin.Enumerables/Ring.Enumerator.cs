@@ -41,18 +41,22 @@ public partial class Ring<TRingItem>
         /// <summary>
         ///     First element to start enumeration from.
         /// </summary>
-        public TRingItem First => _first ?? throw new InvalidOperationException("Enumerator has no first element.");
+        public TRingItem First =>
+            _first ?? throw new InvalidOperationException("Enumerator has no first element.");
 
         /// <summary>
         ///     Last element to end enumeration with.
         /// </summary>
-        public TRingItem Last => _last ?? throw new InvalidOperationException("Enumerator has no last element.");
+        public TRingItem Last =>
+            _last ?? throw new InvalidOperationException("Enumerator has no last element.");
 
         /// <inheritdoc />
         public bool MoveNext()
         {
-            if (_first == null) return false;
-            if (_endReached) return false;
+            if (_first == null)
+                return false;
+            if (_endReached)
+                return false;
 
             if (_current == null)
             {
@@ -64,7 +68,9 @@ public partial class Ring<TRingItem>
             {
                 var upper = _current.Upper;
                 if (!ReferenceEquals(upper?.Lower, _current))
-                    throw new InvalidOperationException("Found invalid neighbor references while enumerating.");
+                    throw new InvalidOperationException(
+                        "Found invalid neighbor references while enumerating."
+                    );
                 _current = upper;
                 return true;
             }
@@ -83,7 +89,10 @@ public partial class Ring<TRingItem>
 
         /// <inheritdoc />
         public TRingItem Current =>
-            _current ?? throw new InvalidOperationException("Invalid state of enumerator. Before start or after end of enumeration.");
+            _current
+            ?? throw new InvalidOperationException(
+                "Invalid state of enumerator. Before start or after end of enumeration."
+            );
 
         object IEnumerator.Current => Current;
 

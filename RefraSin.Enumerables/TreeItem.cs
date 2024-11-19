@@ -41,5 +41,6 @@ public class TreeItem<TValue> : ITreeItem<TreeItem<TValue>>
     public TValue Value { get; set; }
 
     /// <inheritdoc />
-    public override string ToString() => $"TreeItem<{TypeNameEncoder.EncodeTypeName(typeof(TValue))}> Value={Value}";
+    public override string ToString() =>
+        $"TreeItem<{TypeNameEncoder.EncodeTypeName(typeof(TValue))}> Value={Value}";
 }

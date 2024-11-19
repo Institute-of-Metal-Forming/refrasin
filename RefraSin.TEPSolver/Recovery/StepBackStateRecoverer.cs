@@ -29,12 +29,21 @@ public class StepBackStateRecoverer(int rememberedStateCount = 5) : IStateRecove
         solver.StepSuccessfullyCalculated += HandleStepSuccessfullyCalculated;
     }
 
-    private void HandleSessionInitialized(object? sender, SinteringSolver.SessionInitializedEventArgs eventArgs)
+    private void HandleSessionInitialized(
+        object? sender,
+        SinteringSolver.SessionInitializedEventArgs eventArgs
+    )
     {
-        _stateMemory.Add(eventArgs.SolverSession.Id, new FixedStack<SolutionState>(RememberedStateCount));
+        _stateMemory.Add(
+            eventArgs.SolverSession.Id,
+            new FixedStack<SolutionState>(RememberedStateCount)
+        );
     }
 
-    private void HandleStepSuccessfullyCalculated(object? sender, SinteringSolver.StepSuccessfullyCalculatedEventArgs eventArgs)
+    private void HandleStepSuccessfullyCalculated(
+        object? sender,
+        SinteringSolver.StepSuccessfullyCalculatedEventArgs eventArgs
+    )
     {
         _stateMemory[eventArgs.SolverSession.Id].Push(eventArgs.NewState);
     }

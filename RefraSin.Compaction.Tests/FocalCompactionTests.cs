@@ -24,7 +24,11 @@ public class FocalCompactionTests
             new[]
             {
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty).GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty) { CenterCoordinates = (3, 0), RotationAngle = Straight }.GetParticle()
+                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+                {
+                    CenterCoordinates = (3, 0),
+                    RotationAngle = Straight,
+                }.GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );
@@ -32,7 +36,11 @@ public class FocalCompactionTests
             new[]
             {
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty).GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty) { CenterCoordinates = (-3, 0), RotationAngle = Straight }.GetParticle()
+                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+                {
+                    CenterCoordinates = (-3, 0),
+                    RotationAngle = Straight,
+                }.GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );
@@ -40,22 +48,41 @@ public class FocalCompactionTests
             new[]
             {
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                    { CenterCoordinates = (-3, -3), RotationAngle = HalfRight }.GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty) { CenterCoordinates = (3, -3), RotationAngle = Straight - HalfRight }
-                    .GetParticle()
+                {
+                    CenterCoordinates = (-3, -3),
+                    RotationAngle = HalfRight,
+                }.GetParticle(),
+                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+                {
+                    CenterCoordinates = (3, -3),
+                    RotationAngle = Straight - HalfRight,
+                }.GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );
         yield return new TestFixtureData(
             new[]
             {
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty) { CenterCoordinates = (3, 6), RotationAngle = HalfRight }.GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty) { CenterCoordinates = (-3, 6), RotationAngle = Straight - HalfRight }
-                    .GetParticle(),
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                    { CenterCoordinates = (3, -6), RotationAngle = -HalfRight }.GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty) { CenterCoordinates = (-3, -6), RotationAngle = Straight + HalfRight }
-                    .GetParticle()
+                {
+                    CenterCoordinates = (3, 6),
+                    RotationAngle = HalfRight,
+                }.GetParticle(),
+                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+                {
+                    CenterCoordinates = (-3, 6),
+                    RotationAngle = Straight - HalfRight,
+                }.GetParticle(),
+                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+                {
+                    CenterCoordinates = (3, -6),
+                    RotationAngle = -HalfRight,
+                }.GetParticle(),
+                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
+                {
+                    CenterCoordinates = (-3, -6),
+                    RotationAngle = Straight + HalfRight,
+                }.GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );
@@ -76,9 +103,21 @@ public class FocalCompactionTests
         var compactor = new FocalCompactionStep(_focus, stepSize, maxStepCount: 1000);
         var sol = compactor.Solve(_system);
 
-        Chart.Combine([
-            ParticlePlot.PlotParticles(_system.Particles.Select(p => new Particle<IParticleNode>(p.Id, sol.Particles[p.Id].Coordinates, p.RotationAngle, p.MaterialId, particle => p.Nodes.Select(n => new ParticleNode(n, particle))))),
-            ParticlePlot.PlotParticles(sol.Particles)
-        ]).Show();
+        Chart
+            .Combine(
+                [
+                    ParticlePlot.PlotParticles(
+                        _system.Particles.Select(p => new Particle<IParticleNode>(
+                            p.Id,
+                            sol.Particles[p.Id].Coordinates,
+                            p.RotationAngle,
+                            p.MaterialId,
+                            particle => p.Nodes.Select(n => new ParticleNode(n, particle))
+                        ))
+                    ),
+                    ParticlePlot.PlotParticles(sol.Particles),
+                ]
+            )
+            .Show();
     }
 }

@@ -36,6 +36,6 @@ public record ParticleContact : ParticleContactEdge<Particle>
 
     public IList<ContactNodeBase> ToNodes =>
         _toNodes ??= FromNodes.Select(n => n.ContactedNode).ToArray();
-    
+
     public Guid MergedId { get; }
 }

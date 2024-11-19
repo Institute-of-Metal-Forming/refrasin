@@ -10,7 +10,13 @@ namespace RefraSin.ParticleModel.ParticleFactories;
 
 public class ShapeFunctionParticleFactory : IParticleFactory<Particle<ParticleNode>, ParticleNode>
 {
-    public ShapeFunctionParticleFactory(double baseRadius, double peakHeight, uint peakCount, double ovality, Guid materialId)
+    public ShapeFunctionParticleFactory(
+        double baseRadius,
+        double peakHeight,
+        uint peakCount,
+        double ovality,
+        Guid materialId
+    )
     {
         BaseRadius = baseRadius;
         PeakHeight = peakHeight;
@@ -37,7 +43,8 @@ public class ShapeFunctionParticleFactory : IParticleFactory<Particle<ParticleNo
 
     public Func<ShapeFunctionParticleFactory, int>? NodeCountFunction { get; init; }
 
-    public virtual double ParticleShapeFunction(double phi) => BaseRadius * (1 + PeakHeight * Cos(PeakCount * phi) + Ovality * Cos(2 * phi));
+    public virtual double ParticleShapeFunction(double phi) =>
+        BaseRadius * (1 + PeakHeight * Cos(PeakCount * phi) + Ovality * Cos(2 * phi));
 
     /// <inheritdoc />
     public Particle<ParticleNode> GetParticle(Guid? id = null)
@@ -56,13 +63,12 @@ public class ShapeFunctionParticleFactory : IParticleFactory<Particle<ParticleNo
         );
 
         IEnumerable<ParticleNode> NodeFactory(IParticle<ParticleNode> particle) =>
-            phis.Zip(rs).Select(
-                t => new ParticleNode(
+            phis.Zip(rs)
+                .Select(t => new ParticleNode(
                     Guid.NewGuid(),
                     particle,
                     new PolarPoint(t.First, t.Second),
                     NodeType.Surface
-                )
-            );
+                ));
     }
 }

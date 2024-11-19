@@ -25,9 +25,13 @@ internal record ParticleReturn : IParticle<NodeReturn>
             .Nodes.Select(n =>
                 n switch
                 {
-                    ContactNodeBase contactNode
-                        => new ContactNodeReturn(contactNode, stepVector, this, norm),
-                    _ => new NodeReturn(n, stepVector, this, norm)
+                    ContactNodeBase contactNode => new ContactNodeReturn(
+                        contactNode,
+                        stepVector,
+                        this,
+                        norm
+                    ),
+                    _ => new NodeReturn(n, stepVector, this, norm),
                 }
             )
             .ToReadOnlyParticleSurface();

@@ -31,7 +31,7 @@ public class GrainBoundaryRemeshingTest
     {
         var baseParticleFactory = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.NewGuid())
         {
-            NodeCount = 50
+            NodeCount = 50,
         };
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> particle) =>

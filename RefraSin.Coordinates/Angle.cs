@@ -581,7 +581,7 @@ public readonly struct Angle
         /// <summary>
         ///     Domain [-π, π] resp. [-180°, 180°] resp. [-200 gon, 200 gon].
         /// </summary>
-        WithNegative
+        WithNegative,
     }
 
     /// <inheritdoc />

@@ -16,13 +16,7 @@ public class TestSpecs
     [SetUp]
     public void Setup()
     {
-        var factory = new ShapeFunctionParticleFactory(
-            100,
-            0.1,
-            5,
-            0.1,
-            Guid.Empty
-        );
+        var factory = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty);
 
         _particle = factory.GetParticle();
     }
@@ -51,7 +45,10 @@ public class TestSpecs
 
         Throws(
             Is.TypeOf<KeyNotFoundException>(),
-            () => { _ = _particle.Nodes[Guid.NewGuid()]; }
+            () =>
+            {
+                _ = _particle.Nodes[Guid.NewGuid()];
+            }
         );
     }
 }

@@ -7,5 +7,4 @@ namespace RefraSin.TEPSolver.StepValidators;
 public interface IStepValidator : ISolverRoutine
 {
     public void Validate(SolutionState currentState, StepVector stepVector);
-    
 }

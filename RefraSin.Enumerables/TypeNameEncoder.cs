@@ -17,7 +17,8 @@ internal static class TypeNameEncoder
     /// </summary>
     /// <param name="valueType">type of the value</param>
     /// <param name="value">value instance</param>
-    public static string ToString(Type valueType, object? value) => $"TreeItem<{EncodeTypeName(valueType)}> Value={value}";
+    public static string ToString(Type valueType, object? value) =>
+        $"TreeItem<{EncodeTypeName(valueType)}> Value={value}";
 
     /// <summary>
     /// Kodiert einen Typnamen passend für XML-Dokumente.
@@ -26,8 +27,9 @@ internal static class TypeNameEncoder
     /// <returns></returns>
     public static string EncodeTypeName(Type? type)
     {
-        if (type == null) return string.Empty;
-            
+        if (type == null)
+            return string.Empty;
+
         if (TypeNames.TryGetValue(type, out var cachedTypeName))
         {
             return cachedTypeName;
@@ -61,12 +63,12 @@ internal static class TypeNameEncoder
             }
 
             rawName.Append('>');
-                
+
             var typeName = rawName.ToString();
             TypeNames.Add(type, typeName);
             return typeName;
         }
-            
+
         return type.Name;
     }
 }

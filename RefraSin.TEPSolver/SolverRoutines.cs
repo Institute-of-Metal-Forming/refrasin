@@ -22,30 +22,29 @@ public record SolverRoutines(
     IEnumerable<IParticleSystemRemesher> Remeshers
 ) : ISolverRoutines
 {
-    public static readonly SolverRoutines Default =
-        new(
-            new StepEstimator(),
-            new AdamsMoultonTimeStepper(),
-            [
-                // new InstabilityDetector()
-            ],
-            new DirectLagrangianRootFinder(
-                new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4)
-            ),
-            // new TearingLagrangianRootFinder(
-            //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
-            //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
-            //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4)
-            // ),
-            new DefaultNormalizer(),
-            new MaximumDisplacementAngleStepWidthController(),
-            [new StepBackStateRecoverer()],
-            [
-                new FreeSurfaceRemesher(),
-                new NeckNeighborhoodRemesher(),
-                // new GrainBoundaryRemesher(),
-            ]
-        );
+    public static readonly SolverRoutines Default = new(
+        new StepEstimator(),
+        new AdamsMoultonTimeStepper(),
+        [
+            // new InstabilityDetector()
+        ],
+        new DirectLagrangianRootFinder(
+            new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4)
+        ),
+        // new TearingLagrangianRootFinder(
+        //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
+        //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
+        //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4)
+        // ),
+        new DefaultNormalizer(),
+        new MaximumDisplacementAngleStepWidthController(),
+        [new StepBackStateRecoverer()],
+        [
+            new FreeSurfaceRemesher(),
+            new NeckNeighborhoodRemesher(),
+            // new GrainBoundaryRemesher(),
+        ]
+    );
 
     /// <inheritdoc />
     public void RegisterWithSolver(SinteringSolver solver)

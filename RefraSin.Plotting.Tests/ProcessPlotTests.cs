@@ -26,38 +26,94 @@ public class ProcessPlotTests
 
         _states =
         [
-            compactor.Solve(new SystemState(Guid.NewGuid(), 0, new ParticleSystem<IParticle<IParticleNode>, IParticleNode>([
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = 0, CenterCoordinates = (0, 0) }
-                    .GetParticle(_id1),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = Angle.Straight, CenterCoordinates = (2.35, 0) }
-                    .GetParticle(_id2),
-            ]))),
-            compactor.Solve(new SystemState(Guid.NewGuid(), 1, new ParticleSystem<IParticle<IParticleNode>, IParticleNode>([
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = 0, CenterCoordinates = (0, 0) }
-                    .GetParticle(_id1),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = Angle.Straight + 0.1, CenterCoordinates = (2.3, 0) }
-                    .GetParticle(_id2),
-            ]))),
-            compactor.Solve(new SystemState(Guid.NewGuid(), 3, new ParticleSystem<IParticle<IParticleNode>, IParticleNode>([
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = 0, CenterCoordinates = (0, 0) }
-                    .GetParticle(_id1),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = Angle.Straight + 0.2, CenterCoordinates = (2.2, 0) }
-                    .GetParticle(_id2),
-            ]))),
-            compactor.Solve(new SystemState(Guid.NewGuid(), 3.5, new ParticleSystem<IParticle<IParticleNode>, IParticleNode>([
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = 0, CenterCoordinates = (0, 0) }
-                    .GetParticle(_id1),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                        { NodeCount = 200, RotationAngle = Angle.Straight + 0.3, CenterCoordinates = (2.1, 0) }
-                    .GetParticle(_id2),
-            ])))
+            compactor.Solve(
+                new SystemState(
+                    Guid.NewGuid(),
+                    0,
+                    new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
+                        [
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = 0,
+                                CenterCoordinates = (0, 0),
+                            }.GetParticle(_id1),
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = Angle.Straight,
+                                CenterCoordinates = (2.35, 0),
+                            }.GetParticle(_id2),
+                        ]
+                    )
+                )
+            ),
+            compactor.Solve(
+                new SystemState(
+                    Guid.NewGuid(),
+                    1,
+                    new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
+                        [
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = 0,
+                                CenterCoordinates = (0, 0),
+                            }.GetParticle(_id1),
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = Angle.Straight + 0.1,
+                                CenterCoordinates = (2.3, 0),
+                            }.GetParticle(_id2),
+                        ]
+                    )
+                )
+            ),
+            compactor.Solve(
+                new SystemState(
+                    Guid.NewGuid(),
+                    3,
+                    new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
+                        [
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = 0,
+                                CenterCoordinates = (0, 0),
+                            }.GetParticle(_id1),
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = Angle.Straight + 0.2,
+                                CenterCoordinates = (2.2, 0),
+                            }.GetParticle(_id2),
+                        ]
+                    )
+                )
+            ),
+            compactor.Solve(
+                new SystemState(
+                    Guid.NewGuid(),
+                    3.5,
+                    new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
+                        [
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = 0,
+                                CenterCoordinates = (0, 0),
+                            }.GetParticle(_id1),
+                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
+                            {
+                                NodeCount = 200,
+                                RotationAngle = Angle.Straight + 0.3,
+                                CenterCoordinates = (2.1, 0),
+                            }.GetParticle(_id2),
+                        ]
+                    )
+                )
+            ),
         ];
     }
 
@@ -98,6 +154,7 @@ public class ProcessPlotTests
         var end = ParticlePlot.PlotParticle(states[^1]);
         Chart.Combine([start, center, rots, end]).Show();
     }
+
     [Test]
     public void TestPlotParticleCenters()
     {

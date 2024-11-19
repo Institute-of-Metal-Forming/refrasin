@@ -18,21 +18,21 @@ public class BfgsTests
     {
         Vector<double> Function(Vector<double> x)
         {
-            return new DenseVector([
-                2 * x[0] + x[2] * x[1],
-                2 * x[1] + x[2] * x[0],
-                x[0] * x[1] - 1
-            ]);
+            return new DenseVector(
+                [2 * x[0] + x[2] * x[1], 2 * x[1] + x[2] * x[0], x[0] * x[1] - 1]
+            );
         }
 
         Matrix<double> Jacobian(Vector<double> x)
         {
-            return Matrix<double>.Build.DenseOfArray(new[,]
-            {
-                { 2, x[2], x[1] },
-                { x[2], 2, x[0] },
-                { x[1], x[0], 0 }
-            });
+            return Matrix<double>.Build.DenseOfArray(
+                new[,]
+                {
+                    { 2, x[2], x[1] },
+                    { x[2], 2, x[0] },
+                    { x[1], x[0], 0 },
+                }
+            );
         }
 
         var solver = new BfgsApproximateRootFinder();

@@ -1,6 +1,3 @@
 namespace RefraSin.ParticleModel.Nodes;
 
-public interface IParticleContactNode: IParticleNode, INodeContact
-{
-    
-}
+public interface IParticleContactNode : IParticleNode, INodeContact { }

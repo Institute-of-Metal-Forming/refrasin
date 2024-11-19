@@ -31,7 +31,7 @@ public class OneParticleTest
 
         _particle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
         {
-            NodeCount = 80
+            NodeCount = 80,
         }.GetParticle();
         _solutionStorage = new InMemorySolutionStorage();
 
@@ -45,7 +45,7 @@ public class OneParticleTest
         });
 
         _solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default);
-        
+
         _material = new Material(
             _particle.MaterialId,
             "Al2O3",
@@ -54,18 +54,13 @@ public class OneParticleTest
             new InterfaceProperties(1.65e-10, 0.9),
             new Dictionary<Guid, IInterfaceProperties>
             {
-                {_particle.MaterialId, new InterfaceProperties(1.65e-10, 0.5)}
+                { _particle.MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
             }
         );
 
         _initialState = new SystemState(Guid.NewGuid(), 0, new[] { _particle });
 
-        _sinteringProcess = new SinteringStep(
-            duration,
-            2073,
-            _solver,
-            new[] { _material }
-        );
+        _sinteringProcess = new SinteringStep(duration, 2073, _solver, new[] { _material });
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
@@ -176,7 +171,7 @@ public class OneParticleTest
                         n switch
                         {
                             INodeShifts shifts => new ScottPlot.Coordinates(j, shifts.Shift.Normal),
-                            _ => new ScottPlot.Coordinates()
+                            _ => new ScottPlot.Coordinates(),
                         }
                 )
                 .ToArray();

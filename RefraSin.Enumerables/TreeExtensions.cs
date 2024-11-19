@@ -16,8 +16,12 @@ public static class TreeExtensions
     /// <typeparam name="TSource">type of the source tree items</typeparam>
     /// <typeparam name="TResult">type of the result tree items</typeparam>
     /// <returns>the built result tree</returns>
-    public static Tree<TResult> TreeMap<TSource, TResult>(this Tree<TSource> source, Func<TSource, TResult> selector)
-        where TSource : class, ITreeItem<TSource> where TResult : class, ITreeItem<TResult>
+    public static Tree<TResult> TreeMap<TSource, TResult>(
+        this Tree<TSource> source,
+        Func<TSource, TResult> selector
+    )
+        where TSource : class, ITreeItem<TSource>
+        where TResult : class, ITreeItem<TResult>
     {
         var sourceRoot = source.Root;
         var resultRoot = selector(sourceRoot);
@@ -28,7 +32,8 @@ public static class TreeExtensions
         while (true)
         {
             var result = queue.TryDequeue(out var parents);
-            if (!result) break;
+            if (!result)
+                break;
 
             foreach (var sourceItem in parents.sourceItem.Children)
             {

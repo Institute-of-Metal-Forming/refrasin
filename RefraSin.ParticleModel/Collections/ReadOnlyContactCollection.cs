@@ -3,7 +3,8 @@ using RefraSin.Graphs;
 
 namespace RefraSin.ParticleModel.Collections;
 
-public class ReadOnlyContactCollection<TContact> : IReadOnlyContactCollection<TContact> where TContact : IEdge
+public class ReadOnlyContactCollection<TContact> : IReadOnlyContactCollection<TContact>
+    where TContact : IEdge
 {
     private TContact[] _contacts;
     private Dictionary<(Guid, Guid), int> _indices;
@@ -19,11 +20,14 @@ public class ReadOnlyContactCollection<TContact> : IReadOnlyContactCollection<TC
     public ReadOnlyContactCollection(IEnumerable<TContact> contacts)
     {
         _contacts = contacts.ToArray();
-        _indices = _contacts.Select((c, i) => ((c.From, c.To), i)).ToDictionary(t => t.Item1, t => t.i);
+        _indices = _contacts
+            .Select((c, i) => ((c.From, c.To), i))
+            .ToDictionary(t => t.Item1, t => t.i);
     }
 
     /// <inheritdoc />
-    public IEnumerator<TContact> GetEnumerator() => ((IEnumerable<TContact>)_contacts).GetEnumerator();
+    public IEnumerator<TContact> GetEnumerator() =>
+        ((IEnumerable<TContact>)_contacts).GetEnumerator();
 
     /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -47,13 +51,17 @@ public class ReadOnlyContactCollection<TContact> : IReadOnlyContactCollection<TC
     public IEnumerable<TContact> From(Guid id) => FromIndices[id].Select(i => _contacts[i]);
 
     private Dictionary<Guid, int[]> FromIndices =>
-        _fromIndices ??= _indices.GroupBy(i => i.Key.Item1, i => i.Value).ToDictionary(g => g.Key, g => g.ToArray());
+        _fromIndices ??= _indices
+            .GroupBy(i => i.Key.Item1, i => i.Value)
+            .ToDictionary(g => g.Key, g => g.ToArray());
 
     /// <inheritdoc />
     public IEnumerable<TContact> To(Guid id) => ToIndices[id].Select(i => _contacts[i]);
 
     private Dictionary<Guid, int[]> ToIndices =>
-        _toIndices ??= _indices.GroupBy(i => i.Key.Item2, i => i.Value).ToDictionary(g => g.Key, g => g.ToArray());
+        _toIndices ??= _indices
+            .GroupBy(i => i.Key.Item2, i => i.Value)
+            .ToDictionary(g => g.Key, g => g.ToArray());
 
     public static ReadOnlyContactCollection<TContact> Empty { get; } = new();
 }

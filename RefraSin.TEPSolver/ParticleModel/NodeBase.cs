@@ -29,12 +29,7 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
         Coordinates = new PolarPoint(node.Coordinates.Phi, node.Coordinates.R, particle);
     }
 
-    protected NodeBase(
-        Guid id,
-        double r,
-        Angle phi,
-        Particle particle
-    )
+    protected NodeBase(Guid id, double r, Angle phi, Particle particle)
     {
         Id = id;
         Particle = particle;

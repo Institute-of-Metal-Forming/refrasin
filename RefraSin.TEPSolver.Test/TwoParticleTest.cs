@@ -62,7 +62,7 @@ public class TwoParticleTest
             var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
             {
                 NodeCount = nodeCountPerParticle,
-                RotationAngle = props.firstRotation
+                RotationAngle = props.firstRotation,
             }.GetParticle();
             var particle2 = new ShapeFunctionParticleFactory(
                 props.secondSize,
@@ -74,7 +74,7 @@ public class TwoParticleTest
             {
                 NodeCount = nodeCountPerParticle,
                 RotationAngle = props.secondRotation,
-                CenterCoordinates = props.secondCenter.Absolute
+                CenterCoordinates = props.secondCenter.Absolute,
             }.GetParticle();
 
             var looseState = new SystemState(Guid.NewGuid(), 0, [particle1, particle2]);
@@ -117,7 +117,7 @@ public class TwoParticleTest
             new InterfaceProperties(1.65e-10, 0.9),
             new Dictionary<Guid, IInterfaceProperties>
             {
-                { initialState.Particles[1].MaterialId, new InterfaceProperties(1.65e-10, 0.5) }
+                { initialState.Particles[1].MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
             }
         );
 

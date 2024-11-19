@@ -30,12 +30,7 @@ public class DirectedGraphTests
     [Test]
     public void TestVertices()
     {
-        Assert.That(
-            _graph.Vertices.ToHashSet(),
-            Is.EqualTo(
-                _vertices.ToHashSet()
-            )
-        );
+        Assert.That(_graph.Vertices.ToHashSet(), Is.EqualTo(_vertices.ToHashSet()));
     }
 
     [Test]
@@ -60,15 +55,11 @@ public class DirectedGraphTests
     {
         Assert.That(
             _graph.ChildrenOf(_vertices[0]).ToHashSet(),
-            Is.EqualTo(
-                _vertices[1..2].ToHashSet()
-            )
+            Is.EqualTo(_vertices[1..2].ToHashSet())
         );
         Assert.That(
             _graph.ChildrenOf(_vertices[1]).ToHashSet(),
-            Is.EqualTo(
-                _vertices[2..].ToHashSet()
-            )
+            Is.EqualTo(_vertices[2..].ToHashSet())
         );
     }
 
@@ -77,15 +68,11 @@ public class DirectedGraphTests
     {
         Assert.That(
             _graph.ParentsOf(_vertices[0]).ToHashSet(),
-            Is.EqualTo(
-                _vertices[2..].ToHashSet()
-            )
+            Is.EqualTo(_vertices[2..].ToHashSet())
         );
         Assert.That(
             _graph.ParentsOf(_vertices[1]).ToHashSet(),
-            Is.EqualTo(
-                new[]{_vertices[0], _vertices[2]}.ToHashSet()
-            )
+            Is.EqualTo(new[] { _vertices[0], _vertices[2] }.ToHashSet())
         );
     }
 }

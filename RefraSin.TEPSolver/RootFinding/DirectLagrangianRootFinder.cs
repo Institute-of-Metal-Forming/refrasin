@@ -23,13 +23,8 @@ public class DirectLagrangianRootFinder(
         var stepVector = initialGuess.Copy();
         var system = new EquationSystem.EquationSystem(currentState, stepVector);
 
-        var solution = RootFinder.FindRoot(
-            Fun,
-            Jac,
-            system.StepVector,
-            logger
-        );
-        
+        var solution = RootFinder.FindRoot(Fun, Jac, system.StepVector, logger);
+
         system.StepVector.Update(solution.AsArray());
 
         return stepVector;

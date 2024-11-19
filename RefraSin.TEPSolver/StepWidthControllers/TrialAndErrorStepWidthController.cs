@@ -11,8 +11,7 @@ public class TrialAndErrorStepWidthController(
     double increaseFactor = 1.5,
     double decreaseFactor = 0.5,
     int increaseDelay = 5
-) :
-    IStepWidthController
+) : IStepWidthController
 {
     /// <inheritdoc />
     public void RegisterWithSolver(SinteringSolver solver)
@@ -21,7 +20,10 @@ public class TrialAndErrorStepWidthController(
         solver.StepRejected += SolverOnStepRejected;
     }
 
-    private void SolverOnSessionInitialized(object? sender, SinteringSolver.SessionInitializedEventArgs e)
+    private void SolverOnSessionInitialized(
+        object? sender,
+        SinteringSolver.SessionInitializedEventArgs e
+    )
     {
         _stepWidths[e.SolverSession.Id] = InitialTimeStepWidth;
         _stepsSinceLastIncrease[e.SolverSession.Id] = 0;
@@ -32,17 +34,26 @@ public class TrialAndErrorStepWidthController(
         var currentStepWidth = _stepWidths[e.SolverSession.Id];
 
         if (currentStepWidth < MinimalTimeStepWidth)
-            e.SolverSession.Logger.LogWarning("Time step width can not be decreased further, since it fall below the allowed minimum.");
+            e.SolverSession.Logger.LogWarning(
+                "Time step width can not be decreased further, since it fall below the allowed minimum."
+            );
         else
         {
             _stepWidths[e.SolverSession.Id] *= DecreaseFactor;
             _stepsSinceLastIncrease[e.SolverSession.Id] = 0;
-            e.SolverSession.Logger.LogInformation("Time step width decreased to {Step}.", _stepWidths[e.SolverSession.Id]);
+            e.SolverSession.Logger.LogInformation(
+                "Time step width decreased to {Step}.",
+                _stepWidths[e.SolverSession.Id]
+            );
         }
     }
 
     /// <inheritdoc />
-    public double GetStepWidth(ISolverSession solverSession, SolutionState currentState, StepVector stepVector)
+    public double GetStepWidth(
+        ISolverSession solverSession,
+        SolutionState currentState,
+        StepVector stepVector
+    )
     {
         if (_stepsSinceLastIncrease[solverSession.Id] < IncreaseDelay)
         {
@@ -51,7 +62,9 @@ public class TrialAndErrorStepWidthController(
         else
         {
             if (_stepWidths[solverSession.Id] > MaximalTimeStepWidth)
-                solverSession.Logger.LogWarning("Time step width can not be increased further, since it rose above the allowed maximum.");
+                solverSession.Logger.LogWarning(
+                    "Time step width can not be increased further, since it rose above the allowed maximum."
+                );
             else
             {
                 _stepWidths[solverSession.Id] *= IncreaseFactor;

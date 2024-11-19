@@ -77,7 +77,8 @@ internal struct NodeCompound
         if (node is INodeMaterialProperties nodeMaterialProperties)
         {
             InterfaceEnergy = nodeMaterialProperties.InterfaceEnergy.ToArray();
-            InterfaceDiffusionCoefficient = nodeMaterialProperties.InterfaceDiffusionCoefficient.ToArray();
+            InterfaceDiffusionCoefficient =
+                nodeMaterialProperties.InterfaceDiffusionCoefficient.ToArray();
         }
 
         if (node is INodeGradients nodeGradients)

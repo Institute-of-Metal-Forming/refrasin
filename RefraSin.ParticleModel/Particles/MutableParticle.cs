@@ -31,7 +31,10 @@ public class MutableParticle<TNode> : IMutableParticle<TNode>
         _surface = new ParticleSurface<TNode>(nodes);
     }
 
-    public MutableParticle(IParticle<IParticleNode> template, Func<IParticleNode, IParticle<TNode>, TNode> nodeSelector)
+    public MutableParticle(
+        IParticle<IParticleNode> template,
+        Func<IParticleNode, IParticle<TNode>, TNode> nodeSelector
+    )
         : this(
             template.Id,
             template.Coordinates,
@@ -47,7 +50,8 @@ public class MutableParticle<TNode> : IMutableParticle<TNode>
     public Guid MaterialId { get; }
 
     /// <inheritdoc />
-    public override string ToString() => $"{nameof(Particle<TNode>)} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
+    public override string ToString() =>
+        $"{nameof(Particle<TNode>)} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
 
     /// <inheritdoc />
     public IParticleSurface<TNode> Surface => _surface;

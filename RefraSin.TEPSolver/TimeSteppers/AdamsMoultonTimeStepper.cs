@@ -6,13 +6,21 @@ namespace RefraSin.TEPSolver.TimeSteppers;
 public class AdamsMoultonTimeStepper : ITimeStepper
 {
     /// <inheritdoc />
-    public StepVector Step(ISolverSession solverSession, SolutionState baseState, StepVector initialGuess)
+    public StepVector Step(
+        ISolverSession solverSession,
+        SolutionState baseState,
+        StepVector initialGuess
+    )
     {
-        var step = solverSession.Routines.LagrangianRootFinder.FindRoot(baseState, initialGuess, solverSession.Logger);
+        var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
+            baseState,
+            initialGuess,
+            solverSession.Logger
+        );
 
         if (_lastSteps.TryGetValue(solverSession.Id, out var lastStep))
             return (step + lastStep) / 2;
-        
+
         return step;
     }
 
@@ -24,7 +32,10 @@ public class AdamsMoultonTimeStepper : ITimeStepper
         solver.StepSuccessfullyCalculated += HandleStepSuccessfullyCalculated;
     }
 
-    private void HandleStepSuccessfullyCalculated(object? sender, SinteringSolver.StepSuccessfullyCalculatedEventArgs e)
+    private void HandleStepSuccessfullyCalculated(
+        object? sender,
+        SinteringSolver.StepSuccessfullyCalculatedEventArgs e
+    )
     {
         _lastSteps[e.SolverSession.Id] = e.StepVector;
     }

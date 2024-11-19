@@ -9,8 +9,18 @@ namespace RefraSin.TEPSolver.StepValidators;
 /// </summary>
 public class InstabilityException : InvalidStepException
 {
-    public InstabilityException(SolutionState baseState, StepVector stepVector, Guid particleId, Guid nodeId, int index) : base(baseState, stepVector,
-        $"Instability detected above node {nodeId} at index {index} of particle {particleId}.")
+    public InstabilityException(
+        SolutionState baseState,
+        StepVector stepVector,
+        Guid particleId,
+        Guid nodeId,
+        int index
+    )
+        : base(
+            baseState,
+            stepVector,
+            $"Instability detected above node {nodeId} at index {index} of particle {particleId}."
+        )
     {
         NodeId = nodeId;
         ParticleId = particleId;

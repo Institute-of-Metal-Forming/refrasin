@@ -1,12 +1,11 @@
+using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Random;
 using Microsoft.Extensions.Logging;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
-using MathNet.Numerics.Distributions;
-using MathNet.Numerics.Random;
 
 namespace RefraSin.TEPSolver.RootFinding;
-
 
 /// <summary>
 /// Kaczmarz solver inspired by L. Föcke - Inverse Problems for Random Measurements
@@ -37,7 +36,10 @@ public class KaczmarzLagrangianRootFinder(
             if (systemResidualNorm < Precision)
                 return stepVector;
 
-            var distribution = new Categorical(systemResidual.Select(r => Abs(r) / systemResidualNorm).ToArray(), randomSource);
+            var distribution = new Categorical(
+                systemResidual.Select(r => Abs(r) / systemResidualNorm).ToArray(),
+                randomSource
+            );
 
             int randomEquation = distribution.Sample();
 
@@ -50,7 +52,7 @@ public class KaczmarzLagrangianRootFinder(
 
                 // var i = randomSource.Next(equationDerivatives.Length);
                 // var derivative = equationDerivatives[i].value;
-                
+
                 foreach (var (i, derivative) in equationDerivatives)
                 {
                     if (double.IsFinite(derivative) && Abs(derivative) > 1e-2)

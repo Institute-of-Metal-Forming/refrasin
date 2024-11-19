@@ -1,6 +1,7 @@
 namespace RefraSin.Graphs;
 
-public interface IEdge<out TVertex> : IEdge where TVertex : IVertex
+public interface IEdge<out TVertex> : IEdge
+    where TVertex : IVertex
 {
     new TVertex From { get; }
     new TVertex To { get; }

@@ -175,7 +175,7 @@ public class EquationSystemTest
         {
             NodeCount = nodeCountPerParticle,
             RotationAngle = Angle.Half,
-            CenterCoordinates = (300e-6, 0)
+            CenterCoordinates = (300e-6, 0),
         }.GetParticle();
 
         var material = new Material(
@@ -186,7 +186,7 @@ public class EquationSystemTest
             new InterfaceProperties(1.65e-10, 0.9),
             new Dictionary<Guid, IInterfaceProperties>
             {
-                { particle2.MaterialId, new InterfaceProperties(1.65e-10, 0.5) }
+                { particle2.MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
             }
         );
 

@@ -21,65 +21,35 @@ public class EdgesTests
     [Test]
     public void TestEquality()
     {
-        Assert.That(
-            _edge1,
-            Is.Not.EqualTo(
-                _edge2
-            )
-        );
-        Assert.That(
-            _edge2,
-            Is.Not.EqualTo(
-                _edge1
-            )
-        );
+        Assert.That(_edge1, Is.Not.EqualTo(_edge2));
+        Assert.That(_edge2, Is.Not.EqualTo(_edge1));
     }
 
     [Test]
     public void TestHashCodeEquality()
     {
-        Assert.That(
-            _edge1.GetHashCode(),
-            Is.Not.EqualTo(
-                _edge2.GetHashCode()
-            )
-        );
-        Assert.That(
-            _edge2.GetHashCode(),
-            Is.Not.EqualTo(
-                _edge1.GetHashCode()
-            )
-        );
+        Assert.That(_edge1.GetHashCode(), Is.Not.EqualTo(_edge2.GetHashCode()));
+        Assert.That(_edge2.GetHashCode(), Is.Not.EqualTo(_edge1.GetHashCode()));
     }
 
     [Test]
     public void TestDirected()
     {
-        Assert.That(
-            _edge1.IsDirected
-        );
+        Assert.That(_edge1.IsDirected);
     }
 
     [Test]
     public void TestIsEdgeFrom()
     {
-        Assert.That(
-            _edge1.IsFrom(_vertex1)
-        );
-        Assert.That(
-            !_edge1.IsFrom(_vertex2)
-        );
+        Assert.That(_edge1.IsFrom(_vertex1));
+        Assert.That(!_edge1.IsFrom(_vertex2));
     }
 
     [Test]
     public void TestIsEdgeTo()
     {
-        Assert.That(
-            _edge1.IsTo(_vertex2)
-        );
-        Assert.That(
-            !_edge1.IsTo(_vertex1)
-        );
+        Assert.That(_edge1.IsTo(_vertex2));
+        Assert.That(!_edge1.IsTo(_vertex1));
     }
 
     [Test]
@@ -87,23 +57,8 @@ public class EdgesTests
     {
         var reversed = _edge1.Reversed();
 
-        Assert.That(
-            reversed,
-            Is.EqualTo(
-                _edge2
-            )
-        );
-        Assert.That(
-            reversed.From,
-            Is.EqualTo(
-                _edge1.To
-            )
-        );
-        Assert.That(
-            reversed.To,
-            Is.EqualTo(
-                _edge1.From
-            )
-        );
+        Assert.That(reversed, Is.EqualTo(_edge2));
+        Assert.That(reversed.From, Is.EqualTo(_edge1.To));
+        Assert.That(reversed.To, Is.EqualTo(_edge1.From));
     }
 }

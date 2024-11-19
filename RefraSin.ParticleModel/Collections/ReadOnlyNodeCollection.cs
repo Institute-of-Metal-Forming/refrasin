@@ -3,7 +3,8 @@ using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Collections;
 
-public class ReadOnlyNodeCollection<TNode> : IReadOnlyNodeCollection<TNode> where TNode : INode
+public class ReadOnlyNodeCollection<TNode> : IReadOnlyNodeCollection<TNode>
+    where TNode : INode
 {
     private TNode[] _nodes;
     private Dictionary<Guid, int> _nodeIndices;

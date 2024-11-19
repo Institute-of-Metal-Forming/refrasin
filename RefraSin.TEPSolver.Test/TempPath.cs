@@ -7,8 +7,8 @@ public static class TempPath
 {
     public static string CreateTempDir()
     {
-        var test = TestContext.CurrentContext.Test; 
-        
+        var test = TestContext.CurrentContext.Test;
+
         var tmpDir = Path.GetTempPath();
 
         var path = Path.Combine(

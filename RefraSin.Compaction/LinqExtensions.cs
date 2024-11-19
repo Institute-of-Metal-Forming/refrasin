@@ -13,7 +13,7 @@ internal static class LinqExtensions
         if (k == 0)
             return
             [
-                []
+                [],
             ];
 
         var elementsArray = elements.ToArray();

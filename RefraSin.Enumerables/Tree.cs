@@ -11,7 +11,8 @@ namespace RefraSin.Enumerables;
 ///     Supports enumeration and execution of actions on elements.
 /// </summary>
 /// <typeparam name="TTreeItem">type of the items, must implement <see cref="ITreeItem{TTreeItem}" /></typeparam>
-public class Tree<TTreeItem> : IEnumerable<TTreeItem> where TTreeItem : class, ITreeItem<TTreeItem>
+public class Tree<TTreeItem> : IEnumerable<TTreeItem>
+    where TTreeItem : class, ITreeItem<TTreeItem>
 {
     /// <summary>
     ///     Creates a new tree with the given root element.
@@ -50,7 +51,10 @@ public class Tree<TTreeItem> : IEnumerable<TTreeItem> where TTreeItem : class, I
 
             // spawn tasks at branches
             foreach (var child in children.Skip(1))
-                Task.Factory.StartNew(() => WalkFurther(child), TaskCreationOptions.AttachedToParent);
+                Task.Factory.StartNew(
+                    () => WalkFurther(child),
+                    TaskCreationOptions.AttachedToParent
+                );
 
             // current task takes first child
             WalkFurther(first);
