@@ -29,7 +29,8 @@ let ShrinkageByDistance (initialState: ISystemState<_, _>) (currentState: ISyste
 
 
 let ShrinkagesbyDistance (states: ISystemState<_, _> seq) : float seq =
-    let distances = [ for s in states -> s.ParticleContacts |> Seq.map _.Distance |> Seq.sum ]
+    let distances =
+        [ for s in states -> s.ParticleContacts |> Seq.map _.Distance |> Seq.sum ]
 
     [ for v in distances -> 1.0 - v / distances[0] ]
 
