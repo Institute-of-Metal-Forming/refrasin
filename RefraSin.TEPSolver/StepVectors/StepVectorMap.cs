@@ -46,7 +46,6 @@ public class StepVectorMap
 
             AddUnknown(contact.MergedId, Unknown.RadialDisplacement);
             AddUnknown(contact.MergedId, Unknown.AngleDisplacement);
-            AddUnknown(contact.MergedId, Unknown.RotationDisplacement);
 
             _contactBlocks[(contact.From.Id, contact.To.Id)] = (startIndex, _index - startIndex);
         }
@@ -109,9 +108,6 @@ public class StepVectorMap
     public int AngleDisplacement(ParticleContact contact) =>
         _indices[(contact.MergedId, Unknown.AngleDisplacement)];
 
-    public int RotationDisplacement(ParticleContact contact) =>
-        _indices[(contact.MergedId, Unknown.RotationDisplacement)];
-
     private enum Unknown
     {
         NormalDisplacement,
@@ -122,7 +118,6 @@ public class StepVectorMap
         LambdaContactDirection,
         RadialDisplacement,
         AngleDisplacement,
-        RotationDisplacement,
         LambdaDissipation,
     }
 }

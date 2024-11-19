@@ -52,7 +52,6 @@ public class EquationSystem
 
         yield return new ContactDistanceDerivative(contact, StepVector);
         yield return new ContactDirectionDerivative(contact, StepVector);
-        yield return new ParticleRotationDerivative(contact, StepVector);
     }
 
     private IEnumerable<IEquation> YieldGlobalEquations()

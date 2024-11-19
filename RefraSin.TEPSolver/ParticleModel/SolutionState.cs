@@ -10,7 +10,11 @@ namespace RefraSin.TEPSolver.ParticleModel;
 
 public class SolutionState : ISystemState<Particle, NodeBase>
 {
-    public SolutionState(ISystemState state, IEnumerable<IMaterial> materials, ISinteringConditions conditions)
+    public SolutionState(
+        ISystemState state,
+        IEnumerable<IMaterial> materials,
+        ISinteringConditions conditions
+    )
     {
         Time = state.Time;
         Id = state.Id;
@@ -35,35 +39,48 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToReadOnlyContactCollection();
     }
 
-
-    private SolutionState(
-        Guid id,
-        double time,
-        IEnumerable<Particle> particles,
-        IEnumerable<ParticleContact> particleContacts,
-        IEnumerable<IEdge<ContactNodeBase>> nodeContacts,
-        IReadOnlyDictionary<Guid, IMaterial> materials
-    )
+    private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
     {
-        Time = time;
-        Id = id;
-        Materials = materials;
-        Particles = particles.ToReadOnlyParticleCollection<Particle, NodeBase>();
-        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
+        var newParticles = new Dictionary<Guid, Particle>()
+        {
+            [oldState.Particles.Root.Id] = oldState.Particles.Root.ApplyTimeStep(
+                null,
+                this,
+                stepVector,
+                timeStepWidth
+            )
+        };
 
-        NodeContacts = nodeContacts
-            .Select(c => new Edge<ContactNodeBase>(
+        foreach (var contact in oldState.ParticleContacts)
+        {
+            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(
+                newParticles[contact.From.Id],
+                this,
+                stepVector,
+                timeStepWidth
+            );
+        }
+
+        Particles = newParticles.Values.ToReadOnlyParticleCollection<Particle, NodeBase>();
+        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
+        Materials = oldState.Materials;
+
+        NodeContacts = oldState
+            .NodeContacts.Select(c => new Edge<ContactNodeBase>(
                 (ContactNodeBase)Nodes[c.From.Id],
                 (ContactNodeBase)Nodes[c.To.Id],
                 true
             ))
             .ToReadOnlyContactCollection();
-        ParticleContacts = particleContacts
-            .Select(c => new ParticleContact(Particles[c.From.Id], Particles[c.To.Id]))
+        ParticleContacts = oldState
+            .ParticleContacts.Select(c => new ParticleContact(
+                Particles[c.From.Id],
+                Particles[c.To.Id]
+            ))
             .ToReadOnlyContactCollection();
     }
-    
-    public IReadOnlyDictionary<Guid,IMaterial> Materials { get; }
+
+    public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
 
     /// <inheritdoc />
     public Guid Id { get; }
@@ -72,18 +89,20 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     public double Time { get; }
 
     /// <inheritdoc cref="ISystemState.Nodes"/>>
-    public IReadOnlyNodeCollection<NodeBase> Nodes { get; }
+    public IReadOnlyNodeCollection<NodeBase> Nodes { get; private set; }
 
     /// <inheritdoc cref="ISystemState.Particles"/>>
-    public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; }
+    public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; private set; }
 
-    public IReadOnlyContactCollection<ParticleContact> ParticleContacts { get; }
+    public IReadOnlyContactCollection<ParticleContact> ParticleContacts { get; private set; }
 
-    public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; }
+    public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; private set; }
 
     IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
+
     IReadOnlyParticleCollection<Particle, NodeBase> IParticleSystem<Particle, NodeBase>.Particles =>
         Particles;
+
     IReadOnlyContactCollection<IParticleContactEdge<Particle>> IParticleSystem<
         Particle,
         NodeBase
@@ -92,33 +111,8 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     IReadOnlyContactCollection<IEdge<NodeBase>> IParticleSystem<Particle, NodeBase>.NodeContacts =>
         NodeContacts;
 
-    public SolutionState ApplyTimeStep(StepVector stepVector, double timeStepWidth)
-    {
-        var newParticles = new Dictionary<Guid, Particle>()
-        {
-            [Particles.Root.Id] = Particles.Root.ApplyTimeStep(null, stepVector, timeStepWidth)
-        };
-
-        foreach (var contact in ParticleContacts)
-        {
-            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(
-                newParticles[contact.From.Id],
-                stepVector,
-                timeStepWidth
-            );
-        }
-
-        var newState = new SolutionState(
-            Guid.NewGuid(),
-            Time + timeStepWidth,
-            newParticles.Values,
-            ParticleContacts,
-            NodeContacts,
-            Materials
-        );
-
-        return newState;
-    }
+    public SolutionState ApplyTimeStep(StepVector stepVector, double timeStepWidth) =>
+        new(this, stepVector, timeStepWidth);
 
     public void Sanitize()
     {
