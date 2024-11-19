@@ -13,17 +13,23 @@ public abstract class IterationInterceptedException : NumericException
     /// <param name="iterationCount">the count of iterations performed so far, values &lt; 0 are interpreted as missing information</param>
     /// <param name="innerException">optional inner exception object</param>
     /// <param name="furtherInformation">optional further information to include in the message</param>
-    public IterationInterceptedException(string loopLabel, InterceptReason reason, int iterationCount = -1, Exception? innerException = null,
-        string? furtherInformation = null)
+    public IterationInterceptedException(
+        string loopLabel,
+        InterceptReason reason,
+        int iterationCount = -1,
+        Exception? innerException = null,
+        string? furtherInformation = null
+    )
         : base("", innerException)
     {
         LoopLabel = loopLabel;
         IterationCount = iterationCount;
         Reason = reason;
 
-        var message = iterationCount >= 0
-            ? $"The iteration loop '{loopLabel}' was intercepted at iteration {iterationCount} due to: {reason}"
-            : $"The iteration loop '{loopLabel}' was intercepted due to: {reason}";
+        var message =
+            iterationCount >= 0
+                ? $"The iteration loop '{loopLabel}' was intercepted at iteration {iterationCount} due to: {reason}"
+                : $"The iteration loop '{loopLabel}' was intercepted due to: {reason}";
 
         if (!string.IsNullOrWhiteSpace(furtherInformation))
         {
@@ -61,7 +67,7 @@ public enum InterceptReason
     /// Unspecific reason. Maybe look at <see cref="IterationInterceptedException.Message"/>.
     /// </summary>
     Unspecified,
-    
+
     /// <summary>
     /// The specified maximum iteration count was exceeded.
     /// </summary>
@@ -75,7 +81,7 @@ public enum InterceptReason
     /// <summary>
     /// An exception was thrown during iteration. See <see cref="Exception.InnerException"/>.
     /// </summary>
-    ExceptionOccured
+    ExceptionOccured,
 }
 
 /// <summary>
@@ -84,8 +90,14 @@ public enum InterceptReason
 public class CriticalIterationInterceptedException : IterationInterceptedException
 {
     /// <inheritdoc />
-    public CriticalIterationInterceptedException(string loopLabel, InterceptReason reason, int iterationCount = -1, Exception? innerException = null,
-        string? furtherInformation = null) : base(loopLabel, reason, iterationCount, innerException, furtherInformation) { }
+    public CriticalIterationInterceptedException(
+        string loopLabel,
+        InterceptReason reason,
+        int iterationCount = -1,
+        Exception? innerException = null,
+        string? furtherInformation = null
+    )
+        : base(loopLabel, reason, iterationCount, innerException, furtherInformation) { }
 }
 
 /// <summary>
@@ -94,7 +106,12 @@ public class CriticalIterationInterceptedException : IterationInterceptedExcepti
 public class UncriticalIterationInterceptedException : IterationInterceptedException
 {
     /// <inheritdoc />
-    public UncriticalIterationInterceptedException(string loopLabel, InterceptReason reason, int iterationCount = -1,
-        Exception? innerException = null, string? furtherInformation = null) : base(loopLabel, reason, iterationCount, innerException,
-        furtherInformation) { }
+    public UncriticalIterationInterceptedException(
+        string loopLabel,
+        InterceptReason reason,
+        int iterationCount = -1,
+        Exception? innerException = null,
+        string? furtherInformation = null
+    )
+        : base(loopLabel, reason, iterationCount, innerException, furtherInformation) { }
 }

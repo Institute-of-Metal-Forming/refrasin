@@ -37,7 +37,10 @@ public record Particle<TNode> : IParticle<TNode>, IParticleMeasures
         MaxX = _nodes.Max(n => n.Coordinates.Absolute.X);
     }
 
-    public Particle(IParticle<IParticleNode> template, Func<IParticleNode, IParticle<TNode>, TNode> nodeSelector)
+    public Particle(
+        IParticle<IParticleNode> template,
+        Func<IParticleNode, IParticle<TNode>, TNode> nodeSelector
+    )
         : this(
             template.Id,
             template.Coordinates,
@@ -74,5 +77,6 @@ public record Particle<TNode> : IParticle<TNode>, IParticleMeasures
     public double MaxY { get; }
 
     /// <inheritdoc />
-    public override string ToString() => $"{nameof(Particle<TNode>)} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
+    public override string ToString() =>
+        $"{nameof(Particle<TNode>)} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
 }

@@ -1,9 +1,9 @@
 namespace RefraSin.Graphs;
 
-public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
+public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex>
+    where TVertex : IVertex
 {
     private readonly Edge<TVertex>[] _traversedEdges;
-
 
     private DepthFirstPathFinder(TVertex start, TVertex target, Edge<TVertex>[] traversedEdges)
     {
@@ -12,22 +12,27 @@ public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex> where TVer
         _traversedEdges = traversedEdges;
     }
 
-    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, TVertex target)
+    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(
+        IGraph<TVertex, TEdge> graph,
+        TVertex start,
+        TVertex target
+    )
         where TEdge : IEdge<TVertex> =>
-        new(
-            start,
-            target,
-            DoFindPath(graph, start, target).ToArray()
-        );
+        new(start, target, DoFindPath(graph, start, target).ToArray());
 
-    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(IRootedGraph<TVertex, TEdge> graph, TVertex target) where TEdge : IEdge<TVertex> =>
-        new(
-            graph.Root,
-            target,
-            DoFindPath(graph, graph.Root, target).ToArray()
-        );
+    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(
+        IRootedGraph<TVertex, TEdge> graph,
+        TVertex target
+    )
+        where TEdge : IEdge<TVertex> =>
+        new(graph.Root, target, DoFindPath(graph, graph.Root, target).ToArray());
 
-    private static IEnumerable<Edge<TVertex>> DoFindPath<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, TVertex target) where TEdge : IEdge<TVertex>
+    private static IEnumerable<Edge<TVertex>> DoFindPath<TEdge>(
+        IGraph<TVertex, TEdge> graph,
+        TVertex start,
+        TVertex target
+    )
+        where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
 

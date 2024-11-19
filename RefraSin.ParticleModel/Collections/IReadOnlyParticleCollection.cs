@@ -8,7 +8,9 @@ namespace RefraSin.ParticleModel.Collections;
 /// </summary>
 /// <typeparam name="TParticle"></typeparam>
 /// <typeparam name="TNode"></typeparam>
-public interface IReadOnlyParticleCollection<out TParticle, out TNode> : IReadOnlyList<TParticle> where TParticle : IParticle<TNode> where TNode : IParticleNode
+public interface IReadOnlyParticleCollection<out TParticle, out TNode> : IReadOnlyList<TParticle>
+    where TParticle : IParticle<TNode>
+    where TNode : IParticleNode
 // IReadOnlyDictionary is not implemented, since this would break covariance
 {
     /// <summary>
@@ -30,7 +32,7 @@ public interface IReadOnlyParticleCollection<out TParticle, out TNode> : IReadOn
     /// </summary>
     /// <param name="particleId">the ID to test for</param>
     public bool Contains(Guid particleId);
-    
+
     /// <summary>
     /// Gets the root particle.
     /// </summary>

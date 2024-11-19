@@ -9,7 +9,8 @@ namespace RefraSin.Enumerables;
 ///     Collection class for the children of <see cref="ITreeItem{TTreeItem}" />.
 ///     Ensures the correct setting of <see cref="ITreeItem{TTreeItem}.Parent" /> on adding to this collection.
 /// </summary>
-public class TreeChildrenCollection<TTreeItem> : IList<TTreeItem> where TTreeItem : class, ITreeItem<TTreeItem>
+public class TreeChildrenCollection<TTreeItem> : IList<TTreeItem>
+    where TTreeItem : class, ITreeItem<TTreeItem>
 {
     private readonly List<TTreeItem> _children;
     private readonly TTreeItem _owner;

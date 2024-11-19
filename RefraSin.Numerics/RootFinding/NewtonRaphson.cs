@@ -26,7 +26,7 @@ public class NewtonRaphsonRootFinder(
     )
     {
         logger ??= NullLogger<NewtonRaphsonRootFinder>.Instance;
-        
+
         int i;
 
         var x = initialGuess.Clone();
@@ -38,7 +38,7 @@ public class NewtonRaphsonRootFinder(
         {
             var error = y.L2Norm();
             logger.LogDebug("Current error {Error}.", error);
-            
+
             if (error <= AbsoluteTolerance)
             {
                 logger.LogDebug("Solution found.");

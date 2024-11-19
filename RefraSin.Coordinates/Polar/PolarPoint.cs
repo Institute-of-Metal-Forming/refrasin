@@ -24,13 +24,10 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
         R = Sqrt(Pow(x, 2) + Pow(y, 2)) / System.RScale;
         Phi =
             (
-                y > 0
-                    ? Acos(x / R)
-                    : y < 0
-                        ? PI + Acos(-x / R)
-                        : x >= 0
-                            ? 0
-                            : PI
+                y > 0 ? Acos(x / R)
+                : y < 0 ? PI + Acos(-x / R)
+                : x >= 0 ? 0
+                : PI
             ) - System.RotationAngle;
     }
 
@@ -82,13 +79,10 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
 
             var r = Sqrt(Pow(x, 2) + Pow(y, 2));
             var phi =
-                y > 0
-                    ? Acos(x / r)
-                    : y < 0
-                        ? PI + Acos(-x / r)
-                        : x >= 0
-                            ? 0
-                            : PI;
+                y > 0 ? Acos(x / r)
+                : y < 0 ? PI + Acos(-x / r)
+                : x >= 0 ? 0
+                : PI;
 
             return new PolarPoint(phi, r, System);
         }
@@ -107,17 +101,14 @@ public readonly struct PolarPoint(Angle phi, double r, IPolarCoordinateSystem? s
         if (System.Equals(p.System))
         {
             var x = p.R * Cos(p.Phi) - R * Cos(Phi);
-            var y = p.R * Sin(p.Phi) - R * Sin(Phi) ;
+            var y = p.R * Sin(p.Phi) - R * Sin(Phi);
 
             var r = Sqrt(Pow(x, 2) + Pow(y, 2));
             var phi =
-                y > 0
-                    ? Acos(x / r)
-                    : y < 0
-                        ? PI + Acos(-x / r)
-                        : x >= 0
-                            ? 0
-                            : PI;
+                y > 0 ? Acos(x / r)
+                : y < 0 ? PI + Acos(-x / r)
+                : x >= 0 ? 0
+                : PI;
 
             return new PolarVector(phi, r, System);
         }

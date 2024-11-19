@@ -41,20 +41,23 @@ public class Tests
         TestContext.WriteLine(fileName);
         var preFileSize = new FileInfo(fileName).Length;
 
-        var particle1 = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.NewGuid()).GetParticle();
+        var particle1 = new ShapeFunctionParticleFactory(
+            100,
+            0.1,
+            5,
+            0.1,
+            Guid.NewGuid()
+        ).GetParticle();
         var particle2 = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.NewGuid())
         {
             CenterCoordinates = new AbsolutePoint(240, 0),
-            RotationAngle = Math.PI
+            RotationAngle = Math.PI,
         }.GetParticle();
 
         storage.StoreState(
             null!,
-            new SystemState(
-                Guid.NewGuid(),
-                0.12,
-                new[] { particle1, particle2 }
-            ));
+            new SystemState(Guid.NewGuid(), 0.12, new[] { particle1, particle2 })
+        );
 
         That(new FileInfo(fileName), Has.Length.GreaterThan(preFileSize));
 

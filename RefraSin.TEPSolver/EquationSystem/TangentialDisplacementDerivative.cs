@@ -12,9 +12,7 @@ public class TangentialDisplacementDerivative : NodeEquationBase<NodeBase>
     /// <inheritdoc />
     public override double Value()
     {
-        var gibbsTerm =
-            -Node.GibbsEnergyGradient.Tangential 
-            * (1 + Step.LambdaDissipation());
+        var gibbsTerm = -Node.GibbsEnergyGradient.Tangential * (1 + Step.LambdaDissipation());
         var requiredConstraintsTerm = Node.VolumeGradient.Tangential * Step.LambdaVolume(Node);
         var contactTerm = Node is ContactNodeBase contactNode
             ? -contactNode.ContactDistanceGradient.Tangential * Step.LambdaContactDistance(Node)
@@ -28,10 +26,7 @@ public class TangentialDisplacementDerivative : NodeEquationBase<NodeBase>
     /// <inheritdoc />
     public override IEnumerable<(int, double)> Derivative()
     {
-        yield return (
-            Map.LambdaDissipation(),
-            -Node.GibbsEnergyGradient.Tangential
-        );
+        yield return (Map.LambdaDissipation(), -Node.GibbsEnergyGradient.Tangential);
 
         yield return (Map.LambdaVolume(Node), Node.VolumeGradient.Tangential);
 

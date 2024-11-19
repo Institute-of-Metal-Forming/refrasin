@@ -4,7 +4,8 @@ namespace RefraSin.Enumerables;
 ///     Interface for items of <see cref="Ring{TRingItem}" />.
 /// </summary>
 /// <typeparam name="TRingItem">the implementing type</typeparam>
-public interface IRingItem<TRingItem> where TRingItem : class, IRingItem<TRingItem>
+public interface IRingItem<TRingItem>
+    where TRingItem : class, IRingItem<TRingItem>
 {
     /// <summary>
     ///     Upper neighbor of this item.

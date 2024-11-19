@@ -41,7 +41,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(3, 0)
+                CenterCoordinates = new(3, 0),
             }.GetParticle(),
             false
         );
@@ -50,7 +50,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(2, 0)
+                CenterCoordinates = new(2, 0),
             }.GetParticle(),
             true
         );
@@ -59,7 +59,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, 0)
+                CenterCoordinates = new(-3, 0),
             }.GetParticle(),
             false
         );
@@ -68,7 +68,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-2, 0)
+                CenterCoordinates = new(-2, 0),
             }.GetParticle(),
             true
         );
@@ -77,7 +77,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 2)
+                CenterCoordinates = new(0, 2),
             }.GetParticle(),
             false
         );
@@ -86,7 +86,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 1)
+                CenterCoordinates = new(0, 1),
             }.GetParticle(),
             true
         );
@@ -95,7 +95,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, -2)
+                CenterCoordinates = new(0, -2),
             }.GetParticle(),
             false
         );
@@ -104,7 +104,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, -1)
+                CenterCoordinates = new(0, -1),
             }.GetParticle(),
             true
         );
@@ -113,7 +113,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(3, 3)
+                CenterCoordinates = new(3, 3),
             }.GetParticle(),
             false
         );
@@ -122,7 +122,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(1, 1)
+                CenterCoordinates = new(1, 1),
             }.GetParticle(),
             true
         );
@@ -131,7 +131,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, -3)
+                CenterCoordinates = new(-3, -3),
             }.GetParticle(),
             false
         );
@@ -140,7 +140,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-1, -1)
+                CenterCoordinates = new(-1, -1),
             }.GetParticle(),
             true
         );
@@ -149,7 +149,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, 3)
+                CenterCoordinates = new(-3, 3),
             }.GetParticle(),
             false
         );
@@ -158,7 +158,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-1, 1)
+                CenterCoordinates = new(-1, 1),
             }.GetParticle(),
             true
         );
@@ -167,7 +167,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, -3)
+                CenterCoordinates = new(-3, -3),
             }.GetParticle(),
             false
         );
@@ -176,7 +176,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(1, -1)
+                CenterCoordinates = new(1, -1),
             }.GetParticle(),
             true
         );
@@ -185,7 +185,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(0.1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 0)
+                CenterCoordinates = new(0, 0),
             }.GetParticle(),
             true
         );
@@ -194,7 +194,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(10, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 0)
+                CenterCoordinates = new(0, 0),
             }.GetParticle(),
             true
         );
@@ -253,7 +253,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(3, 0)
+                CenterCoordinates = new(3, 0),
             }.GetParticle(),
             false
         );
@@ -262,7 +262,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(2, 0)
+                CenterCoordinates = new(2, 0),
             }.GetParticle(),
             true
         );
@@ -271,7 +271,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, 0)
+                CenterCoordinates = new(-3, 0),
             }.GetParticle(),
             false
         );
@@ -280,7 +280,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-2, 0)
+                CenterCoordinates = new(-2, 0),
             }.GetParticle(),
             true
         );
@@ -289,7 +289,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 2)
+                CenterCoordinates = new(0, 2),
             }.GetParticle(),
             false
         );
@@ -298,7 +298,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 1)
+                CenterCoordinates = new(0, 1),
             }.GetParticle(),
             true
         );
@@ -307,7 +307,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, -2)
+                CenterCoordinates = new(0, -2),
             }.GetParticle(),
             false
         );
@@ -316,7 +316,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, -1)
+                CenterCoordinates = new(0, -1),
             }.GetParticle(),
             true
         );
@@ -325,7 +325,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(3, 3)
+                CenterCoordinates = new(3, 3),
             }.GetParticle(),
             false
         );
@@ -334,7 +334,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(1.95, 1.95)
+                CenterCoordinates = new(1.95, 1.95),
             }.GetParticle(),
             false
         );
@@ -343,7 +343,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(1, 1)
+                CenterCoordinates = new(1, 1),
             }.GetParticle(),
             true
         );
@@ -352,7 +352,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, -3)
+                CenterCoordinates = new(-3, -3),
             }.GetParticle(),
             false
         );
@@ -361,7 +361,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-1, -1)
+                CenterCoordinates = new(-1, -1),
             }.GetParticle(),
             true
         );
@@ -370,7 +370,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, 3)
+                CenterCoordinates = new(-3, 3),
             }.GetParticle(),
             false
         );
@@ -379,7 +379,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-1, 1)
+                CenterCoordinates = new(-1, 1),
             }.GetParticle(),
             true
         );
@@ -388,7 +388,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(-3, -3)
+                CenterCoordinates = new(-3, -3),
             }.GetParticle(),
             false
         );
@@ -397,7 +397,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(1, -1)
+                CenterCoordinates = new(1, -1),
             }.GetParticle(),
             true
         );
@@ -406,7 +406,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(0.1, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 0)
+                CenterCoordinates = new(0, 0),
             }.GetParticle(),
             true
         );
@@ -415,7 +415,7 @@ public class ParticleExtensionsTests
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(10, 0.2, 5, 0.2, Guid.Empty)
             {
-                CenterCoordinates = new(0, 0)
+                CenterCoordinates = new(0, 0),
             }.GetParticle(),
             true
         );
@@ -435,16 +435,16 @@ public class ParticleExtensionsTests
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
                 CenterCoordinates = new(2.36, 0),
-                RotationAngle = Angle.Straight
+                RotationAngle = Angle.Straight,
             }.GetParticle(),
-            new AbsolutePoint[] { new(1.18, -0.317), new(1.18, 0.317), }
+            new AbsolutePoint[] { new(1.18, -0.317), new(1.18, 0.317) }
         );
 
         yield return new TestCaseData(
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
                 CenterCoordinates = new(-2.06, 0),
-                RotationAngle = Angle.Straight
+                RotationAngle = Angle.Straight,
             }.GetParticle(),
             new AbsolutePoint[]
             {
@@ -459,7 +459,7 @@ public class ParticleExtensionsTests
             new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
             {
                 CenterCoordinates = new(3, 0),
-                RotationAngle = Angle.Straight
+                RotationAngle = Angle.Straight,
             }.GetParticle(),
             Array.Empty<AbsolutePoint>()
         );
@@ -475,9 +475,13 @@ public class ParticleExtensionsTests
         var intersections = Particle.IntersectionPointsTo(other).ToArray();
 
         var plot = ParticlePlot.PlotParticles([Particle, other]);
-        var points = ParticlePlot.PlotPoints(intersections, "Intersections").WithMarkerStyle(Color:fromKeyword(Magenta), Symbol: Cross);
-        
-        Chart.Combine([plot, points]).SaveHtml(Path.Combine(_tempDir, $"{nameof(TestIntersectionPointsTo)}-{other}.html"));
+        var points = ParticlePlot
+            .PlotPoints(intersections, "Intersections")
+            .WithMarkerStyle(Color: fromKeyword(Magenta), Symbol: Cross);
+
+        Chart
+            .Combine([plot, points])
+            .SaveHtml(Path.Combine(_tempDir, $"{nameof(TestIntersectionPointsTo)}-{other}.html"));
 
         Assert.That(
             intersections.Select(p => p.Absolute.X),
@@ -498,7 +502,14 @@ public class ParticleExtensionsTests
     {
         var newParticles = Particle.CreateGrainBoundariesAtIntersections(other);
 
-        var plot = ParticlePlot.PlotParticles([Particle, other, newParticles.self, newParticles.other]);
-        plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestCreateGrainBoundariesAtIntersections)}-{other}.html"));
+        var plot = ParticlePlot.PlotParticles(
+            [Particle, other, newParticles.self, newParticles.other]
+        );
+        plot.SaveHtml(
+            Path.Combine(
+                _tempDir,
+                $"{nameof(TestCreateGrainBoundariesAtIntersections)}-{other}.html"
+            )
+        );
     }
 }

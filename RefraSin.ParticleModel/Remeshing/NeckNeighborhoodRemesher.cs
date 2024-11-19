@@ -4,8 +4,7 @@ using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
-public class NeckNeighborhoodRemesher(double deletionLimit = 0.3)
-    : IParticleRemesher
+public class NeckNeighborhoodRemesher(double deletionLimit = 0.3) : IParticleRemesher
 {
     /// <inheritdoc />
     public IParticle<IParticleNode> Remesh(IParticle<IParticleNode> particle)
@@ -13,11 +12,7 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.3)
         var meanDiscretizationWidth = particle.Nodes.Average(n => n.SurfaceDistance.ToUpper);
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> newParticle) =>
-            FilterNodes(
-                newParticle,
-                particle.Nodes,
-                meanDiscretizationWidth * DeletionLimit
-            );
+            FilterNodes(newParticle, particle.Nodes, meanDiscretizationWidth * DeletionLimit);
 
         var newParticle = new Particle<IParticleNode>(
             particle.Id,

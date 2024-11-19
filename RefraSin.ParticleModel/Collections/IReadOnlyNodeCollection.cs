@@ -5,7 +5,8 @@ namespace RefraSin.ParticleModel.Collections;
 /// <summary>
 /// An interface for collections of nodes, where items can be indexed by position and GUID.
 /// </summary>
-public interface IReadOnlyNodeCollection<out TNode> : IReadOnlyList<TNode> where TNode : INode
+public interface IReadOnlyNodeCollection<out TNode> : IReadOnlyList<TNode>
+    where TNode : INode
 // IReadOnlyDictionary is not implemented, since this would break covariance
 {
     /// <summary>

@@ -4,8 +4,11 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 
 namespace RefraSin.Numerics.LinearSolvers;
 
-public class IterativeSolver(IIterativeSolver<double> solver, Iterator<double> iterator, IPreconditioner<double> preconditioner)
-    : ILinearSolver
+public class IterativeSolver(
+    IIterativeSolver<double> solver,
+    Iterator<double> iterator,
+    IPreconditioner<double> preconditioner
+) : ILinearSolver
 {
     public IIterativeSolver<double> Solver { get; } = solver;
 

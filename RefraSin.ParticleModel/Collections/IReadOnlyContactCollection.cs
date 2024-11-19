@@ -7,7 +7,8 @@ namespace RefraSin.ParticleModel.Collections;
 /// An interface for collections of particle contacts, where items can be indexed by position and GUIDs.
 /// </summary>
 /// <typeparam name="TContact"></typeparam>
-public interface IReadOnlyContactCollection<out TContact> : IReadOnlyList<TContact> where TContact : IEdge
+public interface IReadOnlyContactCollection<out TContact> : IReadOnlyList<TContact>
+    where TContact : IEdge
 // IReadOnlyDictionary is not implemented, since this would break covariance
 {
     /// <summary>
@@ -34,6 +35,6 @@ public interface IReadOnlyContactCollection<out TContact> : IReadOnlyList<TConta
     public bool Contains(Guid from, Guid to);
 
     IEnumerable<TContact> From(Guid id);
-    
+
     IEnumerable<TContact> To(Guid id);
 }

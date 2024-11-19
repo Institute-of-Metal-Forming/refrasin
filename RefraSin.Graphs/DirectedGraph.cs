@@ -1,6 +1,7 @@
 namespace RefraSin.Graphs;
 
-public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>> where TVertex : IVertex
+public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>>
+    where TVertex : IVertex
 {
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _childrenOf;
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _parentsOf;
@@ -23,7 +24,8 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>> where TVert
         _edgesTo = new Lazy<Dictionary<TVertex, Edge<TVertex>[]>>(InitEdgesTo);
     }
 
-    public static DirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph) where TEdge : IEdge<TVertex> =>
+    public static DirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph)
+        where TEdge : IEdge<TVertex> =>
         new(graph.Vertices, (IEnumerable<IEdge<TVertex>>)graph.Edges);
 
     public static DirectedGraph<TVertex> FromGraphSearch(IGraphTraversal<TVertex> graphTraversal)
@@ -44,39 +46,31 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>> where TVert
     }
 
     private Dictionary<TVertex, TVertex[]> InitChildrenOf() =>
-        Edges
-            .GroupBy(e => e.From, e => e.To)
-            .ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.From, e => e.To).ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, TVertex[]> InitParentsOf() =>
-        Edges
-            .GroupBy(e => e.To, e => e.From)
-            .ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.To, e => e.From).ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, TVertex[]> InitAdjacentsOf() =>
         _childrenOf.Value.ToDictionary(
             kvp => kvp.Key,
-            kvp => kvp.Value.Concat(
-                _parentsOf.Value.GetValueOrDefault(kvp.Key, Array.Empty<TVertex>())
-            ).ToArray()
+            kvp =>
+                kvp.Value.Concat(
+                        _parentsOf.Value.GetValueOrDefault(kvp.Key, Array.Empty<TVertex>())
+                    )
+                    .ToArray()
         );
 
     private Dictionary<TVertex, Edge<TVertex>[]> InitEdgesFrom() =>
-        Edges
-            .GroupBy(e => e.From)
-            .ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.From).ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, Edge<TVertex>[]> InitEdgesTo() =>
-        Edges
-            .GroupBy(e => e.To)
-            .ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.To).ToDictionary(g => g.Key, g => g.ToArray());
 
     private Dictionary<TVertex, Edge<TVertex>[]> InitEdgesAt() =>
         _edgesFrom.Value.ToDictionary(
             kvp => kvp.Key,
-            kvp => kvp.Value.Concat(
-                _edgesTo.Value.GetValueOrDefault(kvp.Key, [])
-            ).ToArray()
+            kvp => kvp.Value.Concat(_edgesTo.Value.GetValueOrDefault(kvp.Key, [])).ToArray()
         );
 
     /// <inheritdoc />
@@ -91,11 +85,14 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>> where TVert
     /// <inheritdoc />
     public ISet<Edge<TVertex>> Edges { get; }
 
-    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) => _childrenOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
+    public IEnumerable<TVertex> ChildrenOf(TVertex vertex) =>
+        _childrenOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
 
-    public IEnumerable<TVertex> ParentsOf(TVertex vertex) => _parentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
+    public IEnumerable<TVertex> ParentsOf(TVertex vertex) =>
+        _parentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
 
-    public IEnumerable<TVertex> AdjacentsOf(TVertex vertex) => _adjacentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
+    public IEnumerable<TVertex> AdjacentsOf(TVertex vertex) =>
+        _adjacentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
 
     public IEnumerable<Edge<TVertex>> EdgesAt(TVertex vertex) =>
         _edgesAt.Value.GetValueOrDefault(vertex, Array.Empty<Edge<TVertex>>());

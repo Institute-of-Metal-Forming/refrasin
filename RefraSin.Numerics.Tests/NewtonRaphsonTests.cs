@@ -18,28 +18,34 @@ public class NewtonRaphsonTests
     {
         Vector<double> Function(Vector<double> x)
         {
-            return new DenseVector([
-                2 * x[0] + x[2] * x[1],
-                2 * x[1] + x[2] * x[0],
-                x[0] * x[1] - 1
-            ]);
+            return new DenseVector(
+                [2 * x[0] + x[2] * x[1], 2 * x[1] + x[2] * x[0], x[0] * x[1] - 1]
+            );
         }
 
         Matrix<double> Jacobian(Vector<double> x)
         {
-            return Matrix<double>.Build.DenseOfArray(new[,]
-            {
-                { 2, x[2], x[1] },
-                { x[2], 2, x[0] },
-                { x[1], x[0], 0 }
-            });
+            return Matrix<double>.Build.DenseOfArray(
+                new[,]
+                {
+                    { 2, x[2], x[1] },
+                    { x[2], 2, x[0] },
+                    { x[1], x[0], 0 },
+                }
+            );
         }
 
-        foreach (var linSolver in new ILinearSolver[]
-                 {
-                     new IterativeSolver(new MlkBiCgStab(), new Iterator<double>(), new UnitPreconditioner<double>()),
-                     new LUSolver()
-                 })
+        foreach (
+            var linSolver in new ILinearSolver[]
+            {
+                new IterativeSolver(
+                    new MlkBiCgStab(),
+                    new Iterator<double>(),
+                    new UnitPreconditioner<double>()
+                ),
+                new LUSolver(),
+            }
+        )
         {
             var solver = new NewtonRaphsonRootFinder(linSolver);
             var solution = solver.FindRoot(Function, Jacobian, new DenseVector([2.0, 2.0, 1.0]));

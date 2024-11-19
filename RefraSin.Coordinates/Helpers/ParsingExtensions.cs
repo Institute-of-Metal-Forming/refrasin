@@ -4,10 +4,9 @@ namespace RefraSin.Coordinates.Helpers;
 
 internal static class ParsingExtensions
 {
-    private static readonly Regex ParseRegex =
-        new(
-            @"^(?<type>[A-Za-z]\w*)?\s*[\(\[\<\{]?\s*(\w+\s*=\s*)?(?<value1>[\deE\+\-,\.]*\d(\s*[\w°]+)?)\s*[,;]?\s+(\w+\s*=\s*)?(?<value2>[\deE\+\-,\.]*\d)\s*[\)\]\>\}]?$"
-        );
+    private static readonly Regex ParseRegex = new(
+        @"^(?<type>[A-Za-z]\w*)?\s*[\(\[\<\{]?\s*(\w+\s*=\s*)?(?<value1>[\deE\+\-,\.]*\d(\s*[\w°]+)?)\s*[,;]?\s+(\w+\s*=\s*)?(?<value2>[\deE\+\-,\.]*\d)\s*[\)\]\>\}]?$"
+    );
 
     /// <summary>
     ///     Umkehrung von

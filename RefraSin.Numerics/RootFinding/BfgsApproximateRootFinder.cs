@@ -34,7 +34,11 @@ public class BfgsApproximateRootFinder(
         }
 
         var objFunction = ObjectiveFunction.Gradient(Fun, Grad);
-        var minimizer = new BfgsMinimizer(GradientTolerance, ParameterTolerance, FunctionProgressTolerance);
+        var minimizer = new BfgsMinimizer(
+            GradientTolerance,
+            ParameterTolerance,
+            FunctionProgressTolerance
+        );
 
         var result = minimizer.FindMinimum(objFunction, initialGuess);
 

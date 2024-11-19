@@ -20,7 +20,9 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
     /// <param name="materialInterfaces"></param>
     public SinteringStep(
         double duration,
-        double temperature, IProcessStepSolver<ISinteringStep> solver, IReadOnlyList<IMaterial> materials,
+        double temperature,
+        IProcessStepSolver<ISinteringStep> solver,
+        IReadOnlyList<IMaterial> materials,
         double gasConstant = 8.31446261815324
     )
     {

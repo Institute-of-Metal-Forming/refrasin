@@ -9,11 +9,15 @@ public static class StorageExtensions
         processStep.SystemStateReported += storage.HandleReportSystemState;
     }
 
-    private static void HandleReportSystemState(this ISolutionStorage storage, object? sender, IProcessStep.SystemStateReportedEventArgs reportedEventArgs)
+    private static void HandleReportSystemState(
+        this ISolutionStorage storage,
+        object? sender,
+        IProcessStep.SystemStateReportedEventArgs reportedEventArgs
+    )
     {
         if (sender is not IProcessStep processStep)
             throw new InvalidOperationException($"Sender must be a {nameof(IProcessStep)}");
-        
+
         storage.StoreState(processStep, reportedEventArgs.State);
     }
 }

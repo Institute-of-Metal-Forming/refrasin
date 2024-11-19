@@ -30,23 +30,13 @@ public class UndirectedGraphTests
     [Test]
     public void TestVertices()
     {
-        Assert.That(
-            _graph.Vertices.ToHashSet(),
-            Is.EqualTo(
-                _vertices.ToHashSet()
-            )
-        );
+        Assert.That(_graph.Vertices.ToHashSet(), Is.EqualTo(_vertices.ToHashSet()));
     }
 
     [Test]
     public void TestEdges()
     {
-        Assert.That(
-            _graph.Edges.ToHashSet(),
-            Is.EqualTo(
-                _edges.ToHashSet()
-            )
-        );
+        Assert.That(_graph.Edges.ToHashSet(), Is.EqualTo(_edges.ToHashSet()));
     }
 
     [Test]
@@ -54,9 +44,7 @@ public class UndirectedGraphTests
     {
         Assert.That(
             _graph.ChildrenOf(_vertices[0]).ToHashSet(),
-            Is.EqualTo(
-                _vertices[1..].ToHashSet()
-            )
+            Is.EqualTo(_vertices[1..].ToHashSet())
         );
     }
 
@@ -65,9 +53,7 @@ public class UndirectedGraphTests
     {
         Assert.That(
             _graph.ParentsOf(_vertices[0]).ToHashSet(),
-            Is.EqualTo(
-                _vertices[1..].ToHashSet()
-            )
+            Is.EqualTo(_vertices[1..].ToHashSet())
         );
     }
 }

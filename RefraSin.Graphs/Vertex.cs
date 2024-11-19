@@ -2,7 +2,8 @@ namespace RefraSin.Graphs;
 
 public class Vertex : IVertex
 {
-    public Vertex(IVertex vertex) : this(vertex.Id)
+    public Vertex(IVertex vertex)
+        : this(vertex.Id)
     {
         if (vertex is Vertex v)
         {
@@ -22,8 +23,10 @@ public class Vertex : IVertex
     /// <inheritdoc />
     public virtual bool Equals(IVertex? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
         return Id.Equals(other.Id);
     }
 
@@ -34,5 +37,6 @@ public class Vertex : IVertex
     public override int GetHashCode() => Id.GetHashCode();
 
     /// <inheritdoc />
-    public override string ToString() => string.IsNullOrWhiteSpace(Label) ? $"Vertex {Id}" : $"Vertex {Label} ({Id})";
+    public override string ToString() =>
+        string.IsNullOrWhiteSpace(Label) ? $"Vertex {Id}" : $"Vertex {Label} ({Id})";
 }

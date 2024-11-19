@@ -58,15 +58,16 @@ public record ParticleNode(
     /// <inheritdoc />
     public ToUpperToLower<Angle> RadiusTangentAngle =>
         _radiusTangentAngle ??= this.RadiusTangentAngle();
-    
+
     public IParticleNode Upper => Particle.Nodes.UpperNeighborOf(this);
-    
+
     INode INodeNeighbors.Upper => Upper;
 
     public IParticleNode Lower => Particle.Nodes.LowerNeighborOf(this);
-    
+
     INode INodeNeighbors.Lower => Lower;
 
     /// <inheritdoc />
-    public override string ToString() => $"""{nameof(ParticleNode)}({Type}) @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}""";
+    public override string ToString() =>
+        $"""{nameof(ParticleNode)}({Type}) @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}""";
 }

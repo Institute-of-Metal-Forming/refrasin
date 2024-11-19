@@ -7,7 +7,8 @@ using RefraSin.ParticleModel.Nodes;
 
 namespace RefraSin.ParticleModel.Particles;
 
-public interface IParticle<out TNode> : IParticle where TNode : IParticleNode
+public interface IParticle<out TNode> : IParticle
+    where TNode : IParticleNode
 {
     /// <summary>
     /// List of node specs.
@@ -29,7 +30,8 @@ public interface IParticle : IVertex, IPolarCoordinateSystem
 
     IPoint ICoordinateSystem.Origin => Coordinates;
 
-    Angle.ReductionDomain IPolarCoordinateSystem.AngleReductionDomain => Angle.ReductionDomain.AllPositive;
+    Angle.ReductionDomain IPolarCoordinateSystem.AngleReductionDomain =>
+        Angle.ReductionDomain.AllPositive;
 
     double IPolarCoordinateSystem.RScale => 1;
 }

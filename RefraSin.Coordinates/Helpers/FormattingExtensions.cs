@@ -28,7 +28,7 @@ internal static class FormattingExtensions
             _ when strainFormatChars.Contains('(') => '(',
             _ when strainFormatChars.Contains('{') => '{',
             _ when strainFormatChars.Contains('<') => '<',
-            _ => ' '
+            _ => ' ',
         };
 
         var closingBracket = strainFormatChars switch
@@ -37,14 +37,14 @@ internal static class FormattingExtensions
             _ when strainFormatChars.Contains(')') => ')',
             _ when strainFormatChars.Contains('}') => '}',
             _ when strainFormatChars.Contains('>') => '>',
-            _ => ' '
+            _ => ' ',
         };
 
         var delimiter = strainFormatChars switch
         {
             _ when strainFormatChars.Contains(',') => ", ",
             _ when strainFormatChars.Contains(';') => "; ",
-            _ => " "
+            _ => " ",
         };
 
         var valueString = strainFormatChars.Contains('V')

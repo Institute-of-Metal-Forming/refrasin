@@ -30,7 +30,7 @@ public class NeckRemeshingTest
     {
         var baseParticle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
         {
-            NodeCount = 50
+            NodeCount = 50,
         }.GetParticle();
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> particle) =>

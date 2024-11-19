@@ -9,34 +9,42 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Oberflächenknoten, der Teil einer freien Oberfläche ist.
 /// </summary>
-public class SurfaceNode : NodeBase 
+public class SurfaceNode : NodeBase
 {
     /// <inheritdoc />
-    public SurfaceNode(INode node, Particle particle) : base(node, particle) { }
+    public SurfaceNode(INode node, Particle particle)
+        : base(node, particle) { }
 
-    private SurfaceNode(Guid id, double r, Angle phi, Particle particle) : base(id, r, phi, particle) { }
+    private SurfaceNode(Guid id, double r, Angle phi, Particle particle)
+        : base(id, r, phi, particle) { }
 
     /// <inheritdoc />
     public override NodeType Type => NodeType.Surface;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> InterfaceEnergy => _interfaceEnergy ??= new ToUpperToLower<double>(
-        Particle.SurfaceProperties.Energy,
-        Particle.SurfaceProperties.Energy
-    );
+    public override ToUpperToLower<double> InterfaceEnergy =>
+        _interfaceEnergy ??= new ToUpperToLower<double>(
+            Particle.SurfaceProperties.Energy,
+            Particle.SurfaceProperties.Energy
+        );
 
     private ToUpperToLower<double>? _interfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> InterfaceDiffusionCoefficient => _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
-        Particle.SurfaceProperties.DiffusionCoefficient,
-        Particle.SurfaceProperties.DiffusionCoefficient
-    );
+    public override ToUpperToLower<double> InterfaceDiffusionCoefficient =>
+        _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
+            Particle.SurfaceProperties.DiffusionCoefficient,
+            Particle.SurfaceProperties.DiffusionCoefficient
+        );
 
     private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
 
     /// <inheritdoc />
-    public override NodeBase ApplyTimeStep(StepVector stepVector, double timeStepWidth, Particle particle)
+    public override NodeBase ApplyTimeStep(
+        StepVector stepVector,
+        double timeStepWidth,
+        Particle particle
+    )
     {
         var normalDisplacement = stepVector.NormalDisplacement(this) * timeStepWidth;
         var angle = SurfaceRadiusAngle.ToUpper + SurfaceNormalAngle.ToUpper;

@@ -22,7 +22,7 @@ public class TestParticleSystem
 
         var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
         {
-            NodeCount = nodeCountPerParticle
+            NodeCount = nodeCountPerParticle,
         }.GetParticle();
 
         IEnumerable<ParticleNode> NodeFactory1(IParticle<ParticleNode> particle) =>
@@ -82,7 +82,7 @@ public class TestParticleSystem
             particle1.MaterialId
         )
         {
-            NodeCount = nodeCountPerParticle
+            NodeCount = nodeCountPerParticle,
         }.GetParticle();
 
         IEnumerable<ParticleNode> NodeFactory2(IParticle<ParticleNode> particle) =>
@@ -134,6 +134,8 @@ public class TestParticleSystem
             NodeFactory2
         );
 
-        _system = new ParticleSystem<Particle<ParticleNode>, ParticleNode>(new[] { particle1, particle2 });
+        _system = new ParticleSystem<Particle<ParticleNode>, ParticleNode>(
+            new[] { particle1, particle2 }
+        );
     }
 }

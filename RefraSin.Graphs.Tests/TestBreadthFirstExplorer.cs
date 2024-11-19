@@ -37,15 +37,20 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[0], _vertices[4], true),
-            new Edge<Vertex>(_vertices[1], _vertices[2], true),
-            new Edge<Vertex>(_vertices[1], _vertices[3], true),
-            new Edge<Vertex>(_vertices[2], _vertices[5], true),
-            new Edge<Vertex>(_vertices[5], _vertices[2], true),
-        }));
+        Assert.That(
+            explorer.TraversedEdges,
+            Is.EqualTo(
+                new IEdge[]
+                {
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[0], _vertices[4], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[3], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[5], true),
+                    new Edge<Vertex>(_vertices[5], _vertices[2], true),
+                }
+            )
+        );
     }
 
     [Test]
@@ -55,19 +60,24 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[0], _vertices[4], true),
-            new Edge<Vertex>(_vertices[1], _vertices[2], true),
-            new Edge<Vertex>(_vertices[1], _vertices[3], true),
-            new Edge<Vertex>(_vertices[1], _vertices[0], true),
-            new Edge<Vertex>(_vertices[4], _vertices[0], true),
-            new Edge<Vertex>(_vertices[2], _vertices[5], true),
-            new Edge<Vertex>(_vertices[2], _vertices[1], true),
-            new Edge<Vertex>(_vertices[3], _vertices[1], true),
-            new Edge<Vertex>(_vertices[5], _vertices[2], true),
-        }));
+        Assert.That(
+            explorer.TraversedEdges,
+            Is.EqualTo(
+                new IEdge[]
+                {
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[0], _vertices[4], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[3], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[0], true),
+                    new Edge<Vertex>(_vertices[4], _vertices[0], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[5], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[3], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[5], _vertices[2], true),
+                }
+            )
+        );
     }
 
     [Test]
@@ -77,19 +87,24 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0]);
 
-        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[0], _vertices[4], true),
-            new Edge<Vertex>(_vertices[1], _vertices[0], true),
-            new Edge<Vertex>(_vertices[1], _vertices[2], true),
-            new Edge<Vertex>(_vertices[1], _vertices[3], true),
-            new Edge<Vertex>(_vertices[4], _vertices[0], true),
-            new Edge<Vertex>(_vertices[2], _vertices[1], true),
-            new Edge<Vertex>(_vertices[2], _vertices[5], true),
-            new Edge<Vertex>(_vertices[3], _vertices[1], true),
-            new Edge<Vertex>(_vertices[5], _vertices[2], true),
-        }));
+        Assert.That(
+            explorer.TraversedEdges,
+            Is.EqualTo(
+                new IEdge[]
+                {
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[0], _vertices[4], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[0], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[3], true),
+                    new Edge<Vertex>(_vertices[4], _vertices[0], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[5], true),
+                    new Edge<Vertex>(_vertices[3], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[5], _vertices[2], true),
+                }
+            )
+        );
     }
 
     [Test]
@@ -99,14 +114,19 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0], false);
 
-        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[0], _vertices[4], true),
-            new Edge<Vertex>(_vertices[1], _vertices[2], true),
-            new Edge<Vertex>(_vertices[1], _vertices[3], true),
-            new Edge<Vertex>(_vertices[2], _vertices[5], true),
-        }));
+        Assert.That(
+            explorer.TraversedEdges,
+            Is.EqualTo(
+                new IEdge[]
+                {
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[0], _vertices[4], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[3], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[5], true),
+                }
+            )
+        );
     }
 
     [Test]
@@ -116,14 +136,19 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0], false);
 
-        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[0], _vertices[4], true),
-            new Edge<Vertex>(_vertices[1], _vertices[2], true),
-            new Edge<Vertex>(_vertices[1], _vertices[3], true),
-            new Edge<Vertex>(_vertices[2], _vertices[5], true),
-        }));
+        Assert.That(
+            explorer.TraversedEdges,
+            Is.EqualTo(
+                new IEdge[]
+                {
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[0], _vertices[4], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[3], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[5], true),
+                }
+            )
+        );
     }
 
     [Test]
@@ -133,13 +158,18 @@ public class TestBreadthFirstExplorer
 
         var explorer = BreadthFirstExplorer<Vertex>.Explore(graph, _vertices[0], false);
 
-        Assert.That(explorer.TraversedEdges, Is.EqualTo(new IEdge[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[0], _vertices[4], true),
-            new Edge<Vertex>(_vertices[1], _vertices[2], true),
-            new Edge<Vertex>(_vertices[1], _vertices[3], true),
-            new Edge<Vertex>(_vertices[2], _vertices[5], true),
-        }));
+        Assert.That(
+            explorer.TraversedEdges,
+            Is.EqualTo(
+                new IEdge[]
+                {
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[0], _vertices[4], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[3], true),
+                    new Edge<Vertex>(_vertices[2], _vertices[5], true),
+                }
+            )
+        );
     }
 }

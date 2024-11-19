@@ -4,7 +4,10 @@ using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.ParticleModel.Collections;
 
-public class ReadOnlyParticleCollection<TParticle, TNode> : IReadOnlyParticleCollection<TParticle, TNode> where TParticle : IParticle<TNode> where TNode : IParticleNode
+public class ReadOnlyParticleCollection<TParticle, TNode>
+    : IReadOnlyParticleCollection<TParticle, TNode>
+    where TParticle : IParticle<TNode>
+    where TNode : IParticleNode
 {
     private TParticle[] _particles;
     private Dictionary<Guid, int> _particleIndices;
@@ -22,7 +25,8 @@ public class ReadOnlyParticleCollection<TParticle, TNode> : IReadOnlyParticleCol
     }
 
     /// <inheritdoc />
-    public IEnumerator<TParticle> GetEnumerator() => ((IEnumerable<TParticle>)_particles).GetEnumerator();
+    public IEnumerator<TParticle> GetEnumerator() =>
+        ((IEnumerable<TParticle>)_particles).GetEnumerator();
 
     /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

@@ -9,7 +9,8 @@ namespace RefraSin.Enumerables;
 ///     Represents a ring enumeration where all elements are connected through neighborhood relations.
 /// </summary>
 /// <typeparam name="TRingItem">type of the items, must implement <see cref="IRingItem{TRingItem}" /></typeparam>
-public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where TRingItem : class, IRingItem<TRingItem>
+public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable
+    where TRingItem : class, IRingItem<TRingItem>
 {
     /// <summary>
     ///     Creates a new ring.
@@ -25,11 +26,13 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
     public Ring(IEnumerable<TRingItem> enumerable)
     {
         using var enumerator = enumerable.GetEnumerator();
-        if (!enumerator.MoveNext()) throw new ArgumentException($"{nameof(enumerable)} cannot be empty");
+        if (!enumerator.MoveNext())
+            throw new ArgumentException($"{nameof(enumerable)} cannot be empty");
 
         SetInitialAnchor(enumerator.Current);
 
-        while (enumerator.MoveNext()) Add(enumerator.Current);
+        while (enumerator.MoveNext())
+            Add(enumerator.Current);
     }
 
     /// <summary>
@@ -41,7 +44,8 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
     /// <inheritdoc />
     public IEnumerator<TRingItem> GetEnumerator()
     {
-        if (Anchor == null) return new Enumerator();
+        if (Anchor == null)
+            return new Enumerator();
         return new Enumerator(Anchor, Anchor.Lower ?? Anchor);
     }
 
@@ -109,9 +113,10 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
     {
         using var enumerator = GetEnumerator();
 
-        for (var i = arrayIndex;; i++)
+        for (var i = arrayIndex; ; i++)
         {
-            if (!enumerator.MoveNext()) break;
+            if (!enumerator.MoveNext())
+                break;
             array[i] = enumerator.Current;
         }
     }
@@ -125,7 +130,8 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
         {
             using var enumerator = GetEnumerator();
             var count = 0;
-            while (enumerator.MoveNext()) count++;
+            while (enumerator.MoveNext())
+                count++;
             return count;
         }
     }
@@ -145,12 +151,15 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
         if (!Contains(item))
             throw new InvalidOperationException($"{nameof(item)} is not part of this ring.");
 
-        if (item.Upper != null) item.Upper.Lower = item.Lower;
+        if (item.Upper != null)
+            item.Upper.Lower = item.Lower;
 
-        if (item.Lower != null) item.Lower.Upper = item.Upper;
+        if (item.Lower != null)
+            item.Lower.Upper = item.Upper;
 
         if (Anchor == item)
-            Anchor = item.Upper ?? throw new InvalidOperationException("Last item cannot be removed.");
+            Anchor =
+                item.Upper ?? throw new InvalidOperationException("Last item cannot be removed.");
 
         item.Upper = null;
         item.Lower = null;
@@ -173,7 +182,9 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
     {
         if (first.IsMemberOf(this) && last.IsMemberOf(this))
             return new Segment(first, last);
-        throw new InvalidOperationException($"Arguments {nameof(first)} and {nameof(last)} must be member of this ring.");
+        throw new InvalidOperationException(
+            $"Arguments {nameof(first)} and {nameof(last)} must be member of this ring."
+        );
     }
 
     private void SetInitialAnchor(TRingItem anchor)
@@ -196,7 +207,8 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
             throw new InvalidOperationException($"{nameof(position)} is not part of this ring.");
         if (replacement.IsRingMember())
             throw new InvalidOperationException(
-                $"Cannot insert '{nameof(replacement)}', because '{nameof(replacement)}' is already part of another ring.");
+                $"Cannot insert '{nameof(replacement)}', because '{nameof(replacement)}' is already part of another ring."
+            );
 
         if (position.Upper != null)
         {
@@ -239,7 +251,8 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
             throw new InvalidOperationException($"{nameof(position)} is not part of this ring.");
         if (insertion.IsRingMember())
             throw new InvalidOperationException(
-                $"Cannot insert '{nameof(insertion)}', because '{nameof(insertion)}' is already part of another ring.");
+                $"Cannot insert '{nameof(insertion)}', because '{nameof(insertion)}' is already part of another ring."
+            );
 
         if (position.Upper != null)
         {
@@ -269,7 +282,8 @@ public partial class Ring<TRingItem> : ICollection<TRingItem>, IDisposable where
             throw new InvalidOperationException($"{nameof(position)} is not part of this ring.");
         if (insertion.IsRingMember())
             throw new InvalidOperationException(
-                $"Cannot insert '{nameof(insertion)}', because '{nameof(insertion)}' is already part of another ring.");
+                $"Cannot insert '{nameof(insertion)}', because '{nameof(insertion)}' is already part of another ring."
+            );
 
         if (position.Lower != null)
         {

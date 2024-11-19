@@ -33,7 +33,8 @@ public class FixedStack<T> : IReadOnlyCollection<T>
 
     public T Pop()
     {
-        if (_internalList.First is null) throw new InvalidOperationException("The stack is empty.");
+        if (_internalList.First is null)
+            throw new InvalidOperationException("The stack is empty.");
         var item = _internalList.First.Value;
         _internalList.RemoveFirst();
         return item;
@@ -43,7 +44,8 @@ public class FixedStack<T> : IReadOnlyCollection<T>
     {
         get
         {
-            if (_internalList.First is null) throw new InvalidOperationException("The stack is empty.");
+            if (_internalList.First is null)
+                throw new InvalidOperationException("The stack is empty.");
             return _internalList.First.Value;
         }
     }
@@ -52,7 +54,8 @@ public class FixedStack<T> : IReadOnlyCollection<T>
     {
         get
         {
-            if (_internalList.Last is null) throw new InvalidOperationException("The stack is empty.");
+            if (_internalList.Last is null)
+                throw new InvalidOperationException("The stack is empty.");
             return _internalList.Last.Value;
         }
     }

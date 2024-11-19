@@ -44,9 +44,13 @@ public class ParticleAnalysisTests
     public void TestConvexHull()
     {
         var hull = ParticleAnalysis.ConvexHull(_particle);
-        Chart.Combine([
-            ParticlePlot.PlotParticle(_particle),
-            ParticlePlot.PlotLineRing(hull, "convex hull")
-        ]).Show();
+        Chart
+            .Combine(
+                [
+                    ParticlePlot.PlotParticle(_particle),
+                    ParticlePlot.PlotLineRing(hull, "convex hull"),
+                ]
+            )
+            .Show();
     }
 }

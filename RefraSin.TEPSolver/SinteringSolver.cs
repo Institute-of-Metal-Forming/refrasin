@@ -127,16 +127,13 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                 var remeshedState = new SystemState(
                     Guid.NewGuid(),
                     session.CurrentState.Time,
-                    session.Routines.Remeshers.Aggregate<IParticleSystemRemesher, IParticleSystem<IParticle<IParticleNode>, IParticleNode>>(
-                        session.CurrentState,
-                        (state, remesher) => remesher.RemeshSystem(state)
-                    )
+                    session.Routines.Remeshers.Aggregate<
+                        IParticleSystemRemesher,
+                        IParticleSystem<IParticle<IParticleNode>, IParticleNode>
+                    >(session.CurrentState, (state, remesher) => remesher.RemeshSystem(state))
                 );
 
-                session = new SolverSession(
-                    session,
-                    remeshedState
-                );
+                session = new SolverSession(session, remeshedState);
                 InvokeSessionInitialized(session);
                 session.Logger.LogInformation(
                     "Remeshed session created. Now {NodeCount} nodes present.",

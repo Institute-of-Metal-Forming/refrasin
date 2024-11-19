@@ -12,8 +12,10 @@ public class PropertyNotSetException : InvalidOperationException
     /// <inheritdoc cref="PropertyNotSetException" />
     /// <param name="propertyName">name of the affected property</param>
     /// <param name="ownerName">name of the owning type or object</param>
-    public PropertyNotSetException(string propertyName, string ownerName) : base(
-        $"The property '{propertyName}' of '{ownerName}' is not set, nor a default value can be obtained.")
+    public PropertyNotSetException(string propertyName, string ownerName)
+        : base(
+            $"The property '{propertyName}' of '{ownerName}' is not set, nor a default value can be obtained."
+        )
     {
         PropertyName = propertyName;
         OwnerName = ownerName;

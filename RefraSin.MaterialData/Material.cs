@@ -13,5 +13,6 @@ public record Material(
 ) : IMaterial
 {
     /// <inheritdoc />
-    public IReadOnlyDictionary<Guid, IInterfaceProperties> Interfaces { get; } = Interfaces ?? new Dictionary<Guid, IInterfaceProperties>();
+    public IReadOnlyDictionary<Guid, IInterfaceProperties> Interfaces { get; } =
+        Interfaces ?? new Dictionary<Guid, IInterfaceProperties>();
 }

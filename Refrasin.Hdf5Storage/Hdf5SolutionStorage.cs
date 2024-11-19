@@ -11,10 +11,7 @@ namespace Refrasin.HDF5Storage;
 
 public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
 {
-    public Hdf5SolutionStorage(
-        string filePath,
-        string statesGroupName = "States"
-    )
+    public Hdf5SolutionStorage(string filePath, string statesGroupName = "States")
     {
         FilePath = filePath;
         StatesGroupName = statesGroupName;
@@ -32,7 +29,10 @@ public class Hdf5SolutionStorage : ISolutionStorage, IDisposable
     private int _stateIndex = 0;
 
     /// <inheritdoc />
-    public void StoreState(IProcessStep processStep, ISystemState<IParticle<IParticleNode>, IParticleNode> state)
+    public void StoreState(
+        IProcessStep processStep,
+        ISystemState<IParticle<IParticleNode>, IParticleNode> state
+    )
     {
         var stateId = Hdf5.CreateOrOpenGroup(StatesGroupId, _stateIndex.ToString());
         Hdf5.WriteAttribute(stateId, nameof(state.Time), state.Time);

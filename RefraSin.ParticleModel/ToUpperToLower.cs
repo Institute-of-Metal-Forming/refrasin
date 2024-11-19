@@ -10,8 +10,8 @@ public readonly record struct ToUpperToLower<TValue>(TValue ToUpper, TValue ToLo
     : IMultiplyOperators<ToUpperToLower<TValue>, double, ToUpperToLower<TValue>>,
         IDivisionOperators<ToUpperToLower<TValue>, double, ToUpperToLower<TValue>>
     where TValue : IAdditionOperators<TValue, TValue, TValue>,
-    IMultiplyOperators<TValue, double, TValue>,
-    IDivisionOperators<TValue, double, TValue>
+        IMultiplyOperators<TValue, double, TValue>,
+        IDivisionOperators<TValue, double, TValue>
 {
     /// <summary>
     /// Returns the components of the instance as 2-element array.
@@ -26,10 +26,12 @@ public readonly record struct ToUpperToLower<TValue>(TValue ToUpper, TValue ToLo
     public TValue Sum => ToUpper + ToLower;
 
     /// <inheritdoc />
-    public static ToUpperToLower<TValue> operator *(ToUpperToLower<TValue> left, double right) => new(left.ToUpper * right, left.ToLower * right);
+    public static ToUpperToLower<TValue> operator *(ToUpperToLower<TValue> left, double right) =>
+        new(left.ToUpper * right, left.ToLower * right);
 
     /// <inheritdoc />
-    public static ToUpperToLower<TValue> operator /(ToUpperToLower<TValue> left, double right) => new(left.ToUpper / right, left.ToLower / right);
+    public static ToUpperToLower<TValue> operator /(ToUpperToLower<TValue> left, double right) =>
+        new(left.ToUpper / right, left.ToLower / right);
 }
 
 public static class ToUpperToLowerExtensions

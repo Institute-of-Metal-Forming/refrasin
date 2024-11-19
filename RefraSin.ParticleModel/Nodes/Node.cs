@@ -7,6 +7,7 @@ public record Node(Guid Id, Guid ParticleId, IPolarPoint Coordinates, NodeType T
 {
     public Node(INode template)
         : this(template.Id, template.ParticleId, template.Coordinates, template.Type) { }
-    
-    public override string ToString() => $"""{nameof(Node)}({Type}) @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}""";
+
+    public override string ToString() =>
+        $"""{nameof(Node)}({Type}) @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}""";
 }

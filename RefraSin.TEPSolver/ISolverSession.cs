@@ -16,9 +16,9 @@ public interface ISolverSession : ISinteringConditions
     /// Unique ID of this session.
     /// </summary>
     Guid Id { get; }
-    
+
     public SolutionState CurrentState { get; }
-    
+
     public StepVector? LastStep { get; }
 
     /// <summary>
@@ -30,6 +30,6 @@ public interface ISolverSession : ISinteringConditions
     /// COllection of solver routines to use.
     /// </summary>
     public ISolverRoutines Routines { get; }
-    
+
     INorm Norm { get; }
 }

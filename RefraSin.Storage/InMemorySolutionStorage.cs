@@ -10,7 +10,7 @@ public class InMemorySolutionStorage : ISolutionStorage
     public IReadOnlyList<ISystemState> States => _states;
 
     private readonly List<ISystemState> _states = new();
-    private readonly Dictionary<Guid, ISystemState> _statesDictionary = new ();
+    private readonly Dictionary<Guid, ISystemState> _statesDictionary = new();
 
     public ISystemState GetStateById(Guid id) => _statesDictionary[id];
 

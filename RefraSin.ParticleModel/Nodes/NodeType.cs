@@ -4,5 +4,5 @@ public enum NodeType
 {
     Surface,
     GrainBoundary,
-    Neck
+    Neck,
 }

@@ -6,7 +6,7 @@ public interface ISinteringConditions
     /// Duration of the sintering process.
     /// </summary>
     public double Duration { get; }
-    
+
     /// <summary>
     /// Constant process temperature.
     /// </summary>

@@ -13,7 +13,7 @@ public class ParticleSurfaceTest
     {
         _particle = new ShapeFunctionParticleFactory(1, 0.2, 5, 0.1, Guid.Empty)
         {
-            NodeCount = 100
+            NodeCount = 100,
         }.GetParticle();
     }
 

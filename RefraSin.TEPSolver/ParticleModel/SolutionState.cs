@@ -48,7 +48,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 this,
                 stepVector,
                 timeStepWidth
-            )
+            ),
         };
 
         foreach (var contact in oldState.ParticleContacts)

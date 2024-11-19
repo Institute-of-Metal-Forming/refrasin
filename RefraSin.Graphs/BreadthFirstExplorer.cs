@@ -1,6 +1,7 @@
 namespace RefraSin.Graphs;
 
-public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVertex : IVertex
+public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex>
+    where TVertex : IVertex
 {
     private readonly Edge<TVertex>[] _exploredEdges;
 
@@ -10,21 +11,26 @@ public class BreadthFirstExplorer<TVertex> : IGraphTraversal<TVertex> where TVer
         _exploredEdges = exploredEdges;
     }
 
-    public static BreadthFirstExplorer<TVertex> Explore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, bool allowBackstepping = true)
+    public static BreadthFirstExplorer<TVertex> Explore<TEdge>(
+        IGraph<TVertex, TEdge> graph,
+        TVertex start,
+        bool allowBackstepping = true
+    )
         where TEdge : IEdge<TVertex> =>
-        new(
-            start,
-            DoExplore(graph, start, allowBackstepping).ToArray()
-        );
+        new(start, DoExplore(graph, start, allowBackstepping).ToArray());
 
-    public static BreadthFirstExplorer<TVertex> Explore<TEdge>(IRootedGraph<TVertex, TEdge> graph, bool allowBackstepping = true)
+    public static BreadthFirstExplorer<TVertex> Explore<TEdge>(
+        IRootedGraph<TVertex, TEdge> graph,
+        bool allowBackstepping = true
+    )
         where TEdge : IEdge<TVertex> =>
-        new(
-            graph.Root,
-            DoExplore(graph, graph.Root, allowBackstepping).ToArray()
-        );
+        new(graph.Root, DoExplore(graph, graph.Root, allowBackstepping).ToArray());
 
-    private static IEnumerable<Edge<TVertex>> DoExplore<TEdge>(IGraph<TVertex, TEdge> graph, TVertex start, bool allowBackstepping)
+    private static IEnumerable<Edge<TVertex>> DoExplore<TEdge>(
+        IGraph<TVertex, TEdge> graph,
+        TVertex start,
+        bool allowBackstepping
+    )
         where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };

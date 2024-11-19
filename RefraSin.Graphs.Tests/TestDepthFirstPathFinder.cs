@@ -40,12 +40,17 @@ public class TestDepthFirstPathFinder
 
         var finder = DepthFirstPathFinder<Vertex>.FindPath(graph, _vertices[0], _vertices[5]);
 
-        Assert.That(finder.TraversedEdges, Is.EqualTo(new[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[1], _vertices[3], true),
-            new Edge<Vertex>(_vertices[3], _vertices[5], true),
-        }));
+        Assert.That(
+            finder.TraversedEdges,
+            Is.EqualTo(
+                new[]
+                {
+                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
+                    new Edge<Vertex>(_vertices[1], _vertices[3], true),
+                    new Edge<Vertex>(_vertices[3], _vertices[5], true),
+                }
+            )
+        );
     }
 
     [Test]
@@ -55,20 +60,23 @@ public class TestDepthFirstPathFinder
 
         var finder = DepthFirstPathFinder<Vertex>.FindPath(graph, _vertices[0], _vertices[5]);
 
-        Assert.That(finder.TraversedEdges.ToArray(),
-            Is
-                .EqualTo(new[]
+        Assert.That(
+            finder.TraversedEdges.ToArray(),
+            Is.EqualTo(
+                    new[]
                     {
                         new Edge<Vertex>(_vertices[0], _vertices[1], true),
                         new Edge<Vertex>(_vertices[1], _vertices[3], true),
                         new Edge<Vertex>(_vertices[3], _vertices[5], true),
                     }
                 )
-                .Or.EqualTo(new[]
-                {
-                    new Edge<Vertex>(_vertices[0], _vertices[2], true),
-                    new Edge<Vertex>(_vertices[2], _vertices[5], true),
-                })
+                .Or.EqualTo(
+                    new[]
+                    {
+                        new Edge<Vertex>(_vertices[0], _vertices[2], true),
+                        new Edge<Vertex>(_vertices[2], _vertices[5], true),
+                    }
+                )
         );
     }
 }

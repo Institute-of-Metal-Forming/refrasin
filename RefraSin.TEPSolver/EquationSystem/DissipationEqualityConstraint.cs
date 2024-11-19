@@ -13,17 +13,12 @@ public class DissipationEqualityConstraint : GlobalEquationBase
     public override double Value()
     {
         var dissipationNormal = State
-            .Nodes.Select(n =>
-                -n.GibbsEnergyGradient.Normal * Step.NormalDisplacement(n)
-            )
+            .Nodes.Select(n => -n.GibbsEnergyGradient.Normal * Step.NormalDisplacement(n))
             .Sum();
 
         var dissipationTangential = State
             .Nodes.OfType<NeckNode>()
-            .Select(n =>
-                -n.GibbsEnergyGradient.Tangential
-                * Step.TangentialDisplacement(n)
-            )
+            .Select(n => -n.GibbsEnergyGradient.Tangential * Step.TangentialDisplacement(n))
             .Sum();
 
         var dissipationFunction = State
@@ -43,16 +38,10 @@ public class DissipationEqualityConstraint : GlobalEquationBase
     {
         foreach (var n in State.Nodes)
         {
-            yield return (
-                Map.NormalDisplacement(n),
-                -n.GibbsEnergyGradient.Normal 
-            );
+            yield return (Map.NormalDisplacement(n), -n.GibbsEnergyGradient.Normal);
 
             if (n is NeckNode)
-                yield return (
-                    Map.TangentialDisplacement(n),
-                    -n.GibbsEnergyGradient.Tangential 
-                );
+                yield return (Map.TangentialDisplacement(n), -n.GibbsEnergyGradient.Tangential);
             yield return (
                 Map.FluxToUpper(n),
                 -2

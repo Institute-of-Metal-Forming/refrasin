@@ -6,7 +6,7 @@ namespace RefraSin.ParticleModel.Nodes;
 /// <summary>
 /// Interface of geometry data on a node.
 /// </summary>
-public interface INodeGeometry 
+public interface INodeGeometry
 {
     /// <summary>
     /// Length of the surface lines to neighbor nodes.
@@ -37,7 +37,7 @@ public interface INodeGeometry
     /// Angle between surface line and surface normal resp. tangent.
     /// </summary>
     public ToUpperToLower<Angle> SurfaceTangentAngle { get; }
-    
+
     /// <summary>
     /// Angle between radial vector and surface normal resp. tangent.
     /// </summary>

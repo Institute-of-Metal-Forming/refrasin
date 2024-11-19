@@ -14,12 +14,12 @@ public interface IMaterial
     /// Human-readable name.
     /// </summary>
     string Name { get; }
-    
+
     IBulkProperties Bulk { get; }
-    
+
     ISubstanceProperties Substance { get; }
 
     IInterfaceProperties Surface { get; }
-    
+
     IReadOnlyDictionary<Guid, IInterfaceProperties> Interfaces { get; }
 }

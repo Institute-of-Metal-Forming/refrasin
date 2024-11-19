@@ -7,5 +7,7 @@ namespace RefraSin.ParticleModel.Remeshing;
 
 public interface IParticleSystemRemesher
 {
-    IParticleSystem<IParticle<IParticleNode>, IParticleNode> RemeshSystem(IParticleSystem<IParticle<IParticleNode>, IParticleNode> system);
+    IParticleSystem<IParticle<IParticleNode>, IParticleNode> RemeshSystem(
+        IParticleSystem<IParticle<IParticleNode>, IParticleNode> system
+    );
 }

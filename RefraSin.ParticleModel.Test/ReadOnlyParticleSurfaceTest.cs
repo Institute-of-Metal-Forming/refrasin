@@ -15,7 +15,7 @@ public class ReadOnlyParticleSurfaceTest
         Guid.Empty
     )
     {
-        NodeCount = 100
+        NodeCount = 100,
     }
         .GetParticle()
         .Nodes;
