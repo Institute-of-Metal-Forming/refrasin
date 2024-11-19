@@ -14,5 +14,5 @@ public class ContactDistanceDerivative : ContactEquationBase
 
     /// <inheritdoc />
     public override IEnumerable<(int, double)> Derivative() =>
-        Contact.FromNodes.Select(node => (Map.LambdaContactDirection(node), 1.0));
+        Contact.FromNodes.Select(node => (Map.LambdaContactDistance(node), 1.0));
 }

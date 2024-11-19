@@ -16,7 +16,11 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
     private ReadOnlyParticleSurface<NodeBase> _nodes;
     private IReadOnlyContactCollection<IParticleContactEdge<Particle>>? _contacts;
 
-    public Particle(IParticle<IParticleNode> particle, SolutionState solutionState, ISinteringConditions conditions)
+    public Particle(
+        IParticle<IParticleNode> particle,
+        SolutionState solutionState,
+        ISinteringConditions conditions
+    )
     {
         Id = particle.Id;
         Coordinates = particle.Coordinates.Absolute;
@@ -38,8 +42,7 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
             .Nodes.Select(node =>
                 node switch
                 {
-                    { Type: NodeType.GrainBoundary }
-                        => new GrainBoundaryNode(node, this),
+                    { Type: NodeType.GrainBoundary } => new GrainBoundaryNode(node, this),
                     { Type: NodeType.Neck } => new NeckNode(node, this),
                     _ => (NodeBase)new SurfaceNode(node, this),
                 }
@@ -49,6 +52,7 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 
     private Particle(
         Particle? parent,
+        SolutionState solutionState,
         Particle previousState,
         StepVector stepVector,
         double timeStepWidth
@@ -61,7 +65,7 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
         SurfaceProperties = previousState.SurfaceProperties;
         InterfaceProperties = previousState.InterfaceProperties;
 
-        SolutionState = previousState.SolutionState;
+        SolutionState = solutionState;
 
         // Apply time step changes
         if (parent is null) // is root particle
@@ -71,7 +75,7 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
         }
         else
         {
-            var contact = SolutionState.ParticleContacts[parent.Id, previousState.Id];
+            var contact = previousState.SolutionState.ParticleContacts[parent.Id, previousState.Id];
             var polarCoordinates = contact.ContactVector;
             var newCoordinates = new PolarPoint(
                 polarCoordinates.Phi + stepVector.AngleDisplacement(contact) * timeStepWidth,
@@ -79,8 +83,7 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
                 parent
             );
             Coordinates = newCoordinates.Absolute;
-
-            RotationAngle = previousState.RotationAngle + stepVector.RotationDisplacement(contact) * timeStepWidth;
+            RotationAngle = previousState.RotationAngle;
         }
 
         _nodes = previousState
@@ -119,8 +122,12 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 
     public double VacancyVolumeEnergy { get; }
 
-    public Particle ApplyTimeStep(Particle? parent, StepVector stepVector, double timeStepWidth) =>
-        new(parent, this, stepVector, timeStepWidth);
+    public Particle ApplyTimeStep(
+        Particle? parent,
+        SolutionState solutionState,
+        StepVector stepVector,
+        double timeStepWidth
+    ) => new(parent, solutionState, this, stepVector, timeStepWidth);
 
     /// <inheritdoc/>
     public override string ToString() =>
@@ -130,5 +137,6 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
     public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;
 
     /// <inheritdoc />
-    public IReadOnlyContactCollection<IParticleContactEdge<Particle>> Contacts => _contacts ??=  SolutionState.ParticleContacts.From(Id).ToReadOnlyContactCollection();
+    public IReadOnlyContactCollection<IParticleContactEdge<Particle>> Contacts =>
+        _contacts ??= SolutionState.ParticleContacts.From(Id).ToReadOnlyContactCollection();
 }

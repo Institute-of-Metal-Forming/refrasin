@@ -21,20 +21,12 @@ public class ContactDistanceConstraint : NodeEquationBase<ContactNodeBase>
                     + Node.ContactedNode.ContactDistanceGradient.Tangential
                         * Step.TangentialDisplacement(Node.ContactedNode)
                 : 0
-        )
-        + Node.ContactedNode.Coordinates.R
-            * Sin(Node.ContactedNode.AngleDistanceToContactDirection)
-            * Step.RotationDisplacement(Node.Contact);
+        );
 
     /// <inheritdoc />
     public override IEnumerable<(int, double)> Derivative()
     {
         yield return (Map.RadialDisplacement(Node.Contact), 1.0);
-        yield return (
-            Map.RotationDisplacement(Node.Contact),
-            Node.ContactedNode.Coordinates.R
-                * Sin(Node.ContactedNode.AngleDistanceToContactDirection)
-        );
         yield return (Map.NormalDisplacement(Node), -Node.ContactDistanceGradient.Normal);
         yield return (
             Map.NormalDisplacement(Node.ContactedNode),
