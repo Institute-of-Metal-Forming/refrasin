@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Text;
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using Microsoft.FSharp.Core;
+using NUnit.Framework.Internal;
 using Plotly.NET;
 using RefraSin.Compaction.ProcessModel;
 using RefraSin.Coordinates;
@@ -20,9 +22,68 @@ using RefraSin.TEPSolver.StepEstimators;
 
 namespace RefraSin.TEPSolver.Test;
 
+[TestFixtureSource(nameof(GetTestFixtureData))]
 public class EquationSystemTest
 {
+    public EquationSystemTest(SolutionState state)
+    {
+        _state = state;
+    }
+
+    public static IEnumerable<TestFixtureData> GetTestFixtureData()
+    {
+        TestFixtureData CreateTestFixtureData(string testName, Func<SolutionState> f) =>
+            new(f()) { TestName = testName };
+
+        yield return CreateTestFixtureData(nameof(OneParticle), OneParticle);
+        yield return CreateTestFixtureData(
+            nameof(Symmetric3PointBoundary),
+            Symmetric3PointBoundary
+        );
+    }
+
     private string _tmpDir = TempPath.CreateTempDir();
+    private readonly SolutionState _state;
+
+    [Test]
+    public void Test()
+    {
+        PlotState(_state);
+
+        var guess = new StepEstimator().EstimateStep(Conditions, _state);
+        var equationSystem = new EquationSystem.EquationSystem(_state, guess);
+
+        SaveEquationSystem(equationSystem);
+    }
+
+    private void SaveEquationSystem(EquationSystem.EquationSystem system)
+    {
+        var jac = system.Jacobian();
+        jac.CoerceZero(1e-8);
+        SaveMatrix(jac, -system.Lagrangian(), "full_jacobian");
+
+        foreach (var p in _state.Particles)
+        {
+            var pJac = system.ParticleBlockJacobian(p);
+            pJac.CoerceZero(1e-8);
+            SaveMatrix(pJac, -system.ParticleBlockLagrangian(p), $"particle_{p.Id}");
+        }
+
+        foreach (var c in _state.ParticleContacts)
+        {
+            var contactJac = system.ContactBlockJacobian(c);
+            contactJac.CoerceZero(1e-8);
+            SaveMatrix(
+                contactJac,
+                -system.ContactBlockLagrangian(c),
+                $"contact_{c.From.Id}_{c.To.Id}"
+            );
+        }
+
+        var globalJac = system.GlobalBlockJacobian();
+        globalJac.CoerceZero(1e-8);
+        SaveMatrix(globalJac, -system.GlobalBlockLagrangian(), "global");
+    }
 
     private void PlotState(ISystemState<IParticle<IParticleNode>, IParticleNode> state)
     {
@@ -30,7 +91,7 @@ public class EquationSystemTest
         plot.SaveHtml(Path.Combine(_tmpDir, "state.html"));
     }
 
-    private void SaveMatrix(Matrix<double> matrix, string name)
+    private void SaveMatrix(Matrix<double> matrix, Vector<double> rightSide, string name)
     {
         var path = Path.Combine(_tmpDir, $"{name}.txt");
 
@@ -52,27 +113,69 @@ public class EquationSystemTest
         builder.AppendLine(
             $"IsSymmetric: {matrix.IsSymmetric().ToString(CultureInfo.InvariantCulture)}"
         );
+        builder.AppendLine(
+            "Secondary Determinants: "
+                + string.Join(
+                    ' ',
+                    Enumerable
+                        .Range(0, matrix.ColumnCount)
+                        .Select(i =>
+                        {
+                            var m = matrix.Clone();
+                            m.SetColumn(i, rightSide);
+                            return m.Determinant().Round(8).ToString(CultureInfo.InvariantCulture);
+                        })
+                )
+        );
+        builder.AppendLine($"Rank: {matrix.Rank()}({matrix.Rank() - matrix.RowCount})");
 
         File.WriteAllText(path, builder.ToString(), Encoding.UTF8);
     }
 
-    [Test]
-    public void TestSymmetric3PointBoundary()
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 0);
+
+    private static SolutionState OneParticle()
     {
         var nodeCountPerParticle = 50;
 
-        var conditions = new SinteringConditions(1200, 0);
-
-        var particle1 = new ShapeFunctionParticleFactory(100, 0.2, 5, 0.2, Guid.NewGuid())
+        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
         {
             NodeCount = nodeCountPerParticle,
         }.GetParticle();
 
-        var particle2 = new ShapeFunctionParticleFactory(100, 0.2, 5, 0.2, particle1.MaterialId)
+        var material = new Material(
+            particle1.MaterialId,
+            "Al2O3",
+            new BulkProperties(0, 1e-4),
+            new SubstanceProperties(1.8e3, 101.96e-3),
+            new InterfaceProperties(1.65e-10, 0.9),
+            new Dictionary<Guid, IInterfaceProperties>()
+        );
+
+        var initialState = new SystemState(Guid.Empty, 0, [particle1]);
+        var norm = new DefaultNormalizer().GetNorm(initialState, Conditions, [material]);
+        var normalizedState = norm.NormalizeSystemState(initialState);
+        var normalizedMaterial = norm.NormalizeMaterial(material);
+
+        var state = new SolutionState(normalizedState, [normalizedMaterial], Conditions);
+
+        return state;
+    }
+
+    private static SolutionState Symmetric3PointBoundary()
+    {
+        var nodeCountPerParticle = 50;
+
+        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
+        {
+            NodeCount = nodeCountPerParticle,
+        }.GetParticle();
+
+        var particle2 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, particle1.MaterialId)
         {
             NodeCount = nodeCountPerParticle,
             RotationAngle = Angle.Half,
-            CenterCoordinates = (300, 0)
+            CenterCoordinates = (300e-6, 0)
         }.GetParticle();
 
         var material = new Material(
@@ -88,40 +191,16 @@ public class EquationSystemTest
         );
 
         var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
-        var norm = new DefaultNormalizer().GetNorm(initialState, conditions, [material]);
+        var norm = new DefaultNormalizer().GetNorm(initialState, Conditions, [material]);
         var normalizedState = norm.NormalizeSystemState(initialState);
         var normalizedMaterial = norm.NormalizeMaterial(material);
 
-        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 0.5).Solve(
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 0.5e-6).Solve(
             normalizedState
         );
 
-        var state = new SolutionState(compactedState, [normalizedMaterial], conditions);
-        PlotState(state);
+        var state = new SolutionState(compactedState, [normalizedMaterial], Conditions);
 
-        var guess = new StepEstimator().EstimateStep(conditions, state);
-        var eqns = new EquationSystem.EquationSystem(state, guess);
-
-        var jac = eqns.Jacobian();
-        jac.CoerceZero(1e-8);
-        SaveMatrix(jac, "full_jacobian");
-
-        foreach (var p in state.Particles)
-        {
-            var pJac = eqns.ParticleBlockJacobian(p);
-            pJac.CoerceZero(1e-8);
-            SaveMatrix(pJac, $"particle_{p.Id}");
-        }
-
-        foreach (var c in state.ParticleContacts)
-        {
-            var contactJac = eqns.ContactBlockJacobian(c);
-            contactJac.CoerceZero(1e-8);
-            SaveMatrix(contactJac, $"contact_{c.From.Id}_{c.To.Id}");
-        }
-
-        var globalJac = eqns.GlobalBlockJacobian();
-        globalJac.CoerceZero(1e-8);
-        SaveMatrix(globalJac, "global");
+        return state;
     }
 }

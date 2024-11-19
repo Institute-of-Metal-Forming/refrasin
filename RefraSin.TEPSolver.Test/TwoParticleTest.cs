@@ -38,19 +38,19 @@ public class TwoParticleTest
             Angle.Straight - Angle.HalfRight,
             100e-6
         );
-        // yield return (
-        //     Angle.HalfRight,
-        //     new AbsolutePoint(400e-6, 0),
-        //     Angle.Straight - Angle.HalfRight,
-        //     200e-6
-        // );
-        // // yield return (Angle.Straight, new AbsolutePoint(300e-6, 0), 0, 100e-6);
-        // yield return (
-        //     -Angle.HalfRight,
-        //     new AbsolutePoint(200e-6, -100e-6),
-        //     Angle.Straight - Angle.HalfRight,
-        //     100e-6
-        // );
+        yield return (
+            Angle.HalfRight,
+            new AbsolutePoint(400e-6, 0),
+            Angle.Straight - Angle.HalfRight,
+            200e-6
+        );
+        yield return (Angle.Straight, new AbsolutePoint(300e-6, 0), 0, 100e-6);
+        yield return (
+            -Angle.HalfRight,
+            new AbsolutePoint(200e-6, -100e-6),
+            Angle.Straight - Angle.HalfRight,
+            100e-6
+        );
     }
 
     public static IEnumerable<TestFixtureData> GenerateParticles()
@@ -117,16 +117,11 @@ public class TwoParticleTest
             new InterfaceProperties(1.65e-10, 0.9),
             new Dictionary<Guid, IInterfaceProperties>
             {
-                {initialState.Particles[1].MaterialId, new InterfaceProperties(1.65e-10, 0.5)}
+                { initialState.Particles[1].MaterialId, new InterfaceProperties(1.65e-10, 0.5) }
             }
         );
 
-        _sinteringProcess = new SinteringStep(
-            duration,
-            2073,
-            _solver,
-            new[] { material }
-        );
+        _sinteringProcess = new SinteringStep(duration, 2073, _solver, new[] { material });
         _sinteringProcess.UseStorage(_solutionStorage);
     }
 
