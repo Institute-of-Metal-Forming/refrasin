@@ -32,6 +32,11 @@ public abstract class ContactEquationBase(ParticleContact contact, StepVector st
     protected readonly ParticleContact Contact = contact;
 }
 
+public abstract class RingEquationBase(ParticleRing ring, StepVector step) : EquationBase(step)
+{
+    protected readonly ParticleRing Ring = ring;
+}
+
 public abstract class NodeEquationBase<TNode>(TNode node, StepVector step) : EquationBase(step)
     where TNode : NodeBase
 {

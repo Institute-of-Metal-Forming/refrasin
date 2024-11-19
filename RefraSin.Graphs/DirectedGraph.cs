@@ -1,48 +1,40 @@
 namespace RefraSin.Graphs;
 
-public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>>
+public class DirectedGraph<TVertex, TEdge> : IGraph<TVertex, TEdge>
     where TVertex : IVertex
+    where TEdge : IEdge<TVertex>
 {
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _childrenOf;
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _parentsOf;
     private readonly Lazy<Dictionary<TVertex, TVertex[]>> _adjacentsOf;
 
-    private readonly Lazy<Dictionary<TVertex, Edge<TVertex>[]>> _edgesAt;
-    private readonly Lazy<Dictionary<TVertex, Edge<TVertex>[]>> _edgesFrom;
-    private readonly Lazy<Dictionary<TVertex, Edge<TVertex>[]>> _edgesTo;
+    private readonly Lazy<Dictionary<TVertex, TEdge[]>> _edgesAt;
+    private readonly Lazy<Dictionary<TVertex, TEdge[]>> _edgesFrom;
+    private readonly Lazy<Dictionary<TVertex, TEdge[]>> _edgesTo;
 
-    public DirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<IEdge<TVertex>> edges)
+    public DirectedGraph(IEnumerable<TVertex> vertices, IEnumerable<TEdge> edges)
     {
         Vertices = vertices.ToHashSet();
-        Edges = ConvertEdges(edges).ToHashSet();
+        Edges = edges.ToHashSet();
 
         _childrenOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitChildrenOf);
         _parentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitParentsOf);
         _adjacentsOf = new Lazy<Dictionary<TVertex, TVertex[]>>(InitAdjacentsOf);
-        _edgesAt = new Lazy<Dictionary<TVertex, Edge<TVertex>[]>>(InitEdgesAt);
-        _edgesFrom = new Lazy<Dictionary<TVertex, Edge<TVertex>[]>>(InitEdgesFrom);
-        _edgesTo = new Lazy<Dictionary<TVertex, Edge<TVertex>[]>>(InitEdgesTo);
+        _edgesAt = new Lazy<Dictionary<TVertex, TEdge[]>>(InitEdgesAt);
+        _edgesFrom = new Lazy<Dictionary<TVertex, TEdge[]>>(InitEdgesFrom);
+        _edgesTo = new Lazy<Dictionary<TVertex, TEdge[]>>(InitEdgesTo);
     }
 
-    public static DirectedGraph<TVertex> FromGraph<TEdge>(IGraph<TVertex, TEdge> graph)
-        where TEdge : IEdge<TVertex> =>
-        new(graph.Vertices, (IEnumerable<IEdge<TVertex>>)graph.Edges);
+    public static DirectedGraph<TVertex, TEdge> FromGraph(IGraph<TVertex, TEdge> graph) =>
+        new(graph.Vertices, graph.Edges);
 
-    public static DirectedGraph<TVertex> FromGraphSearch(IGraphTraversal<TVertex> graphTraversal)
+    public static DirectedGraph<TVertex, TEdge> FromGraphSearch(
+        IGraphTraversal<TVertex, TEdge> graphTraversal
+    )
     {
         var edges = graphTraversal.TraversedEdges.ToArray();
         var vertices = edges.Select(e => e.To).Prepend(graphTraversal.Start);
-        return new DirectedGraph<TVertex>(vertices, edges);
-    }
-
-    private IEnumerable<Edge<TVertex>> ConvertEdges(IEnumerable<IEdge<TVertex>> edges)
-    {
-        foreach (var edge in edges)
-        {
-            yield return new Edge<TVertex>(edge.From, edge.To, true);
-            if (!edge.IsDirected)
-                yield return new Edge<TVertex>(edge.To, edge.From, true);
-        }
+        return new DirectedGraph<TVertex, TEdge>(vertices, edges);
     }
 
     private Dictionary<TVertex, TVertex[]> InitChildrenOf() =>
@@ -54,20 +46,16 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>>
     private Dictionary<TVertex, TVertex[]> InitAdjacentsOf() =>
         _childrenOf.Value.ToDictionary(
             kvp => kvp.Key,
-            kvp =>
-                kvp.Value.Concat(
-                        _parentsOf.Value.GetValueOrDefault(kvp.Key, Array.Empty<TVertex>())
-                    )
-                    .ToArray()
+            kvp => kvp.Value.Concat(_parentsOf.Value.GetValueOrDefault(kvp.Key, [])).ToArray()
         );
 
-    private Dictionary<TVertex, Edge<TVertex>[]> InitEdgesFrom() =>
+    private Dictionary<TVertex, TEdge[]> InitEdgesFrom() =>
         Edges.GroupBy(e => e.From).ToDictionary(g => g.Key, g => g.ToArray());
 
-    private Dictionary<TVertex, Edge<TVertex>[]> InitEdgesTo() =>
+    private Dictionary<TVertex, TEdge[]> InitEdgesTo() =>
         Edges.GroupBy(e => e.To).ToDictionary(g => g.Key, g => g.ToArray());
 
-    private Dictionary<TVertex, Edge<TVertex>[]> InitEdgesAt() =>
+    private Dictionary<TVertex, TEdge[]> InitEdgesAt() =>
         _edgesFrom.Value.ToDictionary(
             kvp => kvp.Key,
             kvp => kvp.Value.Concat(_edgesTo.Value.GetValueOrDefault(kvp.Key, [])).ToArray()
@@ -83,30 +71,23 @@ public class DirectedGraph<TVertex> : IGraph<TVertex, Edge<TVertex>>
     public ISet<TVertex> Vertices { get; }
 
     /// <inheritdoc />
-    public ISet<Edge<TVertex>> Edges { get; }
+    public ISet<TEdge> Edges { get; }
 
     public IEnumerable<TVertex> ChildrenOf(TVertex vertex) =>
-        _childrenOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
+        _childrenOf.Value.GetValueOrDefault(vertex, []);
 
     public IEnumerable<TVertex> ParentsOf(TVertex vertex) =>
-        _parentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
+        _parentsOf.Value.GetValueOrDefault(vertex, []);
 
     public IEnumerable<TVertex> AdjacentsOf(TVertex vertex) =>
-        _adjacentsOf.Value.GetValueOrDefault(vertex, Array.Empty<TVertex>());
+        _adjacentsOf.Value.GetValueOrDefault(vertex, []);
 
-    public IEnumerable<Edge<TVertex>> EdgesAt(TVertex vertex) =>
-        _edgesAt.Value.GetValueOrDefault(vertex, Array.Empty<Edge<TVertex>>());
+    public IEnumerable<TEdge> EdgesAt(TVertex vertex) =>
+        _edgesAt.Value.GetValueOrDefault(vertex, []);
 
-    public IEnumerable<Edge<TVertex>> EdgesFrom(TVertex vertex) =>
-        _edgesFrom.Value.GetValueOrDefault(vertex, Array.Empty<Edge<TVertex>>());
+    public IEnumerable<TEdge> EdgesFrom(TVertex vertex) =>
+        _edgesFrom.Value.GetValueOrDefault(vertex, []);
 
-    public IEnumerable<Edge<TVertex>> EdgesTo(TVertex vertex) =>
-        _edgesTo.Value.GetValueOrDefault(vertex, Array.Empty<Edge<TVertex>>());
-
-    public DirectedGraph<TVertex> Reversed()
-    {
-        var reversedEdges = Edges.Select(e => new Edge<TVertex>(e.To, e.From, true)).ToHashSet();
-
-        return new DirectedGraph<TVertex>(Vertices, reversedEdges);
-    }
+    public IEnumerable<TEdge> EdgesTo(TVertex vertex) =>
+        _edgesTo.Value.GetValueOrDefault(vertex, []);
 }

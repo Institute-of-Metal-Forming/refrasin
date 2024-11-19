@@ -41,6 +41,4 @@ public interface IRootedGraph<TVertex, TEdge> : IGraph<TVertex, TEdge>
     where TEdge : IEdge<TVertex>
 {
     TVertex Root { get; }
-
-    int Depth { get; }
 }

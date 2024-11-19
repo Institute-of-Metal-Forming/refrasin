@@ -13,8 +13,6 @@ public interface IParticleContactEdge<out TParticle> : IParticleContactEdge, IEd
 
 public interface IParticleContactEdge : IEdge
 {
-    bool IEdge.IsDirected => true;
-
     double Distance { get; }
 
     Angle DirectionFrom { get; }

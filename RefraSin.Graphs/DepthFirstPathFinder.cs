@@ -1,57 +1,54 @@
 namespace RefraSin.Graphs;
 
-public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex>
+public class DepthFirstPathFinder<TVertex, TEdge> : IGraphTraversal<TVertex, TEdge>
+    where TEdge : IEdge<TVertex>
     where TVertex : IVertex
 {
-    private readonly Edge<TVertex>[] _traversedEdges;
+    private readonly TEdge[] _traversedEdges;
 
-    private DepthFirstPathFinder(TVertex start, TVertex target, Edge<TVertex>[] traversedEdges)
+    private DepthFirstPathFinder(TVertex start, TVertex target, TEdge[] traversedEdges)
     {
         Start = start;
         Target = target;
         _traversedEdges = traversedEdges;
     }
 
-    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(
+    public static DepthFirstPathFinder<TVertex, TEdge> FindPath(
         IGraph<TVertex, TEdge> graph,
         TVertex start,
         TVertex target
-    )
-        where TEdge : IEdge<TVertex> =>
-        new(start, target, DoFindPath(graph, start, target).ToArray());
+    ) => new(start, target, DoFindPath(graph, start, target).ToArray());
 
-    public static DepthFirstPathFinder<TVertex> FindPath<TEdge>(
+    public static DepthFirstPathFinder<TVertex, TEdge> FindPath(
         IRootedGraph<TVertex, TEdge> graph,
         TVertex target
-    )
-        where TEdge : IEdge<TVertex> =>
-        new(graph.Root, target, DoFindPath(graph, graph.Root, target).ToArray());
+    ) => new(graph.Root, target, DoFindPath(graph, graph.Root, target).ToArray());
 
-    private static IEnumerable<Edge<TVertex>> DoFindPath<TEdge>(
+    private static IEnumerable<TEdge> DoFindPath(
         IGraph<TVertex, TEdge> graph,
         TVertex start,
         TVertex target
     )
-        where TEdge : IEdge<TVertex>
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
 
-        IEnumerable<Edge<TVertex>>? InspectVertex(TVertex vertex)
+        IEnumerable<TEdge>? InspectVertex(TVertex vertex)
         {
-            foreach (var child in graph.ChildrenOf(vertex))
+            foreach (var edge in graph.EdgesFrom(vertex))
             {
+                var child = edge.To;
                 if (verticesVisited.Contains(child))
                     continue;
 
                 verticesVisited.Add(child);
 
                 if (child.Equals(target))
-                    return new[] { new Edge<TVertex>(vertex, child, true) };
+                    return new[] { edge };
 
                 var childResult = InspectVertex(child);
 
                 if (childResult is not null)
-                    return childResult.Prepend(new Edge<TVertex>(vertex, child, true));
+                    return childResult.Prepend(edge);
             }
 
             return null;
@@ -71,5 +68,5 @@ public class DepthFirstPathFinder<TVertex> : IGraphTraversal<TVertex>
     public TVertex Target { get; }
 
     /// <inheritdoc />
-    public IEnumerable<IEdge<TVertex>> TraversedEdges => _traversedEdges;
+    public IEnumerable<TEdge> TraversedEdges => _traversedEdges;
 }
