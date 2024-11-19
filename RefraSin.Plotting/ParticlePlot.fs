@@ -15,7 +15,12 @@ let PlotParticle (particle: IParticle<IParticleNode>) : GenericChart =
 
     let xy = [ for p in absolutePoints -> (p.X, p.Y) ]
 
-    Chart.Line(xy = xy, Name = particle.Id.ToString().Substring(0,8), ShowMarkers = true, MarkerSymbol = MarkerSymbol.X)
+    Chart.Line(
+        xy = xy,
+        Name = particle.Id.ToString().Substring(0, 8),
+        ShowMarkers = true,
+        MarkerSymbol = MarkerSymbol.X
+    )
     |> Commons.ApplyPlainSpaceDefaultPlotProperties
 
 
@@ -40,7 +45,9 @@ let PlotPoint (point: IPoint) (label: string) =
 let PlotPoints (points: IPoint seq) (label: string) =
     let absolutePoints = [ for p in points -> p.Absolute ]
     let xy = [ for p in absolutePoints -> (p.X, p.Y) ]
-    let labels = [ for p in absolutePoints -> p.ToString("(,)", CultureInfo.InvariantCulture) ]
+
+    let labels =
+        [ for p in absolutePoints -> p.ToString("(,)", CultureInfo.InvariantCulture) ]
 
     Chart.Point(
         xy = xy,
@@ -50,27 +57,26 @@ let PlotPoints (points: IPoint seq) (label: string) =
         MarkerSymbol = MarkerSymbol.Cross
     )
     |> Commons.ApplyPlainSpaceDefaultPlotProperties
-    
+
 let PlotLineString (points: IPoint seq) (label: string) =
     let absolutePoints = [ for p in points -> p.Absolute ]
     let xy = [ for p in absolutePoints -> (p.X, p.Y) ]
 
-    Chart.Line(
-        xy = xy,
-        Name = label,
-        ShowMarkers = true,
-        MarkerSymbol = MarkerSymbol.Cross
-    )
+    Chart.Line(xy = xy, Name = label, ShowMarkers = true, MarkerSymbol = MarkerSymbol.Cross)
     |> Commons.ApplyPlainSpaceDefaultPlotProperties
-    
+
 let PlotLineRing (points: IPoint seq) (label: string) =
     let pointsList = points |> Seq.toList
-    PlotLineString ( pointsList @ [pointsList[0]]) label
+    PlotLineString (pointsList @ [ pointsList[0] ]) label
 
 let PlotContactEdge (edge: IParticleContactEdge<_>) : GenericChart =
     let from = edge.From.Coordinates.Absolute
     let _to = edge.To.Coordinates.Absolute
     let xy = [ (from.X, from.Y); (_to.X, _to.Y) ]
 
-    Chart.Line(xy = xy, MarkerSymbol = MarkerSymbol.Cross, Name = $"%s{edge.From.Id.ToString().Substring(0,8)} -> %s{edge.To.Id.ToString().Substring(0,8)}")
+    Chart.Line(
+        xy = xy,
+        MarkerSymbol = MarkerSymbol.Cross,
+        Name = $"%s{edge.From.Id.ToString().Substring(0, 8)} -> %s{edge.To.Id.ToString().Substring(0, 8)}"
+    )
     |> Commons.ApplyPlainSpaceDefaultPlotProperties
