@@ -8,16 +8,12 @@ public interface IEdge<out TVertex> : IEdge
 
     Guid IEdge.From => From.Id;
     Guid IEdge.To => To.Id;
-
-    new IEdge<TVertex> Reversed();
 }
 
 public interface IEdge : IEquatable<IEdge>
 {
     Guid From { get; }
     Guid To { get; }
-
-    IEdge Reversed();
 
     bool IEquatable<IEdge>.Equals(IEdge? other)
     {

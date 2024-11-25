@@ -38,10 +38,10 @@ public class DirectedGraph<TVertex, TEdge> : IGraph<TVertex, TEdge>
     }
 
     private Dictionary<TVertex, TVertex[]> InitChildrenOf() =>
-        Edges.GroupBy(e => e.From, e => e.To).ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.From, e => e.To).ToDictionary(g => g.Key, g => g.Distinct().ToArray());
 
     private Dictionary<TVertex, TVertex[]> InitParentsOf() =>
-        Edges.GroupBy(e => e.To, e => e.From).ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.To, e => e.From).ToDictionary(g => g.Key, g => g.Distinct().ToArray());
 
     private Dictionary<TVertex, TVertex[]> InitAdjacentsOf() =>
         _childrenOf.Value.ToDictionary(
@@ -50,10 +50,10 @@ public class DirectedGraph<TVertex, TEdge> : IGraph<TVertex, TEdge>
         );
 
     private Dictionary<TVertex, TEdge[]> InitEdgesFrom() =>
-        Edges.GroupBy(e => e.From).ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.From).ToDictionary(g => g.Key, g => g.Distinct().ToArray());
 
     private Dictionary<TVertex, TEdge[]> InitEdgesTo() =>
-        Edges.GroupBy(e => e.To).ToDictionary(g => g.Key, g => g.ToArray());
+        Edges.GroupBy(e => e.To).ToDictionary(g => g.Key, g => g.Distinct().ToArray());
 
     private Dictionary<TVertex, TEdge[]> InitEdgesAt() =>
         _edgesFrom.Value.ToDictionary(
@@ -90,4 +90,21 @@ public class DirectedGraph<TVertex, TEdge> : IGraph<TVertex, TEdge>
 
     public IEnumerable<TEdge> EdgesTo(TVertex vertex) =>
         _edgesTo.Value.GetValueOrDefault(vertex, []);
+}
+
+public static class DirectedGraphExtensions
+{
+    public static DirectedGraph<TVertex, TEdge> Undirected<TVertex, TEdge>(
+        this DirectedGraph<TVertex, TEdge> self
+    )
+        where TVertex : IVertex
+        where TEdge : IEdge<TVertex>, IReversibleEdge<TEdge> =>
+        new(self.Vertices, self.Edges.SelectMany(e => new[] { e, e.Reversed() }));
+
+    public static DirectedGraph<TVertex, TEdge> Reversed<TVertex, TEdge>(
+        this DirectedGraph<TVertex, TEdge> self
+    )
+        where TVertex : IVertex
+        where TEdge : IEdge<TVertex>, IReversibleEdge<TEdge> =>
+        new(self.Vertices, self.Edges.Select(e => e.Reversed()));
 }
