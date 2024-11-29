@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="CSparse" Version="4.2.0" />
     <PackageVersion Include="morelinq" Version="4.1.0" />
     <PackageVersion Include="FSharp.Core" Version="8.0.400" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" />
