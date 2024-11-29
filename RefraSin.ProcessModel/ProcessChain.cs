@@ -11,7 +11,7 @@ public class ProcessChain : ProcessStepBase
     }
 
     /// <inheritdoc />
-    public override ISystemState Solve(ISystemState inputState)
+    public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(ISystemState<IParticle<IParticleNode>, IParticleNode> inputState)
     {
         var currentState = inputState;
         ReportSystemState(inputState);

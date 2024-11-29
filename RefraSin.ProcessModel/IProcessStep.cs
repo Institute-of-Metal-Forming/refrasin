@@ -13,18 +13,18 @@ public interface IProcessStep
     /// </summary>
     /// <param name="inputState">the incoming state</param>
     /// <returns></returns>
-    ISystemState Solve(ISystemState inputState);
+    ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(ISystemState<IParticle<IParticleNode>, IParticleNode> inputState);
 
     event EventHandler<SystemStateReportedEventArgs>? SystemStateReported;
 
     void ReportSystemState(SystemStateReportedEventArgs reportedEventArgs);
 
-    void ReportSystemState(ISystemState state);
+    void ReportSystemState(ISystemState<IParticle<IParticleNode>, IParticleNode> state);
 
-    class SystemStateReportedEventArgs(IProcessStep processStep, ISystemState state) : EventArgs
+    class SystemStateReportedEventArgs(IProcessStep processStep, ISystemState<IParticle<IParticleNode>, IParticleNode> state) : EventArgs
     {
         public IProcessStep ProcessStep { get; } = processStep;
 
-        public ISystemState State { get; } = state;
+        public ISystemState<IParticle<IParticleNode>, IParticleNode> State { get; } = state;
     }
 }
