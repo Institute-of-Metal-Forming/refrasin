@@ -29,7 +29,7 @@ public record SolverRoutines(
             // new InstabilityDetector()
         ],
         new DirectLagrangianRootFinder(
-            new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4)
+            new NewtonRaphsonRootFinder(new SparseLUSolver(), absoluteTolerance: 1e-4)
         ),
         // new TearingLagrangianRootFinder(
         //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
