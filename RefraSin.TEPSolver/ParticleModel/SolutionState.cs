@@ -41,6 +41,10 @@ public class SolutionState : ISystemState<Particle, NodeBase>
 
     private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
     {
+        Id = Guid.NewGuid();
+        Time = oldState.Time + timeStepWidth;
+        Materials = oldState.Materials;
+        
         var newParticles = new Dictionary<Guid, Particle>()
         {
             [oldState.Particles.Root.Id] = oldState.Particles.Root.ApplyTimeStep(
@@ -63,7 +67,6 @@ public class SolutionState : ISystemState<Particle, NodeBase>
 
         Particles = newParticles.Values.ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
-        Materials = oldState.Materials;
 
         NodeContacts = oldState
             .NodeContacts.Select(c => new Edge<ContactNodeBase>(
