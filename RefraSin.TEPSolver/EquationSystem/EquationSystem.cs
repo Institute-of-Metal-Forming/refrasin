@@ -58,7 +58,8 @@ public class EquationSystem
     {
         foreach (var cycle in State.ParticleCycles)
         {
-            yield return new RingContactConstraint(cycle, StepVector);
+            yield return new RingContactConstraintX(cycle, StepVector);
+            yield return new RingContactConstraintY(cycle, StepVector);
         }
         yield return new DissipationEqualityConstraint(State, StepVector);
     }
