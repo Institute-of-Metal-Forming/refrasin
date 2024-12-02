@@ -1,3 +1,5 @@
+using Parquet;
+using Parquet.Serialization;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ProcessModel;
@@ -22,10 +24,9 @@ public class Tests
             CenterCoordinates = new AbsolutePoint(240, 0),
             RotationAngle = Math.PI,
         }.GetParticle();
-        _state =
-            new SystemState(Guid.NewGuid(), 0.12, new[] { particle1, particle2 });
+        _state = new SystemState(Guid.NewGuid(), 0.12, new[] { particle1, particle2 });
     }
-    
+
     [Test]
     public void TestWriteState()
     {
@@ -34,41 +35,37 @@ public class Tests
 
         var preFileSize = new FileInfo(fileName).Length;
 
-        storage.StoreState(
-            null!,
-            _state
-        );
+        storage.StoreState(null!, _state);
 
         storage.Dispose();
         Assert.That(new FileInfo(fileName), Has.Length.GreaterThan(preFileSize));
     }
-    
+
     [Test]
     public void TestCompression()
     {
+        var compressions = new[]
+        {
+            CompressionMethod.None,
+            CompressionMethod.Snappy,
+            CompressionMethod.Gzip,
+            CompressionMethod.Lzo,
+            CompressionMethod.Brotli,
+            CompressionMethod.Zstd,
+        };
+
         var dirName = TempPath.CreateTempDir();
-        var fileNameCompressed = Path.Combine(dirName, "compressed.parquet");
-        var fileNamePlain = Path.Combine(dirName, "plain.parquet");
-        
-        var storageCompressed = new ParquetStorage(fileNameCompressed);
-        storageCompressed.StoreState(
-            null!,
-            _state
-        );
-        storageCompressed.Dispose();
-        
-        var storagePlain = new ParquetStorage(fileNamePlain);
-        storagePlain.StoreState(
-            null!,
-            _state
-        );
-        storagePlain.Dispose();
-        
-        var sizeCompressed = new FileInfo(fileNameCompressed).Length;
-        var sizePlain = new FileInfo(fileNamePlain).Length;
-        TestContext.WriteLine($"Compressed: {sizeCompressed}");
-        TestContext.WriteLine($"Plain: {sizePlain}");
-        
-        Assert.That(sizeCompressed, Is.LessThan(sizePlain));
+        foreach (var compression in compressions)
+        {
+            var fileName = Path.Combine(dirName, $"{compression}.parquet");
+            var storage = new ParquetStorage(
+                fileName,
+                options: new ParquetSerializerOptions() { CompressionMethod = compression }
+            );
+            storage.StoreState(null!, _state);
+            storage.Dispose();
+            var size = new FileInfo(fileName).Length;
+            TestContext.WriteLine($"{compression}: {size}");
+        }
     }
 }

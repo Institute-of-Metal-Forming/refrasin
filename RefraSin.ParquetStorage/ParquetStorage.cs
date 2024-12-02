@@ -7,29 +7,43 @@ using RefraSin.Storage;
 
 namespace RefraSin.ParquetStorage;
 
-public class ParquetStorage(string fileName, int bufferSize = 1_000) : ISolutionStorage, IAsyncDisposable, IDisposable
+public class ParquetStorage(
+    string fileName,
+    int bufferSize = 1_000,
+    ParquetSerializerOptions? options = null
+) : ISolutionStorage, IAsyncDisposable, IDisposable
 {
-    private readonly FileStream _stream = new(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+    private readonly FileStream _stream = new(
+        fileName,
+        FileMode.OpenOrCreate,
+        FileAccess.ReadWrite
+    );
     private readonly List<Row> _rowBuffer = new(2 * bufferSize);
+    private readonly ParquetSerializerOptions _options = options ?? new ParquetSerializerOptions();
 
     /// <inheritdoc />
-    public void StoreState(IProcessStep processStep, ISystemState<IParticle<IParticleNode>, IParticleNode> state)
+    public void StoreState(
+        IProcessStep processStep,
+        ISystemState<IParticle<IParticleNode>, IParticleNode> state
+    )
     {
         var stateData = StateData.From(state);
-        
+
         foreach (var particle in state.Particles)
         {
             var particleData = ParticleData.From(particle);
-            
+
             foreach (var node in particle.Nodes)
             {
                 var nodeData = NodeData.From(node);
-                _rowBuffer.Add(new Row
-                {
-                    State = stateData,
-                    Particle = particleData,
-                    Node = nodeData
-                });
+                _rowBuffer.Add(
+                    new Row
+                    {
+                        State = stateData,
+                        Particle = particleData,
+                        Node = nodeData,
+                    }
+                );
             }
         }
 
@@ -41,7 +55,7 @@ public class ParquetStorage(string fileName, int bufferSize = 1_000) : ISolution
 
     private async Task WriteRowBuffer()
     {
-        await ParquetSerializer.SerializeAsync(_rowBuffer, _stream);
+        await ParquetSerializer.SerializeAsync(_rowBuffer, _stream, _options);
         _rowBuffer.Clear();
     }
 
@@ -50,9 +64,9 @@ public class ParquetStorage(string fileName, int bufferSize = 1_000) : ISolution
     {
         if (_rowBuffer.Count != 0)
         {
-           await WriteRowBuffer();
+            await WriteRowBuffer();
         }
-        
+
         await _stream.DisposeAsync();
     }
 
@@ -63,7 +77,7 @@ public class ParquetStorage(string fileName, int bufferSize = 1_000) : ISolution
         {
             Task.Run(WriteRowBuffer).Wait();
         }
-        
+
         _stream.Dispose();
     }
 }
