@@ -1,3 +1,4 @@
+using RefraSin.Graphs;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
@@ -32,9 +33,10 @@ public abstract class ContactEquationBase(ParticleContact contact, StepVector st
     protected readonly ParticleContact Contact = contact;
 }
 
-public abstract class RingEquationBase(ParticleRing ring, StepVector step) : EquationBase(step)
+public abstract class RingEquationBase(IGraphCycle<Particle, ParticleContact> ring, StepVector step)
+    : EquationBase(step)
 {
-    protected readonly ParticleRing Ring = ring;
+    protected readonly IGraphCycle<Particle, ParticleContact> Ring = ring;
 }
 
 public abstract class NodeEquationBase<TNode>(TNode node, StepVector step) : EquationBase(step)

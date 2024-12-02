@@ -36,6 +36,10 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
+        ParticleGraph = new DirectedGraph<Particle, ParticleContact>(Particles, ParticleContacts);
+        ParticleCycles = CycleFinder<Particle, ParticleContact>
+            .FindCycles(ParticleGraph, Particles[0])
+            .FoundCycles.ToArray();
     }
 
     private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
@@ -79,6 +83,18 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
+        ParticleGraph = new DirectedGraph<Particle, ParticleContact>(Particles, ParticleContacts);
+        ParticleCycles = oldState
+            .ParticleCycles.Select(c =>
+                (IGraphCycle<Particle, ParticleContact>)
+                    new GraphCycle<Particle, ParticleContact>(
+                        Particles[c.Start.Id],
+                        Particles[c.End.Id],
+                        c.FirstPath.Select(pc => ParticleContacts[pc.From.Id, pc.To.Id]).ToArray(),
+                        c.SecondPath.Select(pc => ParticleContacts[pc.From.Id, pc.To.Id]).ToArray()
+                    )
+            )
+            .ToArray();
     }
 
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
@@ -98,6 +114,10 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     public IReadOnlyContactCollection<ParticleContact> ParticleContacts { get; }
 
     public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; }
+
+    public IGraph<Particle, ParticleContact> ParticleGraph { get; }
+
+    public IReadOnlyCollection<IGraphCycle<Particle, ParticleContact>> ParticleCycles { get; }
 
     IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
 

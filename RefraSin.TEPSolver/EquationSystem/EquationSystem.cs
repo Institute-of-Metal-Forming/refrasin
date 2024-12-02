@@ -56,6 +56,10 @@ public class EquationSystem
 
     private IEnumerable<IEquation> YieldGlobalEquations()
     {
+        foreach (var cycle in State.ParticleCycles)
+        {
+            yield return new RingContactConstraint(cycle, StepVector);
+        }
         yield return new DissipationEqualityConstraint(State, StepVector);
     }
 
