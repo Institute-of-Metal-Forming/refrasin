@@ -13,7 +13,9 @@ public interface IProcessStep
     /// </summary>
     /// <param name="inputState">the incoming state</param>
     /// <returns></returns>
-    ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(ISystemState<IParticle<IParticleNode>, IParticleNode> inputState);
+    ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(
+        ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
+    );
 
     event EventHandler<SystemStateReportedEventArgs>? SystemStateReported;
 
@@ -21,7 +23,10 @@ public interface IProcessStep
 
     void ReportSystemState(ISystemState<IParticle<IParticleNode>, IParticleNode> state);
 
-    class SystemStateReportedEventArgs(IProcessStep processStep, ISystemState<IParticle<IParticleNode>, IParticleNode> state) : EventArgs
+    class SystemStateReportedEventArgs(
+        IProcessStep processStep,
+        ISystemState<IParticle<IParticleNode>, IParticleNode> state
+    ) : EventArgs
     {
         public IProcessStep ProcessStep { get; } = processStep;
 

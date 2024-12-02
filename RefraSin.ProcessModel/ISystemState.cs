@@ -5,12 +5,11 @@ namespace RefraSin.ProcessModel;
 /// <summary>
 /// Interface for classes representing the state of a particle group at a certain position in time and process line.
 /// </summary>
-public interface ISystemState<out TParticle, out TNode> : IParticleSystem<TParticle, TNode>, ISystemState
+public interface ISystemState<out TParticle, out TNode>
+    : IParticleSystem<TParticle, TNode>,
+        ISystemState
     where TParticle : IParticle<TNode>
-    where TNode : IParticleNode
-{
-    
-}
+    where TNode : IParticleNode { }
 
 public interface ISystemState
 {

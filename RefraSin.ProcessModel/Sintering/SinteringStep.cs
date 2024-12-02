@@ -52,5 +52,7 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
     public IReadOnlyList<IMaterial> Materials { get; }
 
     /// <inheritdoc />
-    public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(ISystemState<IParticle<IParticleNode>, IParticleNode> inputState) => Solver.Solve(this, inputState);
+    public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(
+        ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
+    ) => Solver.Solve(this, inputState);
 }
