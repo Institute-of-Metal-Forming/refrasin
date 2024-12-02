@@ -6,12 +6,15 @@ public abstract class ProcessStepBase : IProcessStep
     public event EventHandler<IProcessStep.SystemStateReportedEventArgs>? SystemStateReported;
 
     /// <inheritdoc />
-    public abstract ISystemState Solve(ISystemState inputState);
+    public abstract ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(
+        ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
+    );
 
     public virtual void ReportSystemState(
         IProcessStep.SystemStateReportedEventArgs reportedEventArgs
     ) => SystemStateReported?.Invoke(this, reportedEventArgs);
 
-    public virtual void ReportSystemState(ISystemState state) =>
-        ReportSystemState(new IProcessStep.SystemStateReportedEventArgs(this, state));
+    public virtual void ReportSystemState(
+        ISystemState<IParticle<IParticleNode>, IParticleNode> state
+    ) => ReportSystemState(new IProcessStep.SystemStateReportedEventArgs(this, state));
 }

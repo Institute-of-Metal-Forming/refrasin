@@ -44,7 +44,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         Id = Guid.NewGuid();
         Time = oldState.Time + timeStepWidth;
         Materials = oldState.Materials;
-        
+
         var newParticles = new Dictionary<Guid, Particle>()
         {
             [oldState.Particles.Root.Id] = oldState.Particles.Root.ApplyTimeStep(

@@ -38,4 +38,10 @@ public static class ToUpperToLowerExtensions
 {
     public static double[] ToDoubleArray(this ToUpperToLower<Angle> self) =>
         [self.ToUpper, self.ToLower];
+
+    public static ToUpperToLower<double> ToDoubleValued(this ToUpperToLower<Angle> self) =>
+        new(self.ToUpper, self.ToLower);
+
+    public static ToUpperToLower<Angle> ToAngleValued(this ToUpperToLower<double> self) =>
+        new(self.ToUpper, self.ToLower);
 }

@@ -10,7 +10,7 @@ public record SystemState(
     IReadOnlyParticleCollection<IParticle<IParticleNode>, IParticleNode> Particles,
     IReadOnlyContactCollection<IParticleContactEdge<IParticle<IParticleNode>>> ParticleContacts,
     IReadOnlyContactCollection<IEdge<IParticleNode>> NodeContacts
-) : ISystemState
+) : ISystemState<IParticle<IParticleNode>, IParticleNode>
 {
     public SystemState(
         Guid id,
