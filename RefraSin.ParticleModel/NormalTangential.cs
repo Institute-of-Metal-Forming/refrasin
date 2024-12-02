@@ -41,4 +41,10 @@ public static class NormalTangentialExtensions
 {
     public static double[] ToDoubleArray(this NormalTangential<Angle> self) =>
         new double[] { self.Normal, self.Tangential };
+
+    public static NormalTangential<double> ToDoubleValued(this NormalTangential<Angle> self) =>
+        new(self.Normal, self.Tangential);
+
+    public static NormalTangential<Angle> ToAngleValued(this NormalTangential<double> self) =>
+        new(self.Normal, self.Tangential);
 }
