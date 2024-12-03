@@ -1,7 +1,7 @@
 namespace RefraSin.Graphs;
 
 public class DepthFirstExplorer<TVertex, TEdge> : IGraphTraversal<TVertex, TEdge>
-    where TEdge : IEdge<TVertex>
+    where TEdge : IEdge<TVertex>, IReversibleEdge<TEdge>
     where TVertex : IVertex
 {
     private readonly TEdge[] _exploredEdges;
@@ -23,22 +23,22 @@ public class DepthFirstExplorer<TVertex, TEdge> : IGraphTraversal<TVertex, TEdge
     private static IEnumerable<TEdge> DoExplore(IGraph<TVertex, TEdge> graph, TVertex start)
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
+        var edgesVisited = new HashSet<TEdge>(graph.EdgeCount);
 
         IEnumerable<TEdge> InspectVertex(TVertex current)
         {
             foreach (var edge in graph.EdgesFrom(current))
             {
-                var child = edge.To;
-
-                if (verticesVisited.Contains(child))
-                {
-                    yield return edge;
+                if (!edgesVisited.Add(edge))
                     continue;
-                }
 
+                edgesVisited.Add(edge.Reversed());
+
+                var child = edge.To;
                 yield return edge;
 
-                verticesVisited.Add(child);
+                if (!verticesVisited.Add(child))
+                    continue;
 
                 var childResult = InspectVertex(child);
 

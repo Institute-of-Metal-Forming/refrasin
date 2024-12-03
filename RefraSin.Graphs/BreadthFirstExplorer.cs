@@ -2,7 +2,7 @@ namespace RefraSin.Graphs;
 
 public class BreadthFirstExplorer<TVertex, TEdge> : IGraphTraversal<TVertex, TEdge>
     where TVertex : IVertex
-    where TEdge : IEdge<TVertex>
+    where TEdge : IEdge<TVertex>, IReversibleEdge<TEdge>
 {
     private readonly TEdge[] _exploredEdges;
 
@@ -24,6 +24,7 @@ public class BreadthFirstExplorer<TVertex, TEdge> : IGraphTraversal<TVertex, TEd
     private static IEnumerable<TEdge> DoExplore(IGraph<TVertex, TEdge> graph, TVertex start)
     {
         var verticesVisited = new HashSet<IVertex>(graph.VertexCount) { start };
+        var edgesVisited = new HashSet<TEdge>(graph.EdgeCount);
 
         var queue = new Queue<TVertex>();
         queue.Enqueue(start);
@@ -32,17 +33,17 @@ public class BreadthFirstExplorer<TVertex, TEdge> : IGraphTraversal<TVertex, TEd
         {
             foreach (var edge in graph.EdgesFrom(current))
             {
-                var child = edge.To;
-
-                if (verticesVisited.Contains(child))
-                {
-                    yield return edge;
+                if (!edgesVisited.Add(edge))
                     continue;
-                }
 
+                edgesVisited.Add(edge.Reversed());
+
+                var child = edge.To;
                 yield return edge;
 
-                verticesVisited.Add(child);
+                if (!verticesVisited.Add(child))
+                    continue;
+
                 queue.Enqueue(child);
             }
         }
