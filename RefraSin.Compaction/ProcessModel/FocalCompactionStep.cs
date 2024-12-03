@@ -23,45 +23,61 @@ public class FocalCompactionStep(
         ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
     )
     {
-        var bodies = inputState.Particles.Select(p => (IMoveableParticle)new Particle(p)).ToList();
+        var bodies = new LinkedList<IMoveableParticle>(
+            inputState.Particles.Select(p => new Particle(p))
+        );
 
         for (int i = 0; i < MaxStepCount; i++)
         {
-            var combinationPairs = BuildCombinationPairs(bodies);
+            var current = bodies.First;
 
-            foreach (var pair in combinationPairs)
+            while (current != null)
             {
-                if (pair[0].HasContactTo(pair[1], -MinimumIntrusion))
+                var other = current.Next;
+
+                while (other != null)
                 {
-                    bodies.Remove(pair[0]);
-                    bodies.Remove(pair[1]);
-
-                    var particles0 = pair[0].FlattenIfAgglomerate().ToArray();
-                    var particles1 = pair[1].FlattenIfAgglomerate().ToArray();
-
-                    foreach (var (p0, p1) in particles0.Cartesian(particles1, (p0, p1) => (p0, p1)))
+                    if (current.Value.HasContactTo(other.Value, -MinimumIntrusion))
                     {
-                        if (p0.HasContactTo(p1, -MinimumIntrusion))
-                        {
-                            p0.CreateGrainBoundariesAtIntersections(
-                                p1,
-                                (point, particle) =>
-                                    new Node(Guid.NewGuid(), point.Absolute, Neck, particle),
-                                (point, particle) =>
-                                    new Node(
-                                        Guid.NewGuid(),
-                                        point.Absolute,
-                                        GrainBoundary,
-                                        particle
-                                    )
-                            );
-                        }
-                    }
+                        var particles0 = current.Value.FlattenIfAgglomerate().ToArray();
+                        var particles1 = other.Value.FlattenIfAgglomerate().ToArray();
 
-                    bodies.Add(
-                        new ParticleAgglomerate(Guid.NewGuid(), particles0.Concat(particles1))
-                    );
+                        foreach (
+                            var (p0, p1) in particles0.Cartesian(particles1, (p0, p1) => (p0, p1))
+                        )
+                        {
+                            if (p0.HasContactTo(p1, -MinimumIntrusion))
+                            {
+                                p0.CreateGrainBoundariesAtIntersections(
+                                    p1,
+                                    (point, particle) =>
+                                        new Node(Guid.NewGuid(), point.Absolute, Neck, particle),
+                                    (point, particle) =>
+                                        new Node(
+                                            Guid.NewGuid(),
+                                            point.Absolute,
+                                            GrainBoundary,
+                                            particle
+                                        )
+                                );
+                            }
+                        }
+
+                        current.Value = new ParticleAgglomerate(
+                            Guid.NewGuid(),
+                            particles0.Concat(particles1)
+                        );
+                        var next = other.Next;
+                        bodies.Remove(other);
+                        other = next;
+                    }
+                    else
+                    {
+                        other = other.Next;
+                    }
                 }
+
+                current = current.Next;
             }
 
             if (bodies.Count <= 1)
