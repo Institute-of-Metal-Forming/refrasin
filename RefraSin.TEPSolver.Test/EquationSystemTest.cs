@@ -3,11 +3,13 @@ using System.Text;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using Plotly.NET;
+using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
+using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepEstimators;
 using ScottPlot;
@@ -15,23 +17,42 @@ using ScottPlot;
 namespace RefraSin.TEPSolver.Test;
 
 [TestFixtureSource(nameof(GetTestFixtureData))]
-public class EquationSystemTest(SolutionState state)
+public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticleNode> state)
 {
     public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
-        InitialStates
-            .Generate(Conditions)
-            .Select(s => new TestFixtureData(s.state) { TestName = s.label });
+        InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
     private string _tmpDir = TempPath.CreateTempDir();
     private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 0);
+    private static readonly IMaterial Material = new Material(
+        InitialStates.MaterialId,
+        "Al2O3",
+        new BulkProperties(0, 1e-4),
+        new SubstanceProperties(1.8e3, 101.96e-3),
+        new InterfaceProperties(1.65e-10, 0.9),
+        new Dictionary<Guid, IInterfaceProperties>
+        {
+            { InitialStates.MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
+        }
+    );
 
     [Test]
-    public void Test()
+    public void TestEquationSystem()
     {
-        PlotState(state);
+        var norm = new DefaultNormalizer().GetNorm(state, Conditions, [Material]);
+        var normalizedState = norm.NormalizeSystemState(state);
+        var normalizedMaterial = norm.NormalizeMaterial(Material);
+        var normalizedConditions = norm.NormalizeConditions(Conditions);
 
-        var guess = new StepEstimator().EstimateStep(Conditions, state);
-        var equationSystem = new EquationSystem.EquationSystem(state, guess);
+        PlotState(normalizedState);
+
+        var solutionState = new SolutionState(
+            normalizedState,
+            [normalizedMaterial],
+            normalizedConditions
+        );
+        var guess = new StepEstimator().EstimateStep(normalizedConditions, solutionState);
+        var equationSystem = new EquationSystem.EquationSystem(solutionState, guess);
 
         SaveEquationSystem(equationSystem);
     }
