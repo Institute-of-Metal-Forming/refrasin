@@ -11,7 +11,7 @@ public class ParquetStorage(
     string fileName,
     int bufferSize = 1_000,
     ParquetSerializerOptions? options = null
-) : ISolutionStorage, IAsyncDisposable, IDisposable
+) : ISolutionStorage, IDisposable
 {
     private readonly FileStream _stream = new(
         fileName,
@@ -49,25 +49,15 @@ public class ParquetStorage(
 
         if (_rowBuffer.Count > bufferSize)
         {
-            Task.Run(WriteRowBuffer);
+            WriteRowBuffer();
         }
     }
 
-    private async Task WriteRowBuffer()
+    private void WriteRowBuffer()
     {
-        await ParquetSerializer.SerializeAsync(_rowBuffer, _stream, _options);
+        var data = _rowBuffer.ToArray();
         _rowBuffer.Clear();
-    }
-
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
-    {
-        if (_rowBuffer.Count != 0)
-        {
-            await WriteRowBuffer();
-        }
-
-        await _stream.DisposeAsync();
+        Task.Run(() => ParquetSerializer.SerializeAsync(data, _stream, _options));
     }
 
     /// <inheritdoc />
@@ -75,7 +65,7 @@ public class ParquetStorage(
     {
         if (_rowBuffer.Count != 0)
         {
-            Task.Run(WriteRowBuffer).Wait();
+            WriteRowBuffer();
         }
 
         _stream.Dispose();
