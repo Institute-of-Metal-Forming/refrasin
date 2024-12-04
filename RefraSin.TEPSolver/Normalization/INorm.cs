@@ -82,4 +82,11 @@ public interface INorm
                 kv => NormalizeInterfaceProperties(kv.Value)
             )
         );
+
+    public ISinteringConditions NormalizeConditions(ISinteringConditions conditions) =>
+        new SinteringConditions(
+            conditions.Temperature / Temperature,
+            conditions.Duration / Time,
+            conditions.GasConstant / Energy * Substance * Temperature
+        );
 }
