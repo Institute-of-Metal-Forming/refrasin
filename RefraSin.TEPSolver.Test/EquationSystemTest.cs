@@ -2,21 +2,12 @@ using System.Globalization;
 using System.Text;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-using Microsoft.FSharp.Core;
-using NUnit.Framework.Internal;
 using Plotly.NET;
-using RefraSin.Compaction.ProcessModel;
-using RefraSin.Coordinates;
-using RefraSin.Coordinates.Absolute;
-using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
-using RefraSin.TEPSolver.EquationSystem;
-using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepEstimators;
 
@@ -30,20 +21,14 @@ public class EquationSystemTest
         _state = state;
     }
 
-    public static IEnumerable<TestFixtureData> GetTestFixtureData()
-    {
-        TestFixtureData CreateTestFixtureData(string testName, Func<SolutionState> f) =>
-            new(f()) { TestName = testName };
-
-        yield return CreateTestFixtureData(nameof(OneParticle), OneParticle);
-        yield return CreateTestFixtureData(
-            nameof(Symmetric3PointBoundary),
-            Symmetric3PointBoundary
-        );
-    }
+    public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
+        InitialStates
+            .Generate(Conditions)
+            .Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
     private string _tmpDir = TempPath.CreateTempDir();
     private readonly SolutionState _state;
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 0);
 
     [Test]
     public void Test()
@@ -130,77 +115,5 @@ public class EquationSystemTest
         builder.AppendLine($"Rank: {matrix.Rank()}({matrix.Rank() - matrix.RowCount})");
 
         File.WriteAllText(path, builder.ToString(), Encoding.UTF8);
-    }
-
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 0);
-
-    private static SolutionState OneParticle()
-    {
-        var nodeCountPerParticle = 50;
-
-        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
-        {
-            NodeCount = nodeCountPerParticle,
-        }.GetParticle();
-
-        var material = new Material(
-            particle1.MaterialId,
-            "Al2O3",
-            new BulkProperties(0, 1e-4),
-            new SubstanceProperties(1.8e3, 101.96e-3),
-            new InterfaceProperties(1.65e-10, 0.9),
-            new Dictionary<Guid, IInterfaceProperties>()
-        );
-
-        var initialState = new SystemState(Guid.Empty, 0, [particle1]);
-        var norm = new DefaultNormalizer().GetNorm(initialState, Conditions, [material]);
-        var normalizedState = norm.NormalizeSystemState(initialState);
-        var normalizedMaterial = norm.NormalizeMaterial(material);
-
-        var state = new SolutionState(normalizedState, [normalizedMaterial], Conditions);
-
-        return state;
-    }
-
-    private static SolutionState Symmetric3PointBoundary()
-    {
-        var nodeCountPerParticle = 50;
-
-        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
-        {
-            NodeCount = nodeCountPerParticle,
-        }.GetParticle();
-
-        var particle2 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, particle1.MaterialId)
-        {
-            NodeCount = nodeCountPerParticle,
-            RotationAngle = Angle.Half,
-            CenterCoordinates = (300e-6, 0),
-        }.GetParticle();
-
-        var material = new Material(
-            particle1.MaterialId,
-            "Al2O3",
-            new BulkProperties(0, 1e-4),
-            new SubstanceProperties(1.8e3, 101.96e-3),
-            new InterfaceProperties(1.65e-10, 0.9),
-            new Dictionary<Guid, IInterfaceProperties>
-            {
-                { particle2.MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
-            }
-        );
-
-        var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
-        var norm = new DefaultNormalizer().GetNorm(initialState, Conditions, [material]);
-        var normalizedState = norm.NormalizeSystemState(initialState);
-        var normalizedMaterial = norm.NormalizeMaterial(material);
-
-        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 0.5e-6).Solve(
-            normalizedState
-        );
-
-        var state = new SolutionState(compactedState, [normalizedMaterial], Conditions);
-
-        return state;
     }
 }
