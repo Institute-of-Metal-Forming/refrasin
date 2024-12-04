@@ -6,8 +6,8 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public class TangentialDisplacementDerivative : NodeEquationBase<NodeBase>
 {
     /// <inheritdoc />
-    public TangentialDisplacementDerivative(NodeBase node, StepVector step)
-        : base(node, step) { }
+    public TangentialDisplacementDerivative(SolutionState state, NodeBase node, StepVector step)
+        : base(state, node, step) { }
 
     /// <inheritdoc />
     public override double Value()

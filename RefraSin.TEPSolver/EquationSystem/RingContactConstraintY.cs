@@ -4,8 +4,11 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.EquationSystem;
 
-public class RingContactConstraintY(IGraphCycle<Particle, ParticleContact> ring, StepVector step)
-    : RingEquationBase(ring, step)
+public class RingContactConstraintY(
+    SolutionState state,
+    IGraphCycle<Particle, ParticleContact> ring,
+    StepVector step
+) : RingEquationBase(state, ring, step)
 {
     /// <inheritdoc />
     public override double Value()
@@ -44,10 +47,10 @@ public class RingContactConstraintY(IGraphCycle<Particle, ParticleContact> ring,
         }
     }
 
-    private double RadialDisplacementDerivative(ParticleContact contact) =>
+    public double RadialDisplacementDerivative(ParticleContact contact) =>
         Sin(contact.From.RotationAngle + contact.DirectionFrom + Step.AngleDisplacement(contact));
 
-    private double AngleDisplacementDerivative(ParticleContact contact) =>
+    public double AngleDisplacementDerivative(ParticleContact contact) =>
         (contact.Distance + Step.RadialDisplacement(contact))
         * Cos(contact.From.RotationAngle + contact.DirectionFrom + Step.AngleDisplacement(contact));
 }

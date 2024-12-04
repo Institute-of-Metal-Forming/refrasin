@@ -6,8 +6,8 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public class ParticleRotationDerivative : ContactEquationBase
 {
     /// <inheritdoc />
-    public ParticleRotationDerivative(ParticleContact contact, StepVector step)
-        : base(contact, step) { }
+    public ParticleRotationDerivative(SolutionState state, ParticleContact contact, StepVector step)
+        : base(state, contact, step) { }
 
     /// <inheritdoc />
     public override double Value() =>

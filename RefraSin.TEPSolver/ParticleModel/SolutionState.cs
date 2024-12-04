@@ -36,7 +36,12 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
-        ParticleGraph = new DirectedGraph<Particle, ParticleContact>(Particles, ParticleContacts);
+        ParticleGraph = DirectedGraph<Particle, ParticleContact>.FromGraphSearch(
+            BreadthFirstExplorer<Particle, ParticleContact>.Explore(
+                new DirectedGraph<Particle, ParticleContact>(Particles, ParticleContacts),
+                Particles[0]
+            )
+        );
         ParticleCycles = CycleFinder<Particle, ParticleContact>
             .FindCycles(ParticleGraph, Particles[0])
             .FoundCycles.ToArray();

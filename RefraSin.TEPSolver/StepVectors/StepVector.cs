@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using RefraSin.Graphs;
 using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
@@ -38,6 +39,12 @@ public class StepVector : DenseVector
 
     public double LambdaContactDirection(INode node) =>
         this[StepVectorMap.LambdaContactDirection(node)];
+
+    public double LambdaCycleX(IGraphCycle<Particle, ParticleContact> cycle) =>
+        this[StepVectorMap.LambdaCycleX(cycle)];
+
+    public double LambdaCycleY(IGraphCycle<Particle, ParticleContact> cycle) =>
+        this[StepVectorMap.LambdaCycleY(cycle)];
 
     public double RadialDisplacement(ParticleContact contact) =>
         this[StepVectorMap.RadialDisplacement(contact)];

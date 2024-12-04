@@ -4,8 +4,11 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.EquationSystem;
 
-public class RingContactConstraintX(IGraphCycle<Particle, ParticleContact> ring, StepVector step)
-    : RingEquationBase(ring, step)
+public class RingContactConstraintX(
+    SolutionState state,
+    IGraphCycle<Particle, ParticleContact> ring,
+    StepVector step
+) : RingEquationBase(state, ring, step)
 {
     /// <inheritdoc />
     public override double Value()
