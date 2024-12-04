@@ -14,18 +14,15 @@ namespace RefraSin.TEPSolver.Test;
 
 public static class InitialStates
 {
-    public static IEnumerable<(
-        string label,
-        ISystemState<IParticle<IParticleNode>, IParticleNode> state
-    )> Generate(ISinteringConditions conditions)
+    public static IEnumerable<(string label, SolutionState state)> Generate(
+        ISinteringConditions conditions
+    )
     {
         yield return (nameof(OneParticle), OneParticle(conditions));
         yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary(conditions));
     }
 
-    private static ISystemState<IParticle<IParticleNode>, IParticleNode> OneParticle(
-        ISinteringConditions conditions
-    )
+    private static SolutionState OneParticle(ISinteringConditions conditions)
     {
         var nodeCountPerParticle = 50;
 
@@ -53,9 +50,7 @@ public static class InitialStates
         return state;
     }
 
-    private static ISystemState<IParticle<IParticleNode>, IParticleNode> Symmetric3PointBoundary(
-        ISinteringConditions conditions
-    )
+    private static SolutionState Symmetric3PointBoundary(ISinteringConditions conditions)
     {
         var nodeCountPerParticle = 50;
 
