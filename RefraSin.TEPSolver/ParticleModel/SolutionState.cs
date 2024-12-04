@@ -42,6 +42,10 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[0]
             )
         );
+
+        if (Particles.Any(p => !ParticleGraph.Vertices.Contains(p)))
+            throw new InvalidOperationException("Detached particles encountered.");
+
         ParticleCycles = CycleFinder<Particle, ParticleContact>
             .FindCycles(ParticleGraph, Particles[0])
             .FoundCycles.ToArray();
