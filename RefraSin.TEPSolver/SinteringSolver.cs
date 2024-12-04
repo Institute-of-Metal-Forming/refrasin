@@ -28,23 +28,16 @@ namespace RefraSin.TEPSolver;
 public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 {
     public SinteringSolver(
-        ISolutionStorage solutionStorage,
         ILoggerFactory loggerFactory,
         ISolverRoutines routines,
         int remeshingEverySteps = 10
     )
     {
-        SolutionStorage = solutionStorage;
         LoggerFactory = loggerFactory;
         Routines = routines;
         RemeshingEverySteps = remeshingEverySteps;
         routines.RegisterWithSolver(this);
     }
-
-    /// <summary>
-    /// Storage for solution data.
-    /// </summary>
-    public ISolutionStorage SolutionStorage { get; }
 
     /// <summary>
     /// Factory for loggers used in the Session.
