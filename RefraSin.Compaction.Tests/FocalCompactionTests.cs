@@ -65,22 +65,22 @@ public class FocalCompactionTests
             {
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
                 {
-                    CenterCoordinates = (3, 6),
+                    CenterCoordinates = (3, 3),
                     RotationAngle = HalfRight,
                 }.GetParticle(),
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
                 {
-                    CenterCoordinates = (-3, 6),
+                    CenterCoordinates = (-3, 3),
                     RotationAngle = Straight - HalfRight,
                 }.GetParticle(),
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
                 {
-                    CenterCoordinates = (3, -6),
+                    CenterCoordinates = (3, -3),
                     RotationAngle = -HalfRight,
                 }.GetParticle(),
                 new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
                 {
-                    CenterCoordinates = (-3, -6),
+                    CenterCoordinates = (-3, -3),
                     RotationAngle = Straight + HalfRight,
                 }.GetParticle(),
             },
