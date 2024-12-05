@@ -27,8 +27,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         NodeContacts = state
             .NodeContacts.Select(c => new Edge<ContactNodeBase>(
                 (ContactNodeBase)Nodes[c.From.Id],
-                (ContactNodeBase)Nodes[c.To.Id],
-                true
+                (ContactNodeBase)Nodes[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
         ParticleContacts = state
@@ -71,8 +70,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         NodeContacts = oldState
             .NodeContacts.Select(c => new Edge<ContactNodeBase>(
                 (ContactNodeBase)Nodes[c.From.Id],
-                (ContactNodeBase)Nodes[c.To.Id],
-                true
+                (ContactNodeBase)Nodes[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
         ParticleContacts = oldState
@@ -92,14 +90,14 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     public double Time { get; }
 
     /// <inheritdoc cref="ISystemState.Nodes"/>>
-    public IReadOnlyNodeCollection<NodeBase> Nodes { get; private set; }
+    public IReadOnlyNodeCollection<NodeBase> Nodes { get; }
 
     /// <inheritdoc cref="ISystemState.Particles"/>>
-    public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; private set; }
+    public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; }
 
-    public IReadOnlyContactCollection<ParticleContact> ParticleContacts { get; private set; }
+    public IReadOnlyContactCollection<ParticleContact> ParticleContacts { get; }
 
-    public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; private set; }
+    public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; }
 
     IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
 

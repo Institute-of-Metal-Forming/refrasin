@@ -4,27 +4,22 @@ namespace RefraSin.Graphs.Tests;
 public class DirectedGraphTests
 {
     private Vertex[] _vertices;
-    private IEdge<Vertex>[] _edges;
-    private DirectedGraph<Vertex> _graph;
+    private Edge<Vertex>[] _edges;
+    private DirectedGraph<Vertex, Edge<Vertex>> _graph;
 
     [SetUp]
     public void Setup()
     {
-        _vertices = new Vertex[]
-        {
-            new Vertex(Guid.NewGuid()),
-            new Vertex(Guid.NewGuid()),
-            new Vertex(Guid.NewGuid()),
-        };
+        _vertices = [new(Guid.NewGuid()), new(Guid.NewGuid()), new(Guid.NewGuid())];
 
-        _edges = new IEdge<Vertex>[]
-        {
-            new Edge<Vertex>(_vertices[0], _vertices[1], true),
-            new Edge<Vertex>(_vertices[1], _vertices[2], false),
-            new Edge<Vertex>(_vertices[2], _vertices[0], true),
-        };
+        _edges =
+        [
+            new(_vertices[0], _vertices[1]),
+            new(_vertices[1], _vertices[2]),
+            new(_vertices[2], _vertices[0]),
+        ];
 
-        _graph = new DirectedGraph<Vertex>(_vertices, _edges);
+        _graph = new(_vertices, _edges);
     }
 
     [Test]
@@ -41,10 +36,10 @@ public class DirectedGraphTests
             Is.EqualTo(
                 new IEdge<Vertex>[]
                 {
-                    new Edge<Vertex>(_vertices[0], _vertices[1], true),
-                    new Edge<Vertex>(_vertices[1], _vertices[2], true),
-                    new Edge<Vertex>(_vertices[2], _vertices[1], true),
-                    new Edge<Vertex>(_vertices[2], _vertices[0], true),
+                    new Edge<Vertex>(_vertices[0], _vertices[1]),
+                    new Edge<Vertex>(_vertices[1], _vertices[2]),
+                    new Edge<Vertex>(_vertices[2], _vertices[1]),
+                    new Edge<Vertex>(_vertices[2], _vertices[0]),
                 }.ToHashSet()
             )
         );

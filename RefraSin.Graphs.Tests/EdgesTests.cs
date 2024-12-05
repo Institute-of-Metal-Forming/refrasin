@@ -14,8 +14,8 @@ public class EdgesTests
         _vertex1 = new Vertex(Guid.NewGuid());
         _vertex2 = new Vertex(Guid.NewGuid());
 
-        _edge1 = new Edge<Vertex>(_vertex1, _vertex2, true);
-        _edge2 = new Edge<Vertex>(_vertex2, _vertex1, true);
+        _edge1 = new Edge<Vertex>(_vertex1, _vertex2);
+        _edge2 = new Edge<Vertex>(_vertex2, _vertex1);
     }
 
     [Test]
@@ -30,12 +30,6 @@ public class EdgesTests
     {
         Assert.That(_edge1.GetHashCode(), Is.Not.EqualTo(_edge2.GetHashCode()));
         Assert.That(_edge2.GetHashCode(), Is.Not.EqualTo(_edge1.GetHashCode()));
-    }
-
-    [Test]
-    public void TestDirected()
-    {
-        Assert.That(_edge1.IsDirected);
     }
 
     [Test]

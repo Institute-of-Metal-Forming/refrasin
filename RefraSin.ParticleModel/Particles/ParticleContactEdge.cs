@@ -9,7 +9,7 @@ public record ParticleContactEdge<TParticle>(
     TParticle From,
     TParticle To,
     IPolarVector ContactVector
-) : IParticleContactEdge<TParticle>
+) : IParticleContactEdge<TParticle>, IReversibleEdge<ParticleContactEdge<TParticle>>
     where TParticle : IParticle
 {
     public ParticleContactEdge(TParticle from, TParticle to)
@@ -24,10 +24,6 @@ public record ParticleContactEdge<TParticle>(
 
     public ParticleContactEdge<TParticle> Reversed() =>
         new(To, From, new PolarVector(-ContactVector.Absolute, To));
-
-    IEdge<TParticle> IEdge<TParticle>.Reversed() => Reversed();
-
-    IEdge IEdge.Reversed() => Reversed();
 
     /// <inheritdoc />
     public double Distance => ContactVector.R;
@@ -45,7 +41,7 @@ public record ParticleContactEdge(
     double Distance,
     Angle DirectionFrom,
     Angle DirectionTo
-) : IParticleContactEdge
+) : IParticleContactEdge, IReversibleEdge<ParticleContactEdge>
 {
     public ParticleContactEdge(
         IParticle from,
@@ -60,6 +56,4 @@ public record ParticleContactEdge(
         : this(edge.From, edge.To, distance, directionFrom, directionTo) { }
 
     public ParticleContactEdge Reversed() => new(To, From, Distance, DirectionTo, DirectionFrom);
-
-    IEdge IEdge.Reversed() => Reversed();
 }

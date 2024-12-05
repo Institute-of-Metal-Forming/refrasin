@@ -109,8 +109,7 @@ internal class SolverSession : ISolverSession
         );
         var nodeContacts = CurrentState.NodeContacts.Select(c => new Edge<NodeReturn>(
             nodes[c.From.Id],
-            nodes[c.To.Id],
-            true
+            nodes[c.To.Id]
         ));
         _reportSystemState(
             new SystemState(

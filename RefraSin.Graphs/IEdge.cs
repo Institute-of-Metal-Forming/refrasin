@@ -8,18 +8,12 @@ public interface IEdge<out TVertex> : IEdge
 
     Guid IEdge.From => From.Id;
     Guid IEdge.To => To.Id;
-
-    new IEdge<TVertex> Reversed();
 }
 
 public interface IEdge : IEquatable<IEdge>
 {
     Guid From { get; }
     Guid To { get; }
-
-    bool IsDirected { get; }
-
-    IEdge Reversed();
 
     bool IEquatable<IEdge>.Equals(IEdge? other)
     {
@@ -29,12 +23,8 @@ public interface IEdge : IEquatable<IEdge>
         if (ReferenceEquals(this, other))
             return true;
 
-        if (From == other.From && To == other.To && IsDirected == other.IsDirected)
+        if (From == other.From && To == other.To)
             return true;
-
-        if (IsDirected == false)
-            if (To == other.From && From == other.To && IsDirected == other.IsDirected)
-                return true;
 
         return false;
     }
