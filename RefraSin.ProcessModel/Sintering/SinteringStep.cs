@@ -1,6 +1,4 @@
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.ProcessModel.Sintering;
 
@@ -17,7 +15,6 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
     /// <param name="solver">the solver to use</param>
     /// <param name="gasConstant">value of the universal gas constant</param>
     /// <param name="materials"></param>
-    /// <param name="materialInterfaces"></param>
     public SinteringStep(
         double duration,
         double temperature,
@@ -32,6 +29,20 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
         Materials = materials;
         Temperature = temperature;
         GasConstant = gasConstant;
+    }
+
+    public SinteringStep(
+        ISinteringConditions conditions,
+        IProcessStepSolver<ISinteringStep> solver,
+        IReadOnlyList<IMaterial> materials
+    )
+    {
+        Duration = conditions.Duration;
+        Temperature = conditions.Temperature;
+        Solver = solver;
+        Materials = materials;
+        Temperature = conditions.Temperature;
+        GasConstant = conditions.GasConstant;
     }
 
     /// <summary>

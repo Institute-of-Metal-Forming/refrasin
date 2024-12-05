@@ -2,56 +2,57 @@ using System.Globalization;
 using System.Text;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-using Microsoft.FSharp.Core;
-using NUnit.Framework.Internal;
 using Plotly.NET;
-using RefraSin.Compaction.ProcessModel;
-using RefraSin.Coordinates;
-using RefraSin.Coordinates.Absolute;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
-using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepEstimators;
+using ScottPlot;
 
 namespace RefraSin.TEPSolver.Test;
 
 [TestFixtureSource(nameof(GetTestFixtureData))]
-public class EquationSystemTest
+public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticleNode> state)
 {
-    public EquationSystemTest(SolutionState state)
-    {
-        _state = state;
-    }
-
-    public static IEnumerable<TestFixtureData> GetTestFixtureData()
-    {
-        TestFixtureData CreateTestFixtureData(string testName, Func<SolutionState> f) =>
-            new(f()) { TestName = testName };
-
-        yield return CreateTestFixtureData(nameof(OneParticle), OneParticle);
-        yield return CreateTestFixtureData(
-            nameof(Symmetric3PointBoundary),
-            Symmetric3PointBoundary
-        );
-    }
+    public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
+        InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
     private string _tmpDir = TempPath.CreateTempDir();
-    private readonly SolutionState _state;
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 0);
+    private static readonly IMaterial Material = new Material(
+        InitialStates.MaterialId,
+        "Al2O3",
+        new BulkProperties(0, 1e-4),
+        new SubstanceProperties(1.8e3, 101.96e-3),
+        new InterfaceProperties(1.65e-10, 0.9),
+        new Dictionary<Guid, IInterfaceProperties>
+        {
+            { InitialStates.MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
+        }
+    );
 
     [Test]
-    public void Test()
+    public void TestEquationSystem()
     {
-        PlotState(_state);
+        var norm = new DefaultNormalizer().GetNorm(state, Conditions, [Material]);
+        var normalizedState = norm.NormalizeSystemState(state);
+        var normalizedMaterial = norm.NormalizeMaterial(Material);
+        var normalizedConditions = norm.NormalizeConditions(Conditions);
 
-        var guess = new StepEstimator().EstimateStep(Conditions, _state);
-        var equationSystem = new EquationSystem.EquationSystem(_state, guess);
+        PlotState(normalizedState);
+
+        var solutionState = new SolutionState(
+            normalizedState,
+            [normalizedMaterial],
+            normalizedConditions
+        );
+        var guess = new StepEstimator().EstimateStep(normalizedConditions, solutionState);
+        var equationSystem = new EquationSystem.EquationSystem(solutionState, guess);
 
         SaveEquationSystem(equationSystem);
     }
@@ -61,15 +62,17 @@ public class EquationSystemTest
         var jac = system.Jacobian();
         jac.CoerceZero(1e-8);
         SaveMatrix(jac, -system.Lagrangian(), "full_jacobian");
+        PlotJacobianStructure(jac, "full_jacobian");
 
-        foreach (var p in _state.Particles)
+        foreach (var p in state.Particles)
         {
             var pJac = system.ParticleBlockJacobian(p);
             pJac.CoerceZero(1e-8);
             SaveMatrix(pJac, -system.ParticleBlockLagrangian(p), $"particle_{p.Id}");
+            PlotJacobianStructure(jac, $"particle_{p.Id}");
         }
 
-        foreach (var c in _state.ParticleContacts)
+        foreach (var c in state.ParticleContacts)
         {
             var contactJac = system.ContactBlockJacobian(c);
             contactJac.CoerceZero(1e-8);
@@ -78,11 +81,13 @@ public class EquationSystemTest
                 -system.ContactBlockLagrangian(c),
                 $"contact_{c.From.Id}_{c.To.Id}"
             );
+            PlotJacobianStructure(jac, $"contact_{c.From.Id}_{c.To.Id}");
         }
 
         var globalJac = system.GlobalBlockJacobian();
         globalJac.CoerceZero(1e-8);
         SaveMatrix(globalJac, -system.GlobalBlockLagrangian(), "global");
+        PlotJacobianStructure(jac, "global");
     }
 
     private void PlotState(ISystemState<IParticle<IParticleNode>, IParticleNode> state)
@@ -93,8 +98,6 @@ public class EquationSystemTest
 
     private void SaveMatrix(Matrix<double> matrix, Vector<double> rightSide, string name)
     {
-        var path = Path.Combine(_tmpDir, $"{name}.txt");
-
         var builder = new StringBuilder();
         builder.AppendLine(
             matrix.ToMatrixString(
@@ -129,78 +132,19 @@ public class EquationSystemTest
         );
         builder.AppendLine($"Rank: {matrix.Rank()}({matrix.Rank() - matrix.RowCount})");
 
-        File.WriteAllText(path, builder.ToString(), Encoding.UTF8);
+        File.WriteAllText(Path.Combine(_tmpDir, $"{name}.txt"), builder.ToString(), Encoding.UTF8);
     }
 
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 0);
-
-    private static SolutionState OneParticle()
+    private void PlotJacobianStructure(Matrix<double> jacobian, string name)
     {
-        var nodeCountPerParticle = 50;
+        var matrix = jacobian.PointwiseSign();
 
-        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
-        {
-            NodeCount = nodeCountPerParticle,
-        }.GetParticle();
+        var plt = new Plot();
 
-        var material = new Material(
-            particle1.MaterialId,
-            "Al2O3",
-            new BulkProperties(0, 1e-4),
-            new SubstanceProperties(1.8e3, 101.96e-3),
-            new InterfaceProperties(1.65e-10, 0.9),
-            new Dictionary<Guid, IInterfaceProperties>()
-        );
+        plt.Add.Heatmap(matrix.ToArray());
+        plt.Layout.Frameless();
+        plt.Axes.Margins(0, 0);
 
-        var initialState = new SystemState(Guid.Empty, 0, [particle1]);
-        var norm = new DefaultNormalizer().GetNorm(initialState, Conditions, [material]);
-        var normalizedState = norm.NormalizeSystemState(initialState);
-        var normalizedMaterial = norm.NormalizeMaterial(material);
-
-        var state = new SolutionState(normalizedState, [normalizedMaterial], Conditions);
-
-        return state;
-    }
-
-    private static SolutionState Symmetric3PointBoundary()
-    {
-        var nodeCountPerParticle = 50;
-
-        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, Guid.NewGuid())
-        {
-            NodeCount = nodeCountPerParticle,
-        }.GetParticle();
-
-        var particle2 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, particle1.MaterialId)
-        {
-            NodeCount = nodeCountPerParticle,
-            RotationAngle = Angle.Half,
-            CenterCoordinates = (300e-6, 0),
-        }.GetParticle();
-
-        var material = new Material(
-            particle1.MaterialId,
-            "Al2O3",
-            new BulkProperties(0, 1e-4),
-            new SubstanceProperties(1.8e3, 101.96e-3),
-            new InterfaceProperties(1.65e-10, 0.9),
-            new Dictionary<Guid, IInterfaceProperties>
-            {
-                { particle2.MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
-            }
-        );
-
-        var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
-        var norm = new DefaultNormalizer().GetNorm(initialState, Conditions, [material]);
-        var normalizedState = norm.NormalizeSystemState(initialState);
-        var normalizedMaterial = norm.NormalizeMaterial(material);
-
-        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 0.5e-6).Solve(
-            normalizedState
-        );
-
-        var state = new SolutionState(compactedState, [normalizedMaterial], Conditions);
-
-        return state;
+        plt.SavePng(Path.Combine(_tmpDir, $"{name}.png"), matrix.ColumnCount, matrix.RowCount);
     }
 }

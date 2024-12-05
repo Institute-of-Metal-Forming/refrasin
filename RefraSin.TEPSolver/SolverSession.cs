@@ -28,12 +28,13 @@ internal class SolverSession : ISolverSession
         Norm = sinteringSolver.Routines.Normalizer.GetNorm(inputState, step, step.Materials);
 
         var normalizedState = Norm.NormalizeSystemState(inputState);
+        var normalizedConditions = Norm.NormalizeConditions(step);
 
         StartTime = normalizedState.Time;
-        Duration = step.Duration / Norm.Time;
+        Duration = normalizedConditions.Duration;
         EndTime = StartTime + Duration;
-        Temperature = step.Temperature / Norm.Temperature;
-        GasConstant = step.GasConstant / Norm.Energy * Norm.Substance * Norm.Temperature;
+        Temperature = normalizedConditions.Temperature;
+        GasConstant = normalizedConditions.GasConstant;
         _reportSystemState = step.ReportSystemState;
 
         Materials = step.Materials.Select(m => Norm.NormalizeMaterial(m)).ToArray();
