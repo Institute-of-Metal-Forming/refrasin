@@ -7,7 +7,7 @@ using RefraSin.ParticleModel.Particles;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
-public record ParticleContact : ParticleContactEdge<Particle>
+public record ParticleContact : ParticleContactEdge<Particle>, IReversibleEdge<ParticleContact>
 {
     private IList<ContactNodeBase>? _fromNodes;
     private IList<ContactNodeBase>? _toNodes;
@@ -38,4 +38,7 @@ public record ParticleContact : ParticleContactEdge<Particle>
         _toNodes ??= FromNodes.Select(n => n.ContactedNode).ToArray();
 
     public Guid MergedId { get; }
+
+    /// <inheritdoc />
+    public new ParticleContact Reversed() => new(To, From);
 }

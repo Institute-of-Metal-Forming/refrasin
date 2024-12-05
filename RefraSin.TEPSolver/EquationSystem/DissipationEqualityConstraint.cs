@@ -3,7 +3,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.EquationSystem;
 
-public class DissipationEqualityConstraint : GlobalEquationBase
+public class DissipationEqualityConstraint : EquationBase
 {
     /// <inheritdoc />
     public DissipationEqualityConstraint(SolutionState state, StepVector step)

@@ -1,3 +1,4 @@
+using RefraSin.Graphs;
 using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
@@ -52,6 +53,12 @@ public class StepVectorMap
 
         GlobalStart = _index;
 
+        foreach (var cycle in currentState.ParticleCycles)
+        {
+            AddUnknown(cycle.End.Id, Unknown.LambdaCycleX);
+            AddUnknown(cycle.End.Id, Unknown.LambdaCycleY);
+        }
+
         AddUnknown(Guid.Empty, Unknown.LambdaDissipation);
 
         GlobalLength = _index - GlobalStart;
@@ -102,6 +109,12 @@ public class StepVectorMap
     public int LambdaContactDirection(INode node) =>
         _indices[(node.Id, Unknown.LambdaContactDirection)];
 
+    public int LambdaCycleX(IGraphCycle<Particle, ParticleContact> cycle) =>
+        _indices[(cycle.End.Id, Unknown.LambdaCycleX)];
+
+    public int LambdaCycleY(IGraphCycle<Particle, ParticleContact> cycle) =>
+        _indices[(cycle.End.Id, Unknown.LambdaCycleY)];
+
     public int RadialDisplacement(ParticleContact contact) =>
         _indices[(contact.MergedId, Unknown.RadialDisplacement)];
 
@@ -116,6 +129,8 @@ public class StepVectorMap
         LambdaVolume,
         LambdaContactDistance,
         LambdaContactDirection,
+        LambdaCycleX,
+        LambdaCycleY,
         RadialDisplacement,
         AngleDisplacement,
         LambdaDissipation,

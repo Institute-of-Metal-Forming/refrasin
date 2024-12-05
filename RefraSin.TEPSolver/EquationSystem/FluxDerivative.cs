@@ -6,8 +6,8 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public class FluxDerivative : NodeEquationBase<NodeBase>
 {
     /// <inheritdoc />
-    public FluxDerivative(NodeBase node, StepVector step)
-        : base(node, step) { }
+    public FluxDerivative(SolutionState state, NodeBase node, StepVector step)
+        : base(state, node, step) { }
 
     /// <inheritdoc />
     public override double Value()

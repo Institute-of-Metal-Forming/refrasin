@@ -6,8 +6,8 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public class NormalDisplacementDerivative : NodeEquationBase<NodeBase>
 {
     /// <inheritdoc />
-    public NormalDisplacementDerivative(NodeBase node, StepVector step)
-        : base(node, step) { }
+    public NormalDisplacementDerivative(SolutionState state, NodeBase node, StepVector step)
+        : base(state, node, step) { }
 
     /// <inheritdoc />
     public override double Value()

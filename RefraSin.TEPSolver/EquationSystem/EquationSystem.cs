@@ -34,11 +34,11 @@ public class EquationSystem
     {
         foreach (var n in p.Nodes)
         {
-            yield return new NormalDisplacementDerivative(n, StepVector);
+            yield return new NormalDisplacementDerivative(State, n, StepVector);
             if (n is NeckNode)
-                yield return new TangentialDisplacementDerivative(n, StepVector);
-            yield return new FluxDerivative(n, StepVector);
-            yield return new VolumeBalanceConstraint(n, StepVector);
+                yield return new TangentialDisplacementDerivative(State, n, StepVector);
+            yield return new FluxDerivative(State, n, StepVector);
+            yield return new VolumeBalanceConstraint(State, n, StepVector);
         }
     }
 
@@ -46,16 +46,21 @@ public class EquationSystem
     {
         foreach (var n in contact.FromNodes)
         {
-            yield return new ContactDistanceConstraint(n, StepVector);
-            yield return new ContactDirectionConstraint(n, StepVector);
+            yield return new ContactDistanceConstraint(State, n, StepVector);
+            yield return new ContactDirectionConstraint(State, n, StepVector);
         }
 
-        yield return new ContactDistanceDerivative(contact, StepVector);
-        yield return new ContactDirectionDerivative(contact, StepVector);
+        yield return new ContactDistanceDerivative(State, contact, StepVector);
+        yield return new ContactDirectionDerivative(State, contact, StepVector);
     }
 
     private IEnumerable<IEquation> YieldGlobalEquations()
     {
+        foreach (var cycle in State.ParticleCycles)
+        {
+            yield return new RingContactConstraintX(State, cycle, StepVector);
+            yield return new RingContactConstraintY(State, cycle, StepVector);
+        }
         yield return new DissipationEqualityConstraint(State, StepVector);
     }
 

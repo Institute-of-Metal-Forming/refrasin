@@ -6,8 +6,8 @@ namespace RefraSin.TEPSolver.EquationSystem;
 public class ContactDirectionConstraint : NodeEquationBase<ContactNodeBase>
 {
     /// <inheritdoc />
-    public ContactDirectionConstraint(ContactNodeBase node, StepVector step)
-        : base(node, step) { }
+    public ContactDirectionConstraint(SolutionState state, ContactNodeBase node, StepVector step)
+        : base(state, node, step) { }
 
     /// <inheritdoc />
     public override double Value() =>
