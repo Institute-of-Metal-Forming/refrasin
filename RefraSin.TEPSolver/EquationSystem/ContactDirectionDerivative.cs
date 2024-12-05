@@ -16,16 +16,8 @@ public class ContactDirectionDerivative : ContactEquationBase
         _ringsWithThisInSecondary = State
             .ParticleCycles.Where(r => r.SecondPath.Contains(Contact))
             .ToArray();
-        _xPreFactor =
-            -(contact.Distance + Step.RadialDisplacement(contact))
-            * Sin(
-                Contact.From.RotationAngle + Contact.DirectionFrom + Step.AngleDisplacement(Contact)
-            );
-        _yPreFactor =
-            (contact.Distance + Step.RadialDisplacement(contact))
-            * Cos(
-                Contact.From.RotationAngle + Contact.DirectionFrom + Step.AngleDisplacement(Contact)
-            );
+        _xPreFactor = -contact.Distance * Sin(contact.From.RotationAngle + contact.DirectionFrom);
+        _yPreFactor = contact.Distance * Cos(contact.From.RotationAngle + contact.DirectionFrom);
     }
 
     /// <inheritdoc />
@@ -59,50 +51,6 @@ public class ContactDirectionDerivative : ContactEquationBase
         {
             yield return (Map.LambdaContactDirection(fromNode), 1.0);
         }
-
-        yield return (
-            Map.RadialDisplacement(Contact),
-            -Sin(
-                Contact.From.RotationAngle + Contact.DirectionFrom + Step.AngleDisplacement(Contact)
-            )
-                * (
-                    _ringsWithThisInPrimary.Sum(Step.LambdaCycleX)
-                    - _ringsWithThisInSecondary.Sum(Step.LambdaCycleX)
-                )
-                + Cos(
-                    Contact.From.RotationAngle
-                        + Contact.DirectionFrom
-                        + Step.AngleDisplacement(Contact)
-                )
-                    * (
-                        _ringsWithThisInPrimary.Sum(Step.LambdaCycleY)
-                        - _ringsWithThisInSecondary.Sum(Step.LambdaCycleY)
-                    )
-        );
-
-        yield return (
-            Map.AngleDisplacement(Contact),
-            -(Contact.Distance + Step.RadialDisplacement(Contact))
-                * Cos(
-                    Contact.From.RotationAngle
-                        + Contact.DirectionFrom
-                        + Step.AngleDisplacement(Contact)
-                )
-                * (
-                    _ringsWithThisInPrimary.Sum(Step.LambdaCycleX)
-                    - _ringsWithThisInSecondary.Sum(Step.LambdaCycleX)
-                )
-                - (Contact.Distance + Step.RadialDisplacement(Contact))
-                    * Sin(
-                        Contact.From.RotationAngle
-                            + Contact.DirectionFrom
-                            + Step.AngleDisplacement(Contact)
-                    )
-                    * (
-                        _ringsWithThisInPrimary.Sum(Step.LambdaCycleY)
-                        - _ringsWithThisInSecondary.Sum(Step.LambdaCycleY)
-                    )
-        );
 
         foreach (var cycle in _ringsWithThisInPrimary)
         {

@@ -16,12 +16,8 @@ public class ContactDistanceDerivative : ContactEquationBase
         _ringsWithThisInSecondary = State
             .ParticleCycles.Where(r => r.SecondPath.Contains(Contact))
             .ToArray();
-        _xPreFactor = Cos(
-            Contact.From.RotationAngle + Contact.DirectionFrom + Step.AngleDisplacement(Contact)
-        );
-        _yPreFactor = Sin(
-            Contact.From.RotationAngle + Contact.DirectionFrom + Step.AngleDisplacement(Contact)
-        );
+        _xPreFactor = Cos(contact.From.RotationAngle + contact.DirectionFrom);
+        _yPreFactor = Sin(contact.From.RotationAngle + contact.DirectionFrom);
     }
 
     /// <inheritdoc />
@@ -55,26 +51,6 @@ public class ContactDistanceDerivative : ContactEquationBase
         {
             yield return (Map.LambdaContactDistance(fromNode), 1.0);
         }
-
-        yield return (
-            Map.AngleDisplacement(Contact),
-            -Sin(
-                Contact.From.RotationAngle + Contact.DirectionFrom + Step.AngleDisplacement(Contact)
-            )
-                * (
-                    _ringsWithThisInPrimary.Sum(Step.LambdaCycleX)
-                    - _ringsWithThisInSecondary.Sum(Step.LambdaCycleX)
-                )
-                + Cos(
-                    Contact.From.RotationAngle
-                        + Contact.DirectionFrom
-                        + Step.AngleDisplacement(Contact)
-                )
-                    * (
-                        _ringsWithThisInPrimary.Sum(Step.LambdaCycleY)
-                        - _ringsWithThisInSecondary.Sum(Step.LambdaCycleY)
-                    )
-        );
 
         foreach (var cycle in _ringsWithThisInPrimary)
         {

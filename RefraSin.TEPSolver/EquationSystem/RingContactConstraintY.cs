@@ -19,17 +19,11 @@ public class RingContactConstraintY(
         return primary - secondary;
     }
 
-    private double YShift(ParticleContact contact)
-    {
-        var oldX = contact.Distance * Sin(contact.From.RotationAngle + contact.DirectionFrom);
-        var newX =
-            (contact.Distance + Step.RadialDisplacement(contact))
-            * Sin(
-                contact.From.RotationAngle + contact.DirectionFrom + Step.AngleDisplacement(contact)
-            );
-
-        return newX - oldX;
-    }
+    private double YShift(ParticleContact contact) =>
+        Sin(contact.From.RotationAngle + contact.DirectionFrom) * Step.RadialDisplacement(contact)
+        + contact.Distance
+            * Cos(contact.From.RotationAngle + contact.DirectionFrom)
+            * Step.AngleDisplacement(contact);
 
     /// <inheritdoc />
     public override IEnumerable<(int, double)> Derivative()
@@ -48,9 +42,8 @@ public class RingContactConstraintY(
     }
 
     public double RadialDisplacementDerivative(ParticleContact contact) =>
-        Sin(contact.From.RotationAngle + contact.DirectionFrom + Step.AngleDisplacement(contact));
+        Sin(contact.From.RotationAngle + contact.DirectionFrom);
 
     public double AngleDisplacementDerivative(ParticleContact contact) =>
-        (contact.Distance + Step.RadialDisplacement(contact))
-        * Cos(contact.From.RotationAngle + contact.DirectionFrom + Step.AngleDisplacement(contact));
+        contact.Distance * Cos(contact.From.RotationAngle + contact.DirectionFrom);
 }
