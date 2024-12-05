@@ -25,7 +25,7 @@ public class SimulationTest
             builder.AddFile(Path.Combine(_tempDir, "test.log"));
         });
 
-        var solver = new SinteringSolver(_solutionStorage, loggerFactory, SolverRoutines.Default, 10);
+        var solver = new SinteringSolver(loggerFactory, SolverRoutines.Default, 10);
 
         _sinteringProcess = new SinteringStep(Conditions, solver, [Material]);
         _sinteringProcess.UseStorage(_solutionStorage);
