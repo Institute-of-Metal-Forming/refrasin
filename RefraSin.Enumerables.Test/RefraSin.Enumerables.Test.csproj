@@ -1,17 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Authors>Max Weiner</Authors>
+        <RepositoryUrl>https://github.com/refrabund/refrasin</RepositoryUrl>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
 
         <IsPackable>false</IsPackable>
-
-        <AssemblyName>RefraSin.Enumerables.Test</AssemblyName>
-
-        <RootNamespace>RefraSin.Enumerables.Test</RootNamespace>
-
-        <LangVersion>default</LangVersion>
+        <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,17 +17,11 @@
         <PackageReference Include="NUnit"/>
         <PackageReference Include="NUnit3TestAdapter"/>
         <PackageReference Include="NUnit.Analyzers"/>
-        <PackageReference Include="coverlet.collector">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="coverlet.collector"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\RefraSin.Enumerables\RefraSin.Enumerables.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    </ItemGroup>
 </Project>

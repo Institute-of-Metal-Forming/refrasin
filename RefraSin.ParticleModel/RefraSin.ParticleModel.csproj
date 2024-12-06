@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Authors>Max Weiner</Authors>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <RepositoryUrl>https://github.com/refrabund/refrasin</RepositoryUrl>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
-        <RootNamespace>RefraSin.ParticleModel</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
       <ProjectReference Include="..\RefraSin.Graphs\RefraSin.Graphs.csproj" />
     </ItemGroup>
-
-
 
 </Project>

@@ -6,7 +6,6 @@ using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.Plotting;
 using RefraSin.ProcessModel;
-using ScottPlot;
 using static RefraSin.Coordinates.Angle;
 
 namespace RefraSin.Compaction.Tests;
