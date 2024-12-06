@@ -18,6 +18,8 @@ public static class InitialStates
         yield return (nameof(OneParticle), OneParticle());
         yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
         yield return (nameof(FourParticleRing), FourParticleRing());
+        yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
+        yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
     }
 
     public static readonly Guid MaterialId = Guid.NewGuid();
@@ -91,6 +93,66 @@ public static class InitialStates
             0,
             [particle1, particle2, particle3, particle4]
         );
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6).Solve(
+            initialState
+        );
+
+        return compactedState;
+    }
+
+    private static ISystemState<IParticle<IParticleNode>, IParticleNode> ThreeParticleRingCircular()
+    {
+        var nodeCountPerParticle = 40;
+
+        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0, 0, 0, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+            CenterCoordinates = (0, -110e-6),
+        }.GetParticle();
+
+        var particle2 = new ShapeFunctionParticleFactory(100e-6, 0, 0, 0, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+            CenterCoordinates = (105e-6, 110e-6),
+        }.GetParticle();
+
+        var particle3 = new ShapeFunctionParticleFactory(100e-6, 0, 0, 0, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+            CenterCoordinates = (-105e-6, 110e-6),
+        }.GetParticle();
+
+        var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2, particle3]);
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 5e-6).Solve(
+            initialState
+        );
+
+        return compactedState;
+    }
+
+    private static ISystemState<IParticle<IParticleNode>, IParticleNode> ThreeParticleTreeCircular()
+    {
+        var nodeCountPerParticle = 40;
+
+        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0, 0, 0, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+            CenterCoordinates = (0, 0),
+        }.GetParticle();
+
+        var particle2 = new ShapeFunctionParticleFactory(100e-6, 0, 0, 0, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+            CenterCoordinates = (150e-6, 150e-6),
+        }.GetParticle();
+
+        var particle3 = new ShapeFunctionParticleFactory(100e-6, 0, 0, 0, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+            CenterCoordinates = (-150e-6, 150e-6),
+        }.GetParticle();
+
+        var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2, particle3]);
         var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6).Solve(
             initialState
         );
