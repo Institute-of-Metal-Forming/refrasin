@@ -35,9 +35,17 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.3) : IParticleRem
         {
             if (node.Type == Surface)
             {
-                if (node.Upper.Type == Neck && node.SurfaceDistance.ToUpper < minDistance)
+                if (
+                    node.Upper.Type == Neck
+                    && node.Lower.Type != Neck
+                    && node.SurfaceDistance.ToUpper < minDistance
+                )
                     continue; // delete node
-                if (node.Lower.Type == Neck && node.SurfaceDistance.ToLower < minDistance)
+                if (
+                    node.Lower.Type == Neck
+                    && node.Upper.Type != Neck
+                    && node.SurfaceDistance.ToLower < minDistance
+                )
                     continue; // delete node
             }
 
