@@ -10,7 +10,7 @@ namespace RefraSin.ParquetStorage;
 public class ParquetStorage(
     string fileName,
     int bufferSize = 1_000,
-    ParquetSerializerOptions? options = null
+    ParquetSerializerOptions options = null
 ) : ISolutionStorage, IDisposable
 {
     private readonly FileStream _stream = new(
