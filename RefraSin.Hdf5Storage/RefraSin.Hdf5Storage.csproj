@@ -8,6 +8,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
+        <RootNamespace>Refrasin.Hdf5Storage</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

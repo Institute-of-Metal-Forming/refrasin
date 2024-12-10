@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Refrasin.Hdf5Storage\Refrasin.Hdf5Storage.csproj" />
+      <ProjectReference Include="..\RefraSin.Hdf5Storage\RefraSin.Hdf5Storage.csproj" />
     </ItemGroup>
 
 </Project>
