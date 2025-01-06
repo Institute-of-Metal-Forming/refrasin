@@ -63,7 +63,10 @@ public class SimulationTest
 
         try
         {
-            _sinteringProcess.Solve(_initialState);
+            var finalState = _sinteringProcess.Solve(_initialState);
+            ParticlePlot
+                .PlotParticles(finalState.Particles)
+                .SaveHtml(Path.Combine(_tempDir, "final.html"));
         }
         catch (Exception e)
         {

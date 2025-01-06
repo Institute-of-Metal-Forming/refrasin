@@ -62,7 +62,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         var session = new SolverSession(this, inputState, processStep);
         InvokeSessionInitialized(session);
         session.ReportCurrentState();
-        TryTimeIntegration(session);
+        TryTimeIntegration(ref session);
 
         return new SystemState(
             session.CurrentState.Id,
@@ -71,11 +71,11 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         );
     }
 
-    private void TryTimeIntegration(SolverSession session)
+    private void TryTimeIntegration(ref SolverSession session)
     {
         try
         {
-            DoTimeIntegration(session);
+            DoTimeIntegration(ref session);
         }
         catch (Exception e)
         {
@@ -83,7 +83,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         }
     }
 
-    private void DoTimeIntegration(SolverSession session)
+    private void DoTimeIntegration(ref SolverSession session)
     {
         session.Logger.LogInformation("Starting time integration.");
 
