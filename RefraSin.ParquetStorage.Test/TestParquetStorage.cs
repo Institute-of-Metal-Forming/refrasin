@@ -31,10 +31,11 @@ public class Tests
     public void TestWriteState()
     {
         var fileName = Path.Combine(TempPath.CreateTempDir(), "dump.parquet");
-        var storage = new ParquetStorage(fileName);
+        var storage = new ParquetStorage(fileName, bufferSize: 70);
 
         var preFileSize = new FileInfo(fileName).Length;
 
+        storage.StoreState(null!, _state);
         storage.StoreState(null!, _state);
 
         storage.Dispose();

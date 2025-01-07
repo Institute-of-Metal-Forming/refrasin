@@ -1,4 +1,5 @@
 using Parquet;
+using Parquet.Schema;
 using Parquet.Serialization;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
@@ -9,16 +10,14 @@ namespace RefraSin.ParquetStorage;
 
 public class ParquetStorage(
     string fileName,
-    int bufferSize = 1_000,
+    int bufferSize = 10_000,
     ParquetSerializerOptions options = null
 ) : ISolutionStorage, IDisposable
 {
-    private readonly FileStream _stream = new(
-        fileName,
-        FileMode.OpenOrCreate,
-        FileAccess.ReadWrite
-    );
+    private readonly FileStream _stream = new(fileName, FileMode.Create, FileAccess.ReadWrite);
+    private bool _append = false;
     private readonly List<Row> _rowBuffer = new(2 * bufferSize);
+    private Task _writeTask;
     private readonly ParquetSerializerOptions _options = options ?? new ParquetSerializerOptions();
 
     /// <inheritdoc />
@@ -49,23 +48,28 @@ public class ParquetStorage(
 
         if (_rowBuffer.Count > bufferSize)
         {
-            WriteRowBuffer();
+            _writeTask?.Wait();
+            _writeTask = WriteRowBufferAsync();
         }
     }
 
-    private void WriteRowBuffer()
+    private async Task WriteRowBufferAsync()
     {
         var data = _rowBuffer.ToArray();
         _rowBuffer.Clear();
-        Task.Run(() => ParquetSerializer.SerializeAsync(data, _stream, _options));
+        _options.Append = _append;
+        await ParquetSerializer.SerializeAsync(data, _stream, _options);
+        _append = true;
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
+        _writeTask?.Wait();
+
         if (_rowBuffer.Count != 0)
         {
-            WriteRowBuffer();
+            WriteRowBufferAsync().Wait();
         }
 
         _stream.Dispose();
