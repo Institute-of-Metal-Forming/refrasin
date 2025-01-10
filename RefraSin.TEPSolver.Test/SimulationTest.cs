@@ -37,7 +37,7 @@ public class SimulationTest
     public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
         InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e4);
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e2);
     private readonly ISystemState<IParticle<IParticleNode>, IParticleNode> _initialState;
     private readonly SinteringStep _sinteringProcess;
     private readonly InMemorySolutionStorage _solutionStorage = new();
@@ -63,7 +63,10 @@ public class SimulationTest
 
         try
         {
-            _sinteringProcess.Solve(_initialState);
+            var finalState = _sinteringProcess.Solve(_initialState);
+            ParticlePlot
+                .PlotParticles(finalState.Particles)
+                .SaveHtml(Path.Combine(_tempDir, "final.html"));
         }
         catch (Exception e)
         {

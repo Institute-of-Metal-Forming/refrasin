@@ -1,13 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Authors>Max Weiner</Authors>
+        <RepositoryUrl>https://github.com/refrabund/refrasin</RepositoryUrl>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
 
         <IsPackable>false</IsPackable>
-
-        <RootNamespace>RefraSin.HDF5Storage.Test</RootNamespace>
+        <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,24 +17,11 @@
         <PackageReference Include="NUnit"/>
         <PackageReference Include="NUnit3TestAdapter"/>
         <PackageReference Include="NUnit.Analyzers"/>
-        <PackageReference Include="coverlet.collector">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="coverlet.collector"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Refrasin.Hdf5Storage\Refrasin.Hdf5Storage.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageVersion Update="NUnit" Version="4.0.1" />
-      <PackageVersion Update="NUnit3TestAdapter" Version="4.5.0" />
-      <PackageVersion Update="NUnit.Analyzers" Version="3.10.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageVersion>
-      <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+      <ProjectReference Include="..\RefraSin.Hdf5Storage\RefraSin.Hdf5Storage.csproj" />
     </ItemGroup>
 
 </Project>

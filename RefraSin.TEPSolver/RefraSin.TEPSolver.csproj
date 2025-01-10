@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Authors>Max Weiner</Authors>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <RepositoryUrl>https://github.com/refrabund/refrasin</RepositoryUrl>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
-        <RootNamespace>RefraSin.TEPSolver</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,9 +29,6 @@
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>$(MSBuildProjectName).Test</_Parameter1>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-            <_Parameter1>$(MSBuildProjectName).FSharp</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
 
