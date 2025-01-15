@@ -25,41 +25,40 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
 
         foreach (var particleContact in system.ParticleContacts)
         {
-            var wasInsertedAtLastNode = true; // true to skip lower insertion on first node (will happen upper to the last)
+            var wasInsertedAtLastNode = false;
 
             foreach (
                 var node in system
                     .NodeContacts.Where(e =>
-                        e.From.ParticleId == particleContact.From.Id
+                        e.From.Type == GrainBoundary
+                        && e.From.ParticleId == particleContact.From.Id
                         && e.To.ParticleId == particleContact.To.Id
                     )
                     .Select(e => e.From)
             )
             {
-                if (Abs(node.SurfaceRadiusAngle.Sum - Pi) > AdditionLimit)
+                if (
+                    !wasInsertedAtLastNode
+                    && node.SurfaceDistance.ToLower > AdditionLimit * meanDiscretizationWidth
+                )
                 {
-                    if (
-                        !wasInsertedAtLastNode
-                        && node.SurfaceDistance.ToLower > AdditionLimit * meanDiscretizationWidth
-                    )
-                        AddNodePair(
-                            allNodes,
-                            particleContact,
-                            node.Coordinates.Centroid(node.Lower.Coordinates)
-                        );
-
-                    if (node.SurfaceDistance.ToUpper > AdditionLimit * meanDiscretizationWidth)
-                        AddNodePair(
-                            allNodes,
-                            particleContact,
-                            node.Coordinates.Centroid(node.Upper.Coordinates)
-                        );
-
-                    wasInsertedAtLastNode = true;
-                    continue;
+                    AddNodePair(
+                        allNodes,
+                        particleContact,
+                        node.Coordinates.Centroid(node.Lower.Coordinates)
+                    );
                 }
-
                 wasInsertedAtLastNode = false;
+
+                if (node.SurfaceDistance.ToUpper > AdditionLimit * meanDiscretizationWidth)
+                {
+                    AddNodePair(
+                        allNodes,
+                        particleContact,
+                        node.Coordinates.Centroid(node.Upper.Coordinates)
+                    );
+                    wasInsertedAtLastNode = true;
+                }
             }
         }
 
