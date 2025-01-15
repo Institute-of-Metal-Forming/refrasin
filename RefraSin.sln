@@ -18,10 +18,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.TEPSolver", "Refra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ParticleModel.Test", "RefraSin.ParticleModel.Test\RefraSin.ParticleModel.Test.csproj", "{6B6FA91D-C6A0-45C8-B722-4B5868A4EA73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Hdf5Storage", "RefraSin.Hdf5Storage\RefraSin.Hdf5Storage.csproj", "{7116BF2A-8533-4C5F-AFC7-5B005EFC6C88}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Hdf5Storage.Test", "RefraSin.Hdf5Storage.Test\RefraSin.Hdf5Storage.Test.csproj", "{E1DF96B4-759A-43EE-A04C-3F354CF26152}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.TEPSolver.Test", "RefraSin.TEPSolver.Test\RefraSin.TEPSolver.Test.csproj", "{627870BA-9F85-495B-86AE-1FEDC7F47D9A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ProcessModel", "RefraSin.ProcessModel\RefraSin.ProcessModel.csproj", "{D8938CCB-4045-46E2-A46D-832F0541FD8D}"
@@ -92,14 +88,6 @@ Global
 		{6B6FA91D-C6A0-45C8-B722-4B5868A4EA73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B6FA91D-C6A0-45C8-B722-4B5868A4EA73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B6FA91D-C6A0-45C8-B722-4B5868A4EA73}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7116BF2A-8533-4C5F-AFC7-5B005EFC6C88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7116BF2A-8533-4C5F-AFC7-5B005EFC6C88}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7116BF2A-8533-4C5F-AFC7-5B005EFC6C88}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7116BF2A-8533-4C5F-AFC7-5B005EFC6C88}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E1DF96B4-759A-43EE-A04C-3F354CF26152}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1DF96B4-759A-43EE-A04C-3F354CF26152}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1DF96B4-759A-43EE-A04C-3F354CF26152}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1DF96B4-759A-43EE-A04C-3F354CF26152}.Release|Any CPU.Build.0 = Release|Any CPU
 		{627870BA-9F85-495B-86AE-1FEDC7F47D9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{627870BA-9F85-495B-86AE-1FEDC7F47D9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{627870BA-9F85-495B-86AE-1FEDC7F47D9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
