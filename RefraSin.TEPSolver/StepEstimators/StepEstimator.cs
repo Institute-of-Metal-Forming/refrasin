@@ -40,12 +40,10 @@ class StepEstimator : IStepEstimator
                 contact.FromNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement)
                 + contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);
 
-            stepVector.RadialDisplacement(contact, averageNormalDisplacement);
-
             foreach (var node in contact.FromNodes)
             {
-                stepVector.LambdaContactDistance(node, 1);
-                stepVector.LambdaContactDirection(node, 1);
+                stepVector.LambdaContactX(node, 1);
+                stepVector.LambdaContactY(node, 1);
 
                 stepVector.NormalDisplacement(node, averageNormalDisplacement);
                 stepVector.NormalDisplacement(node.ContactedNode, averageNormalDisplacement);

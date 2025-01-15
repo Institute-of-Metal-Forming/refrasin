@@ -77,7 +77,7 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
     public IParticle<IParticleNode> Particle { get; }
 }
 
-internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeContactGradients
+internal record ContactNodeReturn : NodeReturn
 {
     /// <inheritdoc />
     public ContactNodeReturn(
@@ -90,22 +90,8 @@ internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeConta
     {
         ContactedNodeId = template.ContactedNodeId;
         ContactedParticleId = template.ContactedParticleId;
-        AngleDistanceToContactDirection = template.AngleDistanceToContactDirection;
-        ContactVector = new PolarVector(
-            template.ContactVector.Phi,
-            template.ContactVector.R * norm.Length,
-            particle
-        );
-        CenterShiftVectorDirection = template.CenterShiftVectorDirection;
-        ContactDistanceGradient = template.ContactDistanceGradient / norm.Time;
-        ContactDirectionGradient = template.ContactDirectionGradient / norm.Length / norm.Time;
     }
 
     public Guid ContactedNodeId { get; }
     public Guid ContactedParticleId { get; }
-    public Angle AngleDistanceToContactDirection { get; }
-    public IPolarVector ContactVector { get; }
-    public NormalTangential<Angle> CenterShiftVectorDirection { get; }
-    public NormalTangential<double> ContactDistanceGradient { get; }
-    public NormalTangential<double> ContactDirectionGradient { get; }
 }

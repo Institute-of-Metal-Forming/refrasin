@@ -20,10 +20,8 @@ public class NormalDisplacementDerivative : NodeEquationBase<NodeBase>
         if (Node is ContactNodeBase contactNode)
         {
             contactTerm =
-                -contactNode.ContactDistanceGradient.Normal
-                    * Step.LambdaContactDistance(contactNode)
-                - contactNode.ContactDirectionGradient.Normal
-                    * Step.LambdaContactDirection(contactNode);
+                -contactNode.ContactDistanceGradient.Normal * Step.LambdaContactX(contactNode)
+                - contactNode.ContactDirectionGradient.Normal * Step.LambdaContactY(contactNode);
         }
 
         return gibbsTerm + requiredConstraintsTerm + contactTerm;
@@ -39,11 +37,11 @@ public class NormalDisplacementDerivative : NodeEquationBase<NodeBase>
         if (Node is ContactNodeBase contactNode)
         {
             yield return (
-                Map.LambdaContactDistance(contactNode),
+                Map.LambdaContactX(contactNode),
                 -contactNode.ContactDistanceGradient.Normal
             );
             yield return (
-                Map.LambdaContactDirection(contactNode),
+                Map.LambdaContactY(contactNode),
                 -contactNode.ContactDirectionGradient.Normal
             );
         }

@@ -37,4 +37,6 @@ public interface IReadOnlyContactCollection<out TContact> : IReadOnlyList<TConta
     IEnumerable<TContact> From(Guid id);
 
     IEnumerable<TContact> To(Guid id);
+
+    IEnumerable<TContact> FromOrTo(Guid id);
 }

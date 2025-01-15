@@ -38,11 +38,11 @@ public class StepVector : DenseVector
 
     public double LambdaContactY(INode node) => this[StepVectorMap.LambdaContactY(node)];
 
-    public double ParticleDisplacementX(ParticleContact contact) =>
-        this[StepVectorMap.ParticleDisplacementX(contact)];
+    public double ParticleDisplacementX(Particle particle) =>
+        this[StepVectorMap.ParticleDisplacementX(particle)];
 
-    public double ParticleDisplacementY(ParticleContact contact) =>
-        this[StepVectorMap.ParticleDisplacementY(contact)];
+    public double ParticleDisplacementY(Particle particle) =>
+        this[StepVectorMap.ParticleDisplacementY(particle)];
 
     public void LambdaDissipation(double value) => this[StepVectorMap.LambdaDissipation()] = value;
 
@@ -64,11 +64,11 @@ public class StepVector : DenseVector
     public void LambdaContactY(INode node, double value) =>
         this[StepVectorMap.LambdaContactY(node)] = value;
 
-    public void ParticleDisplacementX(ParticleContact contact, double value) =>
-        this[StepVectorMap.ParticleDisplacementX(contact)] = value;
+    public void ParticleDisplacementX(Particle particle, double value) =>
+        this[StepVectorMap.ParticleDisplacementX(particle)] = value;
 
-    public void ParticleDisplacementY(ParticleContact contact, double value) =>
-        this[StepVectorMap.ParticleDisplacementY(contact)] = value;
+    public void ParticleDisplacementY(Particle particle, double value) =>
+        this[StepVectorMap.ParticleDisplacementY(particle)] = value;
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);

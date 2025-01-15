@@ -32,4 +32,14 @@
         </AssemblyAttribute>
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="EquationSystem\ContactDirectionConstraint.cs" />
+      <Compile Remove="EquationSystem\ContactDirectionDerivative.cs" />
+      <Compile Remove="EquationSystem\ContactDistanceConstraint.cs" />
+      <Compile Remove="EquationSystem\ParticleRotationDerivative.cs" />
+      <Compile Remove="EquationSystem\RingContactConstraintX.cs" />
+      <Compile Remove="EquationSystem\RingContactConstraintY.cs" />
+      <Compile Remove="ParticleModel\ParticleContact.cs" />
+    </ItemGroup>
+
 </Project>

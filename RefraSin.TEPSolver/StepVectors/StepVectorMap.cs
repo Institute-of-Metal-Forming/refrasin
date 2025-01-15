@@ -76,11 +76,11 @@ public class StepVectorMap
 
     public int LambdaContactY(INode node) => _indices[(node.Id, Unknown.LambdaContactY)];
 
-    public int ParticleDisplacementX(ParticleContact contact) =>
-        _indices[(contact.MergedId, Unknown.ParticleDisplacementX)];
+    public int ParticleDisplacementX(Particle particle) =>
+        _indices[(particle.Id, Unknown.ParticleDisplacementX)];
 
-    public int ParticleDisplacementY(ParticleContact contact) =>
-        _indices[(contact.MergedId, Unknown.ParticleDisplacementY)];
+    public int ParticleDisplacementY(Particle particle) =>
+        _indices[(particle.Id, Unknown.ParticleDisplacementY)];
 
     private enum Unknown
     {

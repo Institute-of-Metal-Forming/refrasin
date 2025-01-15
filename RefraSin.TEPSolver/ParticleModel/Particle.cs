@@ -78,8 +78,8 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
             var contact = previousState.SolutionState.ParticleContacts[parent.Id, previousState.Id];
             var polarCoordinates = contact.ContactVector;
             var newCoordinates = new PolarPoint(
-                polarCoordinates.Phi + stepVector.AngleDisplacement(contact) * timeStepWidth,
-                polarCoordinates.R + stepVector.RadialDisplacement(contact) * timeStepWidth,
+                polarCoordinates.Phi + stepVector.ParticleDisplacementY(contact) * timeStepWidth,
+                polarCoordinates.R + stepVector.ParticleDisplacementX(contact) * timeStepWidth,
                 parent
             );
             Coordinates = newCoordinates.Absolute;

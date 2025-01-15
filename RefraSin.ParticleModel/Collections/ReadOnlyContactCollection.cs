@@ -50,6 +50,9 @@ public class ReadOnlyContactCollection<TContact> : IReadOnlyContactCollection<TC
     /// <inheritdoc />
     public IEnumerable<TContact> From(Guid id) => FromIndices[id].Select(i => _contacts[i]);
 
+    /// <inheritdoc />
+    public IEnumerable<TContact> FromOrTo(Guid id) => From(id).Concat(To(id));
+
     private Dictionary<Guid, int[]> FromIndices =>
         _fromIndices ??= _indices
             .GroupBy(i => i.Key.Item1, i => i.Value)

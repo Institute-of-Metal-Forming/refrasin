@@ -1,6 +1,7 @@
 using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
+using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
@@ -24,31 +25,16 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
-        NodeContacts = state
-            .NodeContacts.Select(c => new Edge<ContactNodeBase>(
-                (ContactNodeBase)Nodes[c.From.Id],
-                (ContactNodeBase)Nodes[c.To.Id]
-            ))
-            .ToReadOnlyContactCollection();
-        ParticleContacts = state
-            .ParticleContacts.Select(c => new ParticleContact(
-                Particles[c.From.Id],
-                Particles[c.To.Id]
-            ))
-            .ToReadOnlyContactCollection();
-        ParticleGraph = DirectedGraph<Particle, ParticleContact>.FromGraphSearch(
-            BreadthFirstExplorer<Particle, ParticleContact>.Explore(
-                new DirectedGraph<Particle, ParticleContact>(Particles, ParticleContacts),
-                Particles[0]
+        ParticleContacts = this.ParticleContacts().ToReadOnlyContactCollection();
+        NodeContacts = ParticleContacts
+            .SelectMany(c =>
+                c.NodePairs<Particle, NodeBase>()
+                    .Select(np => new Edge<ContactNodeBase>(
+                        (ContactNodeBase)np.From,
+                        (ContactNodeBase)np.To
+                    ))
             )
-        );
-
-        if (Particles.Any(p => !ParticleGraph.Vertices.Contains(p)))
-            throw new InvalidOperationException("Detached particles encountered.");
-
-        ParticleCycles = CycleFinder<Particle, ParticleContact>
-            .FindCycles(ParticleGraph, Particles[0])
-            .FoundCycles.ToArray();
+            .ToReadOnlyContactCollection();
     }
 
     private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
@@ -87,23 +73,11 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             ))
             .ToReadOnlyContactCollection();
         ParticleContacts = oldState
-            .ParticleContacts.Select(c => new ParticleContact(
+            .ParticleContacts.Select(c => new Edge<Particle>(
                 Particles[c.From.Id],
                 Particles[c.To.Id]
             ))
             .ToReadOnlyContactCollection();
-        ParticleGraph = new DirectedGraph<Particle, ParticleContact>(Particles, ParticleContacts);
-        ParticleCycles = oldState
-            .ParticleCycles.Select(c =>
-                (IGraphCycle<Particle, ParticleContact>)
-                    new GraphCycle<Particle, ParticleContact>(
-                        Particles[c.Start.Id],
-                        Particles[c.End.Id],
-                        c.FirstPath.Select(pc => ParticleContacts[pc.From.Id, pc.To.Id]).ToArray(),
-                        c.SecondPath.Select(pc => ParticleContacts[pc.From.Id, pc.To.Id]).ToArray()
-                    )
-            )
-            .ToArray();
     }
 
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
@@ -120,26 +94,14 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     /// <inheritdoc cref="ISystemState.Particles"/>>
     public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; }
 
-    public IReadOnlyContactCollection<ParticleContact> ParticleContacts { get; }
-
     public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; }
 
-    public IGraph<Particle, ParticleContact> ParticleGraph { get; }
-
-    public IReadOnlyCollection<IGraphCycle<Particle, ParticleContact>> ParticleCycles { get; }
+    public IReadOnlyContactCollection<IEdge<Particle>> ParticleContacts { get; }
 
     IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
 
     IReadOnlyParticleCollection<Particle, NodeBase> IParticleSystem<Particle, NodeBase>.Particles =>
         Particles;
-
-    IReadOnlyContactCollection<IParticleContactEdge<Particle>> IParticleSystem<
-        Particle,
-        NodeBase
-    >.ParticleContacts => ParticleContacts;
-
-    IReadOnlyContactCollection<IEdge<NodeBase>> IParticleSystem<Particle, NodeBase>.NodeContacts =>
-        NodeContacts;
 
     public SolutionState ApplyTimeStep(StepVector stepVector, double timeStepWidth) =>
         new(this, stepVector, timeStepWidth);
