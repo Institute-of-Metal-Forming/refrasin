@@ -1,4 +1,5 @@
 using RefraSin.Coordinates.Polar;
+using RefraSin.Graphs;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Particles.Extensions;
@@ -16,25 +17,19 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
         IParticleSystem<IParticle<IParticleNode>, IParticleNode> system
     )
     {
-        var allNodes = new List<IParticleNode>(
-            system.Nodes.Count + system.ParticleContacts.Count * 8
-        );
+        var allNodes = new List<IParticleNode>(system.Nodes.Count * 2);
         allNodes.AddRange(system.Nodes);
 
         var meanDiscretizationWidth = allNodes.Average(n => n.SurfaceDistance.ToUpper);
 
-        foreach (var particleContact in system.ParticleContacts)
+        foreach (var particleContact in system.ParticleContacts())
         {
             var wasInsertedAtLastNode = false;
 
             foreach (
-                var node in system
-                    .NodeContacts.Where(e =>
-                        e.From.Type == GrainBoundary
-                        && e.From.ParticleId == particleContact.From.Id
-                        && e.To.ParticleId == particleContact.To.Id
-                    )
-                    .Select(e => e.From)
+                var node in particleContact
+                    .FromNodes<IParticle<IParticleNode>, IParticleNode>()
+                    .Where(n => n.Type == GrainBoundary)
             )
             {
                 if (
@@ -81,7 +76,7 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
 
     private static void AddNodePair(
         List<IParticleNode> allNodes,
-        IParticleContactEdge<IParticle<IParticleNode>> particleContact,
+        IEdge<IParticle<IParticleNode>> particleContact,
         IPolarPoint coordinates
     )
     {

@@ -90,7 +90,7 @@ public class GrainBoundaryRemeshingTest
         var remesher = new GrainBoundaryRemesher(additionLimit: 1.2);
         var remeshedParticleSystem = remesher.RemeshSystem(particleSystem);
 
-        var plot = ParticlePlot.PlotParticles(particleSystem.Particles);
+        var plot = ParticlePlot.PlotParticles(remeshedParticleSystem.Particles);
         plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}-{initialNeck}.html"));
 
         Assert.That(

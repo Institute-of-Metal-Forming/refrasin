@@ -5,6 +5,7 @@ open System.Globalization
 open Plotly.NET
 open Plotly.NET.StyleParam
 open RefraSin.Coordinates
+open RefraSin.Graphs
 open RefraSin.ParticleModel.Nodes
 open RefraSin.ParticleModel.Particles
 
@@ -69,7 +70,7 @@ let PlotLineRing (points: IPoint seq) (label: string) =
     let pointsList = points |> Seq.toList
     PlotLineString (pointsList @ [ pointsList[0] ]) label
 
-let PlotContactEdge (edge: IParticleContactEdge<_>) : GenericChart =
+let PlotContactEdge (edge: IEdge<IParticle<_>>) : GenericChart =
     let from = edge.From.Coordinates.Absolute
     let _to = edge.To.Coordinates.Absolute
     let xy = [ (from.X, from.Y); (_to.X, _to.Y) ]

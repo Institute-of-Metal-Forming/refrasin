@@ -1,5 +1,6 @@
 using Plotly.NET;
 using RefraSin.Coordinates;
+using RefraSin.Graphs;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
@@ -73,7 +74,7 @@ public class ParticlePlotTests
     [Test]
     public void TestPlotContactEdge()
     {
-        var edge = new ParticleContactEdge<Particle<ParticleNode>>(_particle1, _particle2);
+        var edge = new Edge<Particle<ParticleNode>>(_particle1, _particle2);
 
         var plot1 = ParticlePlot.PlotParticles([_particle1, _particle2]);
         var plot2 = ParticlePlot.PlotContactEdge(edge);
