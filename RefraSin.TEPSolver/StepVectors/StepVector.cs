@@ -34,23 +34,15 @@ public class StepVector : DenseVector
     public double TangentialDisplacement(INode node) =>
         this[StepVectorMap.TangentialDisplacement(node)];
 
-    public double LambdaContactDistance(INode node) =>
-        this[StepVectorMap.LambdaContactDistance(node)];
+    public double LambdaContactX(INode node) => this[StepVectorMap.LambdaContactX(node)];
 
-    public double LambdaContactDirection(INode node) =>
-        this[StepVectorMap.LambdaContactDirection(node)];
+    public double LambdaContactY(INode node) => this[StepVectorMap.LambdaContactY(node)];
 
-    public double LambdaCycleX(IGraphCycle<Particle, ParticleContact> cycle) =>
-        this[StepVectorMap.LambdaCycleX(cycle)];
+    public double ParticleDisplacementX(ParticleContact contact) =>
+        this[StepVectorMap.ParticleDisplacementX(contact)];
 
-    public double LambdaCycleY(IGraphCycle<Particle, ParticleContact> cycle) =>
-        this[StepVectorMap.LambdaCycleY(cycle)];
-
-    public double RadialDisplacement(ParticleContact contact) =>
-        this[StepVectorMap.RadialDisplacement(contact)];
-
-    public double AngleDisplacement(ParticleContact contact) =>
-        this[StepVectorMap.AngleDisplacement(contact)];
+    public double ParticleDisplacementY(ParticleContact contact) =>
+        this[StepVectorMap.ParticleDisplacementY(contact)];
 
     public void LambdaDissipation(double value) => this[StepVectorMap.LambdaDissipation()] = value;
 
@@ -66,17 +58,17 @@ public class StepVector : DenseVector
     public void TangentialDisplacement(INode node, double value) =>
         this[StepVectorMap.TangentialDisplacement(node)] = value;
 
-    public void LambdaContactDistance(INode node, double value) =>
-        this[StepVectorMap.LambdaContactDistance(node)] = value;
+    public void LambdaContactX(INode node, double value) =>
+        this[StepVectorMap.LambdaContactX(node)] = value;
 
-    public void LambdaContactDirection(INode node, double value) =>
-        this[StepVectorMap.LambdaContactDirection(node)] = value;
+    public void LambdaContactY(INode node, double value) =>
+        this[StepVectorMap.LambdaContactY(node)] = value;
 
-    public void RadialDisplacement(ParticleContact contact, double value) =>
-        this[StepVectorMap.RadialDisplacement(contact)] = value;
+    public void ParticleDisplacementX(ParticleContact contact, double value) =>
+        this[StepVectorMap.ParticleDisplacementX(contact)] = value;
 
-    public void AngleDisplacement(ParticleContact contact, double value) =>
-        this[StepVectorMap.AngleDisplacement(contact)] = value;
+    public void ParticleDisplacementY(ParticleContact contact, double value) =>
+        this[StepVectorMap.ParticleDisplacementY(contact)] = value;
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);
@@ -95,56 +87,8 @@ public class StepVector : DenseVector
 
     public StepVector Copy() => new(Build.DenseOfVector(this), StepVectorMap);
 
-    public Vector<double> ParticleBlock(IParticle particle)
-    {
-        var block = StepVectorMap[particle];
-        return new DenseVector(Values[block.start..(block.start + block.length)]);
-    }
-
-    public Vector<double> ContactBlock(IParticleContactEdge contact)
-    {
-        var block = StepVectorMap[contact];
-        return new DenseVector(Values[block.start..(block.start + block.length)]);
-    }
-
-    public Vector<double> GlobalBlock() => new DenseVector(Values[StepVectorMap.GlobalStart..]);
-
     public void Update(double[] data)
     {
         data.CopyTo(Values, 0);
-    }
-
-    public void UpdateParticleBlock(IParticle particle, double[] data)
-    {
-        var block = StepVectorMap[particle];
-
-        if (data.Length != block.length)
-            throw new InvalidOperationException(
-                "'data' must have exactly the length of the particle block."
-            );
-
-        data.CopyTo(Values, block.start);
-    }
-
-    public void UpdateContactBlock(IParticleContactEdge contact, double[] data)
-    {
-        var block = StepVectorMap[contact];
-
-        if (data.Length != block.length)
-            throw new InvalidOperationException(
-                "'data' must have exactly the length of the contact block."
-            );
-
-        data.CopyTo(Values, block.start);
-    }
-
-    public void UpdateGlobalBlock(double[] data)
-    {
-        if (data.Length != StepVectorMap.GlobalLength)
-            throw new InvalidOperationException(
-                "'data' must have exactly the length of the global block."
-            );
-
-        data.CopyTo(Values, StepVectorMap.GlobalStart);
     }
 }
