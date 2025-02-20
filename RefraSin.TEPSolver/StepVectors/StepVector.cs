@@ -1,6 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using RefraSin.Graphs;
+using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
@@ -23,52 +24,26 @@ public class StepVector : DenseVector
 
     public StepVectorMap StepVectorMap { get; }
 
-    public double LambdaDissipation() => this[StepVectorMap.LambdaDissipation()];
+    public double QuantityValue<TQuantity>()
+        where TQuantity : IGlobalQuantity => this[StepVectorMap.QuantityIndex<TQuantity>()];
 
-    public double NormalDisplacement(INode node) => this[StepVectorMap.NormalDisplacement(node)];
+    public double QuantityValue<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particle)];
 
-    public double FluxToUpper(INode node) => this[StepVectorMap.FluxToUpper(node)];
+    public double QuantityValue<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity => this[StepVectorMap.QuantityIndex<TQuantity>(node)];
 
-    public double LambdaVolume(INode node) => this[StepVectorMap.LambdaVolume(node)];
+    public double ConstraintLambdaValue<TConstraint>()
+        where TConstraint : IGlobalConstraint => this[StepVectorMap.ConstraintIndex<TConstraint>()];
 
-    public double TangentialDisplacement(INode node) =>
-        this[StepVectorMap.TangentialDisplacement(node)];
+    public double ConstraintLambdaValue<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particle)];
 
-    public double LambdaContactX(INode node) => this[StepVectorMap.LambdaContactX(node)];
-
-    public double LambdaContactY(INode node) => this[StepVectorMap.LambdaContactY(node)];
-
-    public double ParticleDisplacementX(Particle particle) =>
-        this[StepVectorMap.ParticleDisplacementX(particle)];
-
-    public double ParticleDisplacementY(Particle particle) =>
-        this[StepVectorMap.ParticleDisplacementY(particle)];
-
-    public void LambdaDissipation(double value) => this[StepVectorMap.LambdaDissipation()] = value;
-
-    public void NormalDisplacement(INode node, double value) =>
-        this[StepVectorMap.NormalDisplacement(node)] = value;
-
-    public void FluxToUpper(INode node, double value) =>
-        this[StepVectorMap.FluxToUpper(node)] = value;
-
-    public void LambdaVolume(INode node, double value) =>
-        this[StepVectorMap.LambdaVolume(node)] = value;
-
-    public void TangentialDisplacement(INode node, double value) =>
-        this[StepVectorMap.TangentialDisplacement(node)] = value;
-
-    public void LambdaContactX(INode node, double value) =>
-        this[StepVectorMap.LambdaContactX(node)] = value;
-
-    public void LambdaContactY(INode node, double value) =>
-        this[StepVectorMap.LambdaContactY(node)] = value;
-
-    public void ParticleDisplacementX(Particle particle, double value) =>
-        this[StepVectorMap.ParticleDisplacementX(particle)] = value;
-
-    public void ParticleDisplacementY(Particle particle, double value) =>
-        this[StepVectorMap.ParticleDisplacementY(particle)] = value;
+    public double ConstraintLambdaValue<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(node)];
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);

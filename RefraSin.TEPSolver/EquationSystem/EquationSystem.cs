@@ -6,52 +6,28 @@ namespace RefraSin.TEPSolver.EquationSystem;
 
 public class EquationSystem
 {
-    public EquationSystem(SolutionState solutionState, StepVector stepVector)
+    internal EquationSystem(
+        SolutionState solutionState,
+        IEnumerable<IQuantity> quantities,
+        IEnumerable<IConstraint> constraints
+    )
     {
         State = solutionState;
-        StepVector = stepVector;
-        Equations = YieldEquations().ToArray();
+        Constraints = constraints.ToArray();
+        Quantities = quantities.ToArray();
     }
 
     public SolutionState State { get; }
 
-    public StepVector StepVector { get; }
+    public IReadOnlyList<IQuantity> Quantities { get; }
+    public IReadOnlyList<IConstraint> Constraints { get; }
 
-    private IEnumerable<IEquation> YieldEquations()
+    public double Dissipation(StepVector stepVector)
     {
-        foreach (var particle in State.Particles)
-        {
-            foreach (var n in particle.Nodes)
-            {
-                yield return new NormalDisplacementDerivative(State, n, StepVector);
-                if (n is NeckNode)
-                    yield return new TangentialDisplacementDerivative(State, n, StepVector);
-                yield return new FluxDerivative(State, n, StepVector);
-                yield return new VolumeBalanceConstraint(State, n, StepVector);
-            }
-
-            yield return new ParticleDisplacementXDerivative(State, particle, StepVector);
-            yield return new ParticleDisplacementYDerivative(State, particle, StepVector);
-        }
-
-        foreach (var nodeContact in State.NodeContacts)
-        {
-            yield return new ContactConstraintY(State, nodeContact.From, StepVector);
-            yield return new ContactConstraintX(State, nodeContact.From, StepVector);
-        }
-
-        yield return new DissipationEqualityConstraint(State, StepVector);
+        throw new NotImplementedException();
     }
 
-    public IReadOnlyList<IEquation> Equations { get; }
+    public Vector<double> Lagrangian() => throw new NotImplementedException();
 
-    public Vector<double> Lagrangian() =>
-        Vector<double>.Build.DenseOfEnumerable(Equations.Select(e => e.Value()));
-
-    public Matrix<double> Jacobian() =>
-        Matrix<double>.Build.SparseOfIndexed(
-            StepVector.Count,
-            StepVector.Count,
-            Equations.SelectMany((e, i) => e.Derivative().Select(c => (i, c.Item1, c.Item2)))
-        );
+    public Matrix<double> Jacobian() => throw new NotImplementedException();
 }

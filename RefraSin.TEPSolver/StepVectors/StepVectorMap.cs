@@ -1,97 +1,130 @@
+using System.Drawing;
 using RefraSin.Graphs;
+using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(SolutionState currentState)
+    public StepVectorMap(EquationSystem.EquationSystem equationSystem)
     {
-        _index = 0;
+        int index = 0;
 
-        foreach (var particle in currentState.Particles)
+        foreach (var quantity in equationSystem.Quantities)
         {
-            foreach (var node in particle.Nodes)
+            if (quantity is IGlobalQuantity globalQuantity)
             {
-                AddUnknown(node.Id, Unknown.NormalDisplacement);
-                if (node is NeckNode)
-                    AddUnknown(node.Id, Unknown.TangentialDisplacement);
-                AddUnknown(node.Id, Unknown.FluxToUpper);
-                AddUnknown(node.Id, Unknown.LambdaVolume);
-
-                if (node is ContactNodeBase contactNode)
-                {
-                    AddUnknown(contactNode.Id, Unknown.LambdaContactX);
-                    AddUnknown(contactNode.Id, Unknown.LambdaContactY);
-                    LinkUnknown(
-                        contactNode.Id,
-                        contactNode.ContactedNodeId,
-                        Unknown.LambdaContactX
-                    );
-                    LinkUnknown(
-                        contactNode.Id,
-                        contactNode.ContactedNodeId,
-                        Unknown.LambdaContactY
-                    );
-                }
+                var key = globalQuantity.GetType();
+                _globalQuantityIndexMap.Add(key, index);
+                _globalQuantityInstanceMap.Add(key, globalQuantity);
             }
+            else if (quantity is IParticleQuantity particleQuantity)
+            {
+                var key = (particleQuantity.GetType(), particleQuantity.Particle);
+                _particleQuantityIndexMap.Add(key, index);
+                _particleQuantityInstanceMap.Add(key, particleQuantity);
+            }
+            else if (quantity is INodeQuantity nodeQuantity)
+            {
+                var key = (nodeQuantity.GetType(), nodeQuantity.Node);
+                _nodeQuantityIndexMap.Add(key, index);
+                _nodeQuantityInstanceMap.Add(key, nodeQuantity);
+            }
+            else
+                throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
 
-            AddUnknown(particle.Id, Unknown.ParticleDisplacementX);
-            AddUnknown(particle.Id, Unknown.ParticleDisplacementY);
+            index++;
         }
 
-        AddUnknown(Guid.Empty, Unknown.LambdaDissipation);
+        foreach (var constraint in equationSystem.Constraints)
+        {
+            if (constraint is IGlobalConstraint globalConstraint)
+            {
+                var key = globalConstraint.GetType();
+                _globalConstraintIndexMap.Add(key, index);
+                _globalConstraintInstanceMap.Add(key, globalConstraint);
+            }
+            else if (constraint is IParticleConstraint particleConstraint)
+            {
+                var key = (particleConstraint.GetType(), particleConstraint.Particle);
+                _particleConstraintIndexMap.Add(key, index);
+                _particleConstraintInstanceMap.Add(key, particleConstraint);
+            }
+            else if (constraint is INodeConstraint nodeConstraint)
+            {
+                var key = (nodeConstraint.GetType(), nodeConstraint.Node);
+                _nodeConstraintIndexMap.Add(key, index);
+                _nodeConstraintInstanceMap.Add(key, nodeConstraint);
+            }
+            else
+                throw new ArgumentException($"Invalid quantity type: {constraint.GetType()}");
 
-        TotalLength = _index;
+            index++;
+        }
+
+        TotalLength = index;
     }
 
     public int TotalLength { get; }
 
-    private void AddUnknown(Guid id, Unknown unknown)
-    {
-        _indices[(id, unknown)] = _index;
-        _index++;
-    }
+    private Dictionary<Type, int> _globalQuantityIndexMap = new();
+    private Dictionary<(Type, Particle), int> _particleQuantityIndexMap = new();
+    private Dictionary<(Type, NodeBase), int> _nodeQuantityIndexMap = new();
 
-    private void LinkUnknown(Guid existingId, Guid newId, Unknown unknown)
-    {
-        _indices[(newId, unknown)] = _indices[(existingId, unknown)];
-    }
+    public int QuantityIndex<TQuantity>()
+        where TQuantity : IGlobalQuantity => _globalQuantityIndexMap[typeof(TQuantity)];
 
-    private int _index;
-    private readonly Dictionary<(Guid, Unknown), int> _indices = new();
+    public int QuantityIndex<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        _particleQuantityIndexMap[(typeof(TQuantity), particle)];
 
-    public int LambdaDissipation() => _indices[(Guid.Empty, Unknown.LambdaDissipation)];
+    public int QuantityIndex<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity => _nodeQuantityIndexMap[(typeof(TQuantity), node)];
 
-    public int NormalDisplacement(INode node) => _indices[(node.Id, Unknown.NormalDisplacement)];
+    private Dictionary<Type, IQuantity> _globalQuantityInstanceMap = new();
+    private Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new();
+    private Dictionary<(Type, NodeBase), IQuantity> _nodeQuantityInstanceMap = new();
 
-    public int FluxToUpper(INode node) => _indices[(node.Id, Unknown.FluxToUpper)];
+    public TQuantity QuantityInstance<TQuantity>()
+        where TQuantity : IGlobalQuantity =>
+        (TQuantity)_globalQuantityInstanceMap[typeof(TQuantity)];
 
-    public int LambdaVolume(INode node) => _indices[(node.Id, Unknown.LambdaVolume)];
+    public TQuantity QuantityInstance<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        (TQuantity)_particleQuantityInstanceMap[(typeof(TQuantity), particle)];
 
-    public int TangentialDisplacement(INode node) =>
-        _indices[(node.Id, Unknown.TangentialDisplacement)];
+    public TQuantity QuantityInstance<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity =>
+        (TQuantity)_nodeQuantityInstanceMap[(typeof(TQuantity), node)];
 
-    public int LambdaContactX(INode node) => _indices[(node.Id, Unknown.LambdaContactX)];
+    private Dictionary<Type, int> _globalConstraintIndexMap = new();
+    private Dictionary<(Type, Particle), int> _particleConstraintIndexMap = new();
+    private Dictionary<(Type, NodeBase), int> _nodeConstraintIndexMap = new();
 
-    public int LambdaContactY(INode node) => _indices[(node.Id, Unknown.LambdaContactY)];
+    public int ConstraintIndex<TConstraint>()
+        where TConstraint : IGlobalConstraint => _globalConstraintIndexMap[typeof(TConstraint)];
 
-    public int ParticleDisplacementX(Particle particle) =>
-        _indices[(particle.Id, Unknown.ParticleDisplacementX)];
+    public int ConstraintIndex<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        _particleConstraintIndexMap[(typeof(TConstraint), particle)];
 
-    public int ParticleDisplacementY(Particle particle) =>
-        _indices[(particle.Id, Unknown.ParticleDisplacementY)];
+    public int ConstraintIndex<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint => _nodeConstraintIndexMap[(typeof(TConstraint), node)];
 
-    private enum Unknown
-    {
-        NormalDisplacement,
-        TangentialDisplacement,
-        FluxToUpper,
-        LambdaVolume,
-        LambdaContactX,
-        LambdaContactY,
-        ParticleDisplacementX,
-        ParticleDisplacementY,
-        LambdaDissipation,
-    }
+    private Dictionary<Type, IConstraint> _globalConstraintInstanceMap = new();
+    private Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new();
+    private Dictionary<(Type, NodeBase), IConstraint> _nodeConstraintInstanceMap = new();
+
+    public TConstraint ConstraintInstance<TConstraint>()
+        where TConstraint : IGlobalConstraint =>
+        (TConstraint)_globalConstraintInstanceMap[typeof(TConstraint)];
+
+    public TConstraint ConstraintInstance<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        (TConstraint)_particleConstraintInstanceMap[(typeof(TConstraint), particle)];
+
+    public TConstraint ConstraintInstance<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint =>
+        (TConstraint)_nodeConstraintInstanceMap[(typeof(TConstraint), node)];
 }
