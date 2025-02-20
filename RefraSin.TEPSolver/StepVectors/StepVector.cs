@@ -1,8 +1,8 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using RefraSin.Graphs;
-using RefraSin.TEPSolver.EquationSystem;
+using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
@@ -34,6 +34,8 @@ public class StepVector : DenseVector
     public double QuantityValue<TQuantity>(NodeBase node)
         where TQuantity : INodeQuantity => this[StepVectorMap.QuantityIndex<TQuantity>(node)];
 
+    public double QuantityValue(IQuantity quantity) => this[StepVectorMap.QuantityIndex(quantity)];
+
     public double ConstraintLambdaValue<TConstraint>()
         where TConstraint : IGlobalConstraint => this[StepVectorMap.ConstraintIndex<TConstraint>()];
 
@@ -44,6 +46,9 @@ public class StepVector : DenseVector
     public double ConstraintLambdaValue<TConstraint>(NodeBase node)
         where TConstraint : INodeConstraint =>
         this[StepVectorMap.ConstraintIndex<TConstraint>(node)];
+
+    public double ConstraintLambdaValue(IConstraint constraint) =>
+        this[StepVectorMap.ConstraintIndex(constraint)];
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);

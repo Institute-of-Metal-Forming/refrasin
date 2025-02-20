@@ -1,13 +1,18 @@
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
-namespace RefraSin.TEPSolver.EquationSystem;
+namespace RefraSin.TEPSolver.Constraints;
 
 public interface IConstraint
 {
-    public double Residual(StepVector stepVector);
+    double Residual(StepVector stepVector);
 
-    public double DerivativeFor(StepVector stepVector, IQuantity quantity);
+    IEnumerable<(int index, double value)> Derivatives(StepVector stepVector);
+
+    IEnumerable<(int firstIndex, int secondIndex, double value)> SecondDerivatives(
+        StepVector stepVector
+    ) => [];
 }
 
 public interface IGlobalConstraint : IConstraint
@@ -27,15 +32,4 @@ public interface INodeConstraint : IConstraint
     static abstract INodeConstraint Create(SolutionState solutionState, NodeBase node);
 
     NodeBase Node { get; }
-}
-
-public abstract class ConstraintBase(SolutionState solutionState, StepVector stepVector)
-    : IConstraint
-{
-    protected readonly SolutionState SolutionState = solutionState;
-    protected readonly StepVector StepVector = stepVector;
-
-    public abstract double Residual(StepVector stepVector);
-
-    public abstract double DerivativeFor(StepVector stepVector, IQuantity quantity);
 }

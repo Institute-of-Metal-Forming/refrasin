@@ -1,13 +1,14 @@
 using System.Drawing;
 using RefraSin.Graphs;
-using RefraSin.TEPSolver.EquationSystem;
+using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(EquationSystem.EquationSystem equationSystem)
+    public StepVectorMap(EquationSystem equationSystem)
     {
         int index = 0;
 
@@ -82,6 +83,19 @@ public class StepVectorMap
     public int QuantityIndex<TQuantity>(NodeBase node)
         where TQuantity : INodeQuantity => _nodeQuantityIndexMap[(typeof(TQuantity), node)];
 
+    public int QuantityIndex(IQuantity quantity)
+    {
+        if (quantity is IGlobalQuantity globalQuantity)
+            return _globalQuantityIndexMap[globalQuantity.GetType()];
+        if (quantity is IParticleQuantity particleQuantity)
+            return _particleConstraintIndexMap[
+                (particleQuantity.GetType(), particleQuantity.Particle)
+            ];
+        if (quantity is INodeQuantity nodeQuantity)
+            return _nodeQuantityIndexMap[(nodeQuantity.GetType(), nodeQuantity.Node)];
+        throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
+    }
+
     private Dictionary<Type, IQuantity> _globalQuantityInstanceMap = new();
     private Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new();
     private Dictionary<(Type, NodeBase), IQuantity> _nodeQuantityInstanceMap = new();
@@ -98,6 +112,11 @@ public class StepVectorMap
         where TQuantity : INodeQuantity =>
         (TQuantity)_nodeQuantityInstanceMap[(typeof(TQuantity), node)];
 
+    public IEnumerable<IQuantity> Quantities =>
+        _globalQuantityInstanceMap
+            .Values.Concat(_particleQuantityInstanceMap.Values)
+            .Concat(_nodeQuantityInstanceMap.Values);
+
     private Dictionary<Type, int> _globalConstraintIndexMap = new();
     private Dictionary<(Type, Particle), int> _particleConstraintIndexMap = new();
     private Dictionary<(Type, NodeBase), int> _nodeConstraintIndexMap = new();
@@ -111,6 +130,19 @@ public class StepVectorMap
 
     public int ConstraintIndex<TConstraint>(NodeBase node)
         where TConstraint : INodeConstraint => _nodeConstraintIndexMap[(typeof(TConstraint), node)];
+
+    public int ConstraintIndex(IConstraint quantity)
+    {
+        if (quantity is IGlobalConstraint globalConstraint)
+            return _globalConstraintIndexMap[globalConstraint.GetType()];
+        if (quantity is IParticleConstraint particleConstraint)
+            return _particleConstraintIndexMap[
+                (particleConstraint.GetType(), particleConstraint.Particle)
+            ];
+        if (quantity is INodeConstraint nodeConstraint)
+            return _nodeConstraintIndexMap[(nodeConstraint.GetType(), nodeConstraint.Node)];
+        throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
+    }
 
     private Dictionary<Type, IConstraint> _globalConstraintInstanceMap = new();
     private Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new();
@@ -127,4 +159,9 @@ public class StepVectorMap
     public TConstraint ConstraintInstance<TConstraint>(NodeBase node)
         where TConstraint : INodeConstraint =>
         (TConstraint)_nodeConstraintInstanceMap[(typeof(TConstraint), node)];
+
+    public IEnumerable<IConstraint> Constraints =>
+        _globalConstraintInstanceMap
+            .Values.Concat(_particleConstraintInstanceMap.Values)
+            .Concat(_nodeConstraintInstanceMap.Values);
 }

@@ -1,7 +1,8 @@
+using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
-using RefraSin.TEPSolver.StepVectors;
+using RefraSin.TEPSolver.Quantities;
 
-namespace RefraSin.TEPSolver.EquationSystem;
+namespace RefraSin.TEPSolver;
 
 public class EquationSystemBuilder
 {
