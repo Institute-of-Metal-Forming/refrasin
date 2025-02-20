@@ -6,5 +6,9 @@ namespace RefraSin.TEPSolver.RootFinding;
 
 public interface ILagrangianRootFinder : ISolverRoutine
 {
-    public StepVector FindRoot(SolutionState currentState, StepVector initialGuess, ILogger logger);
+    public StepVector FindRoot(
+        EquationSystem equationSystem,
+        StepVector initialGuess,
+        ILogger logger
+    );
 }

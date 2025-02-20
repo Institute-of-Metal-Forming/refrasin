@@ -12,6 +12,7 @@ using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepEstimators;
+using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 
 namespace RefraSin.TEPSolver.Test;
@@ -52,16 +53,16 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
             normalizedConditions
         );
         var guess = new StepEstimator().EstimateStep(normalizedConditions, solutionState);
-        var equationSystem = new EquationSystem.EquationSystem(solutionState, guess);
+        var equationSystem = SolverRoutines.Default.EquationSystemBuilder.Build(solutionState);
 
-        SaveEquationSystem(equationSystem);
+        SaveEquationSystem(equationSystem, guess);
     }
 
-    private void SaveEquationSystem(EquationSystem.EquationSystem system)
+    private void SaveEquationSystem(EquationSystem system, StepVector stepVector)
     {
-        var jac = system.Jacobian();
+        var jac = system.Jacobian(stepVector);
         jac.CoerceZero(1e-8);
-        SaveMatrix(jac, -system.Lagrangian());
+        SaveMatrix(jac, -system.Lagrangian(stepVector));
         PlotJacobianStructure(jac);
     }
 

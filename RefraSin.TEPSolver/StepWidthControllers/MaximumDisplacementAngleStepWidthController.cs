@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepWidthControllers;
@@ -42,7 +43,7 @@ public class MaximumDisplacementAngleStepWidthController(
             var stepWidth1 = stepWidth;
             var normalDisplacementAngles = currentState.Nodes.Select(n =>
             {
-                var displacement = stepVector.NormalDisplacement(n) * stepWidth1;
+                var displacement = stepVector.QuantityValue<NormalDisplacement>(n) * stepWidth1;
                 var upperAngle = SinLaw.Alpha(
                     displacement,
                     CosLaw.C(displacement, n.SurfaceDistance.ToUpper, n.SurfaceNormalAngle.ToUpper),
@@ -61,7 +62,8 @@ public class MaximumDisplacementAngleStepWidthController(
                 .Nodes.OfType<NeckNode>()
                 .Select(n =>
                 {
-                    var displacement = stepVector.TangentialDisplacement(n) * stepWidth1;
+                    var displacement =
+                        stepVector.QuantityValue<TangentialDisplacement>(n) * stepWidth1;
                     var upperAngle = SinLaw.Alpha(
                         displacement,
                         CosLaw.C(

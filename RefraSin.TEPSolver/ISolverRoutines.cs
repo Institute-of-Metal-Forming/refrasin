@@ -52,5 +52,10 @@ public interface ISolverRoutines
     /// </summary>
     IEnumerable<IParticleSystemRemesher> Remeshers { get; }
 
+    /// <summary>
+    /// Routine to construct equation system.
+    /// </summary>
+    EquationSystemBuilder EquationSystemBuilder { get; }
+
     void RegisterWithSolver(SinteringSolver solver);
 }

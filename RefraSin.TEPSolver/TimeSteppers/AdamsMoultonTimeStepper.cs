@@ -12,8 +12,9 @@ public class AdamsMoultonTimeStepper : ITimeStepper
         StepVector initialGuess
     )
     {
+        var equationSystem = solverSession.Routines.EquationSystemBuilder.Build(baseState);
         var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
-            baseState,
+            equationSystem,
             initialGuess,
             solverSession.Logger
         );
