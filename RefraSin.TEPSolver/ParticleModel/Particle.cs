@@ -4,6 +4,7 @@ using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ProcessModel.Sintering;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -11,10 +12,9 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
+public class Particle : IParticle<NodeBase>
 {
     private ReadOnlyParticleSurface<NodeBase> _nodes;
-    private IReadOnlyContactCollection<IParticleContactEdge<Particle>>? _contacts;
 
     public Particle(
         IParticle<IParticleNode> particle,
@@ -75,14 +75,12 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
         }
         else
         {
-            var contact = previousState.SolutionState.ParticleContacts[parent.Id, previousState.Id];
-            var polarCoordinates = contact.ContactVector;
-            var newCoordinates = new PolarPoint(
-                polarCoordinates.Phi + stepVector.ParticleDisplacementY(contact) * timeStepWidth,
-                polarCoordinates.R + stepVector.ParticleDisplacementX(contact) * timeStepWidth,
-                parent
-            );
-            Coordinates = newCoordinates.Absolute;
+            Coordinates =
+                previousState.Coordinates
+                + new AbsoluteVector(
+                    stepVector.QuantityValue<ParticleDisplacementX>(previousState),
+                    stepVector.QuantityValue<ParticleDisplacementY>(previousState)
+                );
             RotationAngle = previousState.RotationAngle;
         }
 
@@ -135,8 +133,4 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 
     /// <inheritdoc />
     public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;
-
-    /// <inheritdoc />
-    public IReadOnlyContactCollection<IParticleContactEdge<Particle>> Contacts =>
-        _contacts ??= SolutionState.ParticleContacts.From(Id).ToReadOnlyContactCollection();
 }

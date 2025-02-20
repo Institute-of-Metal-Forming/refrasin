@@ -3,6 +3,7 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 using static RefraSin.Coordinates.Constants;
 
@@ -56,11 +57,11 @@ public class NeckNode : ContactNodeBase<NeckNode>
     {
         var normalDisplacement = new PolarVector(
             SurfaceRadiusAngle.ToUpper + SurfaceNormalAngle.ToUpper,
-            stepVector.NormalDisplacement(this) * timeStepWidth
+            stepVector.QuantityValue<NormalDisplacement>(this) * timeStepWidth
         );
         var tangentialDisplacement = new PolarVector(
             SurfaceRadiusAngle.ToUpper + SurfaceTangentAngle.ToUpper,
-            stepVector.TangentialDisplacement(this) * timeStepWidth
+            stepVector.QuantityValue<TangentialDisplacement>(this) * timeStepWidth
         );
         var totalDisplacement = normalDisplacement + tangentialDisplacement;
 

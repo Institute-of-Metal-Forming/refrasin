@@ -4,6 +4,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -35,8 +36,8 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         RadiusTangentAngle = template.RadiusTangentAngle;
         InterfaceFlux = stepVector is not null
             ? new ToUpperToLower<double>(
-                stepVector.FluxToUpper(template),
-                -stepVector.FluxToUpper(template.Lower)
+                stepVector.QuantityValue<FluxToUpper>(template),
+                -stepVector.QuantityValue<FluxToUpper>(template.Lower)
             )
                 * norm.Area
                 / norm.Time
@@ -47,8 +48,10 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         VolumeGradient = template.VolumeGradient * norm.Length / norm.Time;
         Shift = stepVector is not null
             ? new NormalTangential<double>(
-                stepVector.NormalDisplacement(template),
-                template is NeckNode ? stepVector.TangentialDisplacement(template) : 0
+                stepVector.QuantityValue<NormalDisplacement>(template),
+                template is NeckNode
+                    ? stepVector.QuantityValue<TangentialDisplacement>(template)
+                    : 0
             )
                 * norm.Length
                 / norm.Time

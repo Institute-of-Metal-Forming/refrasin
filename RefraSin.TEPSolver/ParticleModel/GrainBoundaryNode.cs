@@ -3,6 +3,7 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -54,7 +55,7 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>
         Particle particle
     )
     {
-        var normalDisplacement = stepVector.NormalDisplacement(this) * timeStepWidth;
+        var normalDisplacement = stepVector.QuantityValue<NormalDisplacement>(this) * timeStepWidth;
         var angle = SurfaceRadiusAngle.ToUpper + SurfaceNormalAngle.ToUpper;
         var newR = CosLaw.C(Coordinates.R, normalDisplacement, angle);
         var dPhi = SinLaw.Alpha(normalDisplacement, newR, angle);
