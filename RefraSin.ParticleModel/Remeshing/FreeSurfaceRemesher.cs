@@ -45,18 +45,25 @@ public class FreeSurfaceRemesher(
     )
     {
         var wasInsertedAtLastNode = true; // true to skip lower insertion on first node (will happen upper to the last)
+        var lastNodeDeleted = false;
 
         foreach (var node in nodes)
         {
             if (node.Type == Surface)
             {
                 if (
-                    node.Upper.Type != Neck
+                    !lastNodeDeleted
+                    && node.Upper.Type != Neck
                     && node.Lower.Type != Neck
                     && Abs(node.SurfaceRadiusAngle.Sum - Pi) < DeletionLimit
                     && node.SurfaceDistance.Sum < maxDistance
                 )
+                {
+                    lastNodeDeleted = true;
                     continue; // delete node
+                }
+
+                lastNodeDeleted = false;
 
                 if (Abs(node.SurfaceRadiusAngle.Sum - Pi) > AdditionLimit)
                 {
