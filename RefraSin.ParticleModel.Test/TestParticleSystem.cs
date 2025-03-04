@@ -20,10 +20,16 @@ public class TestParticleSystem
         var nodeCountPerParticle = 20;
         var initialNeck = 5e-6;
 
-        var baseParticle1 = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
-        {
-            NodeCount = nodeCountPerParticle,
-        }.GetParticle();
+        var baseParticle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.NewGuid(),
+            (0, 0),
+            0,
+            nodeCountPerParticle,
+            100e-6,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
 
         IEnumerable<ParticleNode> NodeFactory1(IParticle<ParticleNode> particle) =>
             baseParticle1
@@ -74,16 +80,16 @@ public class TestParticleSystem
             NodeFactory1
         );
 
-        var baseParticle2 = new ShapeFunctionParticleFactory(
+        var baseParticle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            particle1.MaterialId,
+            (0, 0),
+            0,
+            nodeCountPerParticle,
             200e-6,
-            0.1,
+            0.2,
             5,
-            0.1,
-            particle1.MaterialId
-        )
-        {
-            NodeCount = nodeCountPerParticle,
-        }.GetParticle();
+            0.2
+        ).GetParticle();
 
         IEnumerable<ParticleNode> NodeFactory2(IParticle<ParticleNode> particle) =>
             baseParticle2

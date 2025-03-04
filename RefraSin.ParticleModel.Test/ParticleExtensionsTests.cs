@@ -16,13 +16,17 @@ namespace RefraSin.ParticleModel.Test;
 [TestFixture]
 public class ParticleExtensionsTests
 {
-    private static readonly Particle<ParticleNode> Particle = new ShapeFunctionParticleFactory(
-        1,
-        0.2,
-        5,
-        0.2,
-        Guid.Empty
-    ).GetParticle();
+    private static readonly Particle<ParticleNode> Particle =
+        new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (0, 0),
+            0,
+            100,
+            1,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
 
     private readonly string _tempDir;
 
@@ -39,163 +43,271 @@ public class ParticleExtensionsTests
 
         // right away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(3, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (3, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // right overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(2, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (2, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // left away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // left overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-2, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-2, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // above away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 2),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 2),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // above overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // below away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, -2),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, -2),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // below overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, -1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, -1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // above right away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(3, 3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (3, 3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // above right overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(1, 1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (1, 1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // below left away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, -3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, -3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // below left overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-1, -1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-1, -1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // above left away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, 3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, 3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // above left overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-1, 1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-1, 1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // below right away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, -3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, -3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // below right overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(1, -1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (1, -1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // within
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(0.1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 0),
+                0,
+                100,
+                0.1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // around
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(10, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 0),
+                0,
+                100,
+                10,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
     }
@@ -251,172 +363,286 @@ public class ParticleExtensionsTests
     {
         // right away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(3, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (3, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // right overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(2, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (2, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // left away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // left overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-2, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-2, 0),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // above away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 2),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 2),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // above overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // below away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, -2),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, -2),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // below overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, -1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, -1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // above right away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(3, 3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (3, 3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // above right close
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(1.95, 1.95),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (1.95, 1.95),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // above right overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(1, 1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (1, 1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // below left away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, -3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, -3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // below left overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-1, -1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-1, -1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // above left away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, 3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, 3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // above left overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-1, 1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-1, 1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // below right away
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-3, -3),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-3, -3),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             false
         );
 
         // below right overlap
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(1, -1),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (1, -1),
+                0,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // within
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(0.1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 0),
+                0,
+                100,
+                0.1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
 
         // around
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(10, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(0, 0),
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (0, 0),
+                0,
+                100,
+                10,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             true
         );
     }
@@ -432,35 +658,50 @@ public class ParticleExtensionsTests
     public static IEnumerable<TestCaseData> GenerateIntersectionPointsToData()
     {
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(2.36, 0),
-                RotationAngle = Angle.Straight,
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (2.36, 0),
+                Angle.Straight,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             new AbsolutePoint[] { new(1.18, -0.317), new(1.18, 0.317) }
         );
 
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(-2.06, 0),
-                RotationAngle = Angle.Straight,
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (-2.06, 0),
+                Angle.Straight,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             new AbsolutePoint[]
             {
                 new(-1.03, 0.732),
-                new(-1.03, 0.1485),
-                new(-1.03, -0.1485),
+                new(-1.03, 0.1465),
+                new(-1.03, -0.1465),
                 new(-1.03, -0.732),
             }
         );
 
         yield return new TestCaseData(
-            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-            {
-                CenterCoordinates = new(3, 0),
-                RotationAngle = Angle.Straight,
-            }.GetParticle(),
+            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                Guid.Empty,
+                (3, 0),
+                Angle.Straight,
+                100,
+                1,
+                0.2,
+                5,
+                0.2
+            ).GetParticle(),
             Array.Empty<AbsolutePoint>()
         );
     }

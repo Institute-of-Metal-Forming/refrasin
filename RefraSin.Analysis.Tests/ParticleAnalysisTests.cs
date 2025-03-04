@@ -1,4 +1,5 @@
 using Plotly.NET;
+using RefraSin.Coordinates.Absolute;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
@@ -9,13 +10,17 @@ namespace RefraSin.Analysis.Tests;
 [TestFixture]
 public class ParticleAnalysisTests
 {
-    private readonly IParticle<IParticleNode> _particle = new ShapeFunctionParticleFactory(
-        1,
-        0.2,
-        5,
-        0.2,
-        Guid.Empty
-    ).GetParticle();
+    private readonly IParticle<IParticleNode> _particle =
+        new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            new AbsolutePoint(),
+            0,
+            100,
+            1,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
 
     private readonly string _tempDir;
 

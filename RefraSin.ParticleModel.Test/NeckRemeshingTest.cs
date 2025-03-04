@@ -28,10 +28,16 @@ public class NeckRemeshingTest
     [TestCase(2e-6, 0)]
     public void TestNodeDeletion(double initialNeck, int expectedRemovedNodeCount)
     {
-        var baseParticle = new ShapeFunctionParticleFactory(100e-6, 0.1, 5, 0.1, Guid.NewGuid())
-        {
-            NodeCount = 50,
-        }.GetParticle();
+        var baseParticle = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (0, 0),
+            0,
+            50,
+            100e-6,
+            0.1,
+            5,
+            0.1
+        ).GetParticle();
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> particle) =>
             baseParticle

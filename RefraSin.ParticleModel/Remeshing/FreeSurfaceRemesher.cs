@@ -114,6 +114,7 @@ public class FreeSurfaceRemesher(
                 }
             }
 
+            lowerTwin = null;
             wasInsertedAtLastNode = false;
             yield return new ParticleNode(node, particle); // keep node
         }

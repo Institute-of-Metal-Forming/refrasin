@@ -11,10 +11,16 @@ public class ParticleSurfaceTest
 {
     public ParticleSurfaceTest()
     {
-        _particle = new ShapeFunctionParticleFactory(1, 0.2, 5, 0.1, Guid.Empty)
-        {
-            NodeCount = 100,
-        }.GetParticle();
+        _particle = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (0, 0),
+            0,
+            100,
+            1,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
     }
 
     [SetUp]

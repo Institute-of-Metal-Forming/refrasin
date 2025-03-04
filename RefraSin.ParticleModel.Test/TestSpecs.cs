@@ -16,7 +16,16 @@ public class TestSpecs
     [SetUp]
     public void Setup()
     {
-        var factory = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.Empty);
+        var factory = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (0, 0),
+            0,
+            100,
+            100,
+            0.2,
+            5,
+            0.2
+        );
 
         _particle = factory.GetParticle();
     }

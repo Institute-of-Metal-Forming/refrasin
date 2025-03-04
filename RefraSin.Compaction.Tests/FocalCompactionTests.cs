@@ -1,5 +1,6 @@
 using Plotly.NET;
 using RefraSin.Compaction.ProcessModel;
+using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
@@ -22,66 +23,124 @@ public class FocalCompactionTests
         yield return new TestFixtureData(
             new[]
             {
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty).GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (3, 0),
-                    RotationAngle = Straight,
-                }.GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (0, 0),
+                    0,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (3.0, 0),
+                    Straight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );
         yield return new TestFixtureData(
             new[]
             {
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty).GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (-3, 0),
-                    RotationAngle = Straight,
-                }.GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (0, 0),
+                    0,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (-3.0, 0),
+                    Straight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );
         yield return new TestFixtureData(
             new[]
             {
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (-3, -3),
-                    RotationAngle = HalfRight,
-                }.GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (3, -3),
-                    RotationAngle = Straight - HalfRight,
-                }.GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (-3, -3),
+                    HalfRight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (3, -3),
+                    Straight - HalfRight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );
         yield return new TestFixtureData(
             new[]
             {
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (3, 3),
-                    RotationAngle = HalfRight,
-                }.GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (-3, 3),
-                    RotationAngle = Straight - HalfRight,
-                }.GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (3, -3),
-                    RotationAngle = -HalfRight,
-                }.GetParticle(),
-                new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.Empty)
-                {
-                    CenterCoordinates = (-3, -3),
-                    RotationAngle = Straight + HalfRight,
-                }.GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (3, 3),
+                    HalfRight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (-3, 3),
+                    Straight - HalfRight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (3, -3),
+                    -HalfRight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (-3, -3),
+                    Straight + HalfRight,
+                    100,
+                    1,
+                    0.2,
+                    5,
+                    0.2
+                ).GetParticle(),
             },
             new AbsolutePoint(0, 0)
         );

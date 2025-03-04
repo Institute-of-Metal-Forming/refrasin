@@ -19,18 +19,26 @@ public class ParticlePlotTests
         Directory.CreateDirectory(_tempDir);
         TestContext.WriteLine(_tempDir);
 
-        _particle1 = new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-        {
-            NodeCount = 200,
-            RotationAngle = Angle.HalfRight,
-            CenterCoordinates = (1, 2),
-        }.GetParticle();
-        _particle2 = new ShapeFunctionParticleFactory(1.5, 0.2, 5, 0.2, Guid.NewGuid())
-        {
-            NodeCount = 200,
-            RotationAngle = Angle.Straight,
-            CenterCoordinates = (2, 3),
-        }.GetParticle();
+        _particle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (1, 2),
+            Angle.HalfRight,
+            200,
+            1,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
+        _particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (2, 3),
+            Angle.Straight,
+            200,
+            1.5,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
     }
 
     [Test]

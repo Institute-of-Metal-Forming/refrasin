@@ -12,18 +12,26 @@ public class Tests
 
     public Tests()
     {
-        var particle1 = new ShapeFunctionParticleFactory(
+        var particle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            new AbsolutePoint(),
+            0,
             100,
-            0.1,
+            1,
+            0.2,
             5,
-            0.1,
-            Guid.NewGuid()
+            0.2
         ).GetParticle();
-        var particle2 = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.NewGuid())
-        {
-            CenterCoordinates = new AbsolutePoint(240, 0),
-            RotationAngle = Math.PI,
-        }.GetParticle();
+        var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            new AbsolutePoint(240, 0),
+            Math.PI,
+            100,
+            1,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
         _state = new SystemState(Guid.NewGuid(), 0.12, new[] { particle1, particle2 });
     }
 

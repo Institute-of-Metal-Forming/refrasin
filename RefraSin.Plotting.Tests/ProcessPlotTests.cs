@@ -32,18 +32,26 @@ public class ProcessPlotTests
                     0,
                     new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
                         [
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = 0,
-                                CenterCoordinates = (0, 0),
-                            }.GetParticle(_id1),
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = Angle.Straight,
-                                CenterCoordinates = (2.35, 0),
-                            }.GetParticle(_id2),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (0, 0),
+                                0,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id1),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (2.35, 0),
+                                Angle.Straight,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id2),
                         ]
                     )
                 )
@@ -54,18 +62,26 @@ public class ProcessPlotTests
                     1,
                     new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
                         [
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = 0,
-                                CenterCoordinates = (0, 0),
-                            }.GetParticle(_id1),
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = Angle.Straight + 0.1,
-                                CenterCoordinates = (2.3, 0),
-                            }.GetParticle(_id2),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (0, 0),
+                                0,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id1),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (2.3, 0),
+                                Angle.Straight + 0.1,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id2),
                         ]
                     )
                 )
@@ -76,18 +92,26 @@ public class ProcessPlotTests
                     3,
                     new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
                         [
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = 0,
-                                CenterCoordinates = (0, 0),
-                            }.GetParticle(_id1),
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = Angle.Straight + 0.2,
-                                CenterCoordinates = (2.2, 0),
-                            }.GetParticle(_id2),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (0, 0),
+                                0,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id1),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (2.2, 0),
+                                Angle.Straight + 0.2,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id2),
                         ]
                     )
                 )
@@ -98,18 +122,26 @@ public class ProcessPlotTests
                     3.5,
                     new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(
                         [
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = 0,
-                                CenterCoordinates = (0, 0),
-                            }.GetParticle(_id1),
-                            new ShapeFunctionParticleFactory(1, 0.2, 5, 0.2, Guid.NewGuid())
-                            {
-                                NodeCount = 200,
-                                RotationAngle = Angle.Straight + 0.3,
-                                CenterCoordinates = (2.1, 0),
-                            }.GetParticle(_id2),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (0, 0),
+                                0,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id1),
+                            new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                                Guid.Empty,
+                                (2.1, 0),
+                                Angle.Straight + 0.3,
+                                200,
+                                1,
+                                0.2,
+                                5,
+                                0.2
+                            ).GetParticle(_id2),
                         ]
                     )
                 )

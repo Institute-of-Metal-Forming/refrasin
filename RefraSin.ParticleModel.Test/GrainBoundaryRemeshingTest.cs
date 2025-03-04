@@ -29,10 +29,16 @@ public class GrainBoundaryRemeshingTest
     [TestCase(2, 0)]
     public void TestNodeAddition(double initialNeck, int expectedAddedNodeCount)
     {
-        var baseParticleFactory = new ShapeFunctionParticleFactory(100, 0.1, 5, 0.1, Guid.NewGuid())
-        {
-            NodeCount = 50,
-        };
+        var baseParticleFactory = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (0, 0),
+            0,
+            50,
+            100,
+            0.2,
+            5,
+            0.2
+        );
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> particle) =>
             baseParticleFactory

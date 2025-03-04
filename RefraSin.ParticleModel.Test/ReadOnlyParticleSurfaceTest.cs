@@ -7,18 +7,19 @@ namespace RefraSin.ParticleModel.Test;
 [TestFixture]
 public class ReadOnlyParticleSurfaceTest
 {
-    private IReadOnlyParticleSurface<IParticleNode> _surface = new ShapeFunctionParticleFactory(
-        1,
-        0.2,
-        5,
-        0.1,
-        Guid.Empty
-    )
-    {
-        NodeCount = 100,
-    }
-        .GetParticle()
-        .Nodes;
+    private IReadOnlyParticleSurface<IParticleNode> _surface =
+        new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            Guid.Empty,
+            (0, 0),
+            0,
+            100,
+            1,
+            0.2,
+            5,
+            0.2
+        )
+            .GetParticle()
+            .Nodes;
 
     [Test]
     public void TestNextUpperNodeFrom()
