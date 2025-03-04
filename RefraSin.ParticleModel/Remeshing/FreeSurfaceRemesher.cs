@@ -10,7 +10,8 @@ public class FreeSurfaceRemesher(
     double deletionLimit = 0.05,
     double additionLimit = 0.5,
     double minWidthFactor = 0.25,
-    double maxWidthFactor = 3.0
+    double maxWidthFactor = 3.0,
+    double twinPointLimit = 0.1
 ) : IParticleRemesher
 {
     /// <inheritdoc />
@@ -23,7 +24,8 @@ public class FreeSurfaceRemesher(
                 newParticle,
                 particle.Nodes,
                 meanDiscretizationWidth * MinWidthFactor,
-                meanDiscretizationWidth * MaxWidthFactor
+                meanDiscretizationWidth * MaxWidthFactor,
+                meanDiscretizationWidth * TwinPointLimit
             );
 
         var newParticle = new Particle<IParticleNode>(
@@ -41,16 +43,36 @@ public class FreeSurfaceRemesher(
         IParticle<IParticleNode> particle,
         IEnumerable<IParticleNode> nodes,
         double minDistance,
-        double maxDistance
+        double maxDistance,
+        double twinPointDistance
     )
     {
         var wasInsertedAtLastNode = true; // true to skip lower insertion on first node (will happen upper to the last)
         var lastNodeDeleted = false;
+        IParticleNode? lowerTwin = null;
 
         foreach (var node in nodes)
         {
             if (node.Type == Surface)
             {
+                if (lowerTwin is not null)
+                {
+                    yield return new ParticleNode(
+                        Guid.NewGuid(),
+                        particle,
+                        node.Coordinates.Centroid(lowerTwin.Coordinates),
+                        Surface
+                    );
+                    lowerTwin = null;
+                    continue;
+                }
+
+                if (node.SurfaceDistance.ToUpper < twinPointDistance)
+                {
+                    lowerTwin = node;
+                    continue;
+                }
+
                 if (
                     !lastNodeDeleted
                     && node.Upper.Type != Neck
@@ -74,21 +96,26 @@ public class FreeSurfaceRemesher(
                             node.Coordinates.Centroid(node.Lower.Coordinates),
                             Surface
                         );
-                    yield return new ParticleNode((INode)node, particle);
+                    yield return new ParticleNode(node, particle); // existing node
                     if (node.SurfaceDistance.ToUpper > minDistance)
+                    {
                         yield return new ParticleNode(
                             Guid.NewGuid(),
                             particle,
                             node.Coordinates.Centroid(node.Upper.Coordinates),
                             Surface
                         );
-                    wasInsertedAtLastNode = true;
+                        wasInsertedAtLastNode = true;
+                    }
+                    else
+                        wasInsertedAtLastNode = false;
+
                     continue;
                 }
             }
 
             wasInsertedAtLastNode = false;
-            yield return new ParticleNode((INode)node, particle);
+            yield return new ParticleNode(node, particle); // keep node
         }
     }
 
@@ -99,4 +126,6 @@ public class FreeSurfaceRemesher(
     public double MinWidthFactor { get; } = minWidthFactor;
 
     public double MaxWidthFactor { get; } = maxWidthFactor;
+
+    public double TwinPointLimit { get; } = twinPointLimit;
 }
