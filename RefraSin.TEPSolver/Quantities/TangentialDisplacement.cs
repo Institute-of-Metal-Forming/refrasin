@@ -10,8 +10,7 @@ public class TangentialDisplacement : INodeQuantity
         Node = node;
     }
 
-    public static INodeQuantity Create(SolutionState solutionState, NodeBase node) =>
-        new TangentialDisplacement(node);
+    public static INodeQuantity Create(NodeBase node) => new TangentialDisplacement(node);
 
     public double DrivingForce(StepVector stepVector) => -Node.GibbsEnergyGradient.Tangential;
 

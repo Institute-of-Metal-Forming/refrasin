@@ -22,14 +22,14 @@ public interface IGlobalConstraint : IConstraint
 
 public interface IParticleConstraint : IConstraint
 {
-    static abstract IParticleConstraint Create(SolutionState solutionState, Particle particle);
+    static abstract IParticleConstraint Create(Particle particle);
 
     Particle Particle { get; }
 }
 
 public interface INodeConstraint : IConstraint
 {
-    static abstract INodeConstraint Create(SolutionState solutionState, NodeBase node);
+    static abstract INodeConstraint Create(NodeBase node);
 
     NodeBase Node { get; }
 }

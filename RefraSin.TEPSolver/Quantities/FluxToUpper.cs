@@ -10,8 +10,7 @@ public class FluxToUpper : INodeQuantity
         Node = node;
     }
 
-    public static INodeQuantity Create(SolutionState solutionState, NodeBase node) =>
-        new FluxToUpper(node);
+    public static INodeQuantity Create(NodeBase node) => new FluxToUpper(node);
 
     public double DrivingForce(StepVector stepVector) => 0;
 

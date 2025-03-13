@@ -11,7 +11,7 @@ public class FixedParticleConstraintX : IParticleConstraint
         Particle = particle;
     }
 
-    public static IParticleConstraint Create(SolutionState solutionState, Particle particle) =>
+    public static IParticleConstraint Create(Particle particle) =>
         new FixedParticleConstraintX(particle);
 
     public double Residual(StepVector stepVector) =>

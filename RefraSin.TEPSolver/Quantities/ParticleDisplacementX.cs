@@ -10,7 +10,7 @@ public class ParticleDisplacementX : IParticleQuantity
         Particle = particle;
     }
 
-    public static IParticleQuantity Create(SolutionState solutionState, Particle particle) =>
+    public static IParticleQuantity Create(Particle particle) =>
         new ParticleDisplacementX(particle);
 
     public double DrivingForce(StepVector stepVector) => 0;

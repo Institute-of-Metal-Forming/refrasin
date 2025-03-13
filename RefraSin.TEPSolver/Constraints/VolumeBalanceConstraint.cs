@@ -11,7 +11,7 @@ public class VolumeBalanceConstraint : INodeConstraint
         Node = node;
     }
 
-    public static INodeConstraint Create(SolutionState solutionState, NodeBase node)
+    public static INodeConstraint Create(NodeBase node)
     {
         return new VolumeBalanceConstraint(node);
     }

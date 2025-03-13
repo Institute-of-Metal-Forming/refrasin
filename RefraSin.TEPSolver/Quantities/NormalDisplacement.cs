@@ -10,8 +10,7 @@ public class NormalDisplacement : INodeQuantity
         Node = node;
     }
 
-    public static INodeQuantity Create(SolutionState solutionState, NodeBase node) =>
-        new NormalDisplacement(node);
+    public static INodeQuantity Create(NodeBase node) => new NormalDisplacement(node);
 
     public double DrivingForce(StepVector stepVector) => -Node.GibbsEnergyGradient.Normal;
 

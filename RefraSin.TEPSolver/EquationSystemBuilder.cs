@@ -13,13 +13,13 @@ public class EquationSystemBuilder
     )> _globalQuantities = new();
 
     private readonly List<(
-        Func<SolutionState, Particle, bool> condition,
-        Func<SolutionState, Particle, IQuantity> ctor
+        Func<Particle, bool> condition,
+        Func<Particle, IQuantity> ctor
     )> _particleQuantities = new();
 
     private readonly List<(
-        Func<SolutionState, NodeBase, bool> condition,
-        Func<SolutionState, NodeBase, IQuantity> ctor
+        Func<NodeBase, bool> condition,
+        Func<NodeBase, IQuantity> ctor
     )> _nodeQuantities = new();
 
     public EquationSystemBuilder AddGlobalQuantity<TQuantity>(
@@ -32,20 +32,18 @@ public class EquationSystemBuilder
     }
 
     public EquationSystemBuilder AddParticleQuantity<TQuantity>(
-        Func<SolutionState, Particle, bool>? condition = null
+        Func<Particle, bool>? condition = null
     )
         where TQuantity : IParticleQuantity
     {
-        _particleQuantities.Add((condition ?? ((_, _) => true), TQuantity.Create));
+        _particleQuantities.Add((condition ?? (_ => true), TQuantity.Create));
         return this;
     }
 
-    public EquationSystemBuilder AddNodeQuantity<TQuantity>(
-        Func<SolutionState, NodeBase, bool>? condition = null
-    )
+    public EquationSystemBuilder AddNodeQuantity<TQuantity>(Func<NodeBase, bool>? condition = null)
         where TQuantity : INodeQuantity
     {
-        _nodeQuantities.Add((condition ?? ((_, _) => true), TQuantity.Create));
+        _nodeQuantities.Add((condition ?? (_ => true), TQuantity.Create));
         return this;
     }
 
@@ -53,7 +51,7 @@ public class EquationSystemBuilder
         where TQuantity : INodeQuantity
         where TNode : NodeBase
     {
-        _nodeQuantities.Add(((_, n) => n is TNode, TQuantity.Create));
+        _nodeQuantities.Add((n => n is TNode, TQuantity.Create));
         return this;
     }
 
@@ -63,13 +61,13 @@ public class EquationSystemBuilder
     )> _globalConstraints = new();
 
     private readonly List<(
-        Func<SolutionState, Particle, bool> condition,
-        Func<SolutionState, Particle, IConstraint> ctor
+        Func<Particle, bool> condition,
+        Func<Particle, IConstraint> ctor
     )> _particleConstraints = new();
 
     private readonly List<(
-        Func<SolutionState, NodeBase, bool> condition,
-        Func<SolutionState, NodeBase, IConstraint> ctor
+        Func<NodeBase, bool> condition,
+        Func<NodeBase, IConstraint> ctor
     )> _nodeConstraints = new();
 
     public EquationSystemBuilder AddGlobalConstraint<TConstraint>(
@@ -82,20 +80,20 @@ public class EquationSystemBuilder
     }
 
     public EquationSystemBuilder AddParticleConstraint<TConstraint>(
-        Func<SolutionState, Particle, bool>? condition = null
+        Func<Particle, bool>? condition = null
     )
         where TConstraint : IParticleConstraint
     {
-        _particleConstraints.Add((condition ?? ((_, _) => true), TConstraint.Create));
+        _particleConstraints.Add((condition ?? (_ => true), TConstraint.Create));
         return this;
     }
 
     public EquationSystemBuilder AddNodeConstraint<TConstraint>(
-        Func<SolutionState, NodeBase, bool>? condition = null
+        Func<NodeBase, bool>? condition = null
     )
         where TConstraint : INodeConstraint
     {
-        _nodeConstraints.Add((condition ?? ((_, _) => true), TConstraint.Create));
+        _nodeConstraints.Add((condition ?? (_ => true), TConstraint.Create));
         return this;
     }
 
@@ -103,7 +101,7 @@ public class EquationSystemBuilder
         where TConstraint : INodeConstraint
         where TNode : NodeBase
     {
-        _nodeConstraints.Add(((_, n) => n is TNode, TConstraint.Create));
+        _nodeConstraints.Add((n => n is TNode, TConstraint.Create));
         return this;
     }
 
@@ -127,14 +125,8 @@ public class EquationSystemBuilder
             Func<SolutionState, bool> condition,
             Func<SolutionState, T> ctor
         )> globalItems,
-        IReadOnlyList<(
-            Func<SolutionState, Particle, bool> condition,
-            Func<SolutionState, Particle, T> ctor
-        )> particleItems,
-        IReadOnlyList<(
-            Func<SolutionState, NodeBase, bool> condition,
-            Func<SolutionState, NodeBase, T> ctor
-        )> nodeItems
+        IReadOnlyList<(Func<Particle, bool> condition, Func<Particle, T> ctor)> particleItems,
+        IReadOnlyList<(Func<NodeBase, bool> condition, Func<NodeBase, T> ctor)> nodeItems
     )
     {
         foreach (var (condition, globalConstraint) in globalItems)
@@ -147,15 +139,15 @@ public class EquationSystemBuilder
         {
             foreach (var (condition, particleConstraint) in particleItems)
             {
-                if (condition(solutionState, particle))
-                    yield return particleConstraint(solutionState, particle);
+                if (condition(particle))
+                    yield return particleConstraint(particle);
             }
 
             foreach (var node in particle.Nodes)
             foreach (var (condition, nodeConstraint) in nodeItems)
             {
-                if (condition(solutionState, node))
-                    yield return nodeConstraint(solutionState, node);
+                if (condition(node))
+                    yield return nodeConstraint(node);
             }
         }
     }

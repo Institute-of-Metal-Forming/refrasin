@@ -11,7 +11,7 @@ public class ContactConstraintY : INodeConstraint
         Node = node;
     }
 
-    public static INodeConstraint Create(SolutionState solutionState, NodeBase node) =>
+    public static INodeConstraint Create(NodeBase node) =>
         new ContactConstraintY(
             node as ContactNodeBase
                 ?? throw new ArgumentException($"Node given must be {typeof(ContactNodeBase)}.")

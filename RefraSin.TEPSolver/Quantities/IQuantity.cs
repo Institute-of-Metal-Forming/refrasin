@@ -16,14 +16,14 @@ public interface IGlobalQuantity : IQuantity
 
 public interface IParticleQuantity : IQuantity
 {
-    static abstract IParticleQuantity Create(SolutionState solutionState, Particle particle);
+    static abstract IParticleQuantity Create(Particle particle);
 
     Particle Particle { get; }
 }
 
 public interface INodeQuantity : IQuantity
 {
-    static abstract INodeQuantity Create(SolutionState solutionState, NodeBase node);
+    static abstract INodeQuantity Create(NodeBase node);
 
     NodeBase Node { get; }
 }
