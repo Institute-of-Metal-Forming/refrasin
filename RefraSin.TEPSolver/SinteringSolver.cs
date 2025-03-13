@@ -145,11 +145,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         IStateRecoverer[] recoverers
     )
     {
-        var stepVector = session.Routines.TimeStepper.Step(
-            session,
-            baseState,
-            session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, baseState)
-        );
+        var stepVector = session.Routines.TimeStepper.Step(session, baseState);
 
         try
         {

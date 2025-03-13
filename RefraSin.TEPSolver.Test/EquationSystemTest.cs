@@ -52,8 +52,8 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
             [normalizedMaterial],
             normalizedConditions
         );
-        var guess = new StepEstimator().EstimateStep(normalizedConditions, solutionState);
         var equationSystem = SolverRoutines.Default.EquationSystemBuilder.Build(solutionState);
+        var guess = new StepEstimator().EstimateStep(equationSystem);
 
         SaveEquationSystem(equationSystem, guess);
     }

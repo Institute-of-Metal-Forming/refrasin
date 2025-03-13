@@ -1,5 +1,8 @@
+using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ProcessModel.Sintering;
+using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 using GrainBoundaryNode = RefraSin.TEPSolver.ParticleModel.GrainBoundaryNode;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
@@ -8,17 +11,17 @@ namespace RefraSin.TEPSolver.StepEstimators;
 
 class StepEstimator : IStepEstimator
 {
-    public StepVector EstimateStep(ISinteringConditions conditions, SolutionState currentState)
+    public StepVector EstimateStep(EquationSystem equationSystem)
     {
-        var map = new StepVectorMap(currentState);
+        var map = new StepVectorMap(equationSystem);
         var vector = new StepVector(new double[map.TotalLength], map);
-        FillStepVector(vector, currentState);
+        FillStepVector(vector, equationSystem.State);
         return vector;
     }
 
     private static void FillStepVector(StepVector stepVector, SolutionState currentState)
     {
-        stepVector.LambdaDissipation(1);
+        stepVector.SetConstraintLambdaValue<DissipationEqualityConstraint>(1);
 
         foreach (var particle in currentState.Particles)
         {
@@ -26,32 +29,47 @@ class StepEstimator : IStepEstimator
             {
                 if (node.Type is NodeType.Surface)
                 {
-                    stepVector.NormalDisplacement(node, GuessNormalDisplacement(node));
+                    stepVector.SetQuantityValue<NormalDisplacement>(
+                        node,
+                        GuessNormalDisplacement(node)
+                    );
                 }
 
-                stepVector.FluxToUpper(node, GuessFluxToUpper(node));
-                stepVector.LambdaVolume(node, 1);
+                stepVector.SetQuantityValue<FluxToUpper>(node, GuessFluxToUpper(node));
+                stepVector.SetConstraintLambdaValue<VolumeBalanceConstraint>(node, 1);
             }
         }
 
         foreach (var contact in currentState.ParticleContacts)
         {
             var averageNormalDisplacement =
-                contact.FromNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement)
-                + contact.ToNodes.OfType<GrainBoundaryNode>().Average(GuessNormalDisplacement);
+                contact
+                    .FromNodes<Particle, NodeBase>()
+                    .OfType<GrainBoundaryNode>()
+                    .Average(GuessNormalDisplacement)
+                + contact
+                    .ToNodes<Particle, NodeBase>()
+                    .OfType<GrainBoundaryNode>()
+                    .Average(GuessNormalDisplacement);
 
-            foreach (var node in contact.FromNodes)
+            foreach (var node in contact.FromNodes<Particle, NodeBase>().OfType<ContactNodeBase>())
             {
-                stepVector.LambdaContactX(node, 1);
-                stepVector.LambdaContactY(node, 1);
+                stepVector.SetConstraintLambdaValue<ContactConstraintX>(node, 1);
+                stepVector.SetConstraintLambdaValue<ContactConstraintY>(node, 1);
 
-                stepVector.NormalDisplacement(node, averageNormalDisplacement);
-                stepVector.NormalDisplacement(node.ContactedNode, averageNormalDisplacement);
+                stepVector.SetQuantityValue<NormalDisplacement>(node, averageNormalDisplacement);
+                stepVector.SetQuantityValue<NormalDisplacement>(
+                    node.ContactedNode,
+                    averageNormalDisplacement
+                );
 
                 if (node.Type is NodeType.Neck)
                 {
-                    stepVector.TangentialDisplacement(node, GuessTangentialDisplacement(node));
-                    stepVector.TangentialDisplacement(
+                    stepVector.SetQuantityValue<TangentialDisplacement>(
+                        node,
+                        GuessTangentialDisplacement(node)
+                    );
+                    stepVector.SetQuantityValue<TangentialDisplacement>(
                         node.ContactedNode,
                         GuessTangentialDisplacement(node.ContactedNode)
                     );

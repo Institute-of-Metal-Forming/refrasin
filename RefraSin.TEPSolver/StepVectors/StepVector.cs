@@ -36,6 +36,20 @@ public class StepVector : DenseVector
 
     public double QuantityValue(IQuantity quantity) => this[StepVectorMap.QuantityIndex(quantity)];
 
+    public void SetQuantityValue<TQuantity>(double value)
+        where TQuantity : IGlobalQuantity => this[StepVectorMap.QuantityIndex<TQuantity>()] = value;
+
+    public void SetQuantityValue<TQuantity>(Particle particle, double value)
+        where TQuantity : IParticleQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particle)] = value;
+
+    public void SetQuantityValue<TQuantity>(NodeBase node, double value)
+        where TQuantity : INodeQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(node)] = value;
+
+    public void SetQuantityValue(IQuantity quantity, double value) =>
+        this[StepVectorMap.QuantityIndex(quantity)] = value;
+
     public double ConstraintLambdaValue<TConstraint>()
         where TConstraint : IGlobalConstraint => this[StepVectorMap.ConstraintIndex<TConstraint>()];
 
@@ -49,6 +63,21 @@ public class StepVector : DenseVector
 
     public double ConstraintLambdaValue(IConstraint constraint) =>
         this[StepVectorMap.ConstraintIndex(constraint)];
+
+    public void SetConstraintLambdaValue<TConstraint>(double value)
+        where TConstraint : IGlobalConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>()] = value;
+
+    public void SetConstraintLambdaValue<TConstraint>(Particle particle, double value)
+        where TConstraint : IParticleConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particle)] = value;
+
+    public void SetConstraintLambdaValue<TConstraint>(NodeBase node, double value)
+        where TConstraint : INodeConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(node)] = value;
+
+    public void SetConstraintLambdaValue(IConstraint constraint, double value) =>
+        this[StepVectorMap.ConstraintIndex(constraint)] = value;
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);

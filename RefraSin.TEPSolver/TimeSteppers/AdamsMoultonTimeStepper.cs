@@ -6,16 +6,13 @@ namespace RefraSin.TEPSolver.TimeSteppers;
 public class AdamsMoultonTimeStepper : ITimeStepper
 {
     /// <inheritdoc />
-    public StepVector Step(
-        ISolverSession solverSession,
-        SolutionState baseState,
-        StepVector initialGuess
-    )
+    public StepVector Step(ISolverSession solverSession, SolutionState baseState)
     {
         var equationSystem = solverSession.Routines.EquationSystemBuilder.Build(baseState);
         var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
             equationSystem,
-            initialGuess,
+            solverSession.LastStep
+                ?? solverSession.Routines.StepEstimator.EstimateStep(equationSystem),
             solverSession.Logger
         );
 
