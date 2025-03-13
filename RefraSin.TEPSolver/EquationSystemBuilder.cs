@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.ComTypes;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
@@ -10,7 +11,10 @@ public class EquationSystemBuilder
 
     private readonly List<Func<SolutionState, Particle, IQuantity>> _particleQuantities = new();
 
-    private readonly List<Func<SolutionState, NodeBase, IQuantity>> _nodeQuantities = new();
+    private readonly List<(
+        Func<NodeBase, bool> condition,
+        Func<SolutionState, NodeBase, IQuantity> ctor
+    )> _nodeQuantities = new();
 
     public EquationSystemBuilder AddGlobalQuantity<TQuantity>()
         where TQuantity : IGlobalQuantity
@@ -29,13 +33,25 @@ public class EquationSystemBuilder
     public EquationSystemBuilder AddNodeQuantity<TQuantity>()
         where TQuantity : INodeQuantity
     {
-        _nodeQuantities.Add(TQuantity.Create);
+        _nodeQuantities.Add((_ => true, TQuantity.Create));
+        return this;
+    }
+
+    public EquationSystemBuilder AddNodeQuantity<TQuantity, TNode>()
+        where TQuantity : INodeQuantity
+        where TNode : NodeBase
+    {
+        _nodeQuantities.Add((n => n is TNode, TQuantity.Create));
         return this;
     }
 
     private readonly List<Func<SolutionState, IConstraint>> _globalConstraints = new();
     private readonly List<Func<SolutionState, Particle, IConstraint>> _particleConstraints = new();
-    private readonly List<Func<SolutionState, NodeBase, IConstraint>> _nodeConstraints = new();
+
+    private readonly List<(
+        Func<NodeBase, bool> condition,
+        Func<SolutionState, NodeBase, IConstraint> ctor
+    )> _nodeConstraints = new();
 
     public EquationSystemBuilder AddGlobalConstraint<TConstraint>()
         where TConstraint : IGlobalConstraint
@@ -54,7 +70,15 @@ public class EquationSystemBuilder
     public EquationSystemBuilder AddNodeConstraint<TConstraint>()
         where TConstraint : INodeConstraint
     {
-        _nodeConstraints.Add(TConstraint.Create);
+        _nodeConstraints.Add((_ => true, TConstraint.Create));
+        return this;
+    }
+
+    public EquationSystemBuilder AddNodeConstraint<TConstraint, TNode>()
+        where TConstraint : INodeConstraint
+        where TNode : NodeBase
+    {
+        _nodeConstraints.Add((n => n is TNode, TConstraint.Create));
         return this;
     }
 
@@ -76,9 +100,10 @@ public class EquationSystemBuilder
             }
 
             foreach (var node in particle.Nodes)
-            foreach (var nodeQuantity in _nodeQuantities)
+            foreach (var (condition, nodeQuantity) in _nodeQuantities)
             {
-                yield return nodeQuantity(solutionState, node);
+                if (condition(node))
+                    yield return nodeQuantity(solutionState, node);
             }
         }
     }
@@ -98,9 +123,10 @@ public class EquationSystemBuilder
             }
 
             foreach (var node in particle.Nodes)
-            foreach (var nodeConstraint in _nodeConstraints)
+            foreach (var (condtion, nodeConstraint) in _nodeConstraints)
             {
-                yield return nodeConstraint(solutionState, node);
+                if (condtion(node))
+                    yield return nodeConstraint(solutionState, node);
             }
         }
     }

@@ -3,6 +3,7 @@ using RefraSin.Numerics.RootFinding;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
@@ -38,8 +39,8 @@ public record SolverRoutines(
 
         equationSystemBuilder.AddGlobalConstraint<DissipationEqualityConstraint>();
         equationSystemBuilder.AddNodeConstraint<VolumeBalanceConstraint>();
-        equationSystemBuilder.AddNodeConstraint<ContactConstraintX>();
-        equationSystemBuilder.AddNodeConstraint<ContactConstraintY>();
+        equationSystemBuilder.AddNodeConstraint<ContactConstraintX, ContactNodeBase>();
+        equationSystemBuilder.AddNodeConstraint<ContactConstraintY, ContactNodeBase>();
 
         Default = new(
             new StepEstimator(),
