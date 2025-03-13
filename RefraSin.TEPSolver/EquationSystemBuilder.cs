@@ -110,34 +110,34 @@ public class EquationSystemBuilder
     public EquationSystem Build(SolutionState solutionState) =>
         new(solutionState, CreateQuantities(solutionState), CreateConstraints(solutionState));
 
-    private IEnumerable<IQuantity> CreateQuantities(SolutionState solutionState)
+    private IEnumerable<IQuantity> CreateQuantities(SolutionState solutionState) =>
+        CreateSystemItems(solutionState, _globalQuantities, _particleQuantities, _nodeQuantities);
+
+    private IEnumerable<IConstraint> CreateConstraints(SolutionState solutionState) =>
+        CreateSystemItems(
+            solutionState,
+            _globalConstraints,
+            _particleConstraints,
+            _nodeConstraints
+        );
+
+    private IEnumerable<T> CreateSystemItems<T>(
+        SolutionState solutionState,
+        IReadOnlyList<(
+            Func<SolutionState, bool> condition,
+            Func<SolutionState, T> ctor
+        )> globalItems,
+        IReadOnlyList<(
+            Func<SolutionState, Particle, bool> condition,
+            Func<SolutionState, Particle, T> ctor
+        )> particleItems,
+        IReadOnlyList<(
+            Func<SolutionState, NodeBase, bool> condition,
+            Func<SolutionState, NodeBase, T> ctor
+        )> nodeItems
+    )
     {
-        foreach (var (condition, globalQuantity) in _globalQuantities)
-        {
-            if (condition(solutionState))
-                yield return globalQuantity(solutionState);
-        }
-
-        foreach (var particle in solutionState.Particles)
-        {
-            foreach (var (condition, particleQuantity) in _particleQuantities)
-            {
-                if (condition(solutionState, particle))
-                    yield return particleQuantity(solutionState, particle);
-            }
-
-            foreach (var node in particle.Nodes)
-            foreach (var (condition, nodeQuantity) in _nodeQuantities)
-            {
-                if (condition(solutionState, node))
-                    yield return nodeQuantity(solutionState, node);
-            }
-        }
-    }
-
-    private IEnumerable<IConstraint> CreateConstraints(SolutionState solutionState)
-    {
-        foreach (var (condition, globalConstraint) in _globalConstraints)
+        foreach (var (condition, globalConstraint) in globalItems)
         {
             if (condition(solutionState))
                 yield return globalConstraint(solutionState);
@@ -145,14 +145,14 @@ public class EquationSystemBuilder
 
         foreach (var particle in solutionState.Particles)
         {
-            foreach (var (condition, particleConstraint) in _particleConstraints)
+            foreach (var (condition, particleConstraint) in particleItems)
             {
                 if (condition(solutionState, particle))
                     yield return particleConstraint(solutionState, particle);
             }
 
             foreach (var node in particle.Nodes)
-            foreach (var (condition, nodeConstraint) in _nodeConstraints)
+            foreach (var (condition, nodeConstraint) in nodeItems)
             {
                 if (condition(solutionState, node))
                     yield return nodeConstraint(solutionState, node);
