@@ -28,19 +28,22 @@ public record SolverRoutines(
 {
     static SolverRoutines()
     {
-        var equationSystemBuilder = new EquationSystemBuilder();
-
-        equationSystemBuilder.AddNodeQuantity<NormalDisplacement>();
-        equationSystemBuilder.AddNodeQuantity<TangentialDisplacement>();
-        equationSystemBuilder.AddNodeQuantity<FluxToUpper>();
-
-        equationSystemBuilder.AddParticleQuantity<ParticleDisplacementX>();
-        equationSystemBuilder.AddParticleQuantity<ParticleDisplacementY>();
-
-        equationSystemBuilder.AddGlobalConstraint<DissipationEqualityConstraint>();
-        equationSystemBuilder.AddNodeConstraint<VolumeBalanceConstraint>();
-        equationSystemBuilder.AddNodeConstraint<ContactConstraintX, ContactNodeBase>();
-        equationSystemBuilder.AddNodeConstraint<ContactConstraintY, ContactNodeBase>();
+        var equationSystemBuilder = new EquationSystemBuilder()
+            .AddNodeQuantity<NormalDisplacement>()
+            .AddNodeQuantity<TangentialDisplacement>()
+            .AddNodeQuantity<FluxToUpper>()
+            .AddParticleQuantity<ParticleDisplacementX>()
+            .AddParticleQuantity<ParticleDisplacementY>()
+            .AddGlobalConstraint<DissipationEqualityConstraint>()
+            .AddNodeConstraint<VolumeBalanceConstraint>()
+            .AddNodeConstraint<ContactConstraintX, ContactNodeBase>()
+            .AddNodeConstraint<ContactConstraintY, ContactNodeBase>()
+            .AddParticleConstraint<FixedParticleConstraintX>(
+                (state, particle) => state.Particles[0] == particle
+            )
+            .AddParticleConstraint<FixedParticleConstraintY>(
+                (state, particle) => state.Particles[0] == particle
+            );
 
         Default = new(
             new StepEstimator(),
