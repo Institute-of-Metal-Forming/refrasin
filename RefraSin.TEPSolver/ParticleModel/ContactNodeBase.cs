@@ -1,7 +1,6 @@
 using RefraSin.Coordinates;
-using RefraSin.Graphs;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes.Extensions;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -12,16 +11,21 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     where TContacted : ContactNodeBase<TContacted>
 {
     /// <inheritdoc />
-    protected ContactNodeBase(INode node, Particle particle)
-        : base(node, particle) { }
+    protected ContactNodeBase(
+        INode node,
+        Particle particle,
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
+    )
+        : base(node, particle, contactedNodeId, contactedParticleId) { }
 
     protected ContactNodeBase(
         Guid id,
         double r,
         Angle phi,
         Particle particle,
-        Guid contactedNodeId,
-        Guid contactedParticleId
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
     )
         : base(id, r, phi, particle, contactedNodeId, contactedParticleId) { }
 
@@ -51,23 +55,17 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
 /// </summary>
 public abstract class ContactNodeBase : NodeBase, INodeContact
 {
-    private Guid? _contactedParticleId;
-    private Guid? _contactedNodeId;
-
     /// <inheritdoc />
-    protected ContactNodeBase(INode node, Particle particle)
+    protected ContactNodeBase(
+        INode node,
+        Particle particle,
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
+    )
         : base(node, particle)
     {
-        if (node is INodeContact nodeContact)
-        {
-            _contactedNodeId = nodeContact.ContactedNodeId;
-            _contactedParticleId = nodeContact.ContactedParticleId;
-        }
-        else
-        {
-            _contactedNodeId = null;
-            _contactedParticleId = null;
-        }
+        _contactedNodeId = contactedNodeId;
+        _contactedParticleId = contactedParticleId;
     }
 
     protected ContactNodeBase(
@@ -75,8 +73,8 @@ public abstract class ContactNodeBase : NodeBase, INodeContact
         double r,
         Angle phi,
         Particle particle,
-        Guid contactedNodeId,
-        Guid contactedParticleId
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
     )
         : base(id, r, phi, particle)
     {
@@ -85,16 +83,11 @@ public abstract class ContactNodeBase : NodeBase, INodeContact
     }
 
     /// <inheritdoc />
-    public Guid ContactedParticleId =>
-        _contactedParticleId ??= Particle.SolutionState.Nodes[ContactedNodeId].ParticleId;
+    public Guid ContactedParticleId => _contactedParticleId ?? ContactedNode.Particle.Id;
 
     /// <inheritdoc />
     public Guid ContactedNodeId =>
-        _contactedNodeId ??= Particle
-            .SolutionState.NodeContacts.FromOrTo(Id)
-            .Single()
-            .Other(this)
-            .Id;
+        _contactedNodeId ?? this.FindContactedNodeByCoordinates(Particle.SolutionState.Nodes).Id;
 
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
@@ -104,4 +97,6 @@ public abstract class ContactNodeBase : NodeBase, INodeContact
             );
 
     private ContactNodeBase? _contactedNode;
+    private readonly Guid? _contactedParticleId;
+    private readonly Guid? _contactedNodeId;
 }

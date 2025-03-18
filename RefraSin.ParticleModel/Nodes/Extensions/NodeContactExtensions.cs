@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using static RefraSin.ParticleModel.Nodes.NodeType;
+
 namespace RefraSin.ParticleModel.Nodes.Extensions;
 
 public static class NodeContactExtensions
@@ -19,6 +22,18 @@ public static class NodeContactExtensions
         return contactedNode;
     }
 
+    public static bool TryFindContactedNodeByCoordinates<TNode>(
+        this TNode self,
+        IEnumerable<TNode> allContactNodes,
+        [MaybeNullWhen(false)] out TNode contacted,
+        double precision = 1e-4
+    )
+        where TNode : INode
+    {
+        contacted = self.TryFindContactedNodeByCoordinates(allContactNodes, precision);
+        return contacted is not null;
+    }
+
     public static TNode FindContactedNodeByCoordinates<TNode>(
         this TNode self,
         IEnumerable<TNode> allContactNodes,
@@ -34,5 +49,31 @@ public static class NodeContactExtensions
             );
 
         return contactedNode;
+    }
+
+    public static IEnumerable<UnorderedPair<TNode>> EnumerateContactNodePairs<TNode>(
+        this IEnumerable<TNode> self
+    )
+        where TNode : INode
+    {
+        var visitedNodes = new Dictionary<Guid, TNode>();
+
+        foreach (var node in self)
+        {
+            if (node.Type is GrainBoundary or Neck)
+            {
+                if (node is INodeContact nodeContact)
+                {
+                    if (visitedNodes.TryGetValue(nodeContact.ContactedNodeId, out var other))
+                        yield return new UnorderedPair<TNode>(node, other);
+                }
+                else if (node.TryFindContactedNodeByCoordinates(visitedNodes.Values, out var other))
+                {
+                    yield return new UnorderedPair<TNode>(node, other);
+                }
+
+                visitedNodes.Add(node.Id, node);
+            }
+        }
     }
 }

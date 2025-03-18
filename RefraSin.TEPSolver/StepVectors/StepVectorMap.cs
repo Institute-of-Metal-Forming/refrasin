@@ -1,5 +1,3 @@
-using System.Drawing;
-using RefraSin.Graphs;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
@@ -88,7 +86,7 @@ public class StepVectorMap
         if (quantity is IGlobalQuantity globalQuantity)
             return _globalQuantityIndexMap[globalQuantity.GetType()];
         if (quantity is IParticleQuantity particleQuantity)
-            return _particleConstraintIndexMap[
+            return _particleQuantityIndexMap[
                 (particleQuantity.GetType(), particleQuantity.Particle)
             ];
         if (quantity is INodeQuantity nodeQuantity)

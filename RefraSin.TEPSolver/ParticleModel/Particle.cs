@@ -1,6 +1,5 @@
 using System.Globalization;
 using RefraSin.Coordinates;
-using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ProcessModel.Sintering;
@@ -51,7 +50,6 @@ public class Particle : IParticle<NodeBase>
     }
 
     private Particle(
-        Particle? parent,
         SolutionState solutionState,
         Particle previousState,
         StepVector stepVector,
@@ -67,22 +65,13 @@ public class Particle : IParticle<NodeBase>
 
         SolutionState = solutionState;
 
-        // Apply time step changes
-        if (parent is null) // is root particle
-        {
-            Coordinates = previousState.Coordinates;
-            RotationAngle = previousState.RotationAngle;
-        }
-        else
-        {
-            Coordinates =
-                previousState.Coordinates
-                + new AbsoluteVector(
-                    stepVector.QuantityValue<ParticleDisplacementX>(previousState),
-                    stepVector.QuantityValue<ParticleDisplacementY>(previousState)
-                );
-            RotationAngle = previousState.RotationAngle;
-        }
+        Coordinates =
+            previousState.Coordinates
+            + new AbsoluteVector(
+                stepVector.QuantityValue<ParticleDisplacementX>(previousState),
+                stepVector.QuantityValue<ParticleDisplacementY>(previousState)
+            );
+        RotationAngle = previousState.RotationAngle;
 
         _nodes = previousState
             .Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, this))
@@ -121,16 +110,12 @@ public class Particle : IParticle<NodeBase>
     public double VacancyVolumeEnergy { get; }
 
     public Particle ApplyTimeStep(
-        Particle? parent,
         SolutionState solutionState,
         StepVector stepVector,
         double timeStepWidth
-    ) => new(parent, solutionState, this, stepVector, timeStepWidth);
+    ) => new(solutionState, this, stepVector, timeStepWidth);
 
     /// <inheritdoc/>
     public override string ToString() =>
         $"{GetType().Name} {Id} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
-
-    /// <inheritdoc />
-    public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;
 }

@@ -15,16 +15,21 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class NeckNode : ContactNodeBase<NeckNode>
 {
     /// <inheritdoc />
-    public NeckNode(INode node, Particle particle)
-        : base(node, particle) { }
+    public NeckNode(
+        INode node,
+        Particle particle,
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
+    )
+        : base(node, particle, contactedNodeId, contactedParticleId) { }
 
     private NeckNode(
         Guid id,
         double r,
         Angle phi,
         Particle particle,
-        Guid contactedNodeId,
-        Guid contactedParticleId
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
     )
         : base(id, r, phi, particle, contactedNodeId, contactedParticleId) { }
 

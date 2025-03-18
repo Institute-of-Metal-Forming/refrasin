@@ -68,7 +68,9 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
 
     private void PlotState(ISystemState<IParticle<IParticleNode>, IParticleNode> state)
     {
-        var plot = ParticlePlot.PlotParticles(state.Particles);
+        var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            state.Particles
+        );
         plot.SaveHtml(Path.Combine(_tmpDir, "state.html"));
     }
 

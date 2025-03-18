@@ -22,10 +22,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.TEPSolver.Test", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ProcessModel", "RefraSin.ProcessModel\RefraSin.ProcessModel.csproj", "{D8938CCB-4045-46E2-A46D-832F0541FD8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Graphs", "RefraSin.Graphs\RefraSin.Graphs.csproj", "{24385645-EC6B-46D4-98D0-CF5612AED935}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Graphs.Tests", "RefraSin.Graphs.Tests\RefraSin.Graphs.Tests.csproj", "{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Numerics", "RefraSin.Numerics\RefraSin.Numerics.csproj", "{1CAB7769-DA9F-465B-B70A-1DE5D14FFD9B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Numerics.Tests", "RefraSin.Numerics.Tests\RefraSin.Numerics.Tests.csproj", "{AD965A7F-38FF-492E-98F4-782FEA1B1359}"
@@ -96,14 +92,6 @@ Global
 		{D8938CCB-4045-46E2-A46D-832F0541FD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8938CCB-4045-46E2-A46D-832F0541FD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8938CCB-4045-46E2-A46D-832F0541FD8D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{24385645-EC6B-46D4-98D0-CF5612AED935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{24385645-EC6B-46D4-98D0-CF5612AED935}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{24385645-EC6B-46D4-98D0-CF5612AED935}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{24385645-EC6B-46D4-98D0-CF5612AED935}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC11CBB1-3A32-4BE5-955A-FDCB10B4C16C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1CAB7769-DA9F-465B-B70A-1DE5D14FFD9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1CAB7769-DA9F-465B-B70A-1DE5D14FFD9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CAB7769-DA9F-465B-B70A-1DE5D14FFD9B}.Release|Any CPU.ActiveCfg = Release|Any CPU

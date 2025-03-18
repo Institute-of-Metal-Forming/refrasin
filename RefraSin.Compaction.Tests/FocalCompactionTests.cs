@@ -164,7 +164,7 @@ public class FocalCompactionTests
         Chart
             .Combine(
                 [
-                    ParticlePlot.PlotParticles(
+                    ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
                         _system.Particles.Select(p => new Particle<IParticleNode>(
                             p.Id,
                             sol.Particles[p.Id].Coordinates,
@@ -173,7 +173,9 @@ public class FocalCompactionTests
                             particle => p.Nodes.Select(n => new ParticleNode(n, particle))
                         ))
                     ),
-                    ParticlePlot.PlotParticles(sol.Particles),
+                    ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+                        sol.Particles
+                    ),
                 ]
             )
             .Show();

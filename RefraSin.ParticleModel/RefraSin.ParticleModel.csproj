@@ -12,7 +12,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
-      <ProjectReference Include="..\RefraSin.Graphs\RefraSin.Graphs.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,6 +21,10 @@
       <Compile Remove="Particles\IParticleContactEdge.cs" />
       <Compile Remove="Particles\IParticleContacts.cs" />
       <Compile Remove="Particles\ParticleContactEdge.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="morelinq" />
     </ItemGroup>
 
 </Project>

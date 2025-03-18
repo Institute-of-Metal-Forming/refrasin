@@ -14,7 +14,7 @@ using static Plotly.NET.StyleParam.MarkerSymbol;
 namespace RefraSin.ParticleModel.Test;
 
 [TestFixture]
-public class ParticleExtensionsTests
+public class ParticleIntersectionExtensionsTests
 {
     private static readonly Particle<ParticleNode> Particle =
         new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
@@ -30,7 +30,7 @@ public class ParticleExtensionsTests
 
     private readonly string _tempDir;
 
-    public ParticleExtensionsTests()
+    public ParticleIntersectionExtensionsTests()
     {
         _tempDir = Path.GetTempFileName().Replace(".tmp", "");
         Directory.CreateDirectory(_tempDir);
@@ -320,11 +320,11 @@ public class ParticleExtensionsTests
     )
     {
         Assert.That(
-            Particle.MayHasContactToByRectangularApproximation(other),
+            Particle.MayIntersectWithByRectangularApproximation(other),
             Is.EqualTo(expectedResult)
         );
         Assert.That(
-            other.MayHasContactToByRectangularApproximation(Particle),
+            other.MayIntersectWithByRectangularApproximation(Particle),
             Is.EqualTo(expectedResult)
         );
     }
@@ -651,8 +651,8 @@ public class ParticleExtensionsTests
     [TestCaseSource(nameof(GenerateHasContactToData))]
     public void TestHasContactTo(Particle<ParticleNode> other, bool expectedResult)
     {
-        Assert.That(Particle.HasContactTo(other), Is.EqualTo(expectedResult));
-        Assert.That(other.HasContactTo(Particle), Is.EqualTo(expectedResult));
+        Assert.That(Particle.IntersectsWith(other), Is.EqualTo(expectedResult));
+        Assert.That(other.IntersectsWith(Particle), Is.EqualTo(expectedResult));
     }
 
     public static IEnumerable<TestCaseData> GenerateIntersectionPointsToData()
@@ -715,7 +715,9 @@ public class ParticleExtensionsTests
     {
         var intersections = Particle.IntersectionPointsTo(other).ToArray();
 
-        var plot = ParticlePlot.PlotParticles([Particle, other]);
+        var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            [Particle, other]
+        );
         var points = ParticlePlot
             .PlotPoints(intersections, "Intersections")
             .WithMarkerStyle(Color: fromKeyword(Magenta), Symbol: Cross);
@@ -743,7 +745,7 @@ public class ParticleExtensionsTests
     {
         var newParticles = Particle.CreateGrainBoundariesAtIntersections(other);
 
-        var plot = ParticlePlot.PlotParticles(
+        var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
             [Particle, other, newParticles.self, newParticles.other]
         );
         plot.SaveHtml(

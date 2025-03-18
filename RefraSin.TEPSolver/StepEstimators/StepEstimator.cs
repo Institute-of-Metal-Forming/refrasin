@@ -44,15 +44,15 @@ class StepEstimator : IStepEstimator
         {
             var averageNormalDisplacement =
                 contact
-                    .FromNodes<Particle, NodeBase>()
+                    .FirstNodes<Particle, NodeBase>()
                     .OfType<GrainBoundaryNode>()
                     .Average(GuessNormalDisplacement)
                 + contact
-                    .ToNodes<Particle, NodeBase>()
+                    .SecondNodes<Particle, NodeBase>()
                     .OfType<GrainBoundaryNode>()
                     .Average(GuessNormalDisplacement);
 
-            foreach (var node in contact.FromNodes<Particle, NodeBase>().OfType<ContactNodeBase>())
+            foreach (var node in contact.FirstNodes<Particle, NodeBase>().OfType<ContactNodeBase>())
             {
                 stepVector.SetConstraintLambdaValue<ContactConstraintX>(node, 1);
                 stepVector.SetConstraintLambdaValue<ContactConstraintY>(node, 1);

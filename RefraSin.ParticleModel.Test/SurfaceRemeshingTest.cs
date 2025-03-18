@@ -1,5 +1,7 @@
 using Plotly.NET;
+using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
+using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.Plotting;
 
@@ -35,7 +37,9 @@ public class SurfaceRemeshingTest
         var remesher = new FreeSurfaceRemesher(deletionLimit: 0.05);
         var remeshedParticle = remesher.Remesh(particle);
 
-        var plot = ParticlePlot.PlotParticles([particle, remeshedParticle]);
+        var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            [particle, remeshedParticle]
+        );
         plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestNodeDeletion)}.html"));
     }
 
@@ -56,7 +60,9 @@ public class SurfaceRemeshingTest
         var remesher = new FreeSurfaceRemesher(deletionLimit: 0.05);
         var remeshedParticle = remesher.Remesh(particle);
 
-        var plot = ParticlePlot.PlotParticles([particle, remeshedParticle]);
+        var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            [particle, remeshedParticle]
+        );
         plot.SaveHtml(Path.Combine(_tempDir, $"{nameof(TestNodeAddition)}.html"));
     }
 }

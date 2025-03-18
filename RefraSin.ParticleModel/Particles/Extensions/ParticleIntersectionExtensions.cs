@@ -10,16 +10,21 @@ using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Particles.Extensions;
 
-public static class ParticleExtensions
+public static class ParticleIntersectionExtensions
 {
-    public static bool MayHasContactToByRectangularApproximation(
+    public static bool MayIntersectWithByRectangularApproximation(
         this IParticleMeasures self,
         IParticleMeasures other
     ) =>
-        DoOverlap(self.MinX, self.MaxX, other.MinX, other.MaxX)
-        && DoOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
+        RangesOverlap(self.MinX, self.MaxX, other.MinX, other.MaxX)
+        && RangesOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
 
-    private static bool DoOverlap(double selfMin, double selfMax, double otherMin, double otherMax)
+    private static bool RangesOverlap(
+        double selfMin,
+        double selfMax,
+        double otherMin,
+        double otherMax
+    )
     {
         if (selfMax >= otherMin)
         {
@@ -65,7 +70,12 @@ public static class ParticleExtensions
     public static IParticleMeasures ToMeasures(this IParticle<IParticleNode> self) =>
         self as IParticleMeasures ?? new ParticleMeasures(self);
 
-    public static bool HasContactTo(
+    public static IParticleMeasures ToMeasures<TParticle, TNode>(this TParticle self)
+        where TParticle : IParticle<TNode>
+        where TNode : IParticleNode =>
+        self as IParticleMeasures ?? new ParticleMeasures((IParticle<IParticleNode>)self);
+
+    public static bool IntersectsWith(
         this IParticle<IParticleNode> self,
         IParticle<IParticleNode> other,
         double precision = 1e-8
@@ -73,7 +83,7 @@ public static class ParticleExtensions
     {
         var selfMeasures = self.ToMeasures();
         var otherMeasures = other.ToMeasures();
-        if (!MayHasContactToByRectangularApproximation(selfMeasures, otherMeasures))
+        if (!MayIntersectWithByRectangularApproximation(selfMeasures, otherMeasures))
             return false;
 
         var othersCenterPolar = new PolarPoint(other.Coordinates, self);

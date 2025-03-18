@@ -14,16 +14,21 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>
 {
     /// <inheritdoc />
-    public GrainBoundaryNode(INode node, Particle particle)
-        : base(node, particle) { }
+    public GrainBoundaryNode(
+        INode node,
+        Particle particle,
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
+    )
+        : base(node, particle, contactedNodeId, contactedParticleId) { }
 
     private GrainBoundaryNode(
         Guid id,
         double r,
         Angle phi,
         Particle particle,
-        Guid contactedNodeId,
-        Guid contactedParticleId
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
     )
         : base(id, r, phi, particle, contactedNodeId, contactedParticleId) { }
 

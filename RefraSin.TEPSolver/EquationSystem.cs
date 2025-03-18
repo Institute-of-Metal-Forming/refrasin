@@ -33,7 +33,8 @@ public class EquationSystem
 
         var quantityDerivatives = Quantities.Select(q =>
             q.DrivingForce(stepVector)
-            + constraintDerivatives[stepVector.StepVectorMap.QuantityIndex(q)]
+            + constraintDerivatives
+                .GetValueOrDefault(stepVector.StepVectorMap.QuantityIndex(q), [])
                 .Sum(t => t.value * stepVector.ConstraintLambdaValue(t.c))
         );
 

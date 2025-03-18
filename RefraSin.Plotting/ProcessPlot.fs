@@ -36,7 +36,7 @@ let PlotShrinkagesByDistance (states: ISystemState<_, _> seq) =
 
     let shrinkages =
         states
-        |> SinteringAnalysis.ShrinkagesbyDistance
+        |> SinteringAnalysis.ShrinkagesByDistance
         |> Seq.map (fun s -> s * 100.0)
         |> Seq.toList
 

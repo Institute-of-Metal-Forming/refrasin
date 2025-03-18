@@ -1,118 +1,127 @@
-using RefraSin.Graphs;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Nodes.Extensions;
+using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Particles.Extensions;
 
 public static class ParticleContactExtensions
 {
-    public static IEnumerable<TNode> ContactNodes<TParticle, TNode>(this TParticle self)
+    public static IEnumerable<TNode> SelectContactNodesByType<TParticle, TNode>(this TParticle self)
         where TParticle : IParticle<TNode>
-        where TNode : IParticleNode => self.Nodes.Where(n => n.Type is not NodeType.Surface);
+        where TNode : IParticleNode => self.Nodes.Where(n => n.Type is GrainBoundary or Neck);
 
-    public static IEnumerable<TNode> FromNodes<TParticle, TNode>(this IEdge<TParticle> self)
-        where TParticle : IParticle<TNode>
-        where TNode : IParticleNode
-    {
-        var possibleContactedNodes = self.To.ContactNodes<TParticle, TNode>().ToArray();
-
-        return self.From.Nodes.Where(n =>
-        {
-            if (n.Type is NodeType.Surface)
-                return false;
-
-            if (n is INodeContact nodeContact)
-                return nodeContact.ContactedParticleId == self.To.Id;
-
-            return n.TryFindContactedNodeByCoordinates(possibleContactedNodes) is not null;
-        });
-    }
-
-    public static IEnumerable<TNode> ToNodes<TParticle, TNode>(this IEdge<TParticle> self)
-        where TParticle : IParticle<TNode>
-        where TNode : IParticleNode
-    {
-        var possibleContactedNodes = self.From.ContactNodes<TParticle, TNode>().ToArray();
-
-        return self.To.Nodes.Where(n =>
-        {
-            if (n.Type is NodeType.Surface)
-                return false;
-
-            if (n is INodeContact nodeContact)
-                return nodeContact.ContactedParticleId == self.From.Id;
-
-            return n.TryFindContactedNodeByCoordinates(possibleContactedNodes) is not null;
-        });
-    }
-
-    public static IEnumerable<IEdge<TNode>> NodePairs<TParticle, TNode>(this IEdge<TParticle> self)
-        where TParticle : IParticle<TNode>
-        where TNode : IParticleNode
-    {
-        var possibleContactedNodes = self.To.ContactNodes<TParticle, TNode>().ToArray();
-
-        foreach (var fromNode in self.From.Nodes)
-        {
-            if (fromNode.Type is NodeType.Surface)
-                continue;
-
-            if (fromNode is INodeContact nodeContact)
-                yield return new Edge<TNode>(fromNode, self.To.Nodes[nodeContact.ContactedNodeId]);
-
-            var foundByCoordinate = fromNode.TryFindContactedNodeByCoordinates(
-                possibleContactedNodes
-            );
-
-            if (foundByCoordinate is not null)
-                yield return new Edge<TNode>(fromNode, foundByCoordinate);
-        }
-    }
-
-    public static IEnumerable<Guid> ContactedParticles<TParticle, TNode>(this TParticle self)
-        where TParticle : IParticle<TNode>
-        where TNode : IParticleNode
-    {
-        var contactedParticles = new HashSet<Guid>();
-
-        foreach (var n in self.ContactNodes<TParticle, TNode>())
-        {
-            if (n is INodeContact nodeContact)
-            {
-                contactedParticles.Add(nodeContact.ContactedParticleId);
-                continue;
-            }
-
-            throw new InvalidOperationException("Contact nodes must implement INodeContact");
-        }
-
-        return contactedParticles;
-    }
-
-    public static IEnumerable<TParticle> ContactedParticles<TParticle, TNode>(
+    public static IEnumerable<UnorderedPair<TNode>> EnumerateContactNodePairs<TParticle, TNode>(
         this TParticle self,
-        IEnumerable<TParticle> otherParticles
+        TParticle other
     )
         where TParticle : IParticle<TNode>
         where TNode : IParticleNode
     {
-        var otherParticlesDictionary = otherParticles.ToDictionary(p => p.Id, p => p);
-        var contactedParticles = new HashSet<Guid>();
-        var allContactNodes = otherParticlesDictionary
-            .Values.SelectMany(p => p.ContactNodes<TParticle, TNode>())
-            .ToArray();
+        var possibleContactedNodes = other
+            .SelectContactNodesByType<TParticle, TNode>()
+            .ToDictionary(n => n.Id);
 
-        foreach (var n in self.ContactNodes<TParticle, TNode>())
+        foreach (var node in self.SelectContactNodesByType<TParticle, TNode>())
         {
-            if (n is INodeContact nodeContact)
+            if (node is INodeContact nodeContact)
             {
-                contactedParticles.Add(nodeContact.ContactedParticleId);
-                continue;
+                if (
+                    possibleContactedNodes.TryGetValue(
+                        nodeContact.ContactedNodeId,
+                        out var contactedNode
+                    )
+                )
+                    yield return new UnorderedPair<TNode>(node, contactedNode);
+            }
+            else if (
+                node.TryFindContactedNodeByCoordinates(
+                    possibleContactedNodes.Values,
+                    out var contactedNode
+                )
+            )
+            {
+                yield return new UnorderedPair<TNode>(node, contactedNode);
+            }
+        }
+    }
+
+    public static IEnumerable<UnorderedPair<TNode>> EnumerateContactNodePairs<TParticle, TNode>(
+        this IEnumerable<TParticle> self
+    )
+        where TParticle : IParticle<TNode>
+        where TNode : IParticleNode
+    {
+        var visitedParticles = new List<TParticle>();
+
+        foreach (var particle in self)
+        {
+            foreach (var other in visitedParticles)
+            {
+                if (
+                    particle
+                        .ToMeasures<TParticle, TNode>()
+                        .MayIntersectWithByRectangularApproximation(
+                            other.ToMeasures<TParticle, TNode>()
+                        )
+                )
+                {
+                    foreach (
+                        var pair in particle.EnumerateContactNodePairs<TParticle, TNode>(other)
+                    )
+                    {
+                        yield return pair;
+                    }
+                }
             }
 
-            contactedParticles.Add(n.FindContactedNodeByCoordinates(allContactNodes).ParticleId);
+            visitedParticles.Add(particle);
         }
-
-        return contactedParticles.Select(i => otherParticlesDictionary[i]);
     }
+
+    public static IEnumerable<UnorderedPair<TParticle>> EnumerateContactedParticlePairs<
+        TParticle,
+        TNode
+    >(this IEnumerable<TParticle> self)
+        where TParticle : IParticle<TNode>
+        where TNode : IParticleNode
+    {
+        var visitedParticles = new List<TParticle>();
+
+        foreach (var particle in self)
+        {
+            foreach (var other in visitedParticles)
+            {
+                if (
+                    particle
+                        .ToMeasures<TParticle, TNode>()
+                        .MayIntersectWithByRectangularApproximation(
+                            other.ToMeasures<TParticle, TNode>()
+                        )
+                )
+                {
+                    foreach (var _ in particle.EnumerateContactNodePairs<TParticle, TNode>(other))
+                    {
+                        yield return new UnorderedPair<TParticle>(particle, other);
+                        break;
+                    }
+                }
+            }
+
+            visitedParticles.Add(particle);
+        }
+    }
+
+    public static IEnumerable<TNode> FirstNodes<TParticle, TNode>(
+        this UnorderedPair<TParticle> self
+    )
+        where TParticle : IParticle<TNode>
+        where TNode : IParticleNode =>
+        self.First.EnumerateContactNodePairs<TParticle, TNode>(self.Second).Select(p => p.First);
+
+    public static IEnumerable<TNode> SecondNodes<TParticle, TNode>(
+        this UnorderedPair<TParticle> self
+    )
+        where TParticle : IParticle<TNode>
+        where TNode : IParticleNode =>
+        self.First.EnumerateContactNodePairs<TParticle, TNode>(self.Second).Select(p => p.Second);
 }

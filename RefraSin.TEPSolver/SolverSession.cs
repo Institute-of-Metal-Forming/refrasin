@@ -1,10 +1,5 @@
 using Microsoft.Extensions.Logging;
-using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Polar;
-using RefraSin.Enumerables;
-using RefraSin.Graphs;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;

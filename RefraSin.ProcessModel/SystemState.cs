@@ -1,4 +1,3 @@
-using RefraSin.Graphs;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.System;
 

@@ -33,3 +33,11 @@ public interface INodeConstraint : IConstraint
 
     NodeBase Node { get; }
 }
+
+public interface INodePairConstraint : IConstraint
+{
+    static abstract INodeConstraint Create(NodeBase node1, NodeBase node2);
+
+    NodeBase Node1 { get; }
+    NodeBase Node2 { get; }
+}

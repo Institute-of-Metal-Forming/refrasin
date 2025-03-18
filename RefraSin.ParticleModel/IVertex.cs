@@ -1,4 +1,4 @@
-namespace RefraSin.Graphs;
+namespace RefraSin.ParticleModel;
 
 public interface IVertex : IEquatable<IVertex>
 {

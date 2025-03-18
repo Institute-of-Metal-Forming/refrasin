@@ -1,9 +1,7 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Polar;
-using RefraSin.Graphs;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Nodes.Extensions;
-using RefraSin.ParticleModel.Particles;
 using static NUnit.Framework.Assert;
 using static RefraSin.Coordinates.Constants;
 

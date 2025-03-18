@@ -1,11 +1,8 @@
 using RefraSin.Coordinates.Polar;
-using RefraSin.Graphs;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ParticleModel.System;
-using static System.Math;
-using static RefraSin.Coordinates.Constants;
 using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
@@ -22,35 +19,46 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
 
         var meanDiscretizationWidth = allNodes.Average(n => n.SurfaceDistance.ToUpper);
 
-        foreach (var particleContact in system.ParticleContacts())
+        foreach (
+            var particleContact in system.Particles.EnumerateContactedParticlePairs<
+                IParticle<IParticleNode>,
+                IParticleNode
+            >()
+        )
         {
             var wasInsertedAtLastNode = false;
 
             foreach (
-                var node in particleContact
-                    .FromNodes<IParticle<IParticleNode>, IParticleNode>()
-                    .Where(n => n.Type == GrainBoundary)
+                var nodePair in particleContact
+                    .First.EnumerateContactNodePairs<IParticle<IParticleNode>, IParticleNode>(
+                        particleContact.Second
+                    )
+                    .Where(n => n.First.Type is GrainBoundary)
             )
             {
                 if (
                     !wasInsertedAtLastNode
-                    && node.SurfaceDistance.ToLower > AdditionLimit * meanDiscretizationWidth
+                    && nodePair.First.SurfaceDistance.ToLower
+                        > AdditionLimit * meanDiscretizationWidth
                 )
                 {
                     AddNodePair(
                         allNodes,
                         particleContact,
-                        node.Coordinates.Centroid(node.Lower.Coordinates)
+                        nodePair.First.Coordinates.Centroid(nodePair.First.Lower.Coordinates)
                     );
                 }
                 wasInsertedAtLastNode = false;
 
-                if (node.SurfaceDistance.ToUpper > AdditionLimit * meanDiscretizationWidth)
+                if (
+                    nodePair.First.SurfaceDistance.ToUpper
+                    > AdditionLimit * meanDiscretizationWidth
+                )
                 {
                     AddNodePair(
                         allNodes,
                         particleContact,
-                        node.Coordinates.Centroid(node.Upper.Coordinates)
+                        nodePair.First.Coordinates.Centroid(nodePair.First.Upper.Coordinates)
                     );
                     wasInsertedAtLastNode = true;
                 }
@@ -76,18 +84,18 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
 
     private static void AddNodePair(
         List<IParticleNode> allNodes,
-        IEdge<IParticle<IParticleNode>> particleContact,
+        UnorderedPair<IParticle<IParticleNode>> particleContact,
         IPolarPoint coordinates
     )
     {
         allNodes.Add(
-            new ParticleNode(Guid.NewGuid(), particleContact.From, coordinates, GrainBoundary)
+            new ParticleNode(Guid.NewGuid(), particleContact.First, coordinates, GrainBoundary)
         );
         allNodes.Add(
             new ParticleNode(
                 Guid.NewGuid(),
-                particleContact.To,
-                new PolarPoint(coordinates, particleContact.To),
+                particleContact.Second,
+                new PolarPoint(coordinates, particleContact.Second),
                 GrainBoundary
             )
         );

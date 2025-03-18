@@ -38,11 +38,11 @@ public record SolverRoutines(
             .AddNodeConstraint<VolumeBalanceConstraint>()
             .AddNodeConstraint<ContactConstraintX, ContactNodeBase>()
             .AddNodeConstraint<ContactConstraintY, ContactNodeBase>()
-            .AddParticleConstraint<FixedParticleConstraintX>(
-                (state, particle) => state.Particles[0] == particle
+            .AddParticleConstraint<FixedParticleConstraintX>(particle =>
+                particle.SolutionState.Particles[0] == particle
             )
-            .AddParticleConstraint<FixedParticleConstraintY>(
-                (state, particle) => state.Particles[0] == particle
+            .AddParticleConstraint<FixedParticleConstraintY>(particle =>
+                particle.SolutionState.Particles[0] == particle
             );
 
         Default = new(

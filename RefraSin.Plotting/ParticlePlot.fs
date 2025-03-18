@@ -5,11 +5,10 @@ open System.Globalization
 open Plotly.NET
 open Plotly.NET.StyleParam
 open RefraSin.Coordinates
-open RefraSin.Graphs
-open RefraSin.ParticleModel.Nodes
+open RefraSin.ParticleModel
 open RefraSin.ParticleModel.Particles
 
-let PlotParticle (particle: IParticle<IParticleNode>) : GenericChart =
+let PlotParticle (particle: IParticle<_>) : GenericChart =
     let absolutePoints =
         [ for n in particle.Nodes -> n.Coordinates.Absolute ]
         @ [ particle.Nodes[0].Coordinates.Absolute ]
@@ -25,7 +24,7 @@ let PlotParticle (particle: IParticle<IParticleNode>) : GenericChart =
     |> Commons.ApplyPlainSpaceDefaultPlotProperties
 
 
-let PlotParticles (particles: IEnumerable<IParticle<IParticleNode>>) : GenericChart =
+let PlotParticles (particles: IEnumerable<#IParticle<_>>) : GenericChart =
     let particlePlots = [ for p in particles -> PlotParticle p ]
 
     particlePlots |> Chart.combine
@@ -70,14 +69,14 @@ let PlotLineRing (points: IPoint seq) (label: string) =
     let pointsList = points |> Seq.toList
     PlotLineString (pointsList @ [ pointsList[0] ]) label
 
-let PlotContactEdge (edge: IEdge<IParticle<_>>) : GenericChart =
-    let from = edge.From.Coordinates.Absolute
-    let _to = edge.To.Coordinates.Absolute
+let PlotContactEdge (edge: UnorderedPair<#IParticle>) : GenericChart =
+    let from = edge.First.Coordinates.Absolute
+    let _to = edge.Second.Coordinates.Absolute
     let xy = [ (from.X, from.Y); (_to.X, _to.Y) ]
 
     Chart.Line(
         xy = xy,
         MarkerSymbol = MarkerSymbol.Cross,
-        Name = $"%s{edge.From.Id.ToString().Substring(0, 8)} -> %s{edge.To.Id.ToString().Substring(0, 8)}"
+        Name = $"%s{edge.First.Id.ToString().Substring(0, 8)} -> %s{edge.Second.Id.ToString().Substring(0, 8)}"
     )
     |> Commons.ApplyPlainSpaceDefaultPlotProperties

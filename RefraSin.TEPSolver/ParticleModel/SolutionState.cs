@@ -1,6 +1,7 @@
-using RefraSin.Graphs;
 using RefraSin.MaterialData;
+using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Collections;
+using RefraSin.ParticleModel.Nodes.Extensions;
 using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
@@ -25,16 +26,10 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
-        ParticleContacts = this.ParticleContacts().ToReadOnlyContactCollection();
-        NodeContacts = ParticleContacts
-            .SelectMany(c =>
-                c.NodePairs<Particle, NodeBase>()
-                    .Select(np => new Edge<ContactNodeBase>(
-                        (ContactNodeBase)np.From,
-                        (ContactNodeBase)np.To
-                    ))
-            )
-            .ToReadOnlyContactCollection();
+        ParticleContacts = Particles
+            .EnumerateContactedParticlePairs<Particle, NodeBase>()
+            .ToArray();
+        NodeContacts = Nodes.EnumerateContactNodePairs().ToArray();
     }
 
     private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
@@ -43,41 +38,11 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         Time = oldState.Time + timeStepWidth;
         Materials = oldState.Materials;
 
-        var newParticles = new Dictionary<Guid, Particle>()
-        {
-            [oldState.Particles.Root.Id] = oldState.Particles.Root.ApplyTimeStep(
-                null,
-                this,
-                stepVector,
-                timeStepWidth
-            ),
-        };
+        Particles = oldState
+            .Particles.Select(p => p.ApplyTimeStep(this, stepVector, timeStepWidth))
+            .ToReadOnlyParticleCollection<Particle, NodeBase>();
 
-        foreach (var contact in oldState.ParticleContacts)
-        {
-            newParticles[contact.To.Id] = contact.To.ApplyTimeStep(
-                newParticles[contact.From.Id],
-                this,
-                stepVector,
-                timeStepWidth
-            );
-        }
-
-        Particles = newParticles.Values.ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
-
-        NodeContacts = oldState
-            .NodeContacts.Select(c => new Edge<ContactNodeBase>(
-                (ContactNodeBase)Nodes[c.From.Id],
-                (ContactNodeBase)Nodes[c.To.Id]
-            ))
-            .ToReadOnlyContactCollection();
-        ParticleContacts = oldState
-            .ParticleContacts.Select(c => new Edge<Particle>(
-                Particles[c.From.Id],
-                Particles[c.To.Id]
-            ))
-            .ToReadOnlyContactCollection();
     }
 
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
@@ -94,9 +59,9 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     /// <inheritdoc cref="ISystemState.Particles"/>>
     public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; }
 
-    public IReadOnlyContactCollection<IEdge<ContactNodeBase>> NodeContacts { get; }
+    public IReadOnlyList<UnorderedPair<NodeBase>> NodeContacts { get; }
 
-    public IReadOnlyContactCollection<IEdge<Particle>> ParticleContacts { get; }
+    public IReadOnlyList<UnorderedPair<Particle>> ParticleContacts { get; }
 
     IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
 
@@ -111,8 +76,8 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         var newNodeCoordinates = NodeContacts
             .Select(e =>
             {
-                var node = Nodes[e.From.Id];
-                var contactedNode = Nodes[e.To.Id];
+                var node = Nodes[e.First.Id];
+                var contactedNode = Nodes[e.Second.Id];
                 var halfway = node.Coordinates.Centroid(contactedNode.Coordinates);
                 return (node, halfway);
             })
