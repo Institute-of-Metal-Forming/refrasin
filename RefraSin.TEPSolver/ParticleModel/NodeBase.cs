@@ -36,7 +36,7 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
         Coordinates = new PolarPoint(phi.Reduce(AllPositive), r, Particle);
     }
 
-    public Guid Id { get; set; }
+    public Guid Id { get; }
 
     /// <summary>
     ///     Partikel, zu dem dieser Knoten gehört.

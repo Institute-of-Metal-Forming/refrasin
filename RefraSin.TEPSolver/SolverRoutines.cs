@@ -11,6 +11,7 @@ using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepWidthControllers;
 using RefraSin.TEPSolver.TimeSteppers;
+using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.TEPSolver;
 
@@ -30,7 +31,7 @@ public record SolverRoutines(
     {
         var equationSystemBuilder = new EquationSystemBuilder()
             .AddNodeQuantity<NormalDisplacement>()
-            .AddNodeQuantity<TangentialDisplacement>()
+            .AddNodeQuantity<TangentialDisplacement>(n => n.Type is Neck)
             .AddNodeQuantity<FluxToUpper>()
             .AddParticleQuantity<ParticleDisplacementX>()
             .AddParticleQuantity<ParticleDisplacementY>()

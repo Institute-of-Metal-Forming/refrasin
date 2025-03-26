@@ -43,6 +43,18 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToReadOnlyParticleCollection<Particle, NodeBase>();
 
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
+        ParticleContacts = oldState
+            .ParticleContacts.Select(c => new UnorderedPair<Particle>(
+                Particles[c.First.Id],
+                Particles[c.Second.Id]
+            ))
+            .ToArray();
+        NodeContacts = oldState
+            .NodeContacts.Select(c => new UnorderedPair<NodeBase>(
+                Nodes[c.First.Id],
+                Nodes[c.Second.Id]
+            ))
+            .ToArray();
     }
 
     public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }

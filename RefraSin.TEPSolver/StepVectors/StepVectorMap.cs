@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
@@ -68,8 +70,12 @@ public class StepVectorMap
     public int TotalLength { get; }
 
     private Dictionary<Type, int> _globalQuantityIndexMap = new();
-    private Dictionary<(Type, Particle), int> _particleQuantityIndexMap = new();
-    private Dictionary<(Type, NodeBase), int> _nodeQuantityIndexMap = new();
+    private Dictionary<(Type, Particle), int> _particleQuantityIndexMap = new(
+        new MapEqualityComparer<Particle>()
+    );
+    private Dictionary<(Type, NodeBase), int> _nodeQuantityIndexMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
 
     public int QuantityIndex<TQuantity>()
         where TQuantity : IGlobalQuantity => _globalQuantityIndexMap[typeof(TQuantity)];
@@ -95,8 +101,12 @@ public class StepVectorMap
     }
 
     private Dictionary<Type, IQuantity> _globalQuantityInstanceMap = new();
-    private Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new();
-    private Dictionary<(Type, NodeBase), IQuantity> _nodeQuantityInstanceMap = new();
+    private Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new(
+        new MapEqualityComparer<Particle>()
+    );
+    private Dictionary<(Type, NodeBase), IQuantity> _nodeQuantityInstanceMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
 
     public TQuantity QuantityInstance<TQuantity>()
         where TQuantity : IGlobalQuantity =>
@@ -116,8 +126,12 @@ public class StepVectorMap
             .Concat(_nodeQuantityInstanceMap.Values);
 
     private Dictionary<Type, int> _globalConstraintIndexMap = new();
-    private Dictionary<(Type, Particle), int> _particleConstraintIndexMap = new();
-    private Dictionary<(Type, NodeBase), int> _nodeConstraintIndexMap = new();
+    private Dictionary<(Type, Particle), int> _particleConstraintIndexMap = new(
+        new MapEqualityComparer<Particle>()
+    );
+    private Dictionary<(Type, NodeBase), int> _nodeConstraintIndexMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
 
     public int ConstraintIndex<TConstraint>()
         where TConstraint : IGlobalConstraint => _globalConstraintIndexMap[typeof(TConstraint)];
@@ -143,8 +157,12 @@ public class StepVectorMap
     }
 
     private Dictionary<Type, IConstraint> _globalConstraintInstanceMap = new();
-    private Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new();
-    private Dictionary<(Type, NodeBase), IConstraint> _nodeConstraintInstanceMap = new();
+    private Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new(
+        new MapEqualityComparer<Particle>()
+    );
+    private Dictionary<(Type, NodeBase), IConstraint> _nodeConstraintInstanceMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
 
     public TConstraint ConstraintInstance<TConstraint>()
         where TConstraint : IGlobalConstraint =>
@@ -162,4 +180,14 @@ public class StepVectorMap
         _globalConstraintInstanceMap
             .Values.Concat(_particleConstraintInstanceMap.Values)
             .Concat(_nodeConstraintInstanceMap.Values);
+
+    private class MapEqualityComparer<T> : EqualityComparer<(Type, T)>
+        where T : IVertex
+    {
+        public override bool Equals((Type, T) x, (Type, T) y) =>
+            x.Item1 == y.Item1 && x.Item2.Id == y.Item2.Id;
+
+        public override int GetHashCode((Type, T) obj) =>
+            HashCode.Combine(obj.Item1.GetHashCode(), obj.Item2.Id.GetHashCode());
+    }
 }
