@@ -32,6 +32,21 @@ public class StepVectorMap
                 _nodeQuantityIndexMap.Add(key, index);
                 _nodeQuantityInstanceMap.Add(key, nodeQuantity);
             }
+            else if (quantity is INodeContactQuantity nodeContactQuantity)
+            {
+                var key = (nodeContactQuantity.GetType(), nodeContactQuantity.NodeContact);
+                _nodeContactQuantityIndexMap.Add(key, index);
+                _nodeContactQuantityInstanceMap.Add(key, nodeContactQuantity);
+            }
+            else if (quantity is IParticleContactQuantity particleContactQuantity)
+            {
+                var key = (
+                    particleContactQuantity.GetType(),
+                    particleContactQuantity.ParticleContact
+                );
+                _particleContactQuantityIndexMap.Add(key, index);
+                _particleContactQuantityInstanceMap.Add(key, particleContactQuantity);
+            }
             else
                 throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
 
@@ -58,6 +73,21 @@ public class StepVectorMap
                 _nodeConstraintIndexMap.Add(key, index);
                 _nodeConstraintInstanceMap.Add(key, nodeConstraint);
             }
+            else if (constraint is INodeContactConstraint nodeContactConstraint)
+            {
+                var key = (nodeContactConstraint.GetType(), nodeContactConstraint.NodeContact);
+                _nodeContactConstraintIndexMap.Add(key, index);
+                _nodeContactConstraintInstanceMap.Add(key, nodeContactConstraint);
+            }
+            else if (constraint is IParticleContactConstraint particleContactConstraint)
+            {
+                var key = (
+                    particleContactConstraint.GetType(),
+                    particleContactConstraint.ParticleContact
+                );
+                _particleContactConstraintIndexMap.Add(key, index);
+                _particleContactConstraintInstanceMap.Add(key, particleContactConstraint);
+            }
             else
                 throw new ArgumentException($"Invalid quantity type: {constraint.GetType()}");
 
@@ -69,13 +99,23 @@ public class StepVectorMap
 
     public int TotalLength { get; }
 
-    private Dictionary<Type, int> _globalQuantityIndexMap = new();
-    private Dictionary<(Type, Particle), int> _particleQuantityIndexMap = new(
+    private readonly Dictionary<Type, int> _globalQuantityIndexMap = new();
+
+    private readonly Dictionary<(Type, Particle), int> _particleQuantityIndexMap = new(
         new MapEqualityComparer<Particle>()
     );
-    private Dictionary<(Type, NodeBase), int> _nodeQuantityIndexMap = new(
+
+    private readonly Dictionary<(Type, NodeBase), int> _nodeQuantityIndexMap = new(
         new MapEqualityComparer<NodeBase>()
     );
+
+    private readonly Dictionary<(Type, ContactPair<NodeBase>), int> _nodeContactQuantityIndexMap =
+        new(new MapEqualityComparer<ContactPair<NodeBase>>());
+
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        int
+    > _particleContactQuantityIndexMap = new(new MapEqualityComparer<ContactPair<Particle>>());
 
     public int QuantityIndex<TQuantity>()
         where TQuantity : IGlobalQuantity => _globalQuantityIndexMap[typeof(TQuantity)];
@@ -87,6 +127,14 @@ public class StepVectorMap
     public int QuantityIndex<TQuantity>(NodeBase node)
         where TQuantity : INodeQuantity => _nodeQuantityIndexMap[(typeof(TQuantity), node)];
 
+    public int QuantityIndex<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        _nodeContactQuantityIndexMap[(typeof(TQuantity), nodeContact)];
+
+    public int QuantityIndex<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        _particleContactQuantityIndexMap[(typeof(TQuantity), particleContact)];
+
     public int QuantityIndex(IQuantity quantity)
     {
         if (quantity is IGlobalQuantity globalQuantity)
@@ -97,16 +145,36 @@ public class StepVectorMap
             ];
         if (quantity is INodeQuantity nodeQuantity)
             return _nodeQuantityIndexMap[(nodeQuantity.GetType(), nodeQuantity.Node)];
+        if (quantity is INodeContactQuantity nodeContactQuantity)
+            return _nodeContactQuantityIndexMap[
+                (nodeContactQuantity.GetType(), nodeContactQuantity.NodeContact)
+            ];
+        if (quantity is IParticleContactQuantity particleContactQuantity)
+            return _particleContactQuantityIndexMap[
+                (particleContactQuantity.GetType(), particleContactQuantity.ParticleContact)
+            ];
         throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
     }
 
-    private Dictionary<Type, IQuantity> _globalQuantityInstanceMap = new();
-    private Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new(
+    private readonly Dictionary<Type, IQuantity> _globalQuantityInstanceMap = new();
+
+    private readonly Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new(
         new MapEqualityComparer<Particle>()
     );
-    private Dictionary<(Type, NodeBase), IQuantity> _nodeQuantityInstanceMap = new(
+
+    private readonly Dictionary<(Type, NodeBase), IQuantity> _nodeQuantityInstanceMap = new(
         new MapEqualityComparer<NodeBase>()
     );
+
+    private readonly Dictionary<
+        (Type, ContactPair<NodeBase>),
+        IQuantity
+    > _nodeContactQuantityInstanceMap = new(new MapEqualityComparer<ContactPair<NodeBase>>());
+
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        IQuantity
+    > _particleContactQuantityInstanceMap = new(new MapEqualityComparer<ContactPair<Particle>>());
 
     public TQuantity QuantityInstance<TQuantity>()
         where TQuantity : IGlobalQuantity =>
@@ -120,18 +188,36 @@ public class StepVectorMap
         where TQuantity : INodeQuantity =>
         (TQuantity)_nodeQuantityInstanceMap[(typeof(TQuantity), node)];
 
+    public TQuantity QuantityInstance<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        (TQuantity)_nodeContactQuantityInstanceMap[(typeof(TQuantity), nodeContact)];
+
+    public TQuantity QuantityInstance<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        (TQuantity)_particleContactQuantityInstanceMap[(typeof(TQuantity), particleContact)];
+
     public IEnumerable<IQuantity> Quantities =>
         _globalQuantityInstanceMap
             .Values.Concat(_particleQuantityInstanceMap.Values)
             .Concat(_nodeQuantityInstanceMap.Values);
 
-    private Dictionary<Type, int> _globalConstraintIndexMap = new();
-    private Dictionary<(Type, Particle), int> _particleConstraintIndexMap = new(
+    private readonly Dictionary<Type, int> _globalConstraintIndexMap = new();
+
+    private readonly Dictionary<(Type, Particle), int> _particleConstraintIndexMap = new(
         new MapEqualityComparer<Particle>()
     );
-    private Dictionary<(Type, NodeBase), int> _nodeConstraintIndexMap = new(
+
+    private readonly Dictionary<(Type, NodeBase), int> _nodeConstraintIndexMap = new(
         new MapEqualityComparer<NodeBase>()
     );
+
+    private readonly Dictionary<(Type, ContactPair<NodeBase>), int> _nodeContactConstraintIndexMap =
+        new(new MapEqualityComparer<ContactPair<NodeBase>>());
+
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        int
+    > _particleContactConstraintIndexMap = new(new MapEqualityComparer<ContactPair<Particle>>());
 
     public int ConstraintIndex<TConstraint>()
         where TConstraint : IGlobalConstraint => _globalConstraintIndexMap[typeof(TConstraint)];
@@ -143,26 +229,54 @@ public class StepVectorMap
     public int ConstraintIndex<TConstraint>(NodeBase node)
         where TConstraint : INodeConstraint => _nodeConstraintIndexMap[(typeof(TConstraint), node)];
 
-    public int ConstraintIndex(IConstraint quantity)
+    public int ConstraintIndex<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        _nodeContactConstraintIndexMap[(typeof(TConstraint), nodeContact)];
+
+    public int ConstraintIndex<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        _particleContactConstraintIndexMap[(typeof(TConstraint), particleContact)];
+
+    public int ConstraintIndex(IConstraint constraint)
     {
-        if (quantity is IGlobalConstraint globalConstraint)
+        if (constraint is IGlobalConstraint globalConstraint)
             return _globalConstraintIndexMap[globalConstraint.GetType()];
-        if (quantity is IParticleConstraint particleConstraint)
+        if (constraint is IParticleConstraint particleConstraint)
             return _particleConstraintIndexMap[
                 (particleConstraint.GetType(), particleConstraint.Particle)
             ];
-        if (quantity is INodeConstraint nodeConstraint)
+        if (constraint is INodeConstraint nodeConstraint)
             return _nodeConstraintIndexMap[(nodeConstraint.GetType(), nodeConstraint.Node)];
-        throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
+        if (constraint is INodeContactConstraint nodeContactConstraint)
+            return _nodeContactConstraintIndexMap[
+                (nodeContactConstraint.GetType(), nodeContactConstraint.NodeContact)
+            ];
+        if (constraint is IParticleContactConstraint particleContactConstraint)
+            return _particleContactConstraintIndexMap[
+                (particleContactConstraint.GetType(), particleContactConstraint.ParticleContact)
+            ];
+        throw new ArgumentException($"Invalid constraint type: {constraint.GetType()}");
     }
 
-    private Dictionary<Type, IConstraint> _globalConstraintInstanceMap = new();
-    private Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new(
+    private readonly Dictionary<Type, IConstraint> _globalConstraintInstanceMap = new();
+
+    private readonly Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new(
         new MapEqualityComparer<Particle>()
     );
-    private Dictionary<(Type, NodeBase), IConstraint> _nodeConstraintInstanceMap = new(
+
+    private readonly Dictionary<(Type, NodeBase), IConstraint> _nodeConstraintInstanceMap = new(
         new MapEqualityComparer<NodeBase>()
     );
+
+    private readonly Dictionary<
+        (Type, ContactPair<NodeBase>),
+        IConstraint
+    > _nodeContactConstraintInstanceMap = new(new MapEqualityComparer<ContactPair<NodeBase>>());
+
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        IConstraint
+    > _particleContactConstraintInstanceMap = new(new MapEqualityComparer<ContactPair<Particle>>());
 
     public TConstraint ConstraintInstance<TConstraint>()
         where TConstraint : IGlobalConstraint =>
@@ -175,6 +289,14 @@ public class StepVectorMap
     public TConstraint ConstraintInstance<TConstraint>(NodeBase node)
         where TConstraint : INodeConstraint =>
         (TConstraint)_nodeConstraintInstanceMap[(typeof(TConstraint), node)];
+
+    public TConstraint ConstraintInstance<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        (TConstraint)_nodeContactConstraintInstanceMap[(typeof(TConstraint), nodeContact)];
+
+    public TConstraint ConstraintInstance<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        (TConstraint)_particleContactConstraintInstanceMap[(typeof(TConstraint), particleContact)];
 
     public IEnumerable<IConstraint> Constraints =>
         _globalConstraintInstanceMap

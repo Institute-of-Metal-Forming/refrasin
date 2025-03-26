@@ -76,7 +76,7 @@ public class ParticlePlotTests
     [Test]
     public void TestPlotContactEdge()
     {
-        var edge = new UnorderedPair<Particle<ParticleNode>>(_particle1, _particle2);
+        var edge = new ContactPair<Particle<ParticleNode>>(Guid.Empty, _particle1, _particle2);
 
         var plot1 = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
             [_particle1, _particle2]

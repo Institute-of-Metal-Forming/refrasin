@@ -69,7 +69,7 @@ let PlotLineRing (points: IPoint seq) (label: string) =
     let pointsList = points |> Seq.toList
     PlotLineString (pointsList @ [ pointsList[0] ]) label
 
-let PlotContactEdge (edge: UnorderedPair<#IParticle>) : GenericChart =
+let PlotContactEdge (edge: ContactPair<#IParticle>) : GenericChart =
     let from = edge.First.Coordinates.Absolute
     let _to = edge.Second.Coordinates.Absolute
     let xy = [ (from.X, from.Y); (_to.X, _to.Y) ]

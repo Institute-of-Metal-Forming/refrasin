@@ -27,41 +27,19 @@ public record SolverRoutines(
     EquationSystemBuilder EquationSystemBuilder
 ) : ISolverRoutines
 {
-    static SolverRoutines()
-    {
-        var equationSystemBuilder = new EquationSystemBuilder()
-            .AddNodeQuantity<NormalDisplacement>()
-            .AddNodeQuantity<TangentialDisplacement>(n => n.Type is Neck)
-            .AddNodeQuantity<FluxToUpper>()
-            .AddParticleQuantity<ParticleDisplacementX>()
-            .AddParticleQuantity<ParticleDisplacementY>()
-            .AddGlobalConstraint<DissipationEqualityConstraint>()
-            .AddNodeConstraint<VolumeBalanceConstraint>()
-            .AddNodeConstraint<ContactConstraintX, ContactNodeBase>()
-            .AddNodeConstraint<ContactConstraintY, ContactNodeBase>()
-            .AddParticleConstraint<FixedParticleConstraintX>(particle =>
-                particle.SolutionState.Particles[0] == particle
-            )
-            .AddParticleConstraint<FixedParticleConstraintY>(particle =>
-                particle.SolutionState.Particles[0] == particle
-            );
-
-        Default = new(
-            new StepEstimator(),
-            new AdamsMoultonTimeStepper(),
-            [],
-            new DirectLagrangianRootFinder(
-                new NewtonRaphsonRootFinder(new SparseLUSolver(), absoluteTolerance: 1e-4)
-            ),
-            new DefaultNormalizer(),
-            new MaximumDisplacementAngleStepWidthController(),
-            [new StepBackStateRecoverer()],
-            [new FreeSurfaceRemesher(), new NeckNeighborhoodRemesher()],
-            equationSystemBuilder
-        );
-    }
-
-    public static readonly SolverRoutines Default;
+    public static readonly SolverRoutines Default = new(
+        new StepEstimator(),
+        new AdamsMoultonTimeStepper(),
+        [],
+        new DirectLagrangianRootFinder(
+            new NewtonRaphsonRootFinder(new SparseLUSolver(), absoluteTolerance: 1e-4)
+        ),
+        new DefaultNormalizer(),
+        new MaximumDisplacementAngleStepWidthController(),
+        [new StepBackStateRecoverer()],
+        [new FreeSurfaceRemesher(), new NeckNeighborhoodRemesher()],
+        EquationSystemBuilder.Default
+    );
 
     /// <inheritdoc />
     public void RegisterWithSolver(SinteringSolver solver)

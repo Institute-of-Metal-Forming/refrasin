@@ -1,3 +1,4 @@
+using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
@@ -28,8 +29,16 @@ public interface INodeQuantity : IQuantity
     NodeBase Node { get; }
 }
 
-public interface INodeQuantity<out TNode> : INodeQuantity
-    where TNode : NodeBase
+public interface INodeContactQuantity : IQuantity
 {
-    new TNode Node { get; }
+    static abstract INodeContactQuantity Create(ContactPair<NodeBase> nodeContact);
+
+    ContactPair<NodeBase> NodeContact { get; }
+}
+
+public interface IParticleContactQuantity : IQuantity
+{
+    static abstract IParticleContactQuantity Create(ContactPair<Particle> nodeContact);
+
+    ContactPair<Particle> ParticleContact { get; }
 }

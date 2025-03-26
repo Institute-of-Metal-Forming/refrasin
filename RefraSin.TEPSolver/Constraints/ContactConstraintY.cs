@@ -1,26 +1,24 @@
+using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class ContactConstraintY : INodeConstraint
+public class ContactConstraintY : INodeContactConstraint
 {
-    private ContactConstraintY(ContactNodeBase node)
+    private ContactConstraintY(ContactPair<NodeBase> nodeContact)
     {
-        Node = node;
+        NodeContact = nodeContact;
     }
 
-    public static INodeConstraint Create(NodeBase node) =>
-        new ContactConstraintY(
-            node as ContactNodeBase
-                ?? throw new ArgumentException($"Node given must be {typeof(ContactNodeBase)}.")
-        );
+    public static INodeContactConstraint Create(ContactPair<NodeBase> nodeContact) =>
+        new ContactConstraintY(nodeContact);
 
     public double Residual(StepVector stepVector)
     {
-        var thisTerm = GlobalNodeDisplacement(stepVector, Node);
-        var othersTerm = GlobalNodeDisplacement(stepVector, Node.ContactedNode);
+        var thisTerm = GlobalNodeDisplacement(stepVector, NodeContact.First);
+        var othersTerm = GlobalNodeDisplacement(stepVector, NodeContact.Second);
 
         return thisTerm - othersTerm;
     }
@@ -45,15 +43,20 @@ public class ContactConstraintY : INodeConstraint
     }
 
     public IEnumerable<(int index, double value)> Derivatives(StepVector stepVector) =>
-        DerivativesOf(stepVector, Node).Concat(DerivativesOf(stepVector, Node.ContactedNode));
+        DerivativesOf(stepVector, NodeContact.First, 1)
+            .Concat(DerivativesOf(stepVector, NodeContact.Second, -1));
 
-    private static IEnumerable<(int, double)> DerivativesOf(StepVector stepVector, NodeBase node)
+    private static IEnumerable<(int, double)> DerivativesOf(
+        StepVector stepVector,
+        NodeBase node,
+        int sign
+    )
     {
         yield return (
             stepVector.StepVectorMap.QuantityIndex<NormalDisplacement>(node),
             -Sin(
                 node.Particle.RotationAngle + node.Coordinates.Phi + node.RadiusNormalAngle.ToLower
-            )
+            ) * sign
         );
         if (node is NeckNode)
             yield return (
@@ -62,15 +65,13 @@ public class ContactConstraintY : INodeConstraint
                     node.Particle.RotationAngle
                         + node.Coordinates.Phi
                         + node.RadiusTangentAngle.ToLower
-                )
+                ) * sign
             );
         yield return (
             stepVector.StepVectorMap.QuantityIndex<ParticleDisplacementY>(node.Particle),
-            1
+            sign
         );
     }
 
-    public ContactNodeBase Node { get; }
-
-    NodeBase INodeConstraint.Node => Node;
+    public ContactPair<NodeBase> NodeContact { get; }
 }

@@ -20,7 +20,7 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
         var meanDiscretizationWidth = allNodes.Average(n => n.SurfaceDistance.ToUpper);
 
         foreach (
-            var particleContact in system.Particles.EnumerateContactedParticlePairs<
+            var particleContact in system.Particles.CreateContactedParticlePairs<
                 IParticle<IParticleNode>,
                 IParticleNode
             >()
@@ -30,7 +30,7 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
 
             foreach (
                 var nodePair in particleContact
-                    .First.EnumerateContactNodePairs<IParticle<IParticleNode>, IParticleNode>(
+                    .First.CreateContactNodePairs<IParticle<IParticleNode>, IParticleNode>(
                         particleContact.Second
                     )
                     .Where(n => n.First.Type is GrainBoundary)
@@ -84,7 +84,7 @@ public class GrainBoundaryRemesher(double additionLimit = 2.1) : IParticleSystem
 
     private static void AddNodePair(
         List<IParticleNode> allNodes,
-        UnorderedPair<IParticle<IParticleNode>> particleContact,
+        ContactPair<IParticle<IParticleNode>> particleContact,
         IPolarPoint coordinates
     )
     {

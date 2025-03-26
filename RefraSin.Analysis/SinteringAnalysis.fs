@@ -6,7 +6,7 @@ open RefraSin.ParticleModel.Particles
 open RefraSin.ProcessModel
 open RefraSin.ParticleModel.Particles.Extensions
 
-let ContactEdgeDistance (contact: UnorderedPair<#IParticle<_>>) : float =
+let ContactEdgeDistance (contact: ContactPair<#IParticle<_>>) : float =
     contact.First.Coordinates.VectorTo(contact.Second.Coordinates).Norm
 
 let ContactDistance (p1: IParticle<_>) (p2: IParticle<_>) : float =
@@ -31,12 +31,12 @@ let ShrinkagesByVolume (states: ISystemState<_, _> seq) : float seq =
 
 let ShrinkageByDistance (initialState: ISystemState<_, _>) (currentState: ISystemState<_, _>) : float =
     let initialDistance =
-        ParticleContactExtensions.EnumerateContactedParticlePairs(initialState.Particles)
+        ParticleContactExtensions.CreateContactedParticlePairs(initialState.Particles)
         |> Seq.map ContactEdgeDistance
         |> Seq.sum
 
     let currentDistance =
-        ParticleContactExtensions.EnumerateContactedParticlePairs(currentState.Particles)
+        ParticleContactExtensions.CreateContactedParticlePairs(currentState.Particles)
         |> Seq.map ContactEdgeDistance
         |> Seq.sum
 
@@ -46,7 +46,7 @@ let ShrinkageByDistance (initialState: ISystemState<_, _>) (currentState: ISyste
 let ShrinkagesByDistance (states: ISystemState<_, _> seq) : float seq =
     let distances =
         [ for s in states ->
-              ParticleContactExtensions.EnumerateContactedParticlePairs(s.Particles)
+              ParticleContactExtensions.CreateContactedParticlePairs(s.Particles)
               |> Seq.map ContactEdgeDistance
               |> Seq.sum ]
 
@@ -55,7 +55,7 @@ let ShrinkagesByDistance (states: ISystemState<_, _> seq) : float seq =
 let NeckWidths (states: ISystemState<_, _> seq) : float seq =
     let widths =
         [ for s in states ->
-              ParticleContactExtensions.EnumerateContactedParticlePairs(s.Particles)
+              ParticleContactExtensions.CreateContactedParticlePairs(s.Particles)
               |> Seq.map (fun c ->
                   c.First.Nodes
                   |> Seq.sumBy (fun n ->

@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using RefraSin.ParticleModel;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
@@ -34,6 +35,14 @@ public class StepVector : DenseVector
     public double QuantityValue<TQuantity>(NodeBase node)
         where TQuantity : INodeQuantity => this[StepVectorMap.QuantityIndex<TQuantity>(node)];
 
+    public double QuantityValue<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(nodeContact)];
+
+    public double QuantityValue<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particleContact)];
+
     public double QuantityValue(IQuantity quantity) => this[StepVectorMap.QuantityIndex(quantity)];
 
     public void SetQuantityValue<TQuantity>(double value)
@@ -46,6 +55,14 @@ public class StepVector : DenseVector
     public void SetQuantityValue<TQuantity>(NodeBase node, double value)
         where TQuantity : INodeQuantity =>
         this[StepVectorMap.QuantityIndex<TQuantity>(node)] = value;
+
+    public void SetQuantityValue<TQuantity>(ContactPair<NodeBase> nodeContact, double value)
+        where TQuantity : INodeContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(nodeContact)] = value;
+
+    public void SetQuantityValue<TQuantity>(ContactPair<Particle> particleContact, double value)
+        where TQuantity : IParticleContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particleContact)] = value;
 
     public void SetQuantityValue(IQuantity quantity, double value) =>
         this[StepVectorMap.QuantityIndex(quantity)] = value;
@@ -61,6 +78,14 @@ public class StepVector : DenseVector
         where TConstraint : INodeConstraint =>
         this[StepVectorMap.ConstraintIndex<TConstraint>(node)];
 
+    public double ConstraintLambdaValue<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(nodeContact)];
+
+    public double ConstraintLambdaValue<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particleContact)];
+
     public double ConstraintLambdaValue(IConstraint constraint) =>
         this[StepVectorMap.ConstraintIndex(constraint)];
 
@@ -75,6 +100,20 @@ public class StepVector : DenseVector
     public void SetConstraintLambdaValue<TConstraint>(NodeBase node, double value)
         where TConstraint : INodeConstraint =>
         this[StepVectorMap.ConstraintIndex<TConstraint>(node)] = value;
+
+    public void SetConstraintLambdaValue<TConstraint>(
+        ContactPair<NodeBase> nodeContact,
+        double value
+    )
+        where TConstraint : INodeContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(nodeContact)] = value;
+
+    public void SetConstraintLambdaValue<TConstraint>(
+        ContactPair<Particle> particleContact,
+        double value
+    )
+        where TConstraint : IParticleContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particleContact)] = value;
 
     public void SetConstraintLambdaValue(IConstraint constraint, double value) =>
         this[StepVectorMap.ConstraintIndex(constraint)] = value;

@@ -10,7 +10,7 @@ public static class ParticleContactExtensions
         where TParticle : IParticle<TNode>
         where TNode : IParticleNode => self.Nodes.Where(n => n.Type is GrainBoundary or Neck);
 
-    public static IEnumerable<UnorderedPair<TNode>> EnumerateContactNodePairs<TParticle, TNode>(
+    public static IEnumerable<ContactPair<TNode>> CreateContactNodePairs<TParticle, TNode>(
         this TParticle self,
         TParticle other
     )
@@ -31,7 +31,7 @@ public static class ParticleContactExtensions
                         out var contactedNode
                     )
                 )
-                    yield return new UnorderedPair<TNode>(node, contactedNode);
+                    yield return new ContactPair<TNode>(Guid.NewGuid(), node, contactedNode);
             }
             else if (
                 node.TryFindContactedNodeByCoordinates(
@@ -40,12 +40,12 @@ public static class ParticleContactExtensions
                 )
             )
             {
-                yield return new UnorderedPair<TNode>(node, contactedNode);
+                yield return new ContactPair<TNode>(Guid.NewGuid(), node, contactedNode);
             }
         }
     }
 
-    public static IEnumerable<UnorderedPair<TNode>> EnumerateContactNodePairs<TParticle, TNode>(
+    public static IEnumerable<ContactPair<TNode>> CreateContactNodePairs<TParticle, TNode>(
         this IEnumerable<TParticle> self
     )
         where TParticle : IParticle<TNode>
@@ -65,9 +65,7 @@ public static class ParticleContactExtensions
                         )
                 )
                 {
-                    foreach (
-                        var pair in particle.EnumerateContactNodePairs<TParticle, TNode>(other)
-                    )
+                    foreach (var pair in particle.CreateContactNodePairs<TParticle, TNode>(other))
                     {
                         yield return pair;
                     }
@@ -78,7 +76,7 @@ public static class ParticleContactExtensions
         }
     }
 
-    public static IEnumerable<UnorderedPair<TParticle>> EnumerateContactedParticlePairs<
+    public static IEnumerable<ContactPair<TParticle>> CreateContactedParticlePairs<
         TParticle,
         TNode
     >(this IEnumerable<TParticle> self)
@@ -99,9 +97,9 @@ public static class ParticleContactExtensions
                         )
                 )
                 {
-                    foreach (var _ in particle.EnumerateContactNodePairs<TParticle, TNode>(other))
+                    foreach (var _ in particle.CreateContactNodePairs<TParticle, TNode>(other))
                     {
-                        yield return new UnorderedPair<TParticle>(particle, other);
+                        yield return new ContactPair<TParticle>(Guid.NewGuid(), particle, other);
                         break;
                     }
                 }
@@ -111,17 +109,13 @@ public static class ParticleContactExtensions
         }
     }
 
-    public static IEnumerable<TNode> FirstNodes<TParticle, TNode>(
-        this UnorderedPair<TParticle> self
-    )
+    public static IEnumerable<TNode> FirstNodes<TParticle, TNode>(this ContactPair<TParticle> self)
         where TParticle : IParticle<TNode>
         where TNode : IParticleNode =>
-        self.First.EnumerateContactNodePairs<TParticle, TNode>(self.Second).Select(p => p.First);
+        self.First.CreateContactNodePairs<TParticle, TNode>(self.Second).Select(p => p.First);
 
-    public static IEnumerable<TNode> SecondNodes<TParticle, TNode>(
-        this UnorderedPair<TParticle> self
-    )
+    public static IEnumerable<TNode> SecondNodes<TParticle, TNode>(this ContactPair<TParticle> self)
         where TParticle : IParticle<TNode>
         where TNode : IParticleNode =>
-        self.First.EnumerateContactNodePairs<TParticle, TNode>(self.Second).Select(p => p.Second);
+        self.First.CreateContactNodePairs<TParticle, TNode>(self.Second).Select(p => p.Second);
 }

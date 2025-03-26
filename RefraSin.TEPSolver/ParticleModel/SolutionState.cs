@@ -26,10 +26,15 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToReadOnlyParticleCollection<Particle, NodeBase>();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
 
-        ParticleContacts = Particles
-            .EnumerateContactedParticlePairs<Particle, NodeBase>()
+        NodeContacts = Nodes.CreateContactNodePairs().ToArray();
+        ParticleContacts = NodeContacts
+            .DistinctBy(c => (c.First.ParticleId, c.Second.ParticleId))
+            .Select(c => new ContactPair<Particle>(
+                Guid.NewGuid(),
+                Particles[c.First.ParticleId],
+                Particles[c.Second.ParticleId]
+            ))
             .ToArray();
-        NodeContacts = Nodes.EnumerateContactNodePairs().ToArray();
     }
 
     private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
@@ -44,13 +49,15 @@ public class SolutionState : ISystemState<Particle, NodeBase>
 
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
         ParticleContacts = oldState
-            .ParticleContacts.Select(c => new UnorderedPair<Particle>(
+            .ParticleContacts.Select(c => new ContactPair<Particle>(
+                c.Id,
                 Particles[c.First.Id],
                 Particles[c.Second.Id]
             ))
             .ToArray();
         NodeContacts = oldState
-            .NodeContacts.Select(c => new UnorderedPair<NodeBase>(
+            .NodeContacts.Select(c => new ContactPair<NodeBase>(
+                c.Id,
                 Nodes[c.First.Id],
                 Nodes[c.Second.Id]
             ))
@@ -71,9 +78,9 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     /// <inheritdoc cref="ISystemState.Particles"/>>
     public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; }
 
-    public IReadOnlyList<UnorderedPair<NodeBase>> NodeContacts { get; }
+    public IReadOnlyList<ContactPair<NodeBase>> NodeContacts { get; }
 
-    public IReadOnlyList<UnorderedPair<Particle>> ParticleContacts { get; }
+    public IReadOnlyList<ContactPair<Particle>> ParticleContacts { get; }
 
     IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
 

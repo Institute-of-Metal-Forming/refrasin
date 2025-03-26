@@ -51,7 +51,7 @@ public static class NodeContactExtensions
         return contactedNode;
     }
 
-    public static IEnumerable<UnorderedPair<TNode>> EnumerateContactNodePairs<TNode>(
+    public static IEnumerable<ContactPair<TNode>> CreateContactNodePairs<TNode>(
         this IEnumerable<TNode> self
     )
         where TNode : INode
@@ -65,11 +65,11 @@ public static class NodeContactExtensions
                 if (node is INodeContact nodeContact)
                 {
                     if (visitedNodes.TryGetValue(nodeContact.ContactedNodeId, out var other))
-                        yield return new UnorderedPair<TNode>(node, other);
+                        yield return new ContactPair<TNode>(Guid.NewGuid(), node, other);
                 }
                 else if (node.TryFindContactedNodeByCoordinates(visitedNodes.Values, out var other))
                 {
-                    yield return new UnorderedPair<TNode>(node, other);
+                    yield return new ContactPair<TNode>(Guid.NewGuid(), node, other);
                 }
 
                 visitedNodes.Add(node.Id, node);
