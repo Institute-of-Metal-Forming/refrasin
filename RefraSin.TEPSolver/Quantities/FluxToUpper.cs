@@ -3,7 +3,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Quantities;
 
-public class FluxToUpper : INodeQuantity
+public class FluxToUpper : INodeQuantity, IFlux
 {
     private FluxToUpper(NodeBase node)
     {
@@ -12,7 +12,10 @@ public class FluxToUpper : INodeQuantity
 
     public static INodeQuantity Create(NodeBase node) => new FluxToUpper(node);
 
-    public double DrivingForce(StepVector stepVector) => 0;
+    public double DissipationFactor(StepVector stepVector) =>
+        Node.Particle.VacancyVolumeEnergy
+        * Node.SurfaceDistance.ToUpper
+        / Node.InterfaceDiffusionCoefficient.ToUpper;
 
     public NodeBase Node { get; }
 }

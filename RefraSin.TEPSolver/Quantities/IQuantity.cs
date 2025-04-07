@@ -5,10 +5,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Quantities;
 
-public interface IQuantity
-{
-    public double DrivingForce(StepVector stepVector);
-}
+public interface IQuantity { }
 
 public interface IGlobalQuantity : IQuantity
 {

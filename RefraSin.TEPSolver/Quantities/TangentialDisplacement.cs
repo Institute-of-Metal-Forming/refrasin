@@ -3,7 +3,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Quantities;
 
-public class TangentialDisplacement : INodeQuantity
+public class TangentialDisplacement : INodeQuantity, IStateVelocity
 {
     private TangentialDisplacement(NodeBase node)
     {

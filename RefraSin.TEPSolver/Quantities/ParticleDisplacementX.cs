@@ -3,7 +3,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Quantities;
 
-public class ParticleDisplacementX : IParticleQuantity
+public class ParticleDisplacementX : IParticleQuantity, IStateVelocity
 {
     private ParticleDisplacementX(Particle particle)
     {

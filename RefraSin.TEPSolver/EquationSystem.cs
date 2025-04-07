@@ -32,7 +32,7 @@ public class EquationSystem
             .ToDictionary(g => g.Key, g => g.ToArray());
 
         var quantityDerivatives = Quantities.Select(q =>
-            q.DrivingForce(stepVector)
+            (q is IStateVelocity sv ? sv.DrivingForce(stepVector) : 0)
             + constraintDerivatives
                 .GetValueOrDefault(stepVector.StepVectorMap.QuantityIndex(q), [])
                 .Sum(t => t.value * stepVector.ConstraintLambdaValue(t.c))

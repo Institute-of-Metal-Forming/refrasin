@@ -3,7 +3,7 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Quantities;
 
-public class NormalDisplacement : INodeQuantity
+public class NormalDisplacement : INodeQuantity, IStateVelocity
 {
     private NormalDisplacement(NodeBase node)
     {

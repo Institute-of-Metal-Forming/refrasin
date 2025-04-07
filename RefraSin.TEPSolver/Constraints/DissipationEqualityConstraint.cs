@@ -6,42 +6,39 @@ namespace RefraSin.TEPSolver.Constraints;
 
 public class DissipationEqualityConstraint : IGlobalConstraint
 {
-    private DissipationEqualityConstraint(SolutionState state)
-    {
-        State = state;
-    }
+    private DissipationEqualityConstraint() { }
 
     public static IGlobalConstraint Create(SolutionState solutionState) =>
-        new DissipationEqualityConstraint(solutionState);
+        new DissipationEqualityConstraint();
 
     /// <inheritdoc />
     public double Residual(StepVector stepVector)
     {
-        var dissipation = stepVector.StepVectorMap.Quantities.Sum(q =>
-            q.DrivingForce(stepVector) * stepVector.QuantityValue(q)
-        );
+        var dissipation = stepVector
+            .StepVectorMap.Quantities.OfType<IStateVelocity>()
+            .Sum(q => q.DrivingForce(stepVector) * stepVector.QuantityValue(q));
 
-        var dissipationFunction = State
-            .Nodes.Select(n => FluxFactor(n) * Pow(stepVector.QuantityValue<FluxToUpper>(n), 2))
-            .Sum();
+        var dissipationFunction = stepVector
+            .StepVectorMap.Quantities.OfType<IFlux>()
+            .Sum(q => q.DissipationFactor(stepVector) * Pow(stepVector.QuantityValue(q), 2));
 
         return dissipation - dissipationFunction;
     }
 
     public IEnumerable<(int index, double value)> Derivatives(StepVector stepVector)
     {
-        foreach (var quantity in stepVector.StepVectorMap.Quantities)
+        foreach (var stateVelocity in stepVector.StepVectorMap.Quantities.OfType<IStateVelocity>())
         {
-            var drivingForce = quantity.DrivingForce(stepVector);
+            var drivingForce = stateVelocity.DrivingForce(stepVector);
             if (drivingForce != 0)
-                yield return (stepVector.StepVectorMap.QuantityIndex(quantity), drivingForce);
+                yield return (stepVector.StepVectorMap.QuantityIndex(stateVelocity), drivingForce);
         }
 
-        foreach (var n in State.Nodes)
+        foreach (var flux in stepVector.StepVectorMap.Quantities.OfType<IFlux>())
         {
             yield return (
-                stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(n),
-                -2 * FluxFactor(n) * stepVector.QuantityValue<FluxToUpper>(n)
+                stepVector.StepVectorMap.QuantityIndex(flux),
+                -2 * flux.DissipationFactor(stepVector) * stepVector.QuantityValue(flux)
             );
         }
     }
@@ -50,17 +47,10 @@ public class DissipationEqualityConstraint : IGlobalConstraint
         StepVector stepVector
     )
     {
-        foreach (var n in State.Nodes)
+        foreach (var flux in stepVector.StepVectorMap.Quantities.OfType<IFlux>())
         {
-            var index = stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(n);
-            yield return (index, index, -2 * FluxFactor(n));
+            var index = stepVector.StepVectorMap.QuantityIndex(flux);
+            yield return (index, index, -2 * flux.DissipationFactor(stepVector));
         }
     }
-
-    private static double FluxFactor(NodeBase n) =>
-        n.Particle.VacancyVolumeEnergy
-        * n.SurfaceDistance.ToUpper
-        / n.InterfaceDiffusionCoefficient.ToUpper;
-
-    public SolutionState State { get; }
 }
