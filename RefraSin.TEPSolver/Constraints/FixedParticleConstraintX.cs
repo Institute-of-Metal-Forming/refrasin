@@ -21,4 +21,6 @@ public class FixedParticleConstraintX : IParticleConstraint
         [(stepVector.StepVectorMap.QuantityIndex<ParticleDisplacementX>(Particle), 1)];
 
     public Particle Particle { get; }
+
+    public override string ToString() => $"x coordinate fixed for {Particle}";
 }

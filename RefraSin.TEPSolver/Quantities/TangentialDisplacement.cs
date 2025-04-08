@@ -15,4 +15,6 @@ public class TangentialDisplacement : INodeQuantity, IStateVelocity
     public double DrivingForce(StepVector stepVector) => -Node.GibbsEnergyGradient.Tangential;
 
     public NodeBase Node { get; }
+
+    public override string ToString() => $"tangential displacement of {Node}";
 }

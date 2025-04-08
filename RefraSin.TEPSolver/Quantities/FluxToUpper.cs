@@ -18,4 +18,6 @@ public class FluxToUpper : INodeQuantity, IFlux
         / Node.InterfaceDiffusionCoefficient.ToUpper;
 
     public NodeBase Node { get; }
+
+    public override string ToString() => $"flux to upper from {Node}";
 }

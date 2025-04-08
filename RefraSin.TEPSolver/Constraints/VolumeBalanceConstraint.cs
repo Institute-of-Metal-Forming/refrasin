@@ -26,8 +26,8 @@ public class VolumeBalanceConstraint : INodeConstraint
                     * stepVector.QuantityValue<TangentialDisplacement>(Node)
                 : 0;
         var fluxTerm =
-            stepVector.QuantityValue<FluxToUpper>(Node)
-            - stepVector.QuantityValue<FluxToUpper>(Node.Lower);
+            -stepVector.QuantityValue<FluxToUpper>(Node)
+            + stepVector.QuantityValue<FluxToUpper>(Node.Lower);
 
         return normalVolumeTerm + tangentialVolumeTerm - fluxTerm;
     }
@@ -43,9 +43,11 @@ public class VolumeBalanceConstraint : INodeConstraint
                 stepVector.StepVectorMap.QuantityIndex<TangentialDisplacement>(Node),
                 Node.VolumeGradient.Tangential
             );
-        yield return (stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(Node), -1);
-        yield return (stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(Node.Lower), 1);
+        yield return (stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(Node), 1);
+        yield return (stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(Node.Lower), -1);
     }
 
     public NodeBase Node { get; }
+
+    public override string ToString() => $"volume balance constraint for {Node}";
 }

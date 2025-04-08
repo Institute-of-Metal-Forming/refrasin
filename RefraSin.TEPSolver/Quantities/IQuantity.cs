@@ -10,6 +10,8 @@ public interface IQuantity { }
 public interface IGlobalQuantity : IQuantity
 {
     static abstract IGlobalQuantity Create(SolutionState solutionState);
+
+    SolutionState SolutionState { get; }
 }
 
 public interface IParticleQuantity : IQuantity

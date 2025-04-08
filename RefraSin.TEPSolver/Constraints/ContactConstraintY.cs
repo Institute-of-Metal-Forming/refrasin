@@ -74,4 +74,7 @@ public class ContactConstraintY : INodeContactConstraint
     }
 
     public ContactPair<NodeBase> NodeContact { get; }
+
+    public override string ToString() =>
+        $"y contact constraint between {NodeContact.First} and {NodeContact.Second}";
 }

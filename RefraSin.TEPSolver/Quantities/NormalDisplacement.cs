@@ -15,4 +15,6 @@ public class NormalDisplacement : INodeQuantity, IStateVelocity
     public double DrivingForce(StepVector stepVector) => -Node.GibbsEnergyGradient.Normal;
 
     public NodeBase Node { get; }
+
+    public override string ToString() => $"normal displacement of {Node}";
 }

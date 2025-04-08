@@ -16,4 +16,6 @@ public class ParticleDisplacementX : IParticleQuantity, IStateVelocity
     public double DrivingForce(StepVector stepVector) => 0;
 
     public Particle Particle { get; }
+
+    public override string ToString() => $"x displacement of {Particle}";
 }

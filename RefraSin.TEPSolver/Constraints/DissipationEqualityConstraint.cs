@@ -53,4 +53,6 @@ public class DissipationEqualityConstraint : IGlobalConstraint
             yield return (index, index, -2 * flux.DissipationFactor(stepVector));
         }
     }
+
+    public override string ToString() => "global dissipation equality constraint";
 }
