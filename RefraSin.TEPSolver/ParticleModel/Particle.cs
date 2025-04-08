@@ -70,7 +70,7 @@ public class Particle : IParticle<NodeBase>
             + new AbsoluteVector(
                 stepVector.QuantityValue<ParticleDisplacementX>(previousState),
                 stepVector.QuantityValue<ParticleDisplacementY>(previousState)
-            );
+            ) * timeStepWidth;
         RotationAngle = previousState.RotationAngle;
 
         _nodes = previousState
