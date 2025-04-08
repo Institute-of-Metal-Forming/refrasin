@@ -20,11 +20,12 @@ public class VolumeBalanceConstraint : INodeConstraint
     {
         var normalVolumeTerm =
             Node.VolumeGradient.Normal * stepVector.QuantityValue<NormalDisplacement>(Node);
-        var tangentialVolumeTerm =
-            Node is NeckNode
-                ? Node.VolumeGradient.Tangential
-                    * stepVector.QuantityValue<TangentialDisplacement>(Node)
-                : 0;
+        var tangentialVolumeTerm = stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(
+            Node
+        )
+            ? Node.VolumeGradient.Tangential
+                * stepVector.QuantityValue<TangentialDisplacement>(Node)
+            : 0;
         var fluxTerm =
             -stepVector.QuantityValue<FluxToUpper>(Node)
             + stepVector.QuantityValue<FluxToUpper>(Node.Lower);
@@ -38,7 +39,7 @@ public class VolumeBalanceConstraint : INodeConstraint
             stepVector.StepVectorMap.QuantityIndex<NormalDisplacement>(Node),
             Node.VolumeGradient.Normal
         );
-        if (Node is NeckNode)
+        if (stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(Node))
             yield return (
                 stepVector.StepVectorMap.QuantityIndex<TangentialDisplacement>(Node),
                 Node.VolumeGradient.Tangential

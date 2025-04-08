@@ -49,7 +49,7 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         Shift = stepVector is not null
             ? new NormalTangential<double>(
                 stepVector.QuantityValue<NormalDisplacement>(template),
-                template is NeckNode
+                stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(template)
                     ? stepVector.QuantityValue<TangentialDisplacement>(template)
                     : 0
             )

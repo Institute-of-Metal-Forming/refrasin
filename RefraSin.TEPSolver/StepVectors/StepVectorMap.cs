@@ -156,6 +156,22 @@ public class StepVectorMap
         throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
     }
 
+    public bool HasQuantity<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        _particleQuantityIndexMap.ContainsKey((typeof(TQuantity), particle));
+
+    public bool HasQuantity<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        _particleContactQuantityIndexMap.ContainsKey((typeof(TQuantity), particleContact));
+
+    public bool HasQuantity<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity =>
+        _nodeQuantityIndexMap.ContainsKey((typeof(TQuantity), node));
+
+    public bool HasQuantity<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        _nodeContactQuantityIndexMap.ContainsKey((typeof(TQuantity), nodeContact));
+
     private readonly Dictionary<Type, IQuantity> _globalQuantityInstanceMap = new();
 
     private readonly Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new(

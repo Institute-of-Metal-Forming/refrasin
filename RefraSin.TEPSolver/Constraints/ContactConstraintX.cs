@@ -29,14 +29,11 @@ public class ContactConstraintX : INodeContactConstraint
             -Cos(
                 node.Particle.RotationAngle + node.Coordinates.Phi + node.RadiusNormalAngle.ToLower
             ) * stepVector.QuantityValue<NormalDisplacement>(node);
-        var byTangential =
-            node is NeckNode
-                ? Cos(
-                    node.Particle.RotationAngle
-                        + node.Coordinates.Phi
-                        + node.RadiusTangentAngle.ToLower
-                ) * stepVector.QuantityValue<TangentialDisplacement>(node)
-                : 0;
+        var byTangential = stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(node)
+            ? Cos(
+                node.Particle.RotationAngle + node.Coordinates.Phi + node.RadiusTangentAngle.ToLower
+            ) * stepVector.QuantityValue<TangentialDisplacement>(node)
+            : 0;
         var byParticle = stepVector.QuantityValue<ParticleDisplacementX>(node.Particle);
 
         return byNormal + byTangential + byParticle;
@@ -58,7 +55,7 @@ public class ContactConstraintX : INodeContactConstraint
                 node.Particle.RotationAngle + node.Coordinates.Phi + node.RadiusNormalAngle.ToLower
             ) * sign
         );
-        if (node is NeckNode)
+        if (stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(node))
             yield return (
                 stepVector.StepVectorMap.QuantityIndex<TangentialDisplacement>(node),
                 Cos(
