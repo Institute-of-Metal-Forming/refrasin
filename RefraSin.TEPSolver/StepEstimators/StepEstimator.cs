@@ -1,10 +1,8 @@
-using RefraSin.ParticleModel.Particles.Extensions;
-using RefraSin.ProcessModel.Sintering;
+using RefraSin.Coordinates;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
-using GrainBoundaryNode = RefraSin.TEPSolver.ParticleModel.GrainBoundaryNode;
 using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 
 namespace RefraSin.TEPSolver.StepEstimators;
@@ -21,90 +19,138 @@ class StepEstimator : IStepEstimator
 
     private static void FillStepVector(StepVector stepVector, SolutionState currentState)
     {
-        stepVector.SetConstraintLambdaValue<DissipationEqualityConstraint>(1);
+        foreach (var constraint in stepVector.StepVectorMap.Constraints)
+        {
+            stepVector.SetConstraintLambdaValue(
+                constraint,
+                constraint switch
+                {
+                    FixedParticleConstraintX or FixedParticleConstraintY => 0,
+                    _ => 1,
+                }
+            );
+        }
 
         foreach (var particle in currentState.Particles)
         {
             foreach (var node in particle.Nodes)
             {
-                if (node.Type is NodeType.Surface)
+                if (node.Type is not NodeType.Neck)
                 {
+                    var fluxToUpper = GuessFluxToUpper(node);
+                    var fluxBalance = fluxToUpper - GuessFluxToUpper(node.Lower);
+
                     stepVector.SetQuantityValue<NormalDisplacement>(
                         node,
-                        GuessNormalDisplacement(node)
+                        GuessNormalDisplacement(node, fluxBalance)
+                    );
+                    stepVector.SetQuantityValue<FluxToUpper>(node, fluxToUpper);
+                }
+            }
+
+            foreach (var neckNode in particle.Nodes.OfType<NeckNode>())
+            {
+                var fluxToUpper = GuessFluxToUpper(neckNode);
+                var fluxBalance = fluxToUpper - GuessFluxToUpper(neckNode.Lower);
+
+                if (neckNode.Lower is GrainBoundaryNode)
+                {
+                    stepVector.SetQuantityValue<NormalDisplacement>(
+                        neckNode,
+                        stepVector.QuantityValue<NormalDisplacement>(neckNode.Lower)
+                    );
+                }
+                else
+                {
+                    stepVector.SetQuantityValue<NormalDisplacement>(
+                        neckNode,
+                        stepVector.QuantityValue<NormalDisplacement>(neckNode.Upper)
                     );
                 }
 
-                stepVector.SetQuantityValue<FluxToUpper>(node, GuessFluxToUpper(node));
-                stepVector.SetConstraintLambdaValue<VolumeBalanceConstraint>(node, 1);
+                stepVector.SetQuantityValue<TangentialDisplacement>(
+                    neckNode,
+                    GuessTangentialDisplacement(neckNode, fluxBalance, stepVector)
+                );
+                stepVector.SetQuantityValue<FluxToUpper>(neckNode, fluxToUpper);
             }
         }
 
-        foreach (var contact in currentState.ParticleContacts)
+        foreach (var particle in currentState.Particles)
         {
-            var averageNormalDisplacement =
-                contact
-                    .FirstNodes<Particle, NodeBase>()
-                    .OfType<GrainBoundaryNode>()
-                    .Average(GuessNormalDisplacement)
-                + contact
-                    .SecondNodes<Particle, NodeBase>()
-                    .OfType<GrainBoundaryNode>()
-                    .Average(GuessNormalDisplacement);
+            var isXFixed = stepVector.StepVectorMap.HasConstraint<FixedParticleConstraintX>(
+                particle
+            );
+            var isYFixed = stepVector.StepVectorMap.HasConstraint<FixedParticleConstraintY>(
+                particle
+            );
 
-            foreach (var node in contact.FirstNodes<Particle, NodeBase>().OfType<ContactNodeBase>())
+            if (!isXFixed || !isYFixed)
             {
-                stepVector.SetConstraintLambdaValue<ContactConstraintX>(node, 1);
-                stepVector.SetConstraintLambdaValue<ContactConstraintY>(node, 1);
+                var grainBoundaryNode = particle.Nodes.OfType<GrainBoundaryNode>().First();
+                var normalNodeDisplacement =
+                    stepVector.QuantityValue<NormalDisplacement>(grainBoundaryNode)
+                    + stepVector.QuantityValue<NormalDisplacement>(grainBoundaryNode.ContactedNode);
 
-                stepVector.SetQuantityValue<NormalDisplacement>(node, averageNormalDisplacement);
-                stepVector.SetQuantityValue<NormalDisplacement>(
-                    node.ContactedNode,
-                    averageNormalDisplacement
-                );
-
-                if (node.Type is NodeType.Neck)
+                if (!isXFixed)
                 {
-                    stepVector.SetQuantityValue<TangentialDisplacement>(
-                        node,
-                        GuessTangentialDisplacement(node)
+                    stepVector.SetQuantityValue<ParticleDisplacementX>(
+                        particle,
+                        Cos(
+                            grainBoundaryNode.Particle.RotationAngle
+                                + grainBoundaryNode.Coordinates.Phi
+                                + grainBoundaryNode.RadiusNormalAngle.ToLower
+                        ) * normalNodeDisplacement
                     );
-                    stepVector.SetQuantityValue<TangentialDisplacement>(
-                        node.ContactedNode,
-                        GuessTangentialDisplacement(node.ContactedNode)
+                }
+
+                if (!isYFixed)
+                {
+                    stepVector.SetQuantityValue<ParticleDisplacementY>(
+                        particle,
+                        Sin(
+                            grainBoundaryNode.Particle.RotationAngle
+                                + grainBoundaryNode.Coordinates.Phi
+                                + grainBoundaryNode.RadiusNormalAngle.ToLower
+                        ) * normalNodeDisplacement
                     );
                 }
             }
         }
     }
 
-    private static double GuessNormalDisplacement(NodeBase node)
+    private static double GuessNormalDisplacement(NodeBase node, double fluxBalance)
     {
-        var fluxBalance = GuessFluxToUpper(node) - GuessFluxToUpper(node.Lower);
-
-        var displacement = fluxBalance / node.VolumeGradient.Normal;
+        var displacement = -fluxBalance / node.VolumeGradient.Normal;
         return displacement;
     }
 
-    private static double GuessTangentialDisplacement(NodeBase node)
+    private static double GuessTangentialDisplacement(
+        NodeBase node,
+        double fluxBalance,
+        StepVector stepVector
+    )
     {
-        var fluxBalance = GuessFluxToUpper(node) - GuessFluxToUpper(node.Lower);
-
-        var displacement = fluxBalance / node.VolumeGradient.Tangential;
+        var displacement =
+            -(
+                fluxBalance
+                + stepVector.QuantityValue<NormalDisplacement>(node) * node.VolumeGradient.Normal
+            ) / node.VolumeGradient.Tangential;
         return displacement;
     }
 
     private static double GuessFluxToUpper(NodeBase node) =>
-        -node.InterfaceDiffusionCoefficient.ToUpper
-        * (GuessVacancyConcentration(node) - GuessVacancyConcentration(node.Upper))
-        / Pow(node.SurfaceDistance.ToUpper, 2);
+        node.InterfaceDiffusionCoefficient.ToUpper
+        * (GuessVacancyConcentration(node.Upper) - GuessVacancyConcentration(node))
+        / node.SurfaceDistance.ToUpper;
 
-    private static double GuessVacancyConcentration(NodeBase node) =>
-        (
-            node is not NeckNode
-                ? node.GibbsEnergyGradient.Normal
-                : -Abs(node.GibbsEnergyGradient.Tangential)
-        ) / node.Particle.VacancyVolumeEnergy;
+    private static double GuessVacancyConcentration(NodeBase node)
+    {
+        var energyGradient = node is not NeckNode
+            ? -node.GibbsEnergyGradient.Normal
+            : 20 * Abs(node.GibbsEnergyGradient.Tangential) - node.GibbsEnergyGradient.Normal;
+        return energyGradient / node.SurfaceDistance.Sum * 2 / node.Particle.VacancyVolumeEnergy;
+    }
 
     /// <inheritdoc />
     public void RegisterWithSolver(SinteringSolver solver) { }
