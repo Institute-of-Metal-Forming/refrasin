@@ -215,7 +215,9 @@ public class StepVectorMap
     public IEnumerable<IQuantity> Quantities =>
         _globalQuantityInstanceMap
             .Values.Concat(_particleQuantityInstanceMap.Values)
-            .Concat(_nodeQuantityInstanceMap.Values);
+            .Concat(_particleContactQuantityInstanceMap.Values)
+            .Concat(_nodeQuantityInstanceMap.Values)
+            .Concat(_nodeContactQuantityInstanceMap.Values);
 
     private readonly Dictionary<Type, int> _globalConstraintIndexMap = new();
 
@@ -274,6 +276,22 @@ public class StepVectorMap
         throw new ArgumentException($"Invalid constraint type: {constraint.GetType()}");
     }
 
+    public bool HasConstraint<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        _particleConstraintIndexMap.ContainsKey((typeof(TConstraint), particle));
+
+    public bool HasConstraint<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        _particleContactConstraintIndexMap.ContainsKey((typeof(TConstraint), particleContact));
+
+    public bool HasConstraint<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint =>
+        _nodeConstraintIndexMap.ContainsKey((typeof(TConstraint), node));
+
+    public bool HasConstraint<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        _nodeContactConstraintIndexMap.ContainsKey((typeof(TConstraint), nodeContact));
+
     private readonly Dictionary<Type, IConstraint> _globalConstraintInstanceMap = new();
 
     private readonly Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new(
@@ -317,7 +335,9 @@ public class StepVectorMap
     public IEnumerable<IConstraint> Constraints =>
         _globalConstraintInstanceMap
             .Values.Concat(_particleConstraintInstanceMap.Values)
-            .Concat(_nodeConstraintInstanceMap.Values);
+            .Concat(_particleContactConstraintInstanceMap.Values)
+            .Concat(_nodeConstraintInstanceMap.Values)
+            .Concat(_nodeContactConstraintInstanceMap.Values);
 
     private class MapEqualityComparer<T> : EqualityComparer<(Type, T)>
         where T : IVertex
