@@ -256,11 +256,9 @@ public class EquationSystemBuilder
             .AddNodeContactConstraint<ContactConstraintX>()
             .AddNodeContactConstraint<ContactConstraintY>()
             .AddParticleConstraint<FixedParticleConstraintX>(particle =>
-                // particle.SolutionState.Particles[0] == particle
-                true
+                particle.SolutionState.Particles[0] == particle
             )
             .AddParticleConstraint<FixedParticleConstraintY>(particle =>
-                // particle.SolutionState.Particles[0] == particle
-                true
+                particle.SolutionState.Particles[0] == particle
             );
 }
