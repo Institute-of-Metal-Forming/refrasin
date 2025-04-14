@@ -96,7 +96,7 @@ public static class InitialStates
         var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
             MaterialId,
             (300e-6, 0),
-            0,
+            Angle.Straight,
             nodeCountPerParticle,
             100e-6,
             0.2,
