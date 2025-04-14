@@ -17,11 +17,11 @@ public static class InitialStates
     )> Generate()
     {
         yield return (nameof(OneParticle), OneParticle());
-        // yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
+        yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
         // yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
-        // yield return (nameof(FourParticleRing), FourParticleRing());
-        // yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
-        // yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
+        yield return (nameof(FourParticleRing), FourParticleRing());
+        yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
+        yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
     }
 
     public static readonly Guid MaterialId = Guid.NewGuid();
@@ -62,7 +62,7 @@ public static class InitialStates
         var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
             MaterialId,
             (300e-6, 0),
-            0,
+            Angle.Half,
             nodeCountPerParticle,
             100e-6,
             0.2,
@@ -82,17 +82,27 @@ public static class InitialStates
     {
         var nodeCountPerParticle = 50;
 
-        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, MaterialId)
-        {
-            NodeCount = nodeCountPerParticle,
-        }.GetParticle();
+        var particle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            MaterialId,
+            (0, 0),
+            0,
+            nodeCountPerParticle,
+            100e-6,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
 
-        var particle2 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, MaterialId)
-        {
-            NodeCount = nodeCountPerParticle,
-            RotationAngle = Angle.Half,
-            CenterCoordinates = (300e-6, 0),
-        }.GetParticle();
+        var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            MaterialId,
+            (300e-6, 0),
+            0,
+            nodeCountPerParticle,
+            100e-6,
+            0.2,
+            5,
+            0.2
+        ).GetParticle();
 
         var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
         var compactedState = new FocalCompactionStep(
@@ -104,7 +114,6 @@ public static class InitialStates
         var remeshedState = new GrainBoundaryRemesher(-0.1).RemeshSystem(compactedState);
 
         return new SystemState(Guid.NewGuid(), compactedState.Time, remeshedState);
-        return compactedState;
     }
 
     private static ISystemState<IParticle<IParticleNode>, IParticleNode> FourParticleRing()
