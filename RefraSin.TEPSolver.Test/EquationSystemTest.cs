@@ -53,16 +53,11 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
             normalizedConditions
         );
         var equationSystem = SolverRoutines.Default.EquationSystemBuilder.Build(solutionState);
-        var guess = new StepEstimator().EstimateStep(equationSystem);
+        var stepVector = new StepEstimator().EstimateStep(equationSystem);
 
-        SaveEquationSystem(equationSystem, guess);
-    }
-
-    private void SaveEquationSystem(EquationSystem system, StepVector stepVector)
-    {
-        var jac = system.Jacobian(stepVector);
+        var jac = equationSystem.Jacobian(stepVector);
         jac.CoerceZero(1e-8);
-        SaveMatrix(jac, -system.Lagrangian(stepVector));
+        DumpMatrix(jac, -equationSystem.Lagrangian(stepVector));
         PlotJacobianStructure(jac);
     }
 
@@ -74,16 +69,21 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         plot.SaveHtml(Path.Combine(_tmpDir, "state.html"));
     }
 
-    private void SaveMatrix(Matrix<double> matrix, Vector<double> rightSide)
+    private void DumpMatrix(Matrix<double> matrix, Vector<double> rightSide)
     {
         var builder = new StringBuilder();
         builder.AppendLine(
-            matrix.ToMatrixString(
-                matrix.RowCount,
-                matrix.ColumnCount,
-                null,
-                CultureInfo.InvariantCulture
-            )
+            matrix
+                .Append(Matrix<double>.Build.DenseOfColumnVectors(rightSide))
+                .ToMatrixString(
+                    matrix.RowCount,
+                    matrix.ColumnCount + 1,
+                    null,
+                    CultureInfo.InvariantCulture
+                )
+        );
+        builder.AppendLine(
+            rightSide.ToVectorString(1, int.MaxValue, null, CultureInfo.InvariantCulture)
         );
         builder.AppendLine(
             $"Determinant: {matrix.Determinant().ToString(CultureInfo.InvariantCulture)}"
