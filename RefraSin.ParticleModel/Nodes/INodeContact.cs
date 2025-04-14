@@ -1,5 +1,3 @@
-using RefraSin.Graphs;
-
 namespace RefraSin.ParticleModel.Nodes;
 
 /// <summary>

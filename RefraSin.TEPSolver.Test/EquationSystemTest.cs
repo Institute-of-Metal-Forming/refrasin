@@ -12,6 +12,7 @@ using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepEstimators;
+using RefraSin.TEPSolver.StepVectors;
 using ScottPlot;
 
 namespace RefraSin.TEPSolver.Test;
@@ -51,52 +52,29 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
             [normalizedMaterial],
             normalizedConditions
         );
-        var guess = new StepEstimator().EstimateStep(normalizedConditions, solutionState);
-        var equationSystem = new EquationSystem.EquationSystem(solutionState, guess);
+        var equationSystem = SolverRoutines.Default.EquationSystemBuilder.Build(solutionState);
+        var guess = new StepEstimator().EstimateStep(equationSystem);
 
-        SaveEquationSystem(equationSystem);
+        SaveEquationSystem(equationSystem, guess);
     }
 
-    private void SaveEquationSystem(EquationSystem.EquationSystem system)
+    private void SaveEquationSystem(EquationSystem system, StepVector stepVector)
     {
-        var jac = system.Jacobian();
+        var jac = system.Jacobian(stepVector);
         jac.CoerceZero(1e-8);
-        SaveMatrix(jac, -system.Lagrangian(), "full_jacobian");
-        PlotJacobianStructure(jac, "full_jacobian");
-
-        foreach (var p in state.Particles)
-        {
-            var pJac = system.ParticleBlockJacobian(p);
-            pJac.CoerceZero(1e-8);
-            SaveMatrix(pJac, -system.ParticleBlockLagrangian(p), $"particle_{p.Id}");
-            PlotJacobianStructure(jac, $"particle_{p.Id}");
-        }
-
-        foreach (var c in state.ParticleContacts)
-        {
-            var contactJac = system.ContactBlockJacobian(c);
-            contactJac.CoerceZero(1e-8);
-            SaveMatrix(
-                contactJac,
-                -system.ContactBlockLagrangian(c),
-                $"contact_{c.From.Id}_{c.To.Id}"
-            );
-            PlotJacobianStructure(jac, $"contact_{c.From.Id}_{c.To.Id}");
-        }
-
-        var globalJac = system.GlobalBlockJacobian();
-        globalJac.CoerceZero(1e-8);
-        SaveMatrix(globalJac, -system.GlobalBlockLagrangian(), "global");
-        PlotJacobianStructure(jac, "global");
+        SaveMatrix(jac, -system.Lagrangian(stepVector));
+        PlotJacobianStructure(jac);
     }
 
     private void PlotState(ISystemState<IParticle<IParticleNode>, IParticleNode> state)
     {
-        var plot = ParticlePlot.PlotParticles(state.Particles);
+        var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            state.Particles
+        );
         plot.SaveHtml(Path.Combine(_tmpDir, "state.html"));
     }
 
-    private void SaveMatrix(Matrix<double> matrix, Vector<double> rightSide, string name)
+    private void SaveMatrix(Matrix<double> matrix, Vector<double> rightSide)
     {
         var builder = new StringBuilder();
         builder.AppendLine(
@@ -132,10 +110,14 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         );
         builder.AppendLine($"Rank: {matrix.Rank()}({matrix.Rank() - matrix.RowCount})");
 
-        File.WriteAllText(Path.Combine(_tmpDir, $"{name}.txt"), builder.ToString(), Encoding.UTF8);
+        File.WriteAllText(
+            Path.Combine(_tmpDir, $"jacobian.txt"),
+            builder.ToString(),
+            Encoding.UTF8
+        );
     }
 
-    private void PlotJacobianStructure(Matrix<double> jacobian, string name)
+    private void PlotJacobianStructure(Matrix<double> jacobian)
     {
         var matrix = jacobian.PointwiseSign();
 
@@ -145,6 +127,6 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         plt.Layout.Frameless();
         plt.Axes.Margins(0, 0);
 
-        plt.SavePng(Path.Combine(_tmpDir, $"{name}.png"), matrix.ColumnCount, matrix.RowCount);
+        plt.SavePng(Path.Combine(_tmpDir, $"jacobian.png"), matrix.ColumnCount, matrix.RowCount);
     }
 }

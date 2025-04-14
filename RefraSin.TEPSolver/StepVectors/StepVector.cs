@@ -1,7 +1,9 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using RefraSin.Graphs;
+using RefraSin.ParticleModel;
+using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
@@ -23,60 +25,98 @@ public class StepVector : DenseVector
 
     public StepVectorMap StepVectorMap { get; }
 
-    public double LambdaDissipation() => this[StepVectorMap.LambdaDissipation()];
+    public double QuantityValue<TQuantity>()
+        where TQuantity : IGlobalQuantity => this[StepVectorMap.QuantityIndex<TQuantity>()];
 
-    public double NormalDisplacement(INode node) => this[StepVectorMap.NormalDisplacement(node)];
+    public double QuantityValue<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particle)];
 
-    public double FluxToUpper(INode node) => this[StepVectorMap.FluxToUpper(node)];
+    public double QuantityValue<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity => this[StepVectorMap.QuantityIndex<TQuantity>(node)];
 
-    public double LambdaVolume(INode node) => this[StepVectorMap.LambdaVolume(node)];
+    public double QuantityValue<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(nodeContact)];
 
-    public double TangentialDisplacement(INode node) =>
-        this[StepVectorMap.TangentialDisplacement(node)];
+    public double QuantityValue<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particleContact)];
 
-    public double LambdaContactDistance(INode node) =>
-        this[StepVectorMap.LambdaContactDistance(node)];
+    public double QuantityValue(IQuantity quantity) => this[StepVectorMap.QuantityIndex(quantity)];
 
-    public double LambdaContactDirection(INode node) =>
-        this[StepVectorMap.LambdaContactDirection(node)];
+    public void SetQuantityValue<TQuantity>(double value)
+        where TQuantity : IGlobalQuantity => this[StepVectorMap.QuantityIndex<TQuantity>()] = value;
 
-    public double LambdaCycleX(IGraphCycle<Particle, ParticleContact> cycle) =>
-        this[StepVectorMap.LambdaCycleX(cycle)];
+    public void SetQuantityValue<TQuantity>(Particle particle, double value)
+        where TQuantity : IParticleQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particle)] = value;
 
-    public double LambdaCycleY(IGraphCycle<Particle, ParticleContact> cycle) =>
-        this[StepVectorMap.LambdaCycleY(cycle)];
+    public void SetQuantityValue<TQuantity>(NodeBase node, double value)
+        where TQuantity : INodeQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(node)] = value;
 
-    public double RadialDisplacement(ParticleContact contact) =>
-        this[StepVectorMap.RadialDisplacement(contact)];
+    public void SetQuantityValue<TQuantity>(ContactPair<NodeBase> nodeContact, double value)
+        where TQuantity : INodeContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(nodeContact)] = value;
 
-    public double AngleDisplacement(ParticleContact contact) =>
-        this[StepVectorMap.AngleDisplacement(contact)];
+    public void SetQuantityValue<TQuantity>(ContactPair<Particle> particleContact, double value)
+        where TQuantity : IParticleContactQuantity =>
+        this[StepVectorMap.QuantityIndex<TQuantity>(particleContact)] = value;
 
-    public void LambdaDissipation(double value) => this[StepVectorMap.LambdaDissipation()] = value;
+    public void SetQuantityValue(IQuantity quantity, double value) =>
+        this[StepVectorMap.QuantityIndex(quantity)] = value;
 
-    public void NormalDisplacement(INode node, double value) =>
-        this[StepVectorMap.NormalDisplacement(node)] = value;
+    public double ConstraintLambdaValue<TConstraint>()
+        where TConstraint : IGlobalConstraint => this[StepVectorMap.ConstraintIndex<TConstraint>()];
 
-    public void FluxToUpper(INode node, double value) =>
-        this[StepVectorMap.FluxToUpper(node)] = value;
+    public double ConstraintLambdaValue<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particle)];
 
-    public void LambdaVolume(INode node, double value) =>
-        this[StepVectorMap.LambdaVolume(node)] = value;
+    public double ConstraintLambdaValue<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(node)];
 
-    public void TangentialDisplacement(INode node, double value) =>
-        this[StepVectorMap.TangentialDisplacement(node)] = value;
+    public double ConstraintLambdaValue<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(nodeContact)];
 
-    public void LambdaContactDistance(INode node, double value) =>
-        this[StepVectorMap.LambdaContactDistance(node)] = value;
+    public double ConstraintLambdaValue<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particleContact)];
 
-    public void LambdaContactDirection(INode node, double value) =>
-        this[StepVectorMap.LambdaContactDirection(node)] = value;
+    public double ConstraintLambdaValue(IConstraint constraint) =>
+        this[StepVectorMap.ConstraintIndex(constraint)];
 
-    public void RadialDisplacement(ParticleContact contact, double value) =>
-        this[StepVectorMap.RadialDisplacement(contact)] = value;
+    public void SetConstraintLambdaValue<TConstraint>(double value)
+        where TConstraint : IGlobalConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>()] = value;
 
-    public void AngleDisplacement(ParticleContact contact, double value) =>
-        this[StepVectorMap.AngleDisplacement(contact)] = value;
+    public void SetConstraintLambdaValue<TConstraint>(Particle particle, double value)
+        where TConstraint : IParticleConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particle)] = value;
+
+    public void SetConstraintLambdaValue<TConstraint>(NodeBase node, double value)
+        where TConstraint : INodeConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(node)] = value;
+
+    public void SetConstraintLambdaValue<TConstraint>(
+        ContactPair<NodeBase> nodeContact,
+        double value
+    )
+        where TConstraint : INodeContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(nodeContact)] = value;
+
+    public void SetConstraintLambdaValue<TConstraint>(
+        ContactPair<Particle> particleContact,
+        double value
+    )
+        where TConstraint : IParticleContactConstraint =>
+        this[StepVectorMap.ConstraintIndex<TConstraint>(particleContact)] = value;
+
+    public void SetConstraintLambdaValue(IConstraint constraint, double value) =>
+        this[StepVectorMap.ConstraintIndex(constraint)] = value;
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);
@@ -95,56 +135,8 @@ public class StepVector : DenseVector
 
     public StepVector Copy() => new(Build.DenseOfVector(this), StepVectorMap);
 
-    public Vector<double> ParticleBlock(IParticle particle)
-    {
-        var block = StepVectorMap[particle];
-        return new DenseVector(Values[block.start..(block.start + block.length)]);
-    }
-
-    public Vector<double> ContactBlock(IParticleContactEdge contact)
-    {
-        var block = StepVectorMap[contact];
-        return new DenseVector(Values[block.start..(block.start + block.length)]);
-    }
-
-    public Vector<double> GlobalBlock() => new DenseVector(Values[StepVectorMap.GlobalStart..]);
-
     public void Update(double[] data)
     {
         data.CopyTo(Values, 0);
-    }
-
-    public void UpdateParticleBlock(IParticle particle, double[] data)
-    {
-        var block = StepVectorMap[particle];
-
-        if (data.Length != block.length)
-            throw new InvalidOperationException(
-                "'data' must have exactly the length of the particle block."
-            );
-
-        data.CopyTo(Values, block.start);
-    }
-
-    public void UpdateContactBlock(IParticleContactEdge contact, double[] data)
-    {
-        var block = StepVectorMap[contact];
-
-        if (data.Length != block.length)
-            throw new InvalidOperationException(
-                "'data' must have exactly the length of the contact block."
-            );
-
-        data.CopyTo(Values, block.start);
-    }
-
-    public void UpdateGlobalBlock(double[] data)
-    {
-        if (data.Length != StepVectorMap.GlobalLength)
-            throw new InvalidOperationException(
-                "'data' must have exactly the length of the global block."
-            );
-
-        data.CopyTo(Values, StepVectorMap.GlobalStart);
     }
 }

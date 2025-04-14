@@ -1,10 +1,5 @@
 using Microsoft.Extensions.Logging;
-using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Polar;
-using RefraSin.Enumerables;
-using RefraSin.Graphs;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
@@ -103,22 +98,8 @@ internal class SolverSession : ISolverSession
         var particles = CurrentState
             .Particles.Select(p => new ParticleReturn(p, stepVector, Norm))
             .ToReadOnlyParticleCollection<ParticleReturn, NodeReturn>();
-        var nodes = particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
-        var particleContacts = CurrentState.ParticleContacts.Select(
-            c => new ParticleContactEdge<ParticleReturn>(particles[c.From.Id], particles[c.To.Id])
-        );
-        var nodeContacts = CurrentState.NodeContacts.Select(c => new Edge<NodeReturn>(
-            nodes[c.From.Id],
-            nodes[c.To.Id]
-        ));
         _reportSystemState(
-            new SystemState(
-                CurrentState.Id,
-                CurrentState.Time * Norm.Time,
-                particles,
-                particleContacts,
-                nodeContacts
-            )
+            new SystemState(CurrentState.Id, CurrentState.Time * Norm.Time, particles)
         );
     }
 }

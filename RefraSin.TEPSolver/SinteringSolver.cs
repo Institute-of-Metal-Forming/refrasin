@@ -1,20 +1,9 @@
 using Microsoft.Extensions.Logging;
-using RefraSin.Coordinates;
-using RefraSin.Coordinates.Absolute;
-using RefraSin.Coordinates.Cartesian;
-using RefraSin.Coordinates.Polar;
-using RefraSin.Graphs;
 using RefraSin.Numerics.Exceptions;
-using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Collections;
-using RefraSin.ParticleModel.Nodes;
-using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
-using RefraSin.Storage;
-using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.StepValidators;
@@ -145,11 +134,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         IStateRecoverer[] recoverers
     )
     {
-        var stepVector = session.Routines.TimeStepper.Step(
-            session,
-            baseState,
-            session.LastStep ?? session.Routines.StepEstimator.EstimateStep(session, baseState)
-        );
+        var stepVector = session.Routines.TimeStepper.Step(session, baseState);
 
         try
         {

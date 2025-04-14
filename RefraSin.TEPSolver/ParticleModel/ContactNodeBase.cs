@@ -1,6 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Nodes.Extensions;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -11,16 +11,21 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
     where TContacted : ContactNodeBase<TContacted>
 {
     /// <inheritdoc />
-    protected ContactNodeBase(INode node, Particle particle)
-        : base(node, particle) { }
+    protected ContactNodeBase(
+        INode node,
+        Particle particle,
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
+    )
+        : base(node, particle, contactedNodeId, contactedParticleId) { }
 
     protected ContactNodeBase(
         Guid id,
         double r,
         Angle phi,
         Particle particle,
-        Guid contactedNodeId,
-        Guid contactedParticleId
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
     )
         : base(id, r, phi, particle, contactedNodeId, contactedParticleId) { }
 
@@ -43,97 +48,24 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
         _materialInterface ??= Particle.InterfaceProperties[ContactedNode.Particle.MaterialId];
 
     private IInterfaceProperties? _materialInterface;
-
-    /// <inheritdoc />
-    public override NormalTangential<Angle> CenterShiftVectorDirection =>
-        _centerShiftVectorDirection ??= IsParentsNode
-            ? new NormalTangential<Angle>(
-                AngleDistanceToContactDirection - (Pi - RadiusNormalAngle.ToLower),
-                AngleDistanceToContactDirection + (Pi - RadiusTangentAngle.ToUpper)
-            )
-            : new NormalTangential<Angle>(
-                (Pi - RadiusNormalAngle.ToUpper) + AngleDistanceToContactDirection,
-                (Pi - RadiusTangentAngle.ToUpper) + AngleDistanceToContactDirection
-            );
-
-    private NormalTangential<Angle>? _centerShiftVectorDirection;
-
-    /// <inheritdoc />
-    public override NormalTangential<Angle> TorqueProjectionAngle =>
-        _torqueProjectionAngle ??= IsParentsNode
-            ? new NormalTangential<Angle>(
-                RadiusNormalAngle.ToLower
-                    - (
-                        Pi
-                        - AngleDistanceToContactDirection
-                        + ContactedNode.AngleDistanceToContactDirection
-                    ),
-                Pi
-                    - RadiusTangentAngle.ToLower
-                    - AngleDistanceToContactDirection
-                    + ContactedNode.AngleDistanceToContactDirection
-            ) * -1
-            : new NormalTangential<Angle>(
-                Pi - RadiusNormalAngle.ToUpper,
-                RadiusTangentAngle.ToUpper
-            );
-
-    private NormalTangential<Angle>? _torqueProjectionAngle;
-
-    public override NormalTangential<double> TorqueLeverArm =>
-        _torqueLeverArm ??=
-            new NormalTangential<double>(
-                Sin(TorqueProjectionAngle.Normal),
-                Sin(TorqueProjectionAngle.Tangential)
-            ) * (IsParentsNode ? ContactedNode.Coordinates.R : Coordinates.R);
-
-    private NormalTangential<double>? _torqueLeverArm;
-
-    /// <inheritdoc />
-    public override NormalTangential<double> ContactDistanceGradient =>
-        _contactDistanceGradient ??= new NormalTangential<double>(
-            Cos(CenterShiftVectorDirection.Normal),
-            Cos(CenterShiftVectorDirection.Tangential)
-        );
-
-    private NormalTangential<double>? _contactDistanceGradient;
-
-    /// <inheritdoc />
-    public override NormalTangential<double> ContactDirectionGradient =>
-        _contactDirectionGradient ??= new NormalTangential<double>(
-            Sin(CenterShiftVectorDirection.Normal) / ContactDistance,
-            Sin(CenterShiftVectorDirection.Tangential) / ContactDistance
-        );
-
-    private NormalTangential<double>? _contactDirectionGradient;
 }
 
 /// <summary>
 /// Abstrakte Basisklasse für Oberflächenknoten eines Partikels, welche Kontakt zur Oberfläche eines anderen partiekls haben.
 /// </summary>
-public abstract class ContactNodeBase
-    : NodeBase,
-        INodeContactGradients,
-        INodeContactNeighbors,
-        INodeContactGeometry
+public abstract class ContactNodeBase : NodeBase, INodeContact
 {
-    private Guid? _contactedParticleId;
-    private Guid? _contactedNodeId;
-
     /// <inheritdoc />
-    protected ContactNodeBase(INode node, Particle particle)
+    protected ContactNodeBase(
+        INode node,
+        Particle particle,
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
+    )
         : base(node, particle)
     {
-        if (node is INodeContact nodeContact)
-        {
-            _contactedNodeId = nodeContact.ContactedNodeId;
-            _contactedParticleId = nodeContact.ContactedParticleId;
-        }
-        else
-        {
-            _contactedNodeId = null;
-            _contactedParticleId = null;
-        }
+        _contactedNodeId = contactedNodeId;
+        _contactedParticleId = contactedParticleId;
     }
 
     protected ContactNodeBase(
@@ -141,8 +73,8 @@ public abstract class ContactNodeBase
         double r,
         Angle phi,
         Particle particle,
-        Guid contactedNodeId,
-        Guid contactedParticleId
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
     )
         : base(id, r, phi, particle)
     {
@@ -151,16 +83,11 @@ public abstract class ContactNodeBase
     }
 
     /// <inheritdoc />
-    public Guid ContactedParticleId =>
-        _contactedParticleId ??= Particle.SolutionState.Nodes[ContactedNodeId].ParticleId;
+    public Guid ContactedParticleId => _contactedParticleId ?? ContactedNode.Particle.Id;
 
     /// <inheritdoc />
     public Guid ContactedNodeId =>
-        _contactedNodeId ??= Particle.SolutionState.NodeContacts.From(Id).Single().To.Id;
-
-    public Particle ContactedParticle => ContactedNode.Particle;
-
-    IParticle INodeContactNeighbors.ContactedParticle => ContactedParticle;
+        _contactedNodeId ?? this.FindContactedNodeByCoordinates(Particle.SolutionState.Nodes).Id;
 
     public ContactNodeBase ContactedNode =>
         _contactedNode ??=
@@ -170,65 +97,6 @@ public abstract class ContactNodeBase
             );
 
     private ContactNodeBase? _contactedNode;
-
-    INodeContactNeighbors INodeContactNeighbors.ContactedNode => ContactedNode;
-
-    public IPolarVector ContactVector =>
-        IsParentsNode ? Contact.ContactVector : Contact.Reversed().ContactVector;
-
-    public double ContactDistance => ContactVector.R;
-
-    public Angle ContactDirection => IsParentsNode ? Contact.DirectionFrom : Contact.DirectionTo;
-
-    /// <inheritdoc />
-    public Angle AngleDistanceToContactDirection =>
-        _angleDistanceFromContactDirection ??= ContactVector.AngleTo(
-            Coordinates,
-            allowNegative: true
-        );
-
-    private Angle? _angleDistanceFromContactDirection;
-
-    /// <inheritdoc />
-    public abstract NormalTangential<Angle> CenterShiftVectorDirection { get; }
-
-    public abstract NormalTangential<Angle> TorqueProjectionAngle { get; }
-
-    public abstract NormalTangential<double> TorqueLeverArm { get; }
-
-    /// <inheritdoc />
-    public abstract NormalTangential<double> ContactDistanceGradient { get; }
-
-    /// <inheritdoc />
-    public abstract NormalTangential<double> ContactDirectionGradient { get; }
-
-    public bool IsParentsNode => _isParentsNode ??= Contact.From.Id == ParticleId;
-    private bool? _isParentsNode;
-
-    public ParticleContact Contact
-    {
-        get
-        {
-            if (_contact is not null)
-                return _contact;
-
-            _contact = Particle.SolutionState.ParticleContacts.FirstOrDefault(c =>
-                c.From.Id == ParticleId && c.To.Id == ContactedParticleId
-            );
-
-            if (_contact is not null)
-                return _contact;
-
-            _contact = Particle.SolutionState.ParticleContacts.FirstOrDefault(c =>
-                c.To.Id == ParticleId && c.From.Id == ContactedParticleId
-            );
-
-            if (_contact is not null)
-                return _contact;
-
-            throw new InvalidOperationException("Related contact was not found.");
-        }
-    }
-
-    private ParticleContact? _contact;
+    private readonly Guid? _contactedParticleId;
+    private readonly Guid? _contactedNodeId;
 }

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <Authors>Max Weiner</Authors>
-        <Version>1.1.0</Version>
+        <Version>2.0.0</Version>
         <RepositoryUrl>https://github.com/refrabund/refrasin</RepositoryUrl>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -12,7 +12,19 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
-      <ProjectReference Include="..\RefraSin.Graphs\RefraSin.Graphs.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Nodes\INodeContactGeometry.cs" />
+      <Compile Remove="Nodes\INodeContactGradients.cs" />
+      <Compile Remove="Nodes\INodeContactNeighbors.cs" />
+      <Compile Remove="Particles\IParticleContactEdge.cs" />
+      <Compile Remove="Particles\IParticleContacts.cs" />
+      <Compile Remove="Particles\ParticleContactEdge.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="morelinq" />
     </ItemGroup>
 
 </Project>

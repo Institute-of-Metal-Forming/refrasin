@@ -5,7 +5,6 @@ using MathNet.Numerics.RootFinding;
 using Microsoft.Extensions.Logging;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.Numerics.RootFinding;
-using RefraSin.TEPSolver.EquationSystem;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
@@ -18,27 +17,29 @@ public class DirectLagrangianRootFinder(
 ) : ILagrangianRootFinder
 {
     /// <inheritdoc />
-    public StepVector FindRoot(SolutionState currentState, StepVector initialGuess, ILogger logger)
+    public StepVector FindRoot(
+        EquationSystem equationSystem,
+        StepVector initialGuess,
+        ILogger logger
+    )
     {
-        var stepVector = initialGuess.Copy();
-        var system = new EquationSystem.EquationSystem(currentState, stepVector);
+        var solution = RootFinder.FindRoot(Fun, Jac, initialGuess, logger);
 
-        var solution = RootFinder.FindRoot(Fun, Jac, system.StepVector, logger);
-
-        system.StepVector.Update(solution.AsArray());
-
-        return stepVector;
+        return new StepVector(solution, initialGuess.StepVectorMap);
 
         Vector<double> Fun(Vector<double> vector)
         {
-            system.StepVector.Update(vector.AsArray()[..^1]);
-            var result = system.Lagrangian();
+            var result = equationSystem.Lagrangian(
+                new StepVector(vector, initialGuess.StepVectorMap)
+            );
             return result;
         }
 
         Matrix<double> Jac(Vector<double> vector)
         {
-            var result = system.Jacobian();
+            var result = equationSystem.Jacobian(
+                new StepVector(vector, initialGuess.StepVectorMap)
+            );
             return result;
         }
     }

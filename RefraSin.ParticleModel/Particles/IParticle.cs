@@ -1,7 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Polar;
-using RefraSin.Graphs;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 

@@ -4,6 +4,7 @@ using RefraSin.Coordinates.Absolute;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ProcessModel;
 
 namespace RefraSin.TEPSolver.Test;
@@ -15,9 +16,10 @@ public static class InitialStates
         ISystemState<IParticle<IParticleNode>, IParticleNode> state
     )> Generate()
     {
-        // yield return (nameof(OneParticle), OneParticle());
+        yield return (nameof(OneParticle), OneParticle());
         // yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
-        yield return (nameof(FourParticleRing), FourParticleRing());
+        // yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
+        // yield return (nameof(FourParticleRing), FourParticleRing());
         // yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
         // yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
     }
@@ -73,6 +75,35 @@ public static class InitialStates
             initialState
         );
 
+        return compactedState;
+    }
+
+    private static ISystemState<IParticle<IParticleNode>, IParticleNode> Symmetric5PointBoundary()
+    {
+        var nodeCountPerParticle = 50;
+
+        var particle1 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+        }.GetParticle();
+
+        var particle2 = new ShapeFunctionParticleFactory(100e-6, 0.2, 5, 0.2, MaterialId)
+        {
+            NodeCount = nodeCountPerParticle,
+            RotationAngle = Angle.Half,
+            CenterCoordinates = (300e-6, 0),
+        }.GetParticle();
+
+        var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
+        var compactedState = new FocalCompactionStep(
+            new AbsolutePoint(0, 0),
+            8e-6,
+            minimumRelativeIntrusion: 0.9
+        ).Solve(initialState);
+
+        var remeshedState = new GrainBoundaryRemesher(-0.1).RemeshSystem(compactedState);
+
+        return new SystemState(Guid.NewGuid(), compactedState.Time, remeshedState);
         return compactedState;
     }
 

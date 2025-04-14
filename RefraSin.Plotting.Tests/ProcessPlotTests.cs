@@ -154,7 +154,9 @@ public class ProcessPlotTests
     {
         foreach (var state in _states)
         {
-            var plot = ParticlePlot.PlotParticles(state.Particles);
+            var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+                state.Particles
+            );
             plot.Show();
         }
     }

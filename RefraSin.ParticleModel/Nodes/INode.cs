@@ -1,5 +1,4 @@
 using RefraSin.Coordinates.Polar;
-using RefraSin.Graphs;
 
 namespace RefraSin.ParticleModel.Nodes;
 

@@ -1,13 +1,17 @@
 using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.ParticleModel.Remeshing;
+using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepWidthControllers;
 using RefraSin.TEPSolver.TimeSteppers;
+using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.TEPSolver;
 
@@ -19,31 +23,22 @@ public record SolverRoutines(
     INormalizer Normalizer,
     IStepWidthController StepWidthController,
     IEnumerable<IStateRecoverer> StateRecoverers,
-    IEnumerable<IParticleSystemRemesher> Remeshers
+    IEnumerable<IParticleSystemRemesher> Remeshers,
+    EquationSystemBuilder EquationSystemBuilder
 ) : ISolverRoutines
 {
     public static readonly SolverRoutines Default = new(
         new StepEstimator(),
         new AdamsMoultonTimeStepper(),
-        [
-            // new InstabilityDetector()
-        ],
+        [],
         new DirectLagrangianRootFinder(
             new NewtonRaphsonRootFinder(new SparseLUSolver(), absoluteTolerance: 1e-4)
         ),
-        // new TearingLagrangianRootFinder(
-        //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
-        //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4),
-        //     new NewtonRaphsonRootFinder(new LUSolver(), absoluteTolerance: 1e-4)
-        // ),
         new DefaultNormalizer(),
         new MaximumDisplacementAngleStepWidthController(),
         [new StepBackStateRecoverer()],
-        [
-            new FreeSurfaceRemesher(),
-            new NeckNeighborhoodRemesher(),
-            // new GrainBoundaryRemesher(),
-        ]
+        [new FreeSurfaceRemesher(), new NeckNeighborhoodRemesher()],
+        EquationSystemBuilder.Default
     );
 
     /// <inheritdoc />

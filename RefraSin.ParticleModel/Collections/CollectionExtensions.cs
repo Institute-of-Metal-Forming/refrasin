@@ -1,4 +1,3 @@
-using RefraSin.Graphs;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 
@@ -21,14 +20,6 @@ public static class CollectionExtensions
         this IEnumerable<TNode> self
     )
         where TNode : INode => new(self);
-
-    /// <summary>
-    /// Creates a new <see cref="ReadOnlyContactCollection{TContact}"/> from the given enumerable.
-    /// </summary>
-    public static ReadOnlyContactCollection<TContact> ToReadOnlyContactCollection<TContact>(
-        this IEnumerable<TContact> self
-    )
-        where TContact : IEdge => new(self);
 
     /// <summary>
     /// Creates a new <see cref="ReadOnlyParticleCollection{TParticle, TContact}"/> from the given enumerable.

@@ -8,7 +8,6 @@ using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
-using RefraSin.TEPSolver.ParticleModel;
 using static MoreLinq.Extensions.IndexExtension;
 
 namespace RefraSin.TEPSolver.Test;
@@ -37,7 +36,7 @@ public class SimulationTest
     public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
         InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e2);
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e4);
     private readonly ISystemState<IParticle<IParticleNode>, IParticleNode> _initialState;
     private readonly SinteringStep _sinteringProcess;
     private readonly InMemorySolutionStorage _solutionStorage = new();
@@ -65,7 +64,7 @@ public class SimulationTest
         {
             var finalState = _sinteringProcess.Solve(_initialState);
             ParticlePlot
-                .PlotParticles(finalState.Particles)
+                .PlotParticles<IParticle<IParticleNode>, IParticleNode>(finalState.Particles)
                 .SaveHtml(Path.Combine(_tempDir, "final.html"));
         }
         catch (Exception e)
@@ -94,7 +93,9 @@ public class SimulationTest
 
         foreach (var (i, state) in _solutionStorage.States.Index())
         {
-            var plot = ParticlePlot.PlotParticles(state.Particles);
+            var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+                state.Particles
+            );
             plot.WithXAxisStyle(
                 Title.init(Text: "X in m"),
                 MinMax: FSharpOption<Tuple<IConvertible, IConvertible>>.Some(new(-200e-6, 700e-6))
@@ -122,8 +123,12 @@ public class SimulationTest
             return;
 
         var centers = ProcessPlot.PlotParticleCenters(_solutionStorage.States);
-        var start = ParticlePlot.PlotParticles(_solutionStorage.States[0].Particles);
-        var end = ParticlePlot.PlotParticles(_solutionStorage.States[^1].Particles);
+        var start = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            _solutionStorage.States[0].Particles
+        );
+        var end = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            _solutionStorage.States[^1].Particles
+        );
         var plot = Chart.Combine([centers, start, end]);
         plot.SaveHtml(Path.Combine(_tempDir, "particleCenters.html"));
     }

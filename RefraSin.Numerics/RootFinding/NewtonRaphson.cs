@@ -1,6 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.LinearAlgebra.Solvers;
+using MathNet.Numerics.Optimization;
+using MathNet.Numerics.Optimization.LineSearch;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RefraSin.Numerics.Exceptions;
@@ -10,11 +10,10 @@ namespace RefraSin.Numerics.RootFinding;
 
 public class NewtonRaphsonRootFinder(
     ILinearSolver jacobianStepSolver,
-    int maxIterattionCount = 100,
+    bool useLineSearch = false,
+    int maxIterationCount = 100,
     double absoluteTolerance = 1e-8,
-    double averageDecreaseRateFactor = 1e-4,
-    double minStepFactor = 0.1,
-    double maxStepFactor = 0.5
+    WolfeLineSearch? wolfeLineSearch = null
 ) : IRootFinder
 {
     /// <inheritdoc />
@@ -31,12 +30,16 @@ public class NewtonRaphsonRootFinder(
 
         var x = initialGuess.Clone();
         var y = function(x);
-        var f = 0.5 * y * y;
-        var dxold = Vector<double>.Build.Dense(x.Count, double.NaN);
+        var error = y.L2Norm();
+        var dxOld = Vector<double>.Build.Dense(x.Count, double.NaN);
+
+        var objectiveFunction = ObjectiveFunction.Gradient(
+            v => function(v).L2Norm(),
+            v => jacobian(v).ColumnNorms(2)
+        );
 
         for (i = 0; i < MaxIterationCount; i++)
         {
-            var error = y.L2Norm();
             logger.LogDebug("Current error {Error}.", error);
 
             if (error <= AbsoluteTolerance)
@@ -59,54 +62,44 @@ public class NewtonRaphsonRootFinder(
                 );
 
             if (
-                (dx - dxold).L2Norm() < AbsoluteTolerance
-                || (dx + dxold).L2Norm() < AbsoluteTolerance
+                (dx - dxOld).L2Norm() < AbsoluteTolerance
+                || (dx + dxOld).L2Norm() < AbsoluteTolerance
             )
                 return x;
 
-            var gradf = -y * y / dx;
+            if (UseLineSearch)
+            {
+                objectiveFunction.EvaluateAt(x);
+                var lineSearchResult = WolfeLineSearch.FindConformingStep(
+                    objectiveFunction,
+                    dx,
+                    0.5,
+                    1
+                );
+                x = lineSearchResult.MinimizingPoint;
+            }
+            else
+            {
+                x += dx;
+            }
 
-            var xnew = x + dx;
-            var ynew = function(xnew);
-            var fnew = 0.5 * ynew * ynew;
-
-            // if (fnew > f + AverageDecreaseRateFactor * gradf * (xnew - x))
-            // {
-            //     logger.LogDebug("Lowering step by line search.");
-            //     var gprime0 = gradf * dx;
-            //
-            //     var stepFactor = gprime0 / (2 * (fnew - f - gprime0));
-            //
-            //     if (stepFactor > MaxStepFactor)
-            //         stepFactor = MaxStepFactor;
-            //     else if (stepFactor < MinStepFactor)
-            //         stepFactor = MinStepFactor;
-            //
-            //     dx *= stepFactor;
-            //     xnew = x + dx;
-            //     ynew = function(xnew);
-            //     fnew = 0.5 * ynew * ynew;
-            // }
-
-            x = xnew;
-            y = ynew;
-            f = fnew;
-            dxold = dx;
+            y = function(x);
+            error = y.L2Norm();
+            dxOld = dx;
         }
 
         logger.LogWarning("Maximum iteration count exceeded. Continuing anyway.");
         return x;
     }
 
-    public int MaxIterationCount { get; } = maxIterattionCount;
+    public int MaxIterationCount { get; } = maxIterationCount;
 
     public double AbsoluteTolerance { get; } = absoluteTolerance;
 
-    public double AverageDecreaseRateFactor { get; } = averageDecreaseRateFactor;
-
-    public double MinStepFactor { get; } = minStepFactor;
-
-    public double MaxStepFactor { get; } = maxStepFactor;
-
     public ILinearSolver JacobianStepSolver { get; } = jacobianStepSolver;
+
+    public bool UseLineSearch { get; } = useLineSearch;
+
+    public WolfeLineSearch WolfeLineSearch { get; } =
+        wolfeLineSearch ?? new WeakWolfeLineSearch(1e-4, 0.9, 0.1, 100);
 }

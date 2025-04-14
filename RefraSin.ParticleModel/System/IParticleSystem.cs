@@ -1,4 +1,3 @@
-using RefraSin.Graphs;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
@@ -12,8 +11,4 @@ public interface IParticleSystem<out TParticle, out TNode>
     IReadOnlyParticleCollection<TParticle, TNode> Particles { get; }
 
     IReadOnlyNodeCollection<TNode> Nodes { get; }
-
-    IReadOnlyContactCollection<IParticleContactEdge<TParticle>> ParticleContacts { get; }
-
-    IReadOnlyContactCollection<IEdge<TNode>> NodeContacts { get; }
 }

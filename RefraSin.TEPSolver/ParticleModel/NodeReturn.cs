@@ -4,6 +4,7 @@ using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.Normalization;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -35,8 +36,8 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         RadiusTangentAngle = template.RadiusTangentAngle;
         InterfaceFlux = stepVector is not null
             ? new ToUpperToLower<double>(
-                stepVector.FluxToUpper(template),
-                -stepVector.FluxToUpper(template.Lower)
+                stepVector.QuantityValue<FluxToUpper>(template),
+                -stepVector.QuantityValue<FluxToUpper>(template.Lower)
             )
                 * norm.Area
                 / norm.Time
@@ -47,8 +48,10 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         VolumeGradient = template.VolumeGradient * norm.Length / norm.Time;
         Shift = stepVector is not null
             ? new NormalTangential<double>(
-                stepVector.NormalDisplacement(template),
-                template is NeckNode ? stepVector.TangentialDisplacement(template) : 0
+                stepVector.QuantityValue<NormalDisplacement>(template),
+                stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(template)
+                    ? stepVector.QuantityValue<TangentialDisplacement>(template)
+                    : 0
             )
                 * norm.Length
                 / norm.Time
@@ -77,7 +80,7 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
     public IParticle<IParticleNode> Particle { get; }
 }
 
-internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeContactGradients
+internal record ContactNodeReturn : NodeReturn
 {
     /// <inheritdoc />
     public ContactNodeReturn(
@@ -90,22 +93,8 @@ internal record ContactNodeReturn : NodeReturn, INodeContactGeometry, INodeConta
     {
         ContactedNodeId = template.ContactedNodeId;
         ContactedParticleId = template.ContactedParticleId;
-        AngleDistanceToContactDirection = template.AngleDistanceToContactDirection;
-        ContactVector = new PolarVector(
-            template.ContactVector.Phi,
-            template.ContactVector.R * norm.Length,
-            particle
-        );
-        CenterShiftVectorDirection = template.CenterShiftVectorDirection;
-        ContactDistanceGradient = template.ContactDistanceGradient / norm.Time;
-        ContactDirectionGradient = template.ContactDirectionGradient / norm.Length / norm.Time;
     }
 
     public Guid ContactedNodeId { get; }
     public Guid ContactedParticleId { get; }
-    public Angle AngleDistanceToContactDirection { get; }
-    public IPolarVector ContactVector { get; }
-    public NormalTangential<Angle> CenterShiftVectorDirection { get; }
-    public NormalTangential<double> ContactDistanceGradient { get; }
-    public NormalTangential<double> ContactDirectionGradient { get; }
 }

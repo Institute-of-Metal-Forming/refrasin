@@ -1,9 +1,9 @@
 using System.Globalization;
 using RefraSin.Coordinates;
-using RefraSin.Graphs;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ProcessModel.Sintering;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -11,10 +11,9 @@ namespace RefraSin.TEPSolver.ParticleModel;
 /// <summary>
 /// Stellt ein Pulverpartikel dar.
 /// </summary>
-public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
+public class Particle : IParticle<NodeBase>
 {
     private ReadOnlyParticleSurface<NodeBase> _nodes;
-    private IReadOnlyContactCollection<IParticleContactEdge<Particle>>? _contacts;
 
     public Particle(
         IParticle<IParticleNode> particle,
@@ -51,7 +50,6 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
     }
 
     private Particle(
-        Particle? parent,
         SolutionState solutionState,
         Particle previousState,
         StepVector stepVector,
@@ -67,24 +65,13 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
 
         SolutionState = solutionState;
 
-        // Apply time step changes
-        if (parent is null) // is root particle
-        {
-            Coordinates = previousState.Coordinates;
-            RotationAngle = previousState.RotationAngle;
-        }
-        else
-        {
-            var contact = previousState.SolutionState.ParticleContacts[parent.Id, previousState.Id];
-            var polarCoordinates = contact.ContactVector;
-            var newCoordinates = new PolarPoint(
-                polarCoordinates.Phi + stepVector.AngleDisplacement(contact) * timeStepWidth,
-                polarCoordinates.R + stepVector.RadialDisplacement(contact) * timeStepWidth,
-                parent
-            );
-            Coordinates = newCoordinates.Absolute;
-            RotationAngle = previousState.RotationAngle;
-        }
+        Coordinates =
+            previousState.Coordinates
+            + new AbsoluteVector(
+                stepVector.QuantityValue<ParticleDisplacementX>(previousState),
+                stepVector.QuantityValue<ParticleDisplacementY>(previousState)
+            ) * timeStepWidth;
+        RotationAngle = previousState.RotationAngle;
 
         _nodes = previousState
             .Nodes.Select(n => n.ApplyTimeStep(stepVector, timeStepWidth, this))
@@ -123,20 +110,12 @@ public class Particle : IParticle<NodeBase>, IParticleContacts<Particle>
     public double VacancyVolumeEnergy { get; }
 
     public Particle ApplyTimeStep(
-        Particle? parent,
         SolutionState solutionState,
         StepVector stepVector,
         double timeStepWidth
-    ) => new(parent, solutionState, this, stepVector, timeStepWidth);
+    ) => new(solutionState, this, stepVector, timeStepWidth);
 
     /// <inheritdoc/>
     public override string ToString() =>
         $"{GetType().Name} {Id} @ {Coordinates.ToString("(,)", CultureInfo.InvariantCulture)}";
-
-    /// <inheritdoc />
-    public virtual bool Equals(IVertex? other) => other is IParticle && Id == other.Id;
-
-    /// <inheritdoc />
-    public IReadOnlyContactCollection<IParticleContactEdge<Particle>> Contacts =>
-        _contacts ??= SolutionState.ParticleContacts.From(Id).ToReadOnlyContactCollection();
 }

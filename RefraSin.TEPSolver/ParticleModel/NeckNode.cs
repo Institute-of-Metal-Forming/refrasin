@@ -3,6 +3,7 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 using static RefraSin.Coordinates.Constants;
 
@@ -14,16 +15,21 @@ namespace RefraSin.TEPSolver.ParticleModel;
 public class NeckNode : ContactNodeBase<NeckNode>
 {
     /// <inheritdoc />
-    public NeckNode(INode node, Particle particle)
-        : base(node, particle) { }
+    public NeckNode(
+        INode node,
+        Particle particle,
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
+    )
+        : base(node, particle, contactedNodeId, contactedParticleId) { }
 
     private NeckNode(
         Guid id,
         double r,
         Angle phi,
         Particle particle,
-        Guid contactedNodeId,
-        Guid contactedParticleId
+        Guid? contactedNodeId = null,
+        Guid? contactedParticleId = null
     )
         : base(id, r, phi, particle, contactedNodeId, contactedParticleId) { }
 
@@ -56,11 +62,11 @@ public class NeckNode : ContactNodeBase<NeckNode>
     {
         var normalDisplacement = new PolarVector(
             SurfaceRadiusAngle.ToUpper + SurfaceNormalAngle.ToUpper,
-            stepVector.NormalDisplacement(this) * timeStepWidth
+            stepVector.QuantityValue<NormalDisplacement>(this) * timeStepWidth
         );
         var tangentialDisplacement = new PolarVector(
             SurfaceRadiusAngle.ToUpper + SurfaceTangentAngle.ToUpper,
-            stepVector.TangentialDisplacement(this) * timeStepWidth
+            stepVector.QuantityValue<TangentialDisplacement>(this) * timeStepWidth
         );
         var totalDisplacement = normalDisplacement + tangentialDisplacement;
 

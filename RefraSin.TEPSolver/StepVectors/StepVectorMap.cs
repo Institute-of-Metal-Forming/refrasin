@@ -1,138 +1,351 @@
-using RefraSin.Graphs;
+using System.Diagnostics.CodeAnalysis;
+using RefraSin.ParticleModel;
+using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 
 namespace RefraSin.TEPSolver.StepVectors;
 
 public class StepVectorMap
 {
-    public StepVectorMap(SolutionState currentState)
+    public StepVectorMap(EquationSystem equationSystem)
     {
-        _index = 0;
+        int index = 0;
 
-        foreach (var particle in currentState.Particles)
+        foreach (var quantity in equationSystem.Quantities)
         {
-            var startIndex = _index;
-
-            foreach (var node in particle.Nodes)
+            if (quantity is IGlobalQuantity globalQuantity)
             {
-                AddUnknown(node.Id, Unknown.NormalDisplacement);
-                if (node is NeckNode)
-                    AddUnknown(node.Id, Unknown.TangentialDisplacement);
-                AddUnknown(node.Id, Unknown.FluxToUpper);
-                AddUnknown(node.Id, Unknown.LambdaVolume);
+                var key = globalQuantity.GetType();
+                _globalQuantityIndexMap.Add(key, index);
+                _globalQuantityInstanceMap.Add(key, globalQuantity);
             }
-
-            _particleBlocks[particle.Id] = (startIndex, _index - startIndex);
-        }
-
-        foreach (var contact in currentState.ParticleContacts)
-        {
-            var startIndex = _index;
-
-            foreach (var contactNode in contact.FromNodes)
+            else if (quantity is IParticleQuantity particleQuantity)
             {
-                AddUnknown(contactNode.Id, Unknown.LambdaContactDistance);
-                AddUnknown(contactNode.Id, Unknown.LambdaContactDirection);
-                LinkUnknown(
-                    contactNode.Id,
-                    contactNode.ContactedNodeId,
-                    Unknown.LambdaContactDistance
-                );
-                LinkUnknown(
-                    contactNode.Id,
-                    contactNode.ContactedNodeId,
-                    Unknown.LambdaContactDirection
-                );
+                var key = (particleQuantity.GetType(), particleQuantity.Particle);
+                _particleQuantityIndexMap.Add(key, index);
+                _particleQuantityInstanceMap.Add(key, particleQuantity);
             }
+            else if (quantity is INodeQuantity nodeQuantity)
+            {
+                var key = (nodeQuantity.GetType(), nodeQuantity.Node);
+                _nodeQuantityIndexMap.Add(key, index);
+                _nodeQuantityInstanceMap.Add(key, nodeQuantity);
+            }
+            else if (quantity is INodeContactQuantity nodeContactQuantity)
+            {
+                var key = (nodeContactQuantity.GetType(), nodeContactQuantity.NodeContact);
+                _nodeContactQuantityIndexMap.Add(key, index);
+                _nodeContactQuantityInstanceMap.Add(key, nodeContactQuantity);
+            }
+            else if (quantity is IParticleContactQuantity particleContactQuantity)
+            {
+                var key = (
+                    particleContactQuantity.GetType(),
+                    particleContactQuantity.ParticleContact
+                );
+                _particleContactQuantityIndexMap.Add(key, index);
+                _particleContactQuantityInstanceMap.Add(key, particleContactQuantity);
+            }
+            else
+                throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
 
-            AddUnknown(contact.MergedId, Unknown.RadialDisplacement);
-            AddUnknown(contact.MergedId, Unknown.AngleDisplacement);
-
-            _contactBlocks[(contact.From.Id, contact.To.Id)] = (startIndex, _index - startIndex);
+            index++;
         }
 
-        GlobalStart = _index;
-
-        foreach (var cycle in currentState.ParticleCycles)
+        foreach (var constraint in equationSystem.Constraints)
         {
-            AddUnknown(cycle.End.Id, Unknown.LambdaCycleX);
-            AddUnknown(cycle.End.Id, Unknown.LambdaCycleY);
+            if (constraint is IGlobalConstraint globalConstraint)
+            {
+                var key = globalConstraint.GetType();
+                _globalConstraintIndexMap.Add(key, index);
+                _globalConstraintInstanceMap.Add(key, globalConstraint);
+            }
+            else if (constraint is IParticleConstraint particleConstraint)
+            {
+                var key = (particleConstraint.GetType(), particleConstraint.Particle);
+                _particleConstraintIndexMap.Add(key, index);
+                _particleConstraintInstanceMap.Add(key, particleConstraint);
+            }
+            else if (constraint is INodeConstraint nodeConstraint)
+            {
+                var key = (nodeConstraint.GetType(), nodeConstraint.Node);
+                _nodeConstraintIndexMap.Add(key, index);
+                _nodeConstraintInstanceMap.Add(key, nodeConstraint);
+            }
+            else if (constraint is INodeContactConstraint nodeContactConstraint)
+            {
+                var key = (nodeContactConstraint.GetType(), nodeContactConstraint.NodeContact);
+                _nodeContactConstraintIndexMap.Add(key, index);
+                _nodeContactConstraintInstanceMap.Add(key, nodeContactConstraint);
+            }
+            else if (constraint is IParticleContactConstraint particleContactConstraint)
+            {
+                var key = (
+                    particleContactConstraint.GetType(),
+                    particleContactConstraint.ParticleContact
+                );
+                _particleContactConstraintIndexMap.Add(key, index);
+                _particleContactConstraintInstanceMap.Add(key, particleContactConstraint);
+            }
+            else
+                throw new ArgumentException($"Invalid quantity type: {constraint.GetType()}");
+
+            index++;
         }
 
-        AddUnknown(Guid.Empty, Unknown.LambdaDissipation);
-
-        GlobalLength = _index - GlobalStart;
-        TotalLength = _index;
+        TotalLength = index;
     }
 
     public int TotalLength { get; }
 
-    private void AddUnknown(Guid id, Unknown unknown)
+    private readonly Dictionary<Type, int> _globalQuantityIndexMap = new();
+
+    private readonly Dictionary<(Type, Particle), int> _particleQuantityIndexMap = new(
+        new MapEqualityComparer<Particle>()
+    );
+
+    private readonly Dictionary<(Type, NodeBase), int> _nodeQuantityIndexMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
+
+    private readonly Dictionary<(Type, ContactPair<NodeBase>), int> _nodeContactQuantityIndexMap =
+        new(new MapEqualityComparer<ContactPair<NodeBase>>());
+
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        int
+    > _particleContactQuantityIndexMap = new(new MapEqualityComparer<ContactPair<Particle>>());
+
+    public int QuantityIndex<TQuantity>()
+        where TQuantity : IGlobalQuantity => _globalQuantityIndexMap[typeof(TQuantity)];
+
+    public int QuantityIndex<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        _particleQuantityIndexMap[(typeof(TQuantity), particle)];
+
+    public int QuantityIndex<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity => _nodeQuantityIndexMap[(typeof(TQuantity), node)];
+
+    public int QuantityIndex<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        _nodeContactQuantityIndexMap[(typeof(TQuantity), nodeContact)];
+
+    public int QuantityIndex<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        _particleContactQuantityIndexMap[(typeof(TQuantity), particleContact)];
+
+    public int QuantityIndex(IQuantity quantity)
     {
-        _indices[(id, unknown)] = _index;
-        _index++;
+        if (quantity is IGlobalQuantity globalQuantity)
+            return _globalQuantityIndexMap[globalQuantity.GetType()];
+        if (quantity is IParticleQuantity particleQuantity)
+            return _particleQuantityIndexMap[
+                (particleQuantity.GetType(), particleQuantity.Particle)
+            ];
+        if (quantity is INodeQuantity nodeQuantity)
+            return _nodeQuantityIndexMap[(nodeQuantity.GetType(), nodeQuantity.Node)];
+        if (quantity is INodeContactQuantity nodeContactQuantity)
+            return _nodeContactQuantityIndexMap[
+                (nodeContactQuantity.GetType(), nodeContactQuantity.NodeContact)
+            ];
+        if (quantity is IParticleContactQuantity particleContactQuantity)
+            return _particleContactQuantityIndexMap[
+                (particleContactQuantity.GetType(), particleContactQuantity.ParticleContact)
+            ];
+        throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
     }
 
-    private void LinkUnknown(Guid existingId, Guid newId, Unknown unknown)
+    public bool HasQuantity<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        _particleQuantityIndexMap.ContainsKey((typeof(TQuantity), particle));
+
+    public bool HasQuantity<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        _particleContactQuantityIndexMap.ContainsKey((typeof(TQuantity), particleContact));
+
+    public bool HasQuantity<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity =>
+        _nodeQuantityIndexMap.ContainsKey((typeof(TQuantity), node));
+
+    public bool HasQuantity<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        _nodeContactQuantityIndexMap.ContainsKey((typeof(TQuantity), nodeContact));
+
+    private readonly Dictionary<Type, IQuantity> _globalQuantityInstanceMap = new();
+
+    private readonly Dictionary<(Type, Particle), IQuantity> _particleQuantityInstanceMap = new(
+        new MapEqualityComparer<Particle>()
+    );
+
+    private readonly Dictionary<(Type, NodeBase), IQuantity> _nodeQuantityInstanceMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
+
+    private readonly Dictionary<
+        (Type, ContactPair<NodeBase>),
+        IQuantity
+    > _nodeContactQuantityInstanceMap = new(new MapEqualityComparer<ContactPair<NodeBase>>());
+
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        IQuantity
+    > _particleContactQuantityInstanceMap = new(new MapEqualityComparer<ContactPair<Particle>>());
+
+    public TQuantity QuantityInstance<TQuantity>()
+        where TQuantity : IGlobalQuantity =>
+        (TQuantity)_globalQuantityInstanceMap[typeof(TQuantity)];
+
+    public TQuantity QuantityInstance<TQuantity>(Particle particle)
+        where TQuantity : IParticleQuantity =>
+        (TQuantity)_particleQuantityInstanceMap[(typeof(TQuantity), particle)];
+
+    public TQuantity QuantityInstance<TQuantity>(NodeBase node)
+        where TQuantity : INodeQuantity =>
+        (TQuantity)_nodeQuantityInstanceMap[(typeof(TQuantity), node)];
+
+    public TQuantity QuantityInstance<TQuantity>(ContactPair<NodeBase> nodeContact)
+        where TQuantity : INodeContactQuantity =>
+        (TQuantity)_nodeContactQuantityInstanceMap[(typeof(TQuantity), nodeContact)];
+
+    public TQuantity QuantityInstance<TQuantity>(ContactPair<Particle> particleContact)
+        where TQuantity : IParticleContactQuantity =>
+        (TQuantity)_particleContactQuantityInstanceMap[(typeof(TQuantity), particleContact)];
+
+    public IEnumerable<IQuantity> Quantities =>
+        _globalQuantityInstanceMap
+            .Values.Concat(_particleQuantityInstanceMap.Values)
+            .Concat(_particleContactQuantityInstanceMap.Values)
+            .Concat(_nodeQuantityInstanceMap.Values)
+            .Concat(_nodeContactQuantityInstanceMap.Values);
+
+    private readonly Dictionary<Type, int> _globalConstraintIndexMap = new();
+
+    private readonly Dictionary<(Type, Particle), int> _particleConstraintIndexMap = new(
+        new MapEqualityComparer<Particle>()
+    );
+
+    private readonly Dictionary<(Type, NodeBase), int> _nodeConstraintIndexMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
+
+    private readonly Dictionary<(Type, ContactPair<NodeBase>), int> _nodeContactConstraintIndexMap =
+        new(new MapEqualityComparer<ContactPair<NodeBase>>());
+
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        int
+    > _particleContactConstraintIndexMap = new(new MapEqualityComparer<ContactPair<Particle>>());
+
+    public int ConstraintIndex<TConstraint>()
+        where TConstraint : IGlobalConstraint => _globalConstraintIndexMap[typeof(TConstraint)];
+
+    public int ConstraintIndex<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        _particleConstraintIndexMap[(typeof(TConstraint), particle)];
+
+    public int ConstraintIndex<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint => _nodeConstraintIndexMap[(typeof(TConstraint), node)];
+
+    public int ConstraintIndex<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        _nodeContactConstraintIndexMap[(typeof(TConstraint), nodeContact)];
+
+    public int ConstraintIndex<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        _particleContactConstraintIndexMap[(typeof(TConstraint), particleContact)];
+
+    public int ConstraintIndex(IConstraint constraint)
     {
-        _indices[(newId, unknown)] = _indices[(existingId, unknown)];
+        if (constraint is IGlobalConstraint globalConstraint)
+            return _globalConstraintIndexMap[globalConstraint.GetType()];
+        if (constraint is IParticleConstraint particleConstraint)
+            return _particleConstraintIndexMap[
+                (particleConstraint.GetType(), particleConstraint.Particle)
+            ];
+        if (constraint is INodeConstraint nodeConstraint)
+            return _nodeConstraintIndexMap[(nodeConstraint.GetType(), nodeConstraint.Node)];
+        if (constraint is INodeContactConstraint nodeContactConstraint)
+            return _nodeContactConstraintIndexMap[
+                (nodeContactConstraint.GetType(), nodeContactConstraint.NodeContact)
+            ];
+        if (constraint is IParticleContactConstraint particleContactConstraint)
+            return _particleContactConstraintIndexMap[
+                (particleContactConstraint.GetType(), particleContactConstraint.ParticleContact)
+            ];
+        throw new ArgumentException($"Invalid constraint type: {constraint.GetType()}");
     }
 
-    private int _index;
-    private readonly Dictionary<(Guid, Unknown), int> _indices = new();
-    private readonly Dictionary<Guid, (int start, int length)> _particleBlocks = new();
-    private readonly Dictionary<(Guid, Guid), (int start, int length)> _contactBlocks = new();
+    public bool HasConstraint<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        _particleConstraintIndexMap.ContainsKey((typeof(TConstraint), particle));
 
-    public (int start, int length) this[IParticle particle] => _particleBlocks[particle.Id];
+    public bool HasConstraint<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        _particleContactConstraintIndexMap.ContainsKey((typeof(TConstraint), particleContact));
 
-    public (int start, int length) this[IParticleContactEdge contact] =>
-        _contactBlocks[(contact.From, contact.To)];
+    public bool HasConstraint<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint =>
+        _nodeConstraintIndexMap.ContainsKey((typeof(TConstraint), node));
 
-    public int GlobalStart { get; }
+    public bool HasConstraint<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        _nodeContactConstraintIndexMap.ContainsKey((typeof(TConstraint), nodeContact));
 
-    public int GlobalLength { get; }
+    private readonly Dictionary<Type, IConstraint> _globalConstraintInstanceMap = new();
 
-    public int LambdaDissipation() => _indices[(Guid.Empty, Unknown.LambdaDissipation)];
+    private readonly Dictionary<(Type, Particle), IConstraint> _particleConstraintInstanceMap = new(
+        new MapEqualityComparer<Particle>()
+    );
 
-    public int NormalDisplacement(INode node) => _indices[(node.Id, Unknown.NormalDisplacement)];
+    private readonly Dictionary<(Type, NodeBase), IConstraint> _nodeConstraintInstanceMap = new(
+        new MapEqualityComparer<NodeBase>()
+    );
 
-    public int FluxToUpper(INode node) => _indices[(node.Id, Unknown.FluxToUpper)];
+    private readonly Dictionary<
+        (Type, ContactPair<NodeBase>),
+        IConstraint
+    > _nodeContactConstraintInstanceMap = new(new MapEqualityComparer<ContactPair<NodeBase>>());
 
-    public int LambdaVolume(INode node) => _indices[(node.Id, Unknown.LambdaVolume)];
+    private readonly Dictionary<
+        (Type, ContactPair<Particle>),
+        IConstraint
+    > _particleContactConstraintInstanceMap = new(new MapEqualityComparer<ContactPair<Particle>>());
 
-    public int TangentialDisplacement(INode node) =>
-        _indices[(node.Id, Unknown.TangentialDisplacement)];
+    public TConstraint ConstraintInstance<TConstraint>()
+        where TConstraint : IGlobalConstraint =>
+        (TConstraint)_globalConstraintInstanceMap[typeof(TConstraint)];
 
-    public int LambdaContactDistance(INode node) =>
-        _indices[(node.Id, Unknown.LambdaContactDistance)];
+    public TConstraint ConstraintInstance<TConstraint>(Particle particle)
+        where TConstraint : IParticleConstraint =>
+        (TConstraint)_particleConstraintInstanceMap[(typeof(TConstraint), particle)];
 
-    public int LambdaContactDirection(INode node) =>
-        _indices[(node.Id, Unknown.LambdaContactDirection)];
+    public TConstraint ConstraintInstance<TConstraint>(NodeBase node)
+        where TConstraint : INodeConstraint =>
+        (TConstraint)_nodeConstraintInstanceMap[(typeof(TConstraint), node)];
 
-    public int LambdaCycleX(IGraphCycle<Particle, ParticleContact> cycle) =>
-        _indices[(cycle.End.Id, Unknown.LambdaCycleX)];
+    public TConstraint ConstraintInstance<TConstraint>(ContactPair<NodeBase> nodeContact)
+        where TConstraint : INodeContactConstraint =>
+        (TConstraint)_nodeContactConstraintInstanceMap[(typeof(TConstraint), nodeContact)];
 
-    public int LambdaCycleY(IGraphCycle<Particle, ParticleContact> cycle) =>
-        _indices[(cycle.End.Id, Unknown.LambdaCycleY)];
+    public TConstraint ConstraintInstance<TConstraint>(ContactPair<Particle> particleContact)
+        where TConstraint : IParticleContactConstraint =>
+        (TConstraint)_particleContactConstraintInstanceMap[(typeof(TConstraint), particleContact)];
 
-    public int RadialDisplacement(ParticleContact contact) =>
-        _indices[(contact.MergedId, Unknown.RadialDisplacement)];
+    public IEnumerable<IConstraint> Constraints =>
+        _globalConstraintInstanceMap
+            .Values.Concat(_particleConstraintInstanceMap.Values)
+            .Concat(_particleContactConstraintInstanceMap.Values)
+            .Concat(_nodeConstraintInstanceMap.Values)
+            .Concat(_nodeContactConstraintInstanceMap.Values);
 
-    public int AngleDisplacement(ParticleContact contact) =>
-        _indices[(contact.MergedId, Unknown.AngleDisplacement)];
-
-    private enum Unknown
+    private class MapEqualityComparer<T> : EqualityComparer<(Type, T)>
+        where T : IVertex
     {
-        NormalDisplacement,
-        TangentialDisplacement,
-        FluxToUpper,
-        LambdaVolume,
-        LambdaContactDistance,
-        LambdaContactDirection,
-        LambdaCycleX,
-        LambdaCycleY,
-        RadialDisplacement,
-        AngleDisplacement,
-        LambdaDissipation,
+        public override bool Equals((Type, T) x, (Type, T) y) =>
+            x.Item1 == y.Item1 && x.Item2.Id == y.Item2.Id;
+
+        public override int GetHashCode((Type, T) obj) =>
+            HashCode.Combine(obj.Item1.GetHashCode(), obj.Item2.Id.GetHashCode());
     }
 }

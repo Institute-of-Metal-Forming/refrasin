@@ -1,5 +1,6 @@
 using Plotly.NET;
 using RefraSin.Coordinates;
+using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
@@ -51,7 +52,9 @@ public class ParticlePlotTests
     [Test]
     public void TestPlotParticles()
     {
-        var plot = ParticlePlot.PlotParticles([_particle1, _particle2]);
+        var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            [_particle1, _particle2]
+        );
         plot.Show();
     }
 
@@ -73,9 +76,11 @@ public class ParticlePlotTests
     [Test]
     public void TestPlotContactEdge()
     {
-        var edge = new ParticleContactEdge<Particle<ParticleNode>>(_particle1, _particle2);
+        var edge = new ContactPair<Particle<ParticleNode>>(Guid.Empty, _particle1, _particle2);
 
-        var plot1 = ParticlePlot.PlotParticles([_particle1, _particle2]);
+        var plot1 = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+            [_particle1, _particle2]
+        );
         var plot2 = ParticlePlot.PlotContactEdge(edge);
         Chart.Combine([plot1, plot2]).Show();
     }

@@ -37,7 +37,7 @@ public class FocalCompactionStep(
 
                 while (other != null)
                 {
-                    if (current.Value.HasContactTo(other.Value, -MinimumIntrusion))
+                    if (current.Value.IntersectsWith(other.Value, -MinimumIntrusion))
                     {
                         var particles0 = current.Value.FlattenIfAgglomerate().ToArray();
                         var particles1 = other.Value.FlattenIfAgglomerate().ToArray();
@@ -46,7 +46,7 @@ public class FocalCompactionStep(
                             var (p0, p1) in particles0.Cartesian(particles1, (p0, p1) => (p0, p1))
                         )
                         {
-                            if (p0.HasContactTo(p1, -1e-2 * MinimumIntrusion))
+                            if (p0.IntersectsWith(p1, -1e-2 * MinimumIntrusion))
                             {
                                 p0.CreateGrainBoundariesAtIntersections(
                                     p1,

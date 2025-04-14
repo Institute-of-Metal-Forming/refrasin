@@ -1,4 +1,5 @@
 using RefraSin.TEPSolver.ParticleModel;
+using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.StepValidators;
@@ -11,7 +12,7 @@ public class InstabilityDetector : IStepValidator
         foreach (var particle in currentState.Particles)
         {
             var displacements = particle
-                .Nodes.Select(n => stepVector.NormalDisplacement(n))
+                .Nodes.Select(stepVector.QuantityValue<NormalDisplacement>)
                 .ToArray();
             var differences = displacements
                 .Zip(

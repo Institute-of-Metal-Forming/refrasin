@@ -9,15 +9,18 @@ public class BroydenLagrangianRootFinder(int maxIterationCount = 100, double acc
     : ILagrangianRootFinder
 {
     /// <inheritdoc />
-    public StepVector FindRoot(SolutionState currentState, StepVector initialGuess, ILogger logger)
+    public StepVector FindRoot(
+        EquationSystem equationSystem,
+        StepVector initialGuess,
+        ILogger logger
+    )
     {
         var stepVector = initialGuess.Copy();
-        var system = new EquationSystem.EquationSystem(currentState, stepVector);
 
         double[] Fun(double[] vector)
         {
             stepVector.Update(vector);
-            var result = system.Lagrangian().AsArray();
+            var result = equationSystem.Lagrangian(stepVector).AsArray();
             return result;
         }
 
