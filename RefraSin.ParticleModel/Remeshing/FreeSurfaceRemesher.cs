@@ -17,7 +17,8 @@ public class FreeSurfaceRemesher(
     /// <inheritdoc />
     public IParticle<IParticleNode> Remesh(IParticle<IParticleNode> particle)
     {
-        var meanDiscretizationWidth = particle.Nodes.Average(n => n.SurfaceDistance.ToUpper);
+        var meanDiscretizationWidth =
+            particle.Nodes.Where(n => n.Type == Surface).Average(n => n.SurfaceDistance.Sum) / 2;
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> newParticle) =>
             FilterNodes(
@@ -63,6 +64,7 @@ public class FreeSurfaceRemesher(
                         node.Coordinates.Centroid(lowerTwin.Coordinates),
                         Surface
                     );
+
                     lowerTwin = null;
                     continue;
                 }
