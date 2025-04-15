@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ProcessModel;
@@ -6,6 +5,8 @@ using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using Serilog;
+using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver;
 
@@ -34,11 +35,11 @@ internal class SolverSession : ISolverSession
 
         Materials = step.Materials.Select(m => Norm.NormalizeMaterial(m)).ToArray();
 
-        Logger = sinteringSolver.LoggerFactory.CreateLogger<SinteringSolver>();
         Routines = sinteringSolver.Routines;
 
         CurrentState = new SolutionState(normalizedState, Materials, step);
         CurrentState.Sanitize();
+        Logger = Log.ForContext<SinteringSolver>();
     }
 
     public SolverSession(SolverSession parentSession, ISystemState inputState)
@@ -54,11 +55,11 @@ internal class SolverSession : ISolverSession
         _reportSystemState = parentSession._reportSystemState;
 
         Materials = parentSession.Materials;
-        Logger = parentSession.Logger;
         Routines = parentSession.Routines;
 
         CurrentState = new SolutionState(inputState, Materials, this);
         CurrentState.Sanitize();
+        Logger = parentSession.Logger;
     }
 
     public double StartTime { get; }
@@ -85,9 +86,6 @@ internal class SolverSession : ISolverSession
     public IReadOnlyList<IMaterial> Materials { get; }
 
     /// <inheritdoc />
-    public ILogger<SinteringSolver> Logger { get; }
-
-    /// <inheritdoc />
     public ISolverRoutines Routines { get; }
 
     /// <inheritdoc />
@@ -102,4 +100,6 @@ internal class SolverSession : ISolverSession
             new SystemState(CurrentState.Id, CurrentState.Time * Norm.Time, particles)
         );
     }
+
+    public ILogger Logger { get; }
 }

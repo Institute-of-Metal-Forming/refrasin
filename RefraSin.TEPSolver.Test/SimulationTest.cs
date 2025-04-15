@@ -8,23 +8,40 @@ using RefraSin.Plotting;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.Storage;
-using static MoreLinq.Extensions.IndexExtension;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.TestCorrelator;
 
 namespace RefraSin.TEPSolver.Test;
 
 [TestFixtureSource(nameof(GetTestFixtureData))]
 public class SimulationTest
 {
+    [SetUp]
+    public void SetUpLogging()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            // .WriteTo.TestCorrelator()
+            .WriteTo.Console()
+            .WriteTo.File(Path.Combine(_tempDir, "test.log"))
+            .CreateLogger();
+    }
+
+    [TearDown]
+    public void TearDownLogging()
+    {
+        Log.CloseAndFlush();
+        Log.Logger = Serilog.Core.Logger.None;
+    }
+
     public SimulationTest(ISystemState<IParticle<IParticleNode>, IParticleNode> initialState)
     {
         _initialState = initialState;
 
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddFile(Path.Combine(_tempDir, "test.log"));
-        });
-
-        var solver = new SinteringSolver(loggerFactory, SolverRoutines.Default, 20);
+        var solver = new SinteringSolver(SolverRoutines.Default, 20);
+        var plotHandler = new PlotEventHandler(_tempDir);
+        solver.SessionInitialized += plotHandler.Handle;
 
         _sinteringProcess = new SinteringStep(Conditions, solver, [Material]);
         _sinteringProcess.UseStorage(_solutionStorage);
@@ -62,10 +79,15 @@ public class SimulationTest
 
         try
         {
-            var finalState = _sinteringProcess.Solve(_initialState);
-            ParticlePlot
-                .PlotParticles<IParticle<IParticleNode>, IParticleNode>(finalState.Particles)
-                .SaveHtml(Path.Combine(_tempDir, "final.html"));
+            using (TestCorrelator.CreateContext())
+            {
+                _sinteringProcess.Solve(_initialState);
+
+                Assert.That(
+                    TestCorrelator.GetLogEventsFromCurrentContext(),
+                    Has.None.Matches<LogEvent>(e => e.Exception is not null)
+                );
+            }
         }
         catch (Exception e)
         {
@@ -73,7 +95,6 @@ public class SimulationTest
         }
         finally
         {
-            PlotParticles();
             PlotShrinkage();
             PlotNeckWidths();
             PlotTimeSteps();
@@ -83,28 +104,6 @@ public class SimulationTest
         if (exception is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(exception).Throw();
-        }
-    }
-
-    private void PlotParticles()
-    {
-        var dir = Path.Combine(_tempDir, "p");
-        Directory.CreateDirectory(dir);
-
-        foreach (var (i, state) in _solutionStorage.States.Index())
-        {
-            var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
-                state.Particles
-            );
-            plot.WithXAxisStyle(
-                Title.init(Text: "X in m"),
-                MinMax: FSharpOption<Tuple<IConvertible, IConvertible>>.Some(new(-200e-6, 700e-6))
-            );
-            plot.WithYAxisStyle(
-                Title.init(Text: "Y in m"),
-                MinMax: FSharpOption<Tuple<IConvertible, IConvertible>>.Some(new(-200e-6, 200e-6))
-            );
-            plot.SaveHtml(Path.Combine(dir, $"{i}.html"));
         }
     }
 
@@ -149,5 +148,19 @@ public class SimulationTest
 
         var plot = ProcessPlot.PlotNeckWidths(_solutionStorage.States);
         plot.SaveHtml(Path.Combine(_tempDir, "necks.html"));
+    }
+
+    class PlotEventHandler(string dir)
+    {
+        private int _counter;
+
+        public void Handle(object? sender, SinteringSolver.SessionInitializedEventArgs e)
+        {
+            var plot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
+                e.SolverSession.CurrentState.Particles
+            );
+            plot.SaveHtml(Path.Combine(dir, $"session_{_counter}.html"));
+            _counter++;
+        }
     }
 }

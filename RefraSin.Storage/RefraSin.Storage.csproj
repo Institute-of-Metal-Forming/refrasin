@@ -15,4 +15,8 @@
       <ProjectReference Include="..\RefraSin.ProcessModel\RefraSin.ProcessModel.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Serilog" />
+    </ItemGroup>
+
 </Project>

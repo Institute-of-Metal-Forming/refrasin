@@ -12,8 +12,7 @@ public class AdamsMoultonTimeStepper : ITimeStepper
         var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
             equationSystem,
             solverSession.LastStep
-                ?? solverSession.Routines.StepEstimator.EstimateStep(equationSystem),
-            solverSession.Logger
+                ?? solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
         );
 
         if (_lastSteps.TryGetValue(solverSession.Id, out var lastStep))
