@@ -18,7 +18,7 @@ public static class InitialStates
     {
         yield return (nameof(OneParticle), OneParticle());
         yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
-        // yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
+        yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
         yield return (nameof(FourParticleRing), FourParticleRing());
         yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
         yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());

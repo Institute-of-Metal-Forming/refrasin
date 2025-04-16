@@ -21,7 +21,7 @@ public class SimulationTest
     public void SetUpLogging()
     {
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Information()
             // .WriteTo.TestCorrelator()
             .WriteTo.Console()
             .WriteTo.File(Path.Combine(_tempDir, "test.log"))
@@ -53,7 +53,7 @@ public class SimulationTest
     public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
         InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e4);
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e2);
     private readonly ISystemState<IParticle<IParticleNode>, IParticleNode> _initialState;
     private readonly SinteringStep _sinteringProcess;
     private readonly InMemorySolutionStorage _solutionStorage = new();
