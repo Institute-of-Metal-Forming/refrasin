@@ -21,7 +21,7 @@ public class SimulationTest
     public void SetUpLogging()
     {
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Debug()
             // .WriteTo.TestCorrelator()
             .WriteTo.Console()
             .WriteTo.File(Path.Combine(_tempDir, "test.log"))

@@ -1,6 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.TEPSolver.StepVectors;
+using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver.RootFinding;
 
@@ -11,7 +12,10 @@ public class DirectLagrangianRootFinder(IRootFinder rootFinder) : ILagrangianRoo
     {
         var solution = RootFinder.FindRoot(Fun, Jac, initialGuess);
 
-        return new StepVector(solution, initialGuess.StepVectorMap);
+        var step = new StepVector(solution, initialGuess.StepVectorMap);
+        Log.ForContext<DirectLagrangianRootFinder>()
+            .Debug("Root found with dissipation {Dissipation}", equationSystem.Dissipation(step));
+        return step;
 
         Vector<double> Fun(Vector<double> vector)
         {

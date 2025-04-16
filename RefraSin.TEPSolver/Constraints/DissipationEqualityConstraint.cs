@@ -1,6 +1,7 @@
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
+using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver.Constraints;
 
@@ -22,6 +23,14 @@ public class DissipationEqualityConstraint : IGlobalConstraint
             .StepVectorMap.Quantities.OfType<IFlux>()
             .Sum(q => q.DissipationFactor(stepVector) * Pow(stepVector.QuantityValue(q), 2));
 
+        Log.Logger.ForContext<DissipationEqualityConstraint>()
+            .Debug(
+                "Dissipation {Dissipation}, Dissipation Function {DissipationFunction}, Error {Error} ({ErrorPercent:f2}%).",
+                dissipation,
+                dissipationFunction,
+                dissipation - dissipationFunction,
+                (dissipation - dissipationFunction) / dissipation * 100
+            );
         return dissipation - dissipationFunction;
     }
 

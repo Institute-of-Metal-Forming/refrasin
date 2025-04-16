@@ -17,8 +17,6 @@ public interface ISolverSession : ISinteringConditions
 
     public SolutionState CurrentState { get; }
 
-    public StepVector? LastStep { get; }
-
     /// <summary>
     /// COllection of solver routines to use.
     /// </summary>
