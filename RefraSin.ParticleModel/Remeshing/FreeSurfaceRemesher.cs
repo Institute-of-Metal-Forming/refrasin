@@ -1,8 +1,10 @@
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
+using Serilog;
 using static System.Math;
 using static RefraSin.Coordinates.Constants;
 using static RefraSin.ParticleModel.Nodes.NodeType;
+using Log = Serilog.Log;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
@@ -17,8 +19,14 @@ public class FreeSurfaceRemesher(
     /// <inheritdoc />
     public IParticle<IParticleNode> Remesh(IParticle<IParticleNode> particle)
     {
+        var logger = Log.ForContext<FreeSurfaceRemesher>();
+        logger.Debug("Remeshing particle {Particle}.", particle);
         var meanDiscretizationWidth =
             particle.Nodes.Where(n => n.Type == Surface).Average(n => n.SurfaceDistance.Sum) / 2;
+        logger.Debug(
+            "Reference discretization width is {DiscretizationWidth}",
+            meanDiscretizationWidth
+        );
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> newParticle) =>
             FilterNodes(
@@ -26,7 +34,8 @@ public class FreeSurfaceRemesher(
                 particle.Nodes,
                 meanDiscretizationWidth * MinWidthFactor,
                 meanDiscretizationWidth * MaxWidthFactor,
-                meanDiscretizationWidth * TwinPointLimit
+                meanDiscretizationWidth * TwinPointLimit,
+                logger
             );
 
         var newParticle = new Particle<IParticleNode>(
@@ -45,7 +54,8 @@ public class FreeSurfaceRemesher(
         IEnumerable<IParticleNode> nodes,
         double minDistance,
         double maxDistance,
-        double twinPointDistance
+        double twinPointDistance,
+        ILogger logger
     )
     {
         var wasInsertedAtLastNode = true; // true to skip lower insertion on first node (will happen upper to the last)
@@ -58,11 +68,18 @@ public class FreeSurfaceRemesher(
             {
                 if (lowerTwin is not null)
                 {
-                    yield return new ParticleNode(
+                    var combined = new ParticleNode(
                         Guid.NewGuid(),
                         particle,
                         node.Coordinates.Centroid(lowerTwin.Coordinates),
                         Surface
+                    );
+                    yield return combined;
+                    logger.Debug(
+                        "Combined nearby twin of {First} and {Second} to {Combined}.",
+                        lowerTwin,
+                        node,
+                        combined
                     );
 
                     lowerTwin = null;
@@ -83,6 +100,7 @@ public class FreeSurfaceRemesher(
                     && node.SurfaceDistance.Sum < maxDistance
                 )
                 {
+                    logger.Debug("Deleted node {Node}.", node);
                     lastNodeDeleted = true;
                     continue; // delete node
                 }
@@ -92,21 +110,28 @@ public class FreeSurfaceRemesher(
                 if (Abs(node.SurfaceRadiusAngle.Sum - Pi) > AdditionLimit)
                 {
                     if (!wasInsertedAtLastNode && node.SurfaceDistance.ToLower > minDistance)
-                        yield return new ParticleNode(
+                    {
+                        var added = new ParticleNode(
                             Guid.NewGuid(),
                             particle,
                             node.Coordinates.Centroid(node.Lower.Coordinates),
                             Surface
                         );
+                        yield return added;
+                        logger.Debug("Added node {Added} below {Present}.", added, node);
+                    }
+
                     yield return new ParticleNode(node, particle); // existing node
                     if (node.SurfaceDistance.ToUpper > minDistance)
                     {
-                        yield return new ParticleNode(
+                        var added = new ParticleNode(
                             Guid.NewGuid(),
                             particle,
                             node.Coordinates.Centroid(node.Upper.Coordinates),
                             Surface
                         );
+                        yield return added;
+                        logger.Debug("Added node {Added} above {Present}.", added, node);
                         wasInsertedAtLastNode = true;
                     }
                     else
