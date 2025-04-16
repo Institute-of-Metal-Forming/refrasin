@@ -1,10 +1,9 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Optimization;
 using MathNet.Numerics.Optimization.LineSearch;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using RefraSin.Numerics.Exceptions;
 using RefraSin.Numerics.LinearSolvers;
+using Serilog;
 
 namespace RefraSin.Numerics.RootFinding;
 
@@ -20,12 +19,10 @@ public class NewtonRaphsonRootFinder(
     public Vector<double> FindRoot(
         Func<Vector<double>, Vector<double>> function,
         Func<Vector<double>, Matrix<double>> jacobian,
-        Vector<double> initialGuess,
-        ILogger? logger = null
+        Vector<double> initialGuess
     )
     {
-        logger ??= NullLogger<NewtonRaphsonRootFinder>.Instance;
-
+        var logger = Log.ForContext<NewtonRaphsonRootFinder>();
         int i;
 
         var x = initialGuess.Clone();
@@ -40,18 +37,18 @@ public class NewtonRaphsonRootFinder(
 
         for (i = 0; i < MaxIterationCount; i++)
         {
-            logger.LogDebug("Current error {Error}.", error);
+            logger.Debug("Current error {Error}.", error);
 
             if (error <= AbsoluteTolerance)
             {
-                logger.LogDebug("Solution found.");
+                logger.Debug("Solution found.");
                 return x;
             }
 
             var jac = jacobian(x);
             jac.CoerceZero(1e-8);
             var dx = JacobianStepSolver.Solve(jac, -y);
-            logger.LogDebug("Next step {Step}.", dx);
+            logger.Debug("Next step {Step}.", dx);
 
             if (!dx.ForAll(double.IsFinite))
                 throw new UncriticalIterationInterceptedException(
@@ -77,6 +74,7 @@ public class NewtonRaphsonRootFinder(
                     1
                 );
                 x = lineSearchResult.MinimizingPoint;
+                logger.Debug("Line search resulted in step {Step}.", lineSearchResult.FinalStep);
             }
             else
             {
@@ -88,7 +86,7 @@ public class NewtonRaphsonRootFinder(
             dxOld = dx;
         }
 
-        logger.LogWarning("Maximum iteration count exceeded. Continuing anyway.");
+        logger.Warning("Maximum iteration count exceeded. Continuing anyway.");
         return x;
     }
 

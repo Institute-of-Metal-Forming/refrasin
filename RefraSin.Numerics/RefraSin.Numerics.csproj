@@ -13,7 +13,7 @@
     <ItemGroup>
         <PackageReference Include="CSparse" />
         <PackageReference Include="MathNet.Numerics"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Serilog" />
     </ItemGroup>
 
 </Project>

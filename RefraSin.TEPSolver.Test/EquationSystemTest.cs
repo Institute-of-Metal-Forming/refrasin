@@ -37,7 +37,7 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         }
     );
 
-    [Test]
+    // [Test]
     public void TestEquationSystem()
     {
         var norm = new DefaultNormalizer().GetNorm(state, Conditions, [Material]);

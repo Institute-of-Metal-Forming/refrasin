@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;

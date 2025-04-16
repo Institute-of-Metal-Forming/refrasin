@@ -1,29 +1,15 @@
-using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.RootFinding;
-using Microsoft.Extensions.Logging;
-using RefraSin.Numerics.Exceptions;
 using RefraSin.Numerics.RootFinding;
-using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.RootFinding;
 
-public class DirectLagrangianRootFinder(
-    IRootFinder rootFinder,
-    double iterationPrecision = 1e-4,
-    int maxIterationCount = 100
-) : ILagrangianRootFinder
+public class DirectLagrangianRootFinder(IRootFinder rootFinder) : ILagrangianRootFinder
 {
     /// <inheritdoc />
-    public StepVector FindRoot(
-        EquationSystem equationSystem,
-        StepVector initialGuess,
-        ILogger logger
-    )
+    public StepVector FindRoot(EquationSystem equationSystem, StepVector initialGuess)
     {
-        var solution = RootFinder.FindRoot(Fun, Jac, initialGuess, logger);
+        var solution = RootFinder.FindRoot(Fun, Jac, initialGuess);
 
         return new StepVector(solution, initialGuess.StepVectorMap);
 

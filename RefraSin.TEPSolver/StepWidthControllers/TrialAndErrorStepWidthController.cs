@@ -1,6 +1,7 @@
-using Microsoft.Extensions.Logging;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using Serilog;
+using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver.StepWidthControllers;
 
@@ -31,17 +32,18 @@ public class TrialAndErrorStepWidthController(
 
     private void SolverOnStepRejected(object? sender, SinteringSolver.StepRejectedEventArgs e)
     {
+        var logger = Log.ForContext<TrialAndErrorStepWidthController>();
         var currentStepWidth = _stepWidths[e.SolverSession.Id];
 
         if (currentStepWidth < MinimalTimeStepWidth)
-            e.SolverSession.Logger.LogWarning(
+            logger.Warning(
                 "Time step width can not be decreased further, since it fall below the allowed minimum."
             );
         else
         {
             _stepWidths[e.SolverSession.Id] *= DecreaseFactor;
             _stepsSinceLastIncrease[e.SolverSession.Id] = 0;
-            e.SolverSession.Logger.LogInformation(
+            logger.Information(
                 "Time step width decreased to {Step}.",
                 _stepWidths[e.SolverSession.Id]
             );
@@ -62,9 +64,10 @@ public class TrialAndErrorStepWidthController(
         else
         {
             if (_stepWidths[solverSession.Id] > MaximalTimeStepWidth)
-                solverSession.Logger.LogWarning(
-                    "Time step width can not be increased further, since it rose above the allowed maximum."
-                );
+                Log.ForContext<TrialAndErrorStepWidthController>()
+                    .Warning(
+                        "Time step width can not be increased further, since it rose above the allowed maximum."
+                    );
             else
             {
                 _stepWidths[solverSession.Id] *= IncreaseFactor;

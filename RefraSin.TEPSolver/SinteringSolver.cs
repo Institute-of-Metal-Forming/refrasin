@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Logging;
 using RefraSin.Numerics.Exceptions;
+using RefraSin.Numerics.RootFinding;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
@@ -8,6 +8,8 @@ using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
+using Serilog;
+using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver;
 
@@ -16,22 +18,12 @@ namespace RefraSin.TEPSolver;
 /// </summary>
 public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 {
-    public SinteringSolver(
-        ILoggerFactory loggerFactory,
-        ISolverRoutines routines,
-        int remeshingEverySteps = 10
-    )
+    public SinteringSolver(ISolverRoutines routines, int remeshingEverySteps = 10)
     {
-        LoggerFactory = loggerFactory;
         Routines = routines;
         RemeshingEverySteps = remeshingEverySteps;
         routines.RegisterWithSolver(this);
     }
-
-    /// <summary>
-    /// Factory for loggers used in the Session.
-    /// </summary>
-    public ILoggerFactory LoggerFactory { get; }
 
     /// <summary>
     /// Collection of subroutines to use.
@@ -68,13 +60,13 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         }
         catch (Exception e)
         {
-            session.Logger.LogCritical(e, "Solution procedure failed due to exception.");
+            session.Logger.Error(e, "Solution procedure failed due to exception.");
         }
     }
 
     private void DoTimeIntegration(ref SolverSession session)
     {
-        session.Logger.LogInformation("Starting time integration.");
+        session.Logger.Information("Starting time integration.");
 
         int i = 0;
         var recoverersArray = session.Routines.StateRecoverers.ToArray();
@@ -94,7 +86,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             session.CurrentState = newState;
             session.ReportCurrentState(stepVector);
 
-            session.Logger.LogInformation(
+            session.Logger.Information(
                 "Time step {Index} successfully calculated. ({Time:e2}/{EndTime:e2} = {Percent:f2}%)",
                 i,
                 session.CurrentState.Time,
@@ -117,7 +109,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 
                 session = new SolverSession(session, remeshedState);
                 InvokeSessionInitialized(session);
-                session.Logger.LogInformation(
+                session.Logger.Information(
                     "Remeshed session created. Now {NodeCount} nodes present.",
                     remeshedState.Nodes.Count
                 );
@@ -125,7 +117,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             }
         }
 
-        session.Logger.LogInformation("End time successfully reached after {StepCount} steps.", i);
+        session.Logger.Information("End time successfully reached after {StepCount} steps.", i);
     }
 
     private StepVector SolveStepUntilValid(
@@ -145,7 +137,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         }
         catch (InvalidStepException stepRejectedException)
         {
-            session.Logger.LogError(
+            session.Logger.Error(
                 stepRejectedException,
                 "Calculated step was rejected. Trying to recover."
             );
@@ -157,7 +149,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             }
             catch (RecoveryFailedException recoveryFailedException)
             {
-                session.Logger.LogError(
+                session.Logger.Error(
                     recoveryFailedException,
                     "Recovery failed. Trying next recoverer."
                 );
@@ -181,7 +173,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         }
         catch (IndexOutOfRangeException)
         {
-            session.Logger.LogError("No more recoverers available.");
+            session.Logger.Error("No more recoverers available.");
             throw new CriticalIterationInterceptedException(
                 nameof(SolveStepUntilValid),
                 InterceptReason.ExceptionOccured,

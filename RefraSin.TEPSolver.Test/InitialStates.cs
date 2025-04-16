@@ -190,7 +190,7 @@ public static class InitialStates
 
         var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
             MaterialId,
-            (105e-6, -110e-6),
+            (105e-6, 110e-6),
             0,
             nodeCountPerParticle,
             100e-6
@@ -198,7 +198,7 @@ public static class InitialStates
 
         var particle3 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
             MaterialId,
-            (-105e-6, -110e-6),
+            (-105e-6, 110e-6),
             0,
             nodeCountPerParticle,
             100e-6
@@ -226,7 +226,7 @@ public static class InitialStates
 
         var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
             MaterialId,
-            (150 - 6, 150e-6),
+            (150e-6, 150e-6),
             0,
             nodeCountPerParticle,
             100e-6

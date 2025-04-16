@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-using RefraSin.MaterialData;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
@@ -20,11 +18,6 @@ public interface ISolverSession : ISinteringConditions
     public SolutionState CurrentState { get; }
 
     public StepVector? LastStep { get; }
-
-    /// <summary>
-    /// Factory for loggers used in the session.
-    /// </summary>
-    public ILogger<SinteringSolver> Logger { get; }
 
     /// <summary>
     /// COllection of solver routines to use.
