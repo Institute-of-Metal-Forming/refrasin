@@ -5,6 +5,7 @@ using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
+using Serilog;
 
 namespace RefraSin.ParquetStorage;
 
@@ -55,11 +56,14 @@ public class ParquetStorage(
 
     private async Task WriteRowBufferAsync()
     {
+        var logger = Log.ForContext<ParquetStorage>();
+        logger.Information("Writing buffered data to Parquet file...");
         var data = _rowBuffer.ToArray();
         _rowBuffer.Clear();
         _options.Append = _append;
         await ParquetSerializer.SerializeAsync(data, _stream, _options);
         _append = true;
+        logger.Information("Writing finished.");
     }
 
     /// <inheritdoc />

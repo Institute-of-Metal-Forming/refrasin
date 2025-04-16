@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <PackageReference Include="Parquet.Net" />
+      <PackageReference Include="Serilog" />
     </ItemGroup>
 
 </Project>
