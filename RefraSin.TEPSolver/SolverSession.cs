@@ -80,9 +80,6 @@ internal class SolverSession : ISolverSession
 
     public SolutionState CurrentState { get; set; }
 
-    /// <inheritdoc />
-    public StepVector? LastStep { get; set; }
-
     public IReadOnlyList<IMaterial> Materials { get; }
 
     /// <inheritdoc />

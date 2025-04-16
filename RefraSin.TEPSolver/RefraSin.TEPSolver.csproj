@@ -40,6 +40,7 @@
       <Compile Remove="EquationSystem\RingContactConstraintX.cs" />
       <Compile Remove="EquationSystem\RingContactConstraintY.cs" />
       <Compile Remove="ParticleModel\ParticleContact.cs" />
+      <Compile Remove="Constraints\PushParticleConstraintX.cs" />
     </ItemGroup>
 
 </Project>

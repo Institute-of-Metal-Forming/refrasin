@@ -24,6 +24,11 @@ public class EquationSystem
     public IReadOnlyList<IQuantity> Quantities { get; }
     public IReadOnlyList<IConstraint> Constraints { get; }
 
+    public double Dissipation(StepVector stepVector) =>
+        stepVector
+            .StepVectorMap.Quantities.OfType<IStateVelocity>()
+            .Sum(q => q.DrivingForce(stepVector) * stepVector.QuantityValue(q));
+
     public Vector<double> Lagrangian(StepVector stepVector)
     {
         var constraintDerivatives = Constraints

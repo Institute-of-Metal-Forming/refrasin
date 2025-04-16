@@ -53,7 +53,7 @@ public class SimulationTest
     public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
         InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e4);
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e2);
     private readonly ISystemState<IParticle<IParticleNode>, IParticleNode> _initialState;
     private readonly SinteringStep _sinteringProcess;
     private readonly InMemorySolutionStorage _solutionStorage = new();

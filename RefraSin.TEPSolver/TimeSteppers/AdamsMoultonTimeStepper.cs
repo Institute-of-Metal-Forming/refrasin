@@ -9,16 +9,23 @@ public class AdamsMoultonTimeStepper : ITimeStepper
     public StepVector Step(ISolverSession solverSession, SolutionState baseState)
     {
         var equationSystem = solverSession.Routines.EquationSystemBuilder.Build(baseState);
-        var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
-            equationSystem,
-            solverSession.LastStep
-                ?? solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
-        );
 
         if (_lastSteps.TryGetValue(solverSession.Id, out var lastStep))
+        {
+            var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
+                equationSystem,
+                lastStep
+            );
             return (step + lastStep) / 2;
-
-        return step;
+        }
+        else
+        {
+            var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
+                equationSystem,
+                solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
+            );
+            return step;
+        }
     }
 
     private readonly Dictionary<Guid, StepVector> _lastSteps = new();
