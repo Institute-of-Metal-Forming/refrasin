@@ -61,9 +61,7 @@ class StepEstimator : IStepEstimator
                             2 * flux
                         );
                         var volumeBalance =
-                            flux
-                            - stepVector.QuantityValue<FluxToUpper>(neckNode)
-                            - neckNode.VolumeGradient.Normal * normalDisplacement;
+                            flux - neckNode.VolumeGradient.Normal * normalDisplacement;
                         var tangentialDisplacement =
                             volumeBalance / neckNode.VolumeGradient.Tangential;
                         var dissipation =
@@ -113,9 +111,7 @@ class StepEstimator : IStepEstimator
                             2 * flux
                         );
                         var volumeBalance =
-                            flux
-                            + stepVector.QuantityValue<FluxToUpper>(neckNode.Lower)
-                            - neckNode.VolumeGradient.Normal * normalDisplacement;
+                            flux - neckNode.VolumeGradient.Normal * normalDisplacement;
                         var tangentialDisplacement =
                             volumeBalance / neckNode.VolumeGradient.Tangential;
                         var dissipation =
