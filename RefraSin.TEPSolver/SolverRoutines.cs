@@ -29,7 +29,7 @@ public record SolverRoutines(
 {
     public static readonly SolverRoutines Default = new(
         new StepEstimator(),
-        new AdamsMoultonTimeStepper(),
+        new EulerTimeStepper(),
         [],
         new DirectLagrangianRootFinder(
             new NewtonRaphsonRootFinder(new SparseLUSolver(), absoluteTolerance: 1e-4)
