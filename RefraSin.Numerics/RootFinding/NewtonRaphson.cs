@@ -27,24 +27,14 @@ public class NewtonRaphsonRootFinder(
 
         var x = initialGuess.Clone();
         var y = function(x);
-        var error = y.L2Norm();
-        var dxOld = Vector<double>.Build.Dense(x.Count, double.NaN);
 
         var objectiveFunction = ObjectiveFunction.Gradient(
             v => function(v).L2Norm(),
             v => jacobian(v).ColumnNorms(2)
         );
 
-        for (i = 0; i < MaxIterationCount; i++)
+        for (i = 1; i < MaxIterationCount; i++)
         {
-            logger.Debug("Current error {Error}.", error);
-
-            if (error <= AbsoluteTolerance)
-            {
-                logger.Debug("Solution found.");
-                return x;
-            }
-
             var jac = jacobian(x);
             jac.CoerceZero(1e-8);
             var dx = JacobianStepSolver.Solve(jac, -y);
@@ -57,12 +47,6 @@ public class NewtonRaphsonRootFinder(
                     i,
                     furtherInformation: "Infinite step occured."
                 );
-
-            if (
-                (dx - dxOld).L2Norm() < AbsoluteTolerance
-                || (dx + dxOld).L2Norm() < AbsoluteTolerance
-            )
-                return x;
 
             if (UseLineSearch)
             {
@@ -82,8 +66,14 @@ public class NewtonRaphsonRootFinder(
             }
 
             y = function(x);
-            error = y.L2Norm();
-            dxOld = dx;
+            var error = y.L2Norm();
+            logger.Debug("Current error {Error}.", error);
+
+            if (error <= AbsoluteTolerance)
+            {
+                logger.Debug("Solution found after {Iterations} iterations.", i);
+                return x;
+            }
         }
 
         logger.Warning("Maximum iteration count exceeded. Continuing anyway.");
