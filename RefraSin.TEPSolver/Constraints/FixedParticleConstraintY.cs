@@ -14,11 +14,13 @@ public class FixedParticleConstraintY : IParticleConstraint
     public static IParticleConstraint Create(Particle particle) =>
         new FixedParticleConstraintY(particle);
 
-    public double Residual(StepVector stepVector) =>
+    public double Residual(EquationSystem equationSystem, StepVector stepVector) =>
         stepVector.QuantityValue<ParticleDisplacementY>(Particle);
 
-    public IEnumerable<(int index, double value)> Derivatives(StepVector stepVector) =>
-        [(stepVector.StepVectorMap.QuantityIndex<ParticleDisplacementY>(Particle), 1)];
+    public IEnumerable<(int index, double value)> Derivatives(
+        EquationSystem equationSystem,
+        StepVector stepVector
+    ) => [(stepVector.StepVectorMap.QuantityIndex<ParticleDisplacementY>(Particle), 1)];
 
     public Particle Particle { get; }
 

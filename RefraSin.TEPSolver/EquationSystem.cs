@@ -25,14 +25,14 @@ public class EquationSystem
     public IReadOnlyList<IConstraint> Constraints { get; }
 
     public double Dissipation(StepVector stepVector) =>
-        stepVector
-            .StepVectorMap.Quantities.OfType<IStateVelocity>()
+        Quantities
+            .OfType<IStateVelocity>()
             .Sum(q => q.DrivingForce(stepVector) * stepVector.QuantityValue(q));
 
     public Vector<double> Lagrangian(StepVector stepVector)
     {
         var constraintDerivatives = Constraints
-            .SelectMany(c => c.Derivatives(stepVector).Select(d => (c, d.index, d.value)))
+            .SelectMany(c => c.Derivatives(this, stepVector).Select(d => (c, d.index, d.value)))
             .GroupBy(t => t.index, t => (t.c, t.value))
             .ToDictionary(g => g.Key, g => g.ToArray());
 
@@ -43,7 +43,7 @@ public class EquationSystem
                 .Sum(t => t.value * stepVector.ConstraintLambdaValue(t.c))
         );
 
-        var constraintResiduals = Constraints.Select(c => c.Residual(stepVector));
+        var constraintResiduals = Constraints.Select(c => c.Residual(this, stepVector));
 
         return Vector<double>.Build.DenseOfEnumerable(
             quantityDerivatives.Concat(constraintResiduals)
@@ -55,14 +55,15 @@ public class EquationSystem
         var constraintComponents = Constraints.SelectMany(c =>
         {
             var rowIndex = stepVector.StepVectorMap.ConstraintIndex(c);
-            return c.Derivatives(stepVector).Select(d => (rowIndex, columnIndex: d.index, d.value));
+            return c.Derivatives(this, stepVector)
+                .Select(d => (rowIndex, columnIndex: d.index, d.value));
         });
 
         var secondDerivatives = Constraints
             .SelectMany(c =>
             {
                 var lambdaIndex = stepVector.StepVectorMap.ConstraintIndex(c);
-                return c.SecondDerivatives(stepVector)
+                return c.SecondDerivatives(this, stepVector)
                     .Select(d => (lambdaIndex, d.firstIndex, d.secondIndex, d.value));
             })
             .GroupBy(t => (t.firstIndex, t.secondIndex), t => (t.lambdaIndex, t.value))

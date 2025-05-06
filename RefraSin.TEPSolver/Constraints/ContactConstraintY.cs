@@ -15,7 +15,7 @@ public class ContactConstraintY : INodeContactConstraint
     public static INodeContactConstraint Create(ContactPair<NodeBase> nodeContact) =>
         new ContactConstraintY(nodeContact);
 
-    public double Residual(StepVector stepVector)
+    public double Residual(EquationSystem equationSystem, StepVector stepVector)
     {
         var thisTerm = GlobalNodeDisplacement(stepVector, NodeContact.First);
         var othersTerm = GlobalNodeDisplacement(stepVector, NodeContact.Second);
@@ -39,7 +39,10 @@ public class ContactConstraintY : INodeContactConstraint
         return byNormal + byTangential + byParticle;
     }
 
-    public IEnumerable<(int index, double value)> Derivatives(StepVector stepVector) =>
+    public IEnumerable<(int index, double value)> Derivatives(
+        EquationSystem equationSystem,
+        StepVector stepVector
+    ) =>
         DerivativesOf(stepVector, NodeContact.First, 1)
             .Concat(DerivativesOf(stepVector, NodeContact.Second, -1));
 

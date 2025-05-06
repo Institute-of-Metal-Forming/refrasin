@@ -16,7 +16,7 @@ public class VolumeBalanceConstraint : INodeConstraint
         return new VolumeBalanceConstraint(node);
     }
 
-    public double Residual(StepVector stepVector)
+    public double Residual(EquationSystem equationSystem, StepVector stepVector)
     {
         var normalVolumeTerm =
             Node.VolumeGradient.Normal * stepVector.QuantityValue<NormalDisplacement>(Node);
@@ -33,7 +33,10 @@ public class VolumeBalanceConstraint : INodeConstraint
         return normalVolumeTerm + tangentialVolumeTerm - fluxTerm;
     }
 
-    public IEnumerable<(int index, double value)> Derivatives(StepVector stepVector)
+    public IEnumerable<(int index, double value)> Derivatives(
+        EquationSystem equationSystem,
+        StepVector stepVector
+    )
     {
         yield return (
             stepVector.StepVectorMap.QuantityIndex<NormalDisplacement>(Node),

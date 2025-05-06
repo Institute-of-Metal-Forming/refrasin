@@ -15,13 +15,13 @@ class StepEstimator : IStepEstimator
         Log.Logger.Debug("Estimate time step.");
         var map = new StepVectorMap(equationSystem);
         var vector = new StepVector(new double[map.TotalLength], map);
-        FillStepVector(vector, equationSystem.State);
+        FillStepVector(vector, equationSystem);
         return vector;
     }
 
-    private static void FillStepVector(StepVector stepVector, SolutionState currentState)
+    private static void FillStepVector(StepVector stepVector, EquationSystem equationSystem)
     {
-        foreach (var constraint in stepVector.StepVectorMap.Constraints)
+        foreach (var constraint in equationSystem.Constraints)
         {
             stepVector.SetConstraintLambdaValue(
                 constraint,
@@ -33,7 +33,7 @@ class StepEstimator : IStepEstimator
             );
         }
 
-        foreach (var particle in currentState.Particles)
+        foreach (var particle in equationSystem.State.Particles)
         {
             foreach (var node in particle.Nodes)
             {
@@ -152,7 +152,7 @@ class StepEstimator : IStepEstimator
             }
         }
 
-        foreach (var particle in currentState.Particles)
+        foreach (var particle in equationSystem.State.Particles)
         {
             var isXFixed = stepVector.StepVectorMap.HasConstraint<FixedParticleConstraintX>(
                 particle

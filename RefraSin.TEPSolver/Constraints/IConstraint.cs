@@ -7,11 +7,15 @@ namespace RefraSin.TEPSolver.Constraints;
 
 public interface IConstraint
 {
-    double Residual(StepVector stepVector);
+    double Residual(EquationSystem equationSystem, StepVector stepVector);
 
-    IEnumerable<(int index, double value)> Derivatives(StepVector stepVector);
+    IEnumerable<(int index, double value)> Derivatives(
+        EquationSystem equationSystem,
+        StepVector stepVector
+    );
 
     IEnumerable<(int firstIndex, int secondIndex, double value)> SecondDerivatives(
+        EquationSystem equationSystem,
         StepVector stepVector
     ) => [];
 }
