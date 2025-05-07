@@ -12,7 +12,7 @@ namespace RefraSin.ParticleModel.ParticleFactories;
 /// <param name="rotationAngle">angle of particle rotation</param>
 /// <param name="nodeCount">count of nodes to create</param>
 /// <param name="baseRadius">base radius</param>
-/// <param name="ovality">ovality as fraction of base radius (ge 0, lt 1)</param>
+/// <param name="ovality">ovality as the ratio between small and large diameter (ge 1)</param>
 /// <param name="peakCount">count of peak waves (ge 0)</param>
 /// <param name="peakHeight">height of peak waves as fraction of base radius (ge 0, lt 1)</param>
 public class ShapeFunctionParticleFactoryEllipseOvalityCosPeaks(
@@ -21,15 +21,16 @@ public class ShapeFunctionParticleFactoryEllipseOvalityCosPeaks(
     Angle rotationAngle,
     int nodeCount,
     double baseRadius,
-    double ovality = 0,
+    double ovality = 1,
     int peakCount = 0,
     double peakHeight = 0
 ) : ShapeFunctionParticleFactory(materialId, centerCoordinates, rotationAngle, nodeCount)
 {
     private double EllipseFunction(double phi)
     {
-        var a = (1 + Ovality) * BaseRadius;
-        var b = (1 - Ovality) * BaseRadius;
+        var factor = Sqrt(Ovality);
+        var a = factor * BaseRadius;
+        var b = BaseRadius / factor;
         return a * b / Sqrt(Pow(a * Sin(phi), 2) + Pow(b * Cos(phi), 2));
     }
 
@@ -40,7 +41,7 @@ public class ShapeFunctionParticleFactoryEllipseOvalityCosPeaks(
     public double BaseRadius { get; } =
         baseRadius > 0 ? baseRadius : throw new ArgumentOutOfRangeException(nameof(baseRadius));
     public double Ovality { get; } =
-        ovality is >= 0 and < 1 ? ovality : throw new ArgumentOutOfRangeException(nameof(ovality));
+        ovality >= 1 ? ovality : throw new ArgumentOutOfRangeException(nameof(ovality));
     public int PeakCount { get; } =
         peakCount >= 0 ? peakCount : throw new ArgumentOutOfRangeException(nameof(peakCount));
     public double PeakHeight { get; } =
