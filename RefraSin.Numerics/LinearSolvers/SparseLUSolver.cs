@@ -1,6 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearAlgebra.Storage;
+using RefraSin.Numerics.Exceptions;
 using ColumnOrdering = CSparse.ColumnOrdering;
 using CSparseLU = CSparse.Double.Factorization.SparseLU;
 using CSparseMatrix = CSparse.Double.SparseMatrix;
@@ -30,14 +31,30 @@ public record SparseLUSolver(
             storage.ColumnIndices,
             storage.RowPointers
         );
+        var rightSideArray =
+            rightSide.AsArray() ?? throw new ArgumentException("right side vector must be dense");
 
-        var lu = CSparseLU.Create(cSparseMatrix, ColumnOrdering, PivotingTolerance);
+        CSparseLU lu;
+
+        try
+        {
+            lu = CSparseLU.Create(cSparseMatrix, ColumnOrdering, PivotingTolerance);
+        }
+        catch (Exception e)
+        {
+            throw new NumericException("LU factorization failed.", e);
+        }
 
         var result = new double[rightSide.Count];
-        lu.Solve(
-            rightSide.AsArray() ?? throw new ArgumentException("right side vector must be dense"),
-            result
-        );
+
+        try
+        {
+            lu.Solve(rightSideArray, result);
+        }
+        catch (Exception e)
+        {
+            throw new NumericException("Solution using LU factorization failed.", e);
+        }
 
         return new DenseVector(result);
     }
