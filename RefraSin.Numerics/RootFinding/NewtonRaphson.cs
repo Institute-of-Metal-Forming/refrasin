@@ -36,7 +36,6 @@ public class NewtonRaphsonRootFinder(
         for (i = 1; i < MaxIterationCount; i++)
         {
             var jac = jacobian(x);
-            jac.CoerceZero(1e-8);
             var dx = JacobianStepSolver.Solve(jac, -y);
             logger.Debug("Next step {Step}.", dx);
 
