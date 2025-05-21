@@ -61,6 +61,8 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         catch (Exception e)
         {
             session.Logger.Error(e, "Solution procedure failed due to exception.");
+            InvokeSolutionFailed(session.CurrentState);
+            throw;
         }
     }
 
@@ -242,5 +244,17 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     public class SessionInitializedEventArgs(ISolverSession solverSession) : EventArgs
     {
         public ISolverSession SolverSession { get; } = solverSession;
+    }
+
+    public event EventHandler<SolutionFailedEventArgs>? SolutionFailed;
+
+    private void InvokeSolutionFailed(SolutionState lastState)
+    {
+        SolutionFailed?.Invoke(this, new SolutionFailedEventArgs(lastState));
+    }
+
+    public class SolutionFailedEventArgs(SolutionState lastState) : EventArgs
+    {
+        public SolutionState LastState { get; } = lastState;
     }
 }
