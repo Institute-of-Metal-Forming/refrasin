@@ -14,8 +14,18 @@ public class EulerTimeStepper : ITimeStepper
             solverSession.Id,
             solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
         );
-        var step = solverSession.Routines.LagrangianRootFinder.FindRoot(equationSystem, estimate);
-        return step;
+        try
+        {
+            var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
+                equationSystem,
+                estimate
+            );
+            return step;
+        }
+        catch (Exception e)
+        {
+            throw new StepFailedException(innerException: e);
+        }
     }
 
     private readonly Dictionary<Guid, StepVector> _lastSteps = new();

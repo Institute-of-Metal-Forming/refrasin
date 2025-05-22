@@ -2,12 +2,13 @@ using RefraSin.Coordinates.Helpers;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
+using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver.StepWidthControllers;
 
 public class MaximumDisplacementAngleStepWidthController(
     double initialTimeStepWidth = 1,
-    double maximumDisplacementAngle = 0.02,
+    double maximumDisplacementAngle = 0.005,
     double increaseFactor = 2,
     double decreaseFactor = 0.8,
     double minimalTimeStepWidth = double.NegativeInfinity,
@@ -18,6 +19,7 @@ public class MaximumDisplacementAngleStepWidthController(
     public void RegisterWithSolver(SinteringSolver solver)
     {
         solver.SessionInitialized += SolverOnSessionInitialized;
+        solver.StepRejected += SolverOnStepRejected;
     }
 
     private void SolverOnSessionInitialized(
@@ -26,6 +28,25 @@ public class MaximumDisplacementAngleStepWidthController(
     )
     {
         _stepWidths[e.SolverSession.Id] = InitialTimeStepWidth;
+    }
+
+    private void SolverOnStepRejected(object? sender, SinteringSolver.StepRejectedEventArgs e)
+    {
+        var logger = Log.ForContext<TrialAndErrorStepWidthController>();
+        var currentStepWidth = _stepWidths[e.SolverSession.Id];
+
+        if (currentStepWidth < MinimalTimeStepWidth)
+            logger.Warning(
+                "Time step width can not be decreased further, since it fall below the allowed minimum."
+            );
+        else
+        {
+            _stepWidths[e.SolverSession.Id] *= DecreaseFactor / IncreaseFactor;
+            logger.Information(
+                "Time step width decreased to {Step} due to invalid step.",
+                _stepWidths[e.SolverSession.Id]
+            );
+        }
     }
 
     /// <inheritdoc />

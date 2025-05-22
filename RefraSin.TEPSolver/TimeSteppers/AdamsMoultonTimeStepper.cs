@@ -12,19 +12,33 @@ public class AdamsMoultonTimeStepper : ITimeStepper
 
         if (_lastSteps.TryGetValue(solverSession.Id, out var lastStep))
         {
-            var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
-                equationSystem,
-                lastStep
-            );
+            var step = TryCalculateStep(solverSession, equationSystem, lastStep);
             return (step + lastStep) / 2;
         }
         else
         {
-            var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
+            var step = TryCalculateStep(
+                solverSession,
                 equationSystem,
                 solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
             );
             return step;
+        }
+    }
+
+    private StepVector TryCalculateStep(
+        ISolverSession solverSession,
+        EquationSystem equationSystem,
+        StepVector estimate
+    )
+    {
+        try
+        {
+            return solverSession.Routines.LagrangianRootFinder.FindRoot(equationSystem, estimate);
+        }
+        catch (Exception e)
+        {
+            throw new StepFailedException(innerException: e);
         }
     }
 

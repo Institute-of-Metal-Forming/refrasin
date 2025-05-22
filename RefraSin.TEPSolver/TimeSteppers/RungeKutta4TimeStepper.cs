@@ -45,7 +45,14 @@ public class RungeKutta4TimeStepper : ITimeStepper
             solverSession.Id,
             solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
         );
-        return solverSession.Routines.LagrangianRootFinder.FindRoot(equationSystem, estimate);
+        try
+        {
+            return solverSession.Routines.LagrangianRootFinder.FindRoot(equationSystem, estimate);
+        }
+        catch (Exception e)
+        {
+            throw new StepFailedException(innerException: e);
+        }
     }
 
     private readonly Dictionary<Guid, StepVector> _lastSteps = new();

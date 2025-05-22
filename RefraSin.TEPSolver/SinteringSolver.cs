@@ -1,5 +1,4 @@
 using RefraSin.Numerics.Exceptions;
-using RefraSin.Numerics.RootFinding;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
@@ -8,8 +7,7 @@ using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepVectors;
-using Serilog;
-using Log = Serilog.Log;
+using RefraSin.TEPSolver.TimeSteppers;
 
 namespace RefraSin.TEPSolver;
 
@@ -128,7 +126,30 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         IStateRecoverer[] recoverers
     )
     {
-        var stepVector = session.Routines.TimeStepper.Step(session, baseState);
+        StepVector? stepVector;
+
+        try
+        {
+            stepVector = session.Routines.TimeStepper.Step(session, baseState);
+        }
+        catch (StepFailedException failedException)
+        {
+            session.Logger.Error(failedException, "Step calculation failed. Trying to recover.");
+            InvokeStepFailed(session, baseState);
+
+            try
+            {
+                stepVector = TryRecover(session, baseState, recoverers);
+            }
+            catch (RecoveryFailedException recoveryFailedException)
+            {
+                session.Logger.Error(
+                    recoveryFailedException,
+                    "Recovery failed. Trying next recoverer."
+                );
+                stepVector = TryRecover(session, baseState, recoverers[1..]);
+            }
+        }
 
         try
         {
@@ -244,6 +265,20 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
     public class SessionInitializedEventArgs(ISolverSession solverSession) : EventArgs
     {
         public ISolverSession SolverSession { get; } = solverSession;
+    }
+
+    public event EventHandler<StepFailedEventArgs>? StepFailed;
+
+    private void InvokeStepFailed(SolverSession solverSession, SolutionState baseState)
+    {
+        StepFailed?.Invoke(this, new StepFailedEventArgs(solverSession, baseState));
+    }
+
+    public class StepFailedEventArgs(ISolverSession solverSession, SolutionState baseState)
+        : EventArgs
+    {
+        public ISolverSession SolverSession { get; } = solverSession;
+        public SolutionState BaseState { get; } = baseState;
     }
 
     public event EventHandler<SolutionFailedEventArgs>? SolutionFailed;
