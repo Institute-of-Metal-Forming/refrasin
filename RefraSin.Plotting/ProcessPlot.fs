@@ -15,7 +15,7 @@ let PlotTimeSteps (states: ISystemState<_, _> seq) =
     Chart.Line(x = indices, y = timeSteps)
     |> Commons.ApplyDefaultPlotProperties
     |> Chart.withXAxisStyle (TitleText = "# of Step", AxisType = AxisType.Category)
-    |> Chart.withYAxisStyle (TitleText = "Time Step Width")
+    |> Chart.withYAxisStyle (TitleText = "Time Step Width", AxisType = AxisType.Log)
 
 let PlotShrinkagesByVolume (states: ISystemState<_, _> seq) =
     let times = [ for s in states -> s.Time ]
