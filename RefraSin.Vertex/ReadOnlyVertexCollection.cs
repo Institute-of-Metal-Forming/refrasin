@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace RefraSin.ParticleModel.Collections;
+namespace RefraSin.Vertex;
 
 public class ReadOnlyVertexCollection<TVertex> : IReadOnlyVertexCollection<TVertex>
     where TVertex : IVertex

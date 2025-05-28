@@ -1,6 +1,4 @@
-using RefraSin.ParticleModel.Nodes;
-
-namespace RefraSin.ParticleModel.Collections;
+namespace RefraSin.Vertex;
 
 /// <summary>
 /// An interface for collections of vertices, where items can be indexed by position and GUID.

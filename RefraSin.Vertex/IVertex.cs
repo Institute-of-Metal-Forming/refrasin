@@ -1,4 +1,4 @@
-namespace RefraSin.ParticleModel;
+namespace RefraSin.Vertex;
 
 public interface IVertex : IEquatable<IVertex>
 {

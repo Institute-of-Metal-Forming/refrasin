@@ -1,5 +1,6 @@
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.System;
+using RefraSin.Vertex;
 
 namespace RefraSin.ProcessModel;
 

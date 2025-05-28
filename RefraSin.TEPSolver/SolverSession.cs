@@ -5,6 +5,7 @@ using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using RefraSin.Vertex;
 using Serilog;
 using Log = Serilog.Log;
 

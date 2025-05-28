@@ -1,3 +1,5 @@
+using RefraSin.Vertex;
+
 namespace RefraSin.ParticleModel;
 
 public readonly struct ContactPair<TVertex>(Guid id, TVertex first, TVertex second)

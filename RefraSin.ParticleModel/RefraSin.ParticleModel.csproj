@@ -12,15 +12,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RefraSin.Coordinates\RefraSin.Coordinates.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Nodes\INodeContactGeometry.cs" />
-      <Compile Remove="Nodes\INodeContactGradients.cs" />
-      <Compile Remove="Nodes\INodeContactNeighbors.cs" />
-      <Compile Remove="Particles\IParticleContactEdge.cs" />
-      <Compile Remove="Particles\IParticleContacts.cs" />
-      <Compile Remove="Particles\ParticleContactEdge.cs" />
+      <ProjectReference Include="..\RefraSin.MaterialData\RefraSin.MaterialData.csproj" />
+      <ProjectReference Include="..\RefraSin.Vertex\RefraSin.Vertex.csproj" />
     </ItemGroup>
 
     <ItemGroup>

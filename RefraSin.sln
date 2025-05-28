@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ParquetStorage", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.ParquetStorage.Test", "RefraSin.ParquetStorage.Test\RefraSin.ParquetStorage.Test.csproj", "{A61EE827-7117-4C54-8BA4-4578493BD373}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefraSin.Vertex", "RefraSin.Vertex\RefraSin.Vertex.csproj", "{C864ED28-60DF-44A6-942E-C5794D72F43B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +134,10 @@ Global
 		{A61EE827-7117-4C54-8BA4-4578493BD373}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A61EE827-7117-4C54-8BA4-4578493BD373}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A61EE827-7117-4C54-8BA4-4578493BD373}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C864ED28-60DF-44A6-942E-C5794D72F43B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C864ED28-60DF-44A6-942E-C5794D72F43B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C864ED28-60DF-44A6-942E-C5794D72F43B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C864ED28-60DF-44A6-942E-C5794D72F43B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

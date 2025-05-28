@@ -1,5 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.ParticleModel.Nodes;
+using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.Collections;
 

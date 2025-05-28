@@ -6,6 +6,7 @@ using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ProcessModel;
+using RefraSin.Vertex;
 using static RefraSin.ParticleModel.Nodes.NodeType;
 using Node = RefraSin.Compaction.ParticleModel.Node;
 
@@ -91,7 +92,7 @@ public class FocalCompactionStep(
 
         var particles = bodies
             .FlattenAgglomerates()
-            .Select(b => new Particle<ParticleNode>(b, (n, p) => new ParticleNode(n, p)))
+            .Select(b => Particle<ParticleNode>.FromTemplate(b, (n, p) => new ParticleNode(n, p)))
             .ToReadOnlyVertexCollection();
 
         return new SystemState(

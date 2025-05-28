@@ -6,6 +6,7 @@ using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.StepVectors;
+using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
