@@ -2,6 +2,6 @@ namespace RefraSin.MaterialData;
 
 public record MatrixMaterial(
     Guid Id,
-    ISubstanceProperties SubstanceProperties,
-    IViscoElasticProperties ViscoElasticProperties
+    ISubstanceProperties Substance,
+    IViscoElasticProperties ViscoElastic
 ) : IMatrixMaterial { }

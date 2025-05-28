@@ -1,4 +1,5 @@
 using RefraSin.ParticleModel;
+using RefraSin.ParticleModel.Pores;
 using RefraSin.TEPSolver.ParticleModel;
 
 namespace RefraSin.TEPSolver;
@@ -18,6 +19,13 @@ public interface IParticleItem : ISystemItem
 public interface INodeItem : ISystemItem
 {
     NodeBase Node { get; }
+}
+
+public interface IPoreItem : ISystemItem
+{
+    static abstract IPoreItem Create(Pore<NodeBase> pore);
+
+    Pore<NodeBase> Pore { get; }
 }
 
 public interface INodeContactItem : ISystemItem
