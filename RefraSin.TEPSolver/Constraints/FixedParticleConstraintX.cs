@@ -4,23 +4,22 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class FixedParticleConstraintX : IParticleConstraint
+public class FixedParticleConstraintX : IParticleItem, IConstraint
 {
     private FixedParticleConstraintX(Particle particle)
     {
         Particle = particle;
     }
 
-    public static IParticleConstraint Create(Particle particle) =>
-        new FixedParticleConstraintX(particle);
+    public static IParticleItem Create(Particle particle) => new FixedParticleConstraintX(particle);
 
     public double Residual(EquationSystem equationSystem, StepVector stepVector) =>
-        stepVector.QuantityValue<ParticleDisplacementX>(Particle);
+        stepVector.ItemValue<ParticleDisplacementX>(Particle);
 
     public IEnumerable<(int index, double value)> Derivatives(
         EquationSystem equationSystem,
         StepVector stepVector
-    ) => [(stepVector.StepVectorMap.QuantityIndex<ParticleDisplacementX>(Particle), 1)];
+    ) => [(stepVector.StepVectorMap.ItemIndex<ParticleDisplacementX>(Particle), 1)];
 
     public Particle Particle { get; }
 

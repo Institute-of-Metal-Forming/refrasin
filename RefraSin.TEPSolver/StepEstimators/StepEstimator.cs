@@ -14,16 +14,16 @@ class StepEstimator : IStepEstimator
     {
         Log.Logger.Debug("Estimate time step.");
         var map = new StepVectorMap(equationSystem);
-        var vector = new StepVector(new double[map.TotalLength], map);
+        var vector = new StepVector(new double[equationSystem.Size], map);
         FillStepVector(vector, equationSystem);
         return vector;
     }
 
     private static void FillStepVector(StepVector stepVector, EquationSystem equationSystem)
     {
-        foreach (var constraint in equationSystem.Constraints)
+        foreach (var constraint in equationSystem.Items.OfType<IConstraint>())
         {
-            stepVector.SetConstraintLambdaValue(
+            stepVector.SetItemValue(
                 constraint,
                 constraint switch
                 {
@@ -40,11 +40,11 @@ class StepEstimator : IStepEstimator
                 var fluxToUpper = GuessFluxToUpper(node);
                 var fluxBalance = fluxToUpper - GuessFluxToUpper(node.Lower);
 
-                stepVector.SetQuantityValue<NormalDisplacement>(
+                stepVector.SetItemValue<NormalDisplacement>(
                     node,
                     GuessNormalDisplacement(node, fluxBalance)
                 );
-                stepVector.SetQuantityValue<FluxToUpper>(node, fluxToUpper);
+                stepVector.SetItemValue<FluxToUpper>(node, fluxToUpper);
             }
 
             foreach (var neckNode in particle.Nodes.OfType<NeckNode>())
@@ -52,7 +52,7 @@ class StepEstimator : IStepEstimator
                 if (neckNode.Lower is GrainBoundaryNode)
                 {
                     var grainBoundaryNode = neckNode.Lower;
-                    var flux = stepVector.QuantityValue<FluxToUpper>(grainBoundaryNode);
+                    var flux = stepVector.ItemValue<FluxToUpper>(grainBoundaryNode);
 
                     for (int i = 0; i < 100; i++)
                     {
@@ -80,16 +80,16 @@ class StepEstimator : IStepEstimator
 
                         if (Abs((flux - newFlux) / flux) < 0.01)
                         {
-                            stepVector.SetQuantityValue<FluxToUpper>(grainBoundaryNode, flux);
-                            stepVector.SetQuantityValue<NormalDisplacement>(
+                            stepVector.SetItemValue<FluxToUpper>(grainBoundaryNode, flux);
+                            stepVector.SetItemValue<NormalDisplacement>(
                                 grainBoundaryNode,
                                 normalDisplacement
                             );
-                            stepVector.SetQuantityValue<NormalDisplacement>(
+                            stepVector.SetItemValue<NormalDisplacement>(
                                 neckNode,
                                 normalDisplacement
                             );
-                            stepVector.SetQuantityValue<TangentialDisplacement>(
+                            stepVector.SetItemValue<TangentialDisplacement>(
                                 neckNode,
                                 tangentialDisplacement
                             );
@@ -102,7 +102,7 @@ class StepEstimator : IStepEstimator
                 else
                 {
                     var grainBoundaryNode = neckNode.Upper;
-                    var flux = -stepVector.QuantityValue<FluxToUpper>(neckNode);
+                    var flux = -stepVector.ItemValue<FluxToUpper>(neckNode);
 
                     for (int i = 0; i < 100; i++)
                     {
@@ -130,16 +130,16 @@ class StepEstimator : IStepEstimator
 
                         if (Abs((flux - newFlux) / flux) < 0.01)
                         {
-                            stepVector.SetQuantityValue<FluxToUpper>(neckNode, -flux);
-                            stepVector.SetQuantityValue<NormalDisplacement>(
+                            stepVector.SetItemValue<FluxToUpper>(neckNode, -flux);
+                            stepVector.SetItemValue<NormalDisplacement>(
                                 grainBoundaryNode,
                                 normalDisplacement
                             );
-                            stepVector.SetQuantityValue<NormalDisplacement>(
+                            stepVector.SetItemValue<NormalDisplacement>(
                                 neckNode,
                                 normalDisplacement
                             );
-                            stepVector.SetQuantityValue<TangentialDisplacement>(
+                            stepVector.SetItemValue<TangentialDisplacement>(
                                 neckNode,
                                 tangentialDisplacement
                             );
@@ -154,23 +154,19 @@ class StepEstimator : IStepEstimator
 
         foreach (var particle in equationSystem.State.Particles)
         {
-            var isXFixed = stepVector.StepVectorMap.HasConstraint<FixedParticleConstraintX>(
-                particle
-            );
-            var isYFixed = stepVector.StepVectorMap.HasConstraint<FixedParticleConstraintY>(
-                particle
-            );
+            var isXFixed = stepVector.StepVectorMap.HasItem<FixedParticleConstraintX>(particle);
+            var isYFixed = stepVector.StepVectorMap.HasItem<FixedParticleConstraintY>(particle);
 
             if (!isXFixed || !isYFixed)
             {
                 var grainBoundaryNode = particle.Nodes.OfType<GrainBoundaryNode>().First();
                 var normalNodeDisplacement =
-                    stepVector.QuantityValue<NormalDisplacement>(grainBoundaryNode)
-                    + stepVector.QuantityValue<NormalDisplacement>(grainBoundaryNode.ContactedNode);
+                    stepVector.ItemValue<NormalDisplacement>(grainBoundaryNode)
+                    + stepVector.ItemValue<NormalDisplacement>(grainBoundaryNode.ContactedNode);
 
                 if (!isXFixed)
                 {
-                    stepVector.SetQuantityValue<ParticleDisplacementX>(
+                    stepVector.SetItemValue<ParticleDisplacementX>(
                         particle,
                         Cos(
                             grainBoundaryNode.Particle.RotationAngle
@@ -182,7 +178,7 @@ class StepEstimator : IStepEstimator
 
                 if (!isYFixed)
                 {
-                    stepVector.SetQuantityValue<ParticleDisplacementY>(
+                    stepVector.SetItemValue<ParticleDisplacementY>(
                         particle,
                         Sin(
                             grainBoundaryNode.Particle.RotationAngle

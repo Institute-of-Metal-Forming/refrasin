@@ -25,98 +25,41 @@ public class StepVector : DenseVector
 
     public StepVectorMap StepVectorMap { get; }
 
-    public double QuantityValue<TQuantity>()
-        where TQuantity : IGlobalQuantity => this[StepVectorMap.QuantityIndex<TQuantity>()];
+    public double ItemValue<TItem>()
+        where TItem : IGlobalItem => this[StepVectorMap.ItemIndex<TItem>()];
 
-    public double QuantityValue<TQuantity>(Particle particle)
-        where TQuantity : IParticleQuantity =>
-        this[StepVectorMap.QuantityIndex<TQuantity>(particle)];
+    public double ItemValue<TItem>(Particle particle)
+        where TItem : IParticleItem => this[StepVectorMap.ItemIndex<TItem>(particle)];
 
-    public double QuantityValue<TQuantity>(NodeBase node)
-        where TQuantity : INodeQuantity => this[StepVectorMap.QuantityIndex<TQuantity>(node)];
+    public double ItemValue<TItem>(NodeBase node)
+        where TItem : INodeItem => this[StepVectorMap.ItemIndex<TItem>(node)];
 
-    public double QuantityValue<TQuantity>(ContactPair<NodeBase> nodeContact)
-        where TQuantity : INodeContactQuantity =>
-        this[StepVectorMap.QuantityIndex<TQuantity>(nodeContact)];
+    public double ItemValue<TItem>(ContactPair<NodeBase> nodeContact)
+        where TItem : INodeContactItem => this[StepVectorMap.ItemIndex<TItem>(nodeContact)];
 
-    public double QuantityValue<TQuantity>(ContactPair<Particle> particleContact)
-        where TQuantity : IParticleContactQuantity =>
-        this[StepVectorMap.QuantityIndex<TQuantity>(particleContact)];
+    public double ItemValue<TItem>(ContactPair<Particle> particleContact)
+        where TItem : IParticleContactItem => this[StepVectorMap.ItemIndex<TItem>(particleContact)];
 
-    public double QuantityValue(IQuantity quantity) => this[StepVectorMap.QuantityIndex(quantity)];
+    public double ItemValue(ISystemItem quantity) => this[StepVectorMap.ItemIndex(quantity)];
 
-    public void SetQuantityValue<TQuantity>(double value)
-        where TQuantity : IGlobalQuantity => this[StepVectorMap.QuantityIndex<TQuantity>()] = value;
+    public void SetItemValue<TItem>(double value)
+        where TItem : IGlobalItem => this[StepVectorMap.ItemIndex<TItem>()] = value;
 
-    public void SetQuantityValue<TQuantity>(Particle particle, double value)
-        where TQuantity : IParticleQuantity =>
-        this[StepVectorMap.QuantityIndex<TQuantity>(particle)] = value;
+    public void SetItemValue<TItem>(Particle particle, double value)
+        where TItem : IParticleItem => this[StepVectorMap.ItemIndex<TItem>(particle)] = value;
 
-    public void SetQuantityValue<TQuantity>(NodeBase node, double value)
-        where TQuantity : INodeQuantity =>
-        this[StepVectorMap.QuantityIndex<TQuantity>(node)] = value;
+    public void SetItemValue<TItem>(NodeBase node, double value)
+        where TItem : INodeItem => this[StepVectorMap.ItemIndex<TItem>(node)] = value;
 
-    public void SetQuantityValue<TQuantity>(ContactPair<NodeBase> nodeContact, double value)
-        where TQuantity : INodeContactQuantity =>
-        this[StepVectorMap.QuantityIndex<TQuantity>(nodeContact)] = value;
+    public void SetItemValue<TItem>(ContactPair<NodeBase> nodeContact, double value)
+        where TItem : INodeContactItem => this[StepVectorMap.ItemIndex<TItem>(nodeContact)] = value;
 
-    public void SetQuantityValue<TQuantity>(ContactPair<Particle> particleContact, double value)
-        where TQuantity : IParticleContactQuantity =>
-        this[StepVectorMap.QuantityIndex<TQuantity>(particleContact)] = value;
+    public void SetItemValue<TItem>(ContactPair<Particle> particleContact, double value)
+        where TItem : IParticleContactItem =>
+        this[StepVectorMap.ItemIndex<TItem>(particleContact)] = value;
 
-    public void SetQuantityValue(IQuantity quantity, double value) =>
-        this[StepVectorMap.QuantityIndex(quantity)] = value;
-
-    public double ConstraintLambdaValue<TConstraint>()
-        where TConstraint : IGlobalConstraint => this[StepVectorMap.ConstraintIndex<TConstraint>()];
-
-    public double ConstraintLambdaValue<TConstraint>(Particle particle)
-        where TConstraint : IParticleConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(particle)];
-
-    public double ConstraintLambdaValue<TConstraint>(NodeBase node)
-        where TConstraint : INodeConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(node)];
-
-    public double ConstraintLambdaValue<TConstraint>(ContactPair<NodeBase> nodeContact)
-        where TConstraint : INodeContactConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(nodeContact)];
-
-    public double ConstraintLambdaValue<TConstraint>(ContactPair<Particle> particleContact)
-        where TConstraint : IParticleContactConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(particleContact)];
-
-    public double ConstraintLambdaValue(IConstraint constraint) =>
-        this[StepVectorMap.ConstraintIndex(constraint)];
-
-    public void SetConstraintLambdaValue<TConstraint>(double value)
-        where TConstraint : IGlobalConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>()] = value;
-
-    public void SetConstraintLambdaValue<TConstraint>(Particle particle, double value)
-        where TConstraint : IParticleConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(particle)] = value;
-
-    public void SetConstraintLambdaValue<TConstraint>(NodeBase node, double value)
-        where TConstraint : INodeConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(node)] = value;
-
-    public void SetConstraintLambdaValue<TConstraint>(
-        ContactPair<NodeBase> nodeContact,
-        double value
-    )
-        where TConstraint : INodeContactConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(nodeContact)] = value;
-
-    public void SetConstraintLambdaValue<TConstraint>(
-        ContactPair<Particle> particleContact,
-        double value
-    )
-        where TConstraint : IParticleContactConstraint =>
-        this[StepVectorMap.ConstraintIndex<TConstraint>(particleContact)] = value;
-
-    public void SetConstraintLambdaValue(IConstraint constraint, double value) =>
-        this[StepVectorMap.ConstraintIndex(constraint)] = value;
+    public void SetItemValue(ISystemItem quantity, double value) =>
+        this[StepVectorMap.ItemIndex(quantity)] = value;
 
     public static StepVector operator +(StepVector leftSide, StepVector rightSide) =>
         new((DenseVector)leftSide + rightSide, leftSide.StepVectorMap);

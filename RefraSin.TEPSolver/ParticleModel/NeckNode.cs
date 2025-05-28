@@ -62,11 +62,11 @@ public class NeckNode : ContactNodeBase<NeckNode>
     {
         var normalDisplacement = new PolarVector(
             SurfaceRadiusAngle.ToUpper + SurfaceNormalAngle.ToUpper,
-            stepVector.QuantityValue<NormalDisplacement>(this) * timeStepWidth
+            stepVector.ItemValue<NormalDisplacement>(this) * timeStepWidth
         );
         var tangentialDisplacement = new PolarVector(
             SurfaceRadiusAngle.ToUpper + SurfaceTangentAngle.ToUpper,
-            stepVector.QuantityValue<TangentialDisplacement>(this) * timeStepWidth
+            stepVector.ItemValue<TangentialDisplacement>(this) * timeStepWidth
         );
         var totalDisplacement = normalDisplacement + tangentialDisplacement;
 

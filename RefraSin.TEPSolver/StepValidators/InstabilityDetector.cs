@@ -12,7 +12,7 @@ public class InstabilityDetector : IStepValidator
         foreach (var particle in currentState.Particles)
         {
             var displacements = particle
-                .Nodes.Select(stepVector.QuantityValue<NormalDisplacement>)
+                .Nodes.Select(stepVector.ItemValue<NormalDisplacement>)
                 .ToArray();
             var differences = displacements
                 .Zip(
