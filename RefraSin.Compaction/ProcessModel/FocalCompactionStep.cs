@@ -92,7 +92,7 @@ public class FocalCompactionStep(
         var particles = bodies
             .FlattenAgglomerates()
             .Select(b => new Particle<ParticleNode>(b, (n, p) => new ParticleNode(n, p)))
-            .ToReadOnlyParticleCollection<Particle<ParticleNode>, ParticleNode>();
+            .ToReadOnlyVertexCollection();
 
         return new SystemState(
             Guid.NewGuid(),

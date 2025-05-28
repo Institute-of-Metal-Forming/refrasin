@@ -8,7 +8,7 @@ public interface IParticleSystem<out TParticle, out TNode>
     where TParticle : IParticle<TNode>
     where TNode : IParticleNode
 {
-    IReadOnlyParticleCollection<TParticle, TNode> Particles { get; }
+    IReadOnlyVertexCollection<TParticle> Particles { get; }
 
-    IReadOnlyNodeCollection<TNode> Nodes { get; }
+    IReadOnlyVertexCollection<TNode> Nodes { get; }
 }

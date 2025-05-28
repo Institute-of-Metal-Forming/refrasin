@@ -14,20 +14,10 @@ public static class CollectionExtensions
         where TNode : INode => new(source);
 
     /// <summary>
-    /// Creates a new <see cref="ReadOnlyNodeCollection{TNode}"/> from the given enumerable.
+    /// Creates a new <see cref="ReadOnlyVertexCollection{TVertex}"/> from the given enumerable.
     /// </summary>
-    public static ReadOnlyNodeCollection<TNode> ToReadOnlyNodeCollection<TNode>(
-        this IEnumerable<TNode> self
+    public static ReadOnlyVertexCollection<TVertex> ToReadOnlyVertexCollection<TVertex>(
+        this IEnumerable<TVertex> self
     )
-        where TNode : INode => new(self);
-
-    /// <summary>
-    /// Creates a new <see cref="ReadOnlyParticleCollection{TParticle, TContact}"/> from the given enumerable.
-    /// </summary>
-    public static ReadOnlyParticleCollection<TParticle, TNode> ToReadOnlyParticleCollection<
-        TParticle,
-        TNode
-    >(this IEnumerable<TParticle> self)
-        where TParticle : IParticle<TNode>
-        where TNode : IParticleNode => new(self);
+        where TVertex : IVertex => new(self);
 }

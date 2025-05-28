@@ -92,7 +92,7 @@ internal class SolverSession : ISolverSession
     {
         var particles = CurrentState
             .Particles.Select(p => new ParticleReturn(p, stepVector, Norm))
-            .ToReadOnlyParticleCollection<ParticleReturn, NodeReturn>();
+            .ToReadOnlyVertexCollection();
         _reportSystemState(
             new SystemState(CurrentState.Id, CurrentState.Time * Norm.Time, particles)
         );

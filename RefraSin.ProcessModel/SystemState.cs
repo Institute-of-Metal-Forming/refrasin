@@ -6,7 +6,7 @@ namespace RefraSin.ProcessModel;
 public record SystemState(
     Guid Id,
     double Time,
-    IReadOnlyParticleCollection<IParticle<IParticleNode>, IParticleNode> Particles
+    IReadOnlyVertexCollection<IParticle<IParticleNode>> Particles
 ) : ISystemState<IParticle<IParticleNode>, IParticleNode>
 {
     public SystemState(
@@ -20,6 +20,6 @@ public record SystemState(
         : this(id, time, new ParticleSystem<IParticle<IParticleNode>, IParticleNode>(particles)) { }
 
     /// <inheritdoc />
-    public IReadOnlyNodeCollection<IParticleNode> Nodes { get; } =
-        Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
+    public IReadOnlyVertexCollection<IParticleNode> Nodes { get; } =
+        Particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
 }

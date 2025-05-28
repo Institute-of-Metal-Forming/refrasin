@@ -19,7 +19,7 @@ internal class ParticleAgglomerate : ICartesianCoordinateSystem, IAgglomerate
             .Centroid<AbsolutePoint, AbsoluteVector>();
         Particles = particlesArray
             .Select(p => new AgglomeratedParticle(p, this))
-            .ToReadOnlyParticleCollection<AgglomeratedParticle, Node>();
+            .ToReadOnlyVertexCollection();
         Surface = new ParticleSurface<Node>(CreateOuterSurface());
     }
 
@@ -67,7 +67,7 @@ internal class ParticleAgglomerate : ICartesianCoordinateSystem, IAgglomerate
     /// <inheritdoc />
     IPoint ICoordinateSystem.Origin => Coordinates;
 
-    public IReadOnlyParticleCollection<AgglomeratedParticle, Node> Particles { get; }
+    public IReadOnlyVertexCollection<AgglomeratedParticle> Particles { get; }
 
     IEnumerable<IMutableParticle<Node>> IAgglomerate.Elements => Particles;
 
