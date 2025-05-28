@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\RefraSin.Compaction\RefraSin.Compaction.csproj" />
       <ProjectReference Include="..\RefraSin.ParticleModel\RefraSin.ParticleModel.csproj" />
       <ProjectReference Include="..\RefraSin.Plotting\RefraSin.Plotting.fsproj" />
     </ItemGroup>

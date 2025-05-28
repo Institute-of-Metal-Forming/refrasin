@@ -65,9 +65,18 @@ let PlotLineString (points: IPoint seq) (label: string) =
     Chart.Line(xy = xy, Name = label, ShowMarkers = true, MarkerSymbol = MarkerSymbol.Cross)
     |> Commons.ApplyPlainSpaceDefaultPlotProperties
 
-let PlotLineRing (points: IPoint seq) (label: string) =
+let CloseRing (points: IPoint seq) : IPoint list =
     let pointsList = points |> Seq.toList
-    PlotLineString (pointsList @ [ pointsList[0] ]) label
+    pointsList @ [ pointsList[0] ]
+
+let PlotLineRing (points: IPoint seq) (label: string) = PlotLineString (CloseRing points) label
+
+let PlotPatch (points: IPoint seq) (label: string) =
+    let absolutePoints = [ for p in CloseRing points -> p.Absolute ]
+    let xy = [ for p in absolutePoints -> (p.X, p.Y) ]
+
+    Chart.SplineArea(xy = xy, Name = label, ShowMarkers = false)
+    |> Commons.ApplyPlainSpaceDefaultPlotProperties
 
 let PlotContactEdge (edge: ContactPair<#IParticle>) : GenericChart =
     let from = edge.First.Coordinates.Absolute

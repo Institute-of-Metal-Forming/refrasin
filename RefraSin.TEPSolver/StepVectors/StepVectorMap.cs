@@ -57,6 +57,9 @@ public class StepVectorMap
     public int ItemIndex<TItem>(NodeBase node)
         where TItem : INodeItem => _itemIndexMap[(typeof(TItem), node.Id)];
 
+    public int ItemIndex<TItem>(Pore pore)
+        where TItem : IPoreItem => _itemIndexMap[(typeof(TItem), pore.Id)];
+
     public int ItemIndex<TItem>(ContactPair<NodeBase> nodeContact)
         where TItem : INodeContactItem => _itemIndexMap[(typeof(TItem), nodeContact.Id)];
 

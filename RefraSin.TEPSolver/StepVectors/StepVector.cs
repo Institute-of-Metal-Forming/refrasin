@@ -34,6 +34,9 @@ public class StepVector : DenseVector
     public double ItemValue<TItem>(NodeBase node)
         where TItem : INodeItem => this[StepVectorMap.ItemIndex<TItem>(node)];
 
+    public double ItemValue<TItem>(Pore pore)
+        where TItem : IPoreItem => this[StepVectorMap.ItemIndex<TItem>(pore)];
+
     public double ItemValue<TItem>(ContactPair<NodeBase> nodeContact)
         where TItem : INodeContactItem => this[StepVectorMap.ItemIndex<TItem>(nodeContact)];
 

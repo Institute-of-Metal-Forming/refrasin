@@ -1,7 +1,7 @@
 using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes.Extensions;
+using RefraSin.ParticleModel.Pores;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
@@ -26,7 +26,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToReadOnlyVertexCollection();
         Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
 
-        NodeContacts = Nodes.CreateContactNodePairs().ToArray();
+        NodeContacts = Nodes.CreateContactNodePairs().ToReadOnlyVertexCollection();
         ParticleContacts = NodeContacts
             .DistinctBy(c => (c.First.ParticleId, c.Second.ParticleId))
             .Select(c => new ContactPair<Particle>(
@@ -34,7 +34,23 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[c.First.ParticleId],
                 Particles[c.Second.ParticleId]
             ))
-            .ToArray();
+            .ToReadOnlyVertexCollection();
+
+        Pores = state
+            is IParticleSystemWithPores<
+                IParticle<IParticleNode>,
+                IParticleNode,
+                IPoreState<IParticleNode>
+            > withPores
+            ? withPores
+                .Pores.Select(p => new Pore(
+                    p.Id,
+                    p.Nodes.Select(n => Nodes[n.Id]),
+                    p.RelativeDensity,
+                    p.Pressure
+                ))
+                .ToReadOnlyVertexCollection()
+            : ReadOnlyVertexCollection<Pore>.Empty;
     }
 
     private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
@@ -54,14 +70,17 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 Particles[c.First.Id],
                 Particles[c.Second.Id]
             ))
-            .ToArray();
+            .ToReadOnlyVertexCollection();
         NodeContacts = oldState
             .NodeContacts.Select(c => new ContactPair<NodeBase>(
                 c.Id,
                 Nodes[c.First.Id],
                 Nodes[c.Second.Id]
             ))
-            .ToArray();
+            .ToReadOnlyVertexCollection();
+        Pores = oldState
+            .Pores.Select(p => p.ApplyTimeStep(Nodes, stepVector, timeStepWidth))
+            .ToReadOnlyVertexCollection();
     }
 
     public IReadOnlyDictionary<Guid, IParticleMaterial> Materials { get; }
@@ -78,9 +97,11 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     /// <inheritdoc cref="ISystemState.Particles"/>>
     public IReadOnlyVertexCollection<Particle> Particles { get; }
 
-    public IReadOnlyList<ContactPair<NodeBase>> NodeContacts { get; }
+    public IReadOnlyVertexCollection<Pore> Pores { get; }
 
-    public IReadOnlyList<ContactPair<Particle>> ParticleContacts { get; }
+    public IReadOnlyVertexCollection<ContactPair<NodeBase>> NodeContacts { get; }
+
+    public IReadOnlyVertexCollection<ContactPair<Particle>> ParticleContacts { get; }
 
     IReadOnlyVertexCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
 
