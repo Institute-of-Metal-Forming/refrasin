@@ -5,14 +5,14 @@ using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class DissipationEqualityConstraint : IGlobalConstraint
+public class DissipationEqualityConstraint : IGlobalItem, IConstraint
 {
     private DissipationEqualityConstraint(SolutionState solutionState)
     {
         SolutionState = solutionState;
     }
 
-    public static IGlobalConstraint Create(SolutionState solutionState) =>
+    public static IGlobalItem Create(SolutionState solutionState) =>
         new DissipationEqualityConstraint(solutionState);
 
     /// <inheritdoc />
@@ -22,12 +22,12 @@ public class DissipationEqualityConstraint : IGlobalConstraint
     public double Residual(EquationSystem equationSystem, StepVector stepVector)
     {
         var dissipation = equationSystem
-            .Quantities.OfType<IStateVelocity>()
-            .Sum(q => q.DrivingForce(stepVector) * stepVector.QuantityValue(q));
+            .Items.OfType<IStateVelocity>()
+            .Sum(q => q.DrivingForce(stepVector) * stepVector.ItemValue(q));
 
         var dissipationFunction = equationSystem
-            .Quantities.OfType<IFlux>()
-            .Sum(q => q.DissipationFactor(stepVector) * Pow(stepVector.QuantityValue(q), 2));
+            .Items.OfType<IFlux>()
+            .Sum(q => q.DissipationFactor(stepVector) * Pow(stepVector.ItemValue(q), 2));
 
         Log.Logger.ForContext<DissipationEqualityConstraint>()
             .Debug(
@@ -45,18 +45,18 @@ public class DissipationEqualityConstraint : IGlobalConstraint
         StepVector stepVector
     )
     {
-        foreach (var stateVelocity in equationSystem.Quantities.OfType<IStateVelocity>())
+        foreach (var stateVelocity in equationSystem.Items.OfType<IStateVelocity>())
         {
             var drivingForce = stateVelocity.DrivingForce(stepVector);
             if (drivingForce != 0)
-                yield return (stepVector.StepVectorMap.QuantityIndex(stateVelocity), drivingForce);
+                yield return (stepVector.StepVectorMap.ItemIndex(stateVelocity), drivingForce);
         }
 
-        foreach (var flux in equationSystem.Quantities.OfType<IFlux>())
+        foreach (var flux in equationSystem.Items.OfType<IFlux>())
         {
             yield return (
-                stepVector.StepVectorMap.QuantityIndex(flux),
-                -2 * flux.DissipationFactor(stepVector) * stepVector.QuantityValue(flux)
+                stepVector.StepVectorMap.ItemIndex(flux),
+                -2 * flux.DissipationFactor(stepVector) * stepVector.ItemValue(flux)
             );
         }
     }
@@ -66,9 +66,9 @@ public class DissipationEqualityConstraint : IGlobalConstraint
         StepVector stepVector
     )
     {
-        foreach (var flux in equationSystem.Quantities.OfType<IFlux>())
+        foreach (var flux in equationSystem.Items.OfType<IFlux>())
         {
-            var index = stepVector.StepVectorMap.QuantityIndex(flux);
+            var index = stepVector.StepVectorMap.ItemIndex(flux);
             yield return (index, index, -2 * flux.DissipationFactor(stepVector));
         }
     }

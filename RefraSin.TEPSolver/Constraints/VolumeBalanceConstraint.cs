@@ -4,14 +4,14 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class VolumeBalanceConstraint : INodeConstraint
+public class VolumeBalanceConstraint : INodeItem, IConstraint
 {
     private VolumeBalanceConstraint(NodeBase node)
     {
         Node = node;
     }
 
-    public static INodeConstraint Create(NodeBase node)
+    public static INodeItem Create(NodeBase node)
     {
         return new VolumeBalanceConstraint(node);
     }
@@ -19,16 +19,13 @@ public class VolumeBalanceConstraint : INodeConstraint
     public double Residual(EquationSystem equationSystem, StepVector stepVector)
     {
         var normalVolumeTerm =
-            Node.VolumeGradient.Normal * stepVector.QuantityValue<NormalDisplacement>(Node);
-        var tangentialVolumeTerm = stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(
-            Node
-        )
-            ? Node.VolumeGradient.Tangential
-                * stepVector.QuantityValue<TangentialDisplacement>(Node)
+            Node.VolumeGradient.Normal * stepVector.ItemValue<NormalDisplacement>(Node);
+        var tangentialVolumeTerm = stepVector.StepVectorMap.HasItem<TangentialDisplacement>(Node)
+            ? Node.VolumeGradient.Tangential * stepVector.ItemValue<TangentialDisplacement>(Node)
             : 0;
         var fluxTerm =
-            -stepVector.QuantityValue<FluxToUpper>(Node)
-            + stepVector.QuantityValue<FluxToUpper>(Node.Lower);
+            -stepVector.ItemValue<FluxToUpper>(Node)
+            + stepVector.ItemValue<FluxToUpper>(Node.Lower);
 
         return normalVolumeTerm + tangentialVolumeTerm - fluxTerm;
     }
@@ -39,16 +36,16 @@ public class VolumeBalanceConstraint : INodeConstraint
     )
     {
         yield return (
-            stepVector.StepVectorMap.QuantityIndex<NormalDisplacement>(Node),
+            stepVector.StepVectorMap.ItemIndex<NormalDisplacement>(Node),
             Node.VolumeGradient.Normal
         );
-        if (stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(Node))
+        if (stepVector.StepVectorMap.HasItem<TangentialDisplacement>(Node))
             yield return (
-                stepVector.StepVectorMap.QuantityIndex<TangentialDisplacement>(Node),
+                stepVector.StepVectorMap.ItemIndex<TangentialDisplacement>(Node),
                 Node.VolumeGradient.Tangential
             );
-        yield return (stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(Node), 1);
-        yield return (stepVector.StepVectorMap.QuantityIndex<FluxToUpper>(Node.Lower), -1);
+        yield return (stepVector.StepVectorMap.ItemIndex<FluxToUpper>(Node), 1);
+        yield return (stepVector.StepVectorMap.ItemIndex<FluxToUpper>(Node.Lower), -1);
     }
 
     public NodeBase Node { get; }

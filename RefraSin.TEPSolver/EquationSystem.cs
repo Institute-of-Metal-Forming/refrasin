@@ -1,4 +1,5 @@
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Solvers;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
@@ -8,61 +9,61 @@ namespace RefraSin.TEPSolver;
 
 public class EquationSystem
 {
-    internal EquationSystem(
-        SolutionState solutionState,
-        IEnumerable<IQuantity> quantities,
-        IEnumerable<IConstraint> constraints
-    )
+    internal EquationSystem(SolutionState solutionState, IEnumerable<ISystemItem> items)
     {
         State = solutionState;
-        Constraints = constraints.ToArray();
-        Quantities = quantities.ToArray();
+        Items = items.ToArray();
+        _constraints = Items.OfType<IConstraint>().ToArray();
     }
 
     public SolutionState State { get; }
 
-    public IReadOnlyList<IQuantity> Quantities { get; }
-    public IReadOnlyList<IConstraint> Constraints { get; }
+    public IReadOnlyList<ISystemItem> Items { get; }
+
+    private IReadOnlyList<IConstraint> _constraints;
+
+    public int Size => Items.Count;
 
     public double Dissipation(StepVector stepVector) =>
-        Quantities
+        Items
             .OfType<IStateVelocity>()
-            .Sum(q => q.DrivingForce(stepVector) * stepVector.QuantityValue(q));
+            .Sum(q => q.DrivingForce(stepVector) * stepVector.ItemValue(q));
 
     public Vector<double> Lagrangian(StepVector stepVector)
     {
-        var constraintDerivatives = Constraints
+        var constraintDerivatives = _constraints
             .SelectMany(c => c.Derivatives(this, stepVector).Select(d => (c, d.index, d.value)))
             .GroupBy(t => t.index, t => (t.c, t.value))
             .ToDictionary(g => g.Key, g => g.ToArray());
 
-        var quantityDerivatives = Quantities.Select(q =>
-            (q is IStateVelocity sv ? sv.DrivingForce(stepVector) : 0)
-            + constraintDerivatives
-                .GetValueOrDefault(stepVector.StepVectorMap.QuantityIndex(q), [])
-                .Sum(t => t.value * stepVector.ConstraintLambdaValue(t.c))
-        );
-
-        var constraintResiduals = Constraints.Select(c => c.Residual(this, stepVector));
-
         return Vector<double>.Build.DenseOfEnumerable(
-            quantityDerivatives.Concat(constraintResiduals)
+            Items.Select(i =>
+                i switch
+                {
+                    IQuantity q => (q is IStateVelocity sv ? sv.DrivingForce(stepVector) : 0)
+                        + constraintDerivatives
+                            .GetValueOrDefault(stepVector.StepVectorMap.ItemIndex(q), [])
+                            .Sum(t => t.value * stepVector.ItemValue(t.c)),
+                    IConstraint c => c.Residual(this, stepVector),
+                    _ => throw new InvalidOperationException(),
+                }
+            )
         );
     }
 
     public Matrix<double> Jacobian(StepVector stepVector)
     {
-        var constraintComponents = Constraints.SelectMany(c =>
+        var constraintComponents = _constraints.SelectMany(c =>
         {
-            var rowIndex = stepVector.StepVectorMap.ConstraintIndex(c);
+            var rowIndex = stepVector.StepVectorMap.ItemIndex(c);
             return c.Derivatives(this, stepVector)
                 .Select(d => (rowIndex, columnIndex: d.index, d.value));
         });
 
-        var secondDerivatives = Constraints
+        var secondDerivatives = _constraints
             .SelectMany(c =>
             {
-                var lambdaIndex = stepVector.StepVectorMap.ConstraintIndex(c);
+                var lambdaIndex = stepVector.StepVectorMap.ItemIndex(c);
                 return c.SecondDerivatives(this, stepVector)
                     .Select(d => (lambdaIndex, d.firstIndex, d.secondIndex, d.value));
             })

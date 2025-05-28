@@ -12,200 +12,88 @@ public class StepVectorMap
     {
         int index = 0;
 
-        foreach (var quantity in equationSystem.Quantities)
+        foreach (var item in equationSystem.Items)
         {
-            if (quantity is IGlobalQuantity globalQuantity)
+            if (item is IGlobalItem globalItem)
             {
-                var key = (globalQuantity.GetType(), Guid.Empty);
-                _quantityIndexMap.Add(key, index);
+                var key = (globalItem.GetType(), Guid.Empty);
+                _itemIndexMap.Add(key, index);
             }
-            else if (quantity is IParticleQuantity particleQuantity)
+            else if (item is IParticleItem particleItem)
             {
-                var key = (particleQuantity.GetType(), particleQuantity.Particle.Id);
-                _quantityIndexMap.Add(key, index);
+                var key = (particleItem.GetType(), particleItem.Particle.Id);
+                _itemIndexMap.Add(key, index);
             }
-            else if (quantity is INodeQuantity nodeQuantity)
+            else if (item is INodeItem nodeItem)
             {
-                var key = (nodeQuantity.GetType(), nodeQuantity.Node.Id);
-                _quantityIndexMap.Add(key, index);
+                var key = (nodeItem.GetType(), nodeItem.Node.Id);
+                _itemIndexMap.Add(key, index);
             }
-            else if (quantity is INodeContactQuantity nodeContactQuantity)
+            else if (item is INodeContactItem nodeContactItem)
             {
-                var key = (nodeContactQuantity.GetType(), nodeContactQuantity.NodeContact.Id);
-                _quantityIndexMap.Add(key, index);
+                var key = (nodeContactItem.GetType(), nodeContactItem.NodeContact.Id);
+                _itemIndexMap.Add(key, index);
             }
-            else if (quantity is IParticleContactQuantity particleContactQuantity)
+            else if (item is IParticleContactItem particleContactItem)
             {
-                var key = (
-                    particleContactQuantity.GetType(),
-                    particleContactQuantity.ParticleContact.Id
-                );
-                _quantityIndexMap.Add(key, index);
+                var key = (particleContactItem.GetType(), particleContactItem.ParticleContact.Id);
+                _itemIndexMap.Add(key, index);
             }
             else
-                throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
+                throw new ArgumentException($"Invalid item type: {item.GetType()}");
 
             index++;
         }
-
-        foreach (var constraint in equationSystem.Constraints)
-        {
-            if (constraint is IGlobalConstraint globalConstraint)
-            {
-                var key = (globalConstraint.GetType(), Guid.Empty);
-                _constraintIndexMap.Add(key, index);
-            }
-            else if (constraint is IParticleConstraint particleConstraint)
-            {
-                var key = (particleConstraint.GetType(), particleConstraint.Particle.Id);
-                _constraintIndexMap.Add(key, index);
-            }
-            else if (constraint is INodeConstraint nodeConstraint)
-            {
-                var key = (nodeConstraint.GetType(), nodeConstraint.Node.Id);
-                _constraintIndexMap.Add(key, index);
-            }
-            else if (constraint is INodeContactConstraint nodeContactConstraint)
-            {
-                var key = (nodeContactConstraint.GetType(), nodeContactConstraint.NodeContact.Id);
-                _constraintIndexMap.Add(key, index);
-            }
-            else if (constraint is IParticleContactConstraint particleContactConstraint)
-            {
-                var key = (
-                    particleContactConstraint.GetType(),
-                    particleContactConstraint.ParticleContact.Id
-                );
-                _constraintIndexMap.Add(key, index);
-            }
-            else
-                throw new ArgumentException($"Invalid quantity type: {constraint.GetType()}");
-
-            index++;
-        }
-
-        TotalLength = index;
     }
 
-    public int TotalLength { get; }
+    private readonly Dictionary<(Type, Guid), int> _itemIndexMap = new();
 
-    private readonly Dictionary<(Type, Guid), int> _quantityIndexMap = new();
+    public int ItemIndex<TItem>()
+        where TItem : IGlobalItem => _itemIndexMap[(typeof(TItem), Guid.Empty)];
 
-    public int QuantityIndex<TQuantity>()
-        where TQuantity : IGlobalQuantity => _quantityIndexMap[(typeof(TQuantity), Guid.Empty)];
+    public int ItemIndex<TItem>(Particle particle)
+        where TItem : IParticleItem => _itemIndexMap[(typeof(TItem), particle.Id)];
 
-    public int QuantityIndex<TQuantity>(Particle particle)
-        where TQuantity : IParticleQuantity => _quantityIndexMap[(typeof(TQuantity), particle.Id)];
+    public int ItemIndex<TItem>(NodeBase node)
+        where TItem : INodeItem => _itemIndexMap[(typeof(TItem), node.Id)];
 
-    public int QuantityIndex<TQuantity>(NodeBase node)
-        where TQuantity : INodeQuantity => _quantityIndexMap[(typeof(TQuantity), node.Id)];
+    public int ItemIndex<TItem>(ContactPair<NodeBase> nodeContact)
+        where TItem : INodeContactItem => _itemIndexMap[(typeof(TItem), nodeContact.Id)];
 
-    public int QuantityIndex<TQuantity>(ContactPair<NodeBase> nodeContact)
-        where TQuantity : INodeContactQuantity =>
-        _quantityIndexMap[(typeof(TQuantity), nodeContact.Id)];
+    public int ItemIndex<TItem>(ContactPair<Particle> particleContact)
+        where TItem : IParticleContactItem => _itemIndexMap[(typeof(TItem), particleContact.Id)];
 
-    public int QuantityIndex<TQuantity>(ContactPair<Particle> particleContact)
-        where TQuantity : IParticleContactQuantity =>
-        _quantityIndexMap[(typeof(TQuantity), particleContact.Id)];
-
-    public int QuantityIndex(IQuantity quantity)
+    public int ItemIndex(ISystemItem item)
     {
-        if (quantity is IGlobalQuantity globalQuantity)
-            return _quantityIndexMap[(globalQuantity.GetType(), Guid.Empty)];
-        if (quantity is IParticleQuantity particleQuantity)
-            return _quantityIndexMap[(particleQuantity.GetType(), particleQuantity.Particle.Id)];
-        if (quantity is INodeQuantity nodeQuantity)
-            return _quantityIndexMap[(nodeQuantity.GetType(), nodeQuantity.Node.Id)];
-        if (quantity is INodeContactQuantity nodeContactQuantity)
-            return _quantityIndexMap[
-                (nodeContactQuantity.GetType(), nodeContactQuantity.NodeContact.Id)
+        if (item is IGlobalItem globalItem)
+            return _itemIndexMap[(globalItem.GetType(), Guid.Empty)];
+        if (item is IParticleItem particleItem)
+            return _itemIndexMap[(particleItem.GetType(), particleItem.Particle.Id)];
+        if (item is INodeItem nodeItem)
+            return _itemIndexMap[(nodeItem.GetType(), nodeItem.Node.Id)];
+        if (item is INodeContactItem nodeContactItem)
+            return _itemIndexMap[(nodeContactItem.GetType(), nodeContactItem.NodeContact.Id)];
+        if (item is IParticleContactItem particleContactItem)
+            return _itemIndexMap[
+                (particleContactItem.GetType(), particleContactItem.ParticleContact.Id)
             ];
-        if (quantity is IParticleContactQuantity particleContactQuantity)
-            return _quantityIndexMap[
-                (particleContactQuantity.GetType(), particleContactQuantity.ParticleContact.Id)
-            ];
-        throw new ArgumentException($"Invalid quantity type: {quantity.GetType()}");
+        throw new ArgumentException($"Invalid item type: {item.GetType()}");
     }
 
-    public bool HasQuantity<TQuantity>()
-        where TQuantity : IParticleQuantity =>
-        _quantityIndexMap.ContainsKey((typeof(TQuantity), Guid.Empty));
+    public bool HasItem<TItem>()
+        where TItem : IParticleItem => _itemIndexMap.ContainsKey((typeof(TItem), Guid.Empty));
 
-    public bool HasQuantity<TQuantity>(Particle particle)
-        where TQuantity : IParticleQuantity =>
-        _quantityIndexMap.ContainsKey((typeof(TQuantity), particle.Id));
+    public bool HasItem<TItem>(Particle particle)
+        where TItem : IParticleItem => _itemIndexMap.ContainsKey((typeof(TItem), particle.Id));
 
-    public bool HasQuantity<TQuantity>(ContactPair<Particle> particleContact)
-        where TQuantity : IParticleContactQuantity =>
-        _quantityIndexMap.ContainsKey((typeof(TQuantity), particleContact.Id));
+    public bool HasItem<TItem>(ContactPair<Particle> particleContact)
+        where TItem : IParticleContactItem =>
+        _itemIndexMap.ContainsKey((typeof(TItem), particleContact.Id));
 
-    public bool HasQuantity<TQuantity>(NodeBase node)
-        where TQuantity : INodeQuantity =>
-        _quantityIndexMap.ContainsKey((typeof(TQuantity), node.Id));
+    public bool HasItem<TItem>(NodeBase node)
+        where TItem : INodeItem => _itemIndexMap.ContainsKey((typeof(TItem), node.Id));
 
-    public bool HasQuantity<TQuantity>(ContactPair<NodeBase> nodeContact)
-        where TQuantity : INodeContactQuantity =>
-        _quantityIndexMap.ContainsKey((typeof(TQuantity), nodeContact.Id));
-
-    private readonly Dictionary<(Type, Guid), int> _constraintIndexMap = new();
-
-    public int ConstraintIndex<TConstraint>()
-        where TConstraint : IGlobalConstraint =>
-        _constraintIndexMap[(typeof(TConstraint), Guid.Empty)];
-
-    public int ConstraintIndex<TConstraint>(Particle particle)
-        where TConstraint : IParticleConstraint =>
-        _constraintIndexMap[(typeof(TConstraint), particle.Id)];
-
-    public int ConstraintIndex<TConstraint>(NodeBase node)
-        where TConstraint : INodeConstraint => _constraintIndexMap[(typeof(TConstraint), node.Id)];
-
-    public int ConstraintIndex<TConstraint>(ContactPair<NodeBase> nodeContact)
-        where TConstraint : INodeContactConstraint =>
-        _constraintIndexMap[(typeof(TConstraint), nodeContact.Id)];
-
-    public int ConstraintIndex<TConstraint>(ContactPair<Particle> particleContact)
-        where TConstraint : IParticleContactConstraint =>
-        _constraintIndexMap[(typeof(TConstraint), particleContact.Id)];
-
-    public int ConstraintIndex(IConstraint constraint)
-    {
-        if (constraint is IGlobalConstraint globalConstraint)
-            return _constraintIndexMap[(globalConstraint.GetType(), Guid.Empty)];
-        if (constraint is IParticleConstraint particleConstraint)
-            return _constraintIndexMap[
-                (particleConstraint.GetType(), particleConstraint.Particle.Id)
-            ];
-        if (constraint is INodeConstraint nodeConstraint)
-            return _constraintIndexMap[(nodeConstraint.GetType(), nodeConstraint.Node.Id)];
-        if (constraint is INodeContactConstraint nodeContactConstraint)
-            return _constraintIndexMap[
-                (nodeContactConstraint.GetType(), nodeContactConstraint.NodeContact.Id)
-            ];
-        if (constraint is IParticleContactConstraint particleContactConstraint)
-            return _constraintIndexMap[
-                (particleContactConstraint.GetType(), particleContactConstraint.ParticleContact.Id)
-            ];
-        throw new ArgumentException($"Invalid constraint type: {constraint.GetType()}");
-    }
-
-    public bool HasConstraint<TConstraint>()
-        where TConstraint : IParticleConstraint =>
-        _constraintIndexMap.ContainsKey((typeof(TConstraint), Guid.Empty));
-
-    public bool HasConstraint<TConstraint>(Particle particle)
-        where TConstraint : IParticleConstraint =>
-        _constraintIndexMap.ContainsKey((typeof(TConstraint), particle.Id));
-
-    public bool HasConstraint<TConstraint>(ContactPair<Particle> particleContact)
-        where TConstraint : IParticleContactConstraint =>
-        _constraintIndexMap.ContainsKey((typeof(TConstraint), particleContact.Id));
-
-    public bool HasConstraint<TConstraint>(NodeBase node)
-        where TConstraint : INodeConstraint =>
-        _constraintIndexMap.ContainsKey((typeof(TConstraint), node.Id));
-
-    public bool HasConstraint<TConstraint>(ContactPair<NodeBase> nodeContact)
-        where TConstraint : INodeContactConstraint =>
-        _constraintIndexMap.ContainsKey((typeof(TConstraint), nodeContact.Id));
+    public bool HasItem<TItem>(ContactPair<NodeBase> nodeContact)
+        where TItem : INodeContactItem =>
+        _itemIndexMap.ContainsKey((typeof(TItem), nodeContact.Id));
 }

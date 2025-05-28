@@ -68,8 +68,8 @@ public class Particle : IParticle<NodeBase>
         Coordinates =
             previousState.Coordinates
             + new AbsoluteVector(
-                stepVector.QuantityValue<ParticleDisplacementX>(previousState),
-                stepVector.QuantityValue<ParticleDisplacementY>(previousState)
+                stepVector.ItemValue<ParticleDisplacementX>(previousState),
+                stepVector.ItemValue<ParticleDisplacementY>(previousState)
             ) * timeStepWidth;
         RotationAngle = previousState.RotationAngle;
 

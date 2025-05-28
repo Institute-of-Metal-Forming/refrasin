@@ -5,14 +5,14 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class ContactConstraintX : INodeContactConstraint
+public class ContactConstraintX : INodeContactItem, IConstraint
 {
     private ContactConstraintX(ContactPair<NodeBase> nodeContact)
     {
         NodeContact = nodeContact;
     }
 
-    public static INodeContactConstraint Create(ContactPair<NodeBase> nodeContact) =>
+    public static INodeContactItem Create(ContactPair<NodeBase> nodeContact) =>
         new ContactConstraintX(nodeContact);
 
     public double Residual(EquationSystem equationSystem, StepVector stepVector)
@@ -28,13 +28,13 @@ public class ContactConstraintX : INodeContactConstraint
         var byNormal =
             -Cos(
                 node.Particle.RotationAngle + node.Coordinates.Phi + node.RadiusNormalAngle.ToLower
-            ) * stepVector.QuantityValue<NormalDisplacement>(node);
-        var byTangential = stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(node)
+            ) * stepVector.ItemValue<NormalDisplacement>(node);
+        var byTangential = stepVector.StepVectorMap.HasItem<TangentialDisplacement>(node)
             ? Cos(
                 node.Particle.RotationAngle + node.Coordinates.Phi + node.RadiusTangentAngle.ToLower
-            ) * stepVector.QuantityValue<TangentialDisplacement>(node)
+            ) * stepVector.ItemValue<TangentialDisplacement>(node)
             : 0;
-        var byParticle = stepVector.QuantityValue<ParticleDisplacementX>(node.Particle);
+        var byParticle = stepVector.ItemValue<ParticleDisplacementX>(node.Particle);
 
         return byNormal + byTangential + byParticle;
     }
@@ -53,14 +53,14 @@ public class ContactConstraintX : INodeContactConstraint
     )
     {
         yield return (
-            stepVector.StepVectorMap.QuantityIndex<NormalDisplacement>(node),
+            stepVector.StepVectorMap.ItemIndex<NormalDisplacement>(node),
             -Cos(
                 node.Particle.RotationAngle + node.Coordinates.Phi + node.RadiusNormalAngle.ToLower
             ) * sign
         );
-        if (stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(node))
+        if (stepVector.StepVectorMap.HasItem<TangentialDisplacement>(node))
             yield return (
-                stepVector.StepVectorMap.QuantityIndex<TangentialDisplacement>(node),
+                stepVector.StepVectorMap.ItemIndex<TangentialDisplacement>(node),
                 Cos(
                     node.Particle.RotationAngle
                         + node.Coordinates.Phi
@@ -68,7 +68,7 @@ public class ContactConstraintX : INodeContactConstraint
                 ) * sign
             );
         yield return (
-            stepVector.StepVectorMap.QuantityIndex<ParticleDisplacementX>(node.Particle),
+            stepVector.StepVectorMap.ItemIndex<ParticleDisplacementX>(node.Particle),
             sign
         );
     }

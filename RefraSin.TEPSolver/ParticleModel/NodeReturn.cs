@@ -36,8 +36,8 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         RadiusTangentAngle = template.RadiusTangentAngle;
         InterfaceFlux = stepVector is not null
             ? new ToUpperToLower<double>(
-                stepVector.QuantityValue<FluxToUpper>(template),
-                -stepVector.QuantityValue<FluxToUpper>(template.Lower)
+                stepVector.ItemValue<FluxToUpper>(template),
+                -stepVector.ItemValue<FluxToUpper>(template.Lower)
             )
                 * norm.Area
                 / norm.Time
@@ -48,9 +48,9 @@ internal record NodeReturn : IParticleNode, INodeGradients, INodeShifts, INodeFl
         VolumeGradient = template.VolumeGradient * norm.Length / norm.Time;
         Shift = stepVector is not null
             ? new NormalTangential<double>(
-                stepVector.QuantityValue<NormalDisplacement>(template),
-                stepVector.StepVectorMap.HasQuantity<TangentialDisplacement>(template)
-                    ? stepVector.QuantityValue<TangentialDisplacement>(template)
+                stepVector.ItemValue<NormalDisplacement>(template),
+                stepVector.StepVectorMap.HasItem<TangentialDisplacement>(template)
+                    ? stepVector.ItemValue<TangentialDisplacement>(template)
                     : 0
             )
                 * norm.Length
