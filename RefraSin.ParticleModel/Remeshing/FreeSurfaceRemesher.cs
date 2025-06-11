@@ -13,7 +13,8 @@ public class FreeSurfaceRemesher(
     double additionLimit = 0.5,
     double minWidthFactor = 0.25,
     double maxWidthFactor = 3.0,
-    double twinPointLimit = 0.1
+    double twinPointLimit = 0.1,
+    double neckProtectionCount = 20
 ) : IParticleRemesher
 {
     /// <inheritdoc />
@@ -98,6 +99,7 @@ public class FreeSurfaceRemesher(
                     && node.Lower.Type != Neck
                     && Abs(node.SurfaceRadiusAngle.Sum - Pi) < DeletionLimit
                     && node.SurfaceDistance.Sum < maxDistance
+                    && !IsNodeInProtection(node)
                 )
                 {
                     logger.Debug("Deleted node {Node}.", node);
@@ -147,6 +149,29 @@ public class FreeSurfaceRemesher(
         }
     }
 
+    private bool IsNodeInProtection(IParticleNode node)
+    {
+        {
+            var currentNode = node;
+            for (int i = 0; i < NeckProtectionCount; i++)
+            {
+                currentNode = currentNode.Upper;
+                if (currentNode.Type == Neck)
+                    return true;
+            }
+        }
+        {
+            var currentNode = node;
+            for (int i = 0; i < NeckProtectionCount; i++)
+            {
+                currentNode = currentNode.Lower;
+                if (currentNode.Type == Neck)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public double DeletionLimit { get; } = deletionLimit;
 
     public double AdditionLimit { get; } = additionLimit;
@@ -156,4 +181,6 @@ public class FreeSurfaceRemesher(
     public double MaxWidthFactor { get; } = maxWidthFactor;
 
     public double TwinPointLimit { get; } = twinPointLimit;
+
+    public double NeckProtectionCount { get; } = neckProtectionCount;
 }
