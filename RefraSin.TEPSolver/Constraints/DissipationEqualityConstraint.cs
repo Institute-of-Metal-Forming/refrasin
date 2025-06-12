@@ -5,18 +5,10 @@ using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class DissipationEqualityConstraint : IGlobalItem, IConstraint
+public class DissipationEqualityConstraint(SolutionState solutionState) : IGlobalItem, IConstraint
 {
-    private DissipationEqualityConstraint(SolutionState solutionState)
-    {
-        SolutionState = solutionState;
-    }
-
-    public static IGlobalItem Create(SolutionState solutionState) =>
-        new DissipationEqualityConstraint(solutionState);
-
     /// <inheritdoc />
-    public SolutionState SolutionState { get; }
+    public SolutionState SolutionState { get; } = solutionState;
 
     /// <inheritdoc />
     public double Residual(EquationSystem equationSystem, StepVector stepVector)

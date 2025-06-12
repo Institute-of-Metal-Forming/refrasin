@@ -5,16 +5,8 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class ContactConstraintY : INodeContactItem, IConstraint
+public class ContactConstraintY(ContactPair<NodeBase> nodeContact) : INodeContactItem, IConstraint
 {
-    private ContactConstraintY(ContactPair<NodeBase> nodeContact)
-    {
-        NodeContact = nodeContact;
-    }
-
-    public static INodeContactItem Create(ContactPair<NodeBase> nodeContact) =>
-        new ContactConstraintY(nodeContact);
-
     public double Residual(EquationSystem equationSystem, StepVector stepVector)
     {
         var thisTerm = GlobalNodeDisplacement(stepVector, NodeContact.First);
@@ -73,7 +65,7 @@ public class ContactConstraintY : INodeContactItem, IConstraint
         );
     }
 
-    public ContactPair<NodeBase> NodeContact { get; }
+    public ContactPair<NodeBase> NodeContact { get; } = nodeContact;
 
     public override string ToString() =>
         $"y contact constraint between {NodeContact.First} and {NodeContact.Second}";

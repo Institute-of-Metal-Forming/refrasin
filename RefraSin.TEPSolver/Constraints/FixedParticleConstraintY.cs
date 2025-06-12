@@ -4,15 +4,8 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class FixedParticleConstraintY : IParticleItem, IConstraint
+public class FixedParticleConstraintY(Particle particle) : IParticleItem, IConstraint
 {
-    private FixedParticleConstraintY(Particle particle)
-    {
-        Particle = particle;
-    }
-
-    public static IParticleItem Create(Particle particle) => new FixedParticleConstraintY(particle);
-
     public double Residual(EquationSystem equationSystem, StepVector stepVector) =>
         stepVector.ItemValue<ParticleDisplacementY>(Particle);
 
@@ -21,7 +14,7 @@ public class FixedParticleConstraintY : IParticleItem, IConstraint
         StepVector stepVector
     ) => [(stepVector.StepVectorMap.ItemIndex<ParticleDisplacementY>(Particle), 1)];
 
-    public Particle Particle { get; }
+    public Particle Particle { get; } = particle;
 
     public override string ToString() => $"y coordinate fixed for {Particle}";
 }

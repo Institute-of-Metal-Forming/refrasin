@@ -24,7 +24,7 @@ public record SolverRoutines(
     IStepWidthController StepWidthController,
     IEnumerable<IStateRecoverer> StateRecoverers,
     IEnumerable<IParticleSystemRemesher> Remeshers,
-    EquationSystemBuilder EquationSystemBuilder
+    IEquationSystemBuilder EquationSystemBuilder
 ) : ISolverRoutines
 {
     public static readonly SolverRoutines Default = new(
@@ -38,7 +38,7 @@ public record SolverRoutines(
         new MaximumDisplacementAngleStepWidthController(),
         [new StepBackStateRecoverer()],
         [new FreeSurfaceRemesher(), new NeckNeighborhoodRemesher()],
-        EquationSystemBuilder.Default
+        new EquationSystemBuilder()
     );
 
     /// <inheritdoc />

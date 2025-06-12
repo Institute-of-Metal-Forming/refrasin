@@ -4,18 +4,8 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Constraints;
 
-public class VolumeBalanceConstraint : INodeItem, IConstraint
+public class VolumeBalanceConstraint(NodeBase node) : INodeItem, IConstraint
 {
-    private VolumeBalanceConstraint(NodeBase node)
-    {
-        Node = node;
-    }
-
-    public static INodeItem Create(NodeBase node)
-    {
-        return new VolumeBalanceConstraint(node);
-    }
-
     public double Residual(EquationSystem equationSystem, StepVector stepVector)
     {
         var normalVolumeTerm =
@@ -48,7 +38,7 @@ public class VolumeBalanceConstraint : INodeItem, IConstraint
         yield return (stepVector.StepVectorMap.ItemIndex<FluxToUpper>(Node.Lower), -1);
     }
 
-    public NodeBase Node { get; }
+    public NodeBase Node { get; } = node;
 
     public override string ToString() => $"volume balance constraint for {Node}";
 }
