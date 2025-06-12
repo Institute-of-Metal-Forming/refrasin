@@ -10,11 +10,11 @@ namespace RefraSin.ParticleModel.Remeshing;
 
 public class FreeSurfaceRemesher(
     double deletionLimit = 0.05,
-    double additionLimit = 0.5,
+    double additionLimit = double.PositiveInfinity,
     double minWidthFactor = 0.25,
     double maxWidthFactor = 3.0,
     double twinPointLimit = 0.1,
-    double neckProtectionCount = 20
+    double neckProtectionCount = 10
 ) : IParticleRemesher
 {
     /// <inheritdoc />
