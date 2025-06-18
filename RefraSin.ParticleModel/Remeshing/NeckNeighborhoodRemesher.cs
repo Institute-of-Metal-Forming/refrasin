@@ -5,7 +5,7 @@ using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
-public class NeckNeighborhoodRemesher(double deletionLimit = 0.5) : IParticleRemesher
+public class NeckNeighborhoodRemesher(double deletionLimit = 0.5, double additionLimit = 2.0) : IParticleRemesher
 {
     /// <inheritdoc />
     public IParticle<IParticleNode> Remesh(IParticle<IParticleNode> particle)
@@ -24,6 +24,7 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.5) : IParticleRem
                 newParticle,
                 particle.Nodes,
                 meanDiscretizationWidth * DeletionLimit,
+                meanDiscretizationWidth * AdditionLimit,
                 logger
             );
 
@@ -42,6 +43,7 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.5) : IParticleRem
         IParticle<IParticleNode> particle,
         IEnumerable<IParticleNode> nodes,
         double minDistance,
+        double maxDistance,
         ILogger logger
     )
     {
@@ -51,22 +53,44 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.5) : IParticleRem
             {
                 if (
                     node.Upper.Type == Neck
-                    && node.Lower.Type != Neck
-                    && node.SurfaceDistance.ToUpper < minDistance
+                 && node.Lower.Type != Neck
                 )
                 {
-                    logger.Debug("Deleted node {Node}.", node);
-                    continue; // delete node
+                    if (node.SurfaceDistance.ToUpper < minDistance)
+                    {
+                        logger.Debug("Deleted node {Node}.", node);
+                        continue; // delete node
+                    }
+
+                    if (node.SurfaceDistance.ToUpper > maxDistance)
+                    {
+                        var newNode = new ParticleNode(Guid.NewGuid(), particle, node.Coordinates.Centroid(node.Upper.Coordinates), Surface);
+                        logger.Debug("Added node {Node}.", newNode);
+                        yield return new ParticleNode(node, particle);
+                        yield return newNode;
+                        continue;
+                    }
                 }
 
                 if (
                     node.Lower.Type == Neck
-                    && node.Upper.Type != Neck
-                    && node.SurfaceDistance.ToLower < minDistance
+                 && node.Upper.Type != Neck
                 )
                 {
-                    logger.Debug("Deleted node {Node}.", node);
-                    continue; // delete node
+                    if (node.SurfaceDistance.ToLower < minDistance)
+                    {
+                        logger.Debug("Deleted node {Node}.", node);
+                        continue; // delete node
+                    }
+                    
+                    if (node.SurfaceDistance.ToLower > maxDistance)
+                    {
+                        var newNode = new ParticleNode(Guid.NewGuid(), particle, node.Coordinates.Centroid(node.Lower.Coordinates), Surface);
+                        logger.Debug("Added node {Node}.", newNode);
+                        yield return newNode;
+                        yield return new ParticleNode(node, particle);
+                        continue;
+                    }
                 }
             }
 
@@ -75,4 +99,5 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.5) : IParticleRem
     }
 
     public double DeletionLimit { get; } = deletionLimit;
+    public double AdditionLimit { get; } = additionLimit;
 }

@@ -17,20 +17,23 @@ public static class NodeGeometryExtensions
     public static ToUpperToLower<Angle> AngleDistance<TNode>(this TNode self)
         where TNode : INode, INodeGeometry, INodeNeighbors =>
         new(
-            self.Coordinates.AngleTo(self.Upper.Coordinates),
-            self.Coordinates.AngleTo(self.Lower.Coordinates)
+            self.Coordinates.AngleTo(self.Upper.Coordinates, true),
+            self.Lower.Coordinates.AngleTo(self.Coordinates, true)
         );
 
     public static ToUpperToLower<Angle> SurfaceRadiusAngle<TNode>(this TNode self)
-        where TNode : INode, INodeGeometry, INodeNeighbors =>
-        new(
-            CosLaw.Gamma(
-                self.SurfaceDistance.ToUpper,
-                self.Coordinates.R,
-                self.Upper.Coordinates.R
-            ),
-            CosLaw.Gamma(self.SurfaceDistance.ToLower, self.Coordinates.R, self.Lower.Coordinates.R)
-        );
+        where TNode : INode, INodeGeometry, INodeNeighbors
+    {
+        var alphau = CosLaw.Gamma(self.SurfaceDistance.ToUpper, self.Coordinates.R, self.Upper.Coordinates.R);
+        if (self.AngleDistance.ToUpper < 0)
+            alphau = Angle.Full - alphau;
+
+        var alphal = CosLaw.Gamma(self.SurfaceDistance.ToLower, self.Coordinates.R, self.Lower.Coordinates.R);
+        if (self.AngleDistance.ToLower < 0)
+            alphal = Angle.Full - alphal;
+
+        return new ToUpperToLower<Angle>(alphau, alphal);
+    }
 
     public static ToUpperToLower<double> Volume<TNode>(this TNode self)
         where TNode : INode, INodeGeometry, INodeNeighbors =>
@@ -48,13 +51,13 @@ public static class NodeGeometryExtensions
                 ? new ToUpperToLower<Angle>(
                     HalfOfPi,
                     ThreeHalfsOfPi
-                        - self.SurfaceRadiusAngle.ToUpper
-                        - self.SurfaceRadiusAngle.ToLower
+                  - self.SurfaceRadiusAngle.ToUpper
+                  - self.SurfaceRadiusAngle.ToLower
                 )
                 : new ToUpperToLower<Angle>(
                     ThreeHalfsOfPi
-                        - self.SurfaceRadiusAngle.ToUpper
-                        - self.SurfaceRadiusAngle.ToLower,
+                  - self.SurfaceRadiusAngle.ToUpper
+                  - self.SurfaceRadiusAngle.ToLower,
                     HalfOfPi
                 );
         }
