@@ -38,8 +38,8 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>
     /// <inheritdoc />
     public override ToUpperToLower<double> InterfaceEnergy =>
         _interfaceEnergy ??= new ToUpperToLower<double>(
-            InterfaceProperties.Energy,
-            InterfaceProperties.Energy
+            InterfaceProperties.Energy / 2,
+            InterfaceProperties.Energy / 2
         );
 
     private ToUpperToLower<double>? _interfaceEnergy;
