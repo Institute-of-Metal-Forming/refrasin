@@ -46,6 +46,12 @@ internal class Particle : IMutableParticle<Node>, IMoveableParticle
         Coordinates += movement;
     }
 
+    public void MoveBy(IVector direction, double distance)
+    {
+        var movement = distance * direction.Direction.Absolute;
+        Coordinates += movement;
+    }
+
     /// <inheritdoc />
     public void Rotate(Angle angle)
     {

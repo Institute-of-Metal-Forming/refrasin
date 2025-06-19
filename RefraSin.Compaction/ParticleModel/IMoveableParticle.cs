@@ -11,5 +11,7 @@ internal interface IMoveableParticle : IMutableParticle<Node>
 
     public void MoveTowards(IPoint target, double distance);
 
+    public void MoveBy(IVector direction, double distance);
+
     public void Rotate(Angle angle);
 }
