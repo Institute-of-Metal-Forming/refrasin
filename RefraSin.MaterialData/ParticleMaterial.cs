@@ -3,14 +3,13 @@ namespace RefraSin.MaterialData;
 /// <summary>
 /// A record of material data.
 /// </summary>
-public record Material(
+public record ParticleMaterial(
     Guid Id,
     string Name,
-    IBulkProperties Bulk,
     ISubstanceProperties Substance,
     IInterfaceProperties Surface,
     IReadOnlyDictionary<Guid, IInterfaceProperties>? Interfaces = null
-) : IMaterial
+) : IParticleMaterial
 {
     /// <inheritdoc />
     public IReadOnlyDictionary<Guid, IInterfaceProperties> Interfaces { get; } =

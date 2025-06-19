@@ -10,6 +10,6 @@ public interface INormalizer : ISolverRoutine
     INorm GetNorm(
         ISystemState referenceState,
         ISinteringConditions conditions,
-        IEnumerable<IMaterial> materials
+        IEnumerable<IParticleMaterial> materials
     );
 }

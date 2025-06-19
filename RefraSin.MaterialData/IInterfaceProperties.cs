@@ -3,7 +3,7 @@ namespace RefraSin.MaterialData;
 public interface IInterfaceProperties
 {
     /// <summary>
-    /// Diffusion coefficient along interface.
+    /// Diffusion coefficient along interface (including vacancy concentration).
     /// </summary>
     double DiffusionCoefficient { get; }
 
@@ -11,4 +11,9 @@ public interface IInterfaceProperties
     /// Interface energy.
     /// </summary>
     double Energy { get; }
+
+    /// <summary>
+    /// Transfer (diffusion) coefficient cross the interface (including vacancy concentration).
+    /// </summary>
+    double TransferCoefficient { get; }
 }

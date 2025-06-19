@@ -13,7 +13,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
 {
     public SolutionState(
         ISystemState state,
-        IEnumerable<IMaterial> materials,
+        IEnumerable<IParticleMaterial> materials,
         ISinteringConditions conditions
     )
     {
@@ -63,7 +63,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToArray();
     }
 
-    public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
+    public IReadOnlyDictionary<Guid, IParticleMaterial> Materials { get; }
 
     /// <inheritdoc />
     public Guid Id { get; }

@@ -53,28 +53,22 @@ public interface INorm
     ) =>
         new InterfaceProperties(
             interfaceProperties.DiffusionCoefficient / DiffusionCoefficient,
-            interfaceProperties.Energy / InterfaceEnergy
-        );
-
-    public IBulkProperties NormalizeBulkProperties(IBulkProperties bulkProperties) =>
-        new BulkProperties(
-            bulkProperties.VolumeDiffusionCoefficient / DiffusionCoefficient,
-            bulkProperties.EquilibriumVacancyConcentration
+            interfaceProperties.Energy / InterfaceEnergy,
+            interfaceProperties.TransferCoefficient / DiffusionCoefficient * Length
         );
 
     public ISubstanceProperties NormalizeSubstanceProperties(
         ISubstanceProperties substanceProperties
     ) =>
-        new SubstanceProperties(
+        SubstanceProperties.FromDensityAndMolarMass(
             substanceProperties.Density / Mass * Volume,
             substanceProperties.MolarMass / Mass * Substance
         );
 
-    public IMaterial NormalizeMaterial(IMaterial material) =>
-        new Material(
+    public IParticleMaterial NormalizeMaterial(IParticleMaterial material) =>
+        new ParticleMaterial(
             material.Id,
             material.Name,
-            NormalizeBulkProperties(material.Bulk),
             NormalizeSubstanceProperties(material.Substance),
             NormalizeInterfaceProperties(material.Surface),
             material.Interfaces.ToDictionary(

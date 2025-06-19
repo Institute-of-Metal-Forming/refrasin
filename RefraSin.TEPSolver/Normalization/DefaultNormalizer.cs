@@ -11,7 +11,7 @@ public class DefaultNormalizer : INormalizer
     public INorm GetNorm(
         ISystemState referenceState,
         ISinteringConditions conditions,
-        IEnumerable<IMaterial> materials
+        IEnumerable<IParticleMaterial> materials
     ) => new Norm(referenceState, conditions, materials);
 
     private class Norm : INorm
@@ -19,7 +19,7 @@ public class DefaultNormalizer : INormalizer
         public Norm(
             ISystemState referenceState,
             ISinteringConditions sinteringStep,
-            IEnumerable<IMaterial> materials
+            IEnumerable<IParticleMaterial> materials
         )
         {
             var referenceParticle = referenceState.Particles[0];
@@ -38,8 +38,7 @@ public class DefaultNormalizer : INormalizer
                 * sinteringStep.Temperature
                 * Pow(Length, 4)
                 / (
-                    referenceMaterial.Bulk.EquilibriumVacancyConcentration
-                    * referenceMaterial.Substance.MolarVolume
+                    referenceMaterial.Substance.MolarVolume
                     * referenceMaterial.Surface.DiffusionCoefficient
                     * referenceMaterial.Surface.Energy
                 );

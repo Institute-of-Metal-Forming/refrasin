@@ -10,4 +10,10 @@
         <LangVersion>default</LangVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="MaterialRegistry.cs" />
+      <Compile Remove="IBulkProperties.cs" />
+      <Compile Remove="BulkProperties.cs" />
+    </ItemGroup>
+
 </Project>

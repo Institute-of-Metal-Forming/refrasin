@@ -80,7 +80,7 @@ internal class SolverSession : ISolverSession
 
     public SolutionState CurrentState { get; set; }
 
-    public IReadOnlyList<IMaterial> Materials { get; }
+    public IReadOnlyList<IParticleMaterial> Materials { get; }
 
     /// <inheritdoc />
     public ISolverRoutines Routines { get; }
