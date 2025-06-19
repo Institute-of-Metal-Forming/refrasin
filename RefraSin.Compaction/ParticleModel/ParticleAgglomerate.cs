@@ -84,6 +84,12 @@ internal class ParticleAgglomerate : ICartesianCoordinateSystem, IAgglomerate
         Coordinates += movement;
     }
 
+    public void MoveBy(IVector direction, double distance)
+    {
+        var movement = distance * direction.Direction.Absolute;
+        Coordinates += movement;
+    }
+
     /// <inheritdoc />
     public void Rotate(Angle angle)
     {
