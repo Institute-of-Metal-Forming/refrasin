@@ -1,5 +1,6 @@
 using RefraSin.Coordinates;
 using RefraSin.ParticleModel.Nodes;
+using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.Collections;
 
@@ -8,7 +9,7 @@ namespace RefraSin.ParticleModel.Collections;
 /// Integer indices may be larger than the count of elements, which means counting from the beginning again (cyclic indexing).
 /// Integer indices may be negative, which means counting from the end.
 /// </summary>
-public interface IReadOnlyParticleSurface<out TNode> : IReadOnlyNodeCollection<TNode>
+public interface IReadOnlyParticleSurface<out TNode> : IReadOnlyVertexCollection<TNode>
     where TNode : INode
 // IReadOnlyDictionary is not implemented, since this would break covariance
 {

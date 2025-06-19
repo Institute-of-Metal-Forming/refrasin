@@ -5,6 +5,7 @@ using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.StepVectors;
+using RefraSin.Vertex;
 using Serilog;
 using Log = Serilog.Log;
 
@@ -80,7 +81,7 @@ internal class SolverSession : ISolverSession
 
     public SolutionState CurrentState { get; set; }
 
-    public IReadOnlyList<IMaterial> Materials { get; }
+    public IReadOnlyList<IParticleMaterial> Materials { get; }
 
     /// <inheritdoc />
     public ISolverRoutines Routines { get; }
@@ -92,7 +93,7 @@ internal class SolverSession : ISolverSession
     {
         var particles = CurrentState
             .Particles.Select(p => new ParticleReturn(p, stepVector, Norm))
-            .ToReadOnlyParticleCollection<ParticleReturn, NodeReturn>();
+            .ToReadOnlyVertexCollection();
         _reportSystemState(
             new SystemState(CurrentState.Id, CurrentState.Time * Norm.Time, particles)
         );

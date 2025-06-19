@@ -30,9 +30,7 @@ public class Particle : IParticle<NodeBase>
         MaterialId = particle.MaterialId;
         var material = solutionState.Materials[particle.MaterialId];
         VacancyVolumeEnergy =
-            conditions.Temperature
-            * conditions.GasConstant
-            / (material.Substance.MolarVolume * material.Bulk.EquilibriumVacancyConcentration);
+            conditions.Temperature * conditions.GasConstant / (material.Substance.MolarVolume);
 
         SurfaceProperties = material.Surface;
         InterfaceProperties = material.Interfaces;

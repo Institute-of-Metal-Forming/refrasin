@@ -3,6 +3,7 @@ using RefraSin.Coordinates.Cartesian;
 using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
+using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.Particles;
 

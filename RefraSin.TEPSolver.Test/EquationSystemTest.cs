@@ -25,15 +25,14 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
 
     private string _tmpDir = TempPath.CreateTempDir();
     private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 0);
-    private static readonly IMaterial Material = new Material(
+    private static readonly IParticleMaterial Material = new ParticleMaterial(
         InitialStates.MaterialId,
         "Al2O3",
-        new BulkProperties(0, 1e-4),
-        new SubstanceProperties(1.8e3, 101.96e-3),
-        new InterfaceProperties(1.65e-10, 0.9),
+        SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
+        new InterfaceProperties(1.65e-14, 0.9),
         new Dictionary<Guid, IInterfaceProperties>
         {
-            { InitialStates.MaterialId, new InterfaceProperties(1.65e-10, 0.5) },
+            { InitialStates.MaterialId, new InterfaceProperties(1.65e-14, 0.5) },
         }
     );
 

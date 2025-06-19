@@ -9,5 +9,5 @@ public interface ISinteringStep : IProcessStep, ISinteringConditions
     /// </summary>
     public IProcessStepSolver<ISinteringStep> Solver { get; }
 
-    public IReadOnlyList<IMaterial> Materials { get; }
+    public IReadOnlyList<IParticleMaterial> Materials { get; }
 }

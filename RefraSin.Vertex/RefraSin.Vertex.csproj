@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <Authors>Max Weiner</Authors>
@@ -9,9 +9,5 @@
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\RefraSin.Vertex\RefraSin.Vertex.csproj" />
-    </ItemGroup>
 
 </Project>

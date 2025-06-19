@@ -19,7 +19,7 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
         double duration,
         double temperature,
         IProcessStepSolver<ISinteringStep> solver,
-        IReadOnlyList<IMaterial> materials,
+        IReadOnlyList<IParticleMaterial> materials,
         double gasConstant = 8.31446261815324
     )
     {
@@ -34,7 +34,7 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
     public SinteringStep(
         ISinteringConditions conditions,
         IProcessStepSolver<ISinteringStep> solver,
-        IReadOnlyList<IMaterial> materials
+        IReadOnlyList<IParticleMaterial> materials
     )
     {
         Duration = conditions.Duration;
@@ -60,7 +60,7 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
     public IProcessStepSolver<ISinteringStep> Solver { get; }
 
     /// <inheritdoc />
-    public IReadOnlyList<IMaterial> Materials { get; }
+    public IReadOnlyList<IParticleMaterial> Materials { get; }
 
     /// <inheritdoc />
     public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(

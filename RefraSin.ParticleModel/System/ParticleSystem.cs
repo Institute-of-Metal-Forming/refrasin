@@ -1,6 +1,7 @@
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.System;
 
@@ -10,13 +11,13 @@ public class ParticleSystem<TParticle, TNode> : IParticleSystem<TParticle, TNode
 {
     public ParticleSystem(IEnumerable<TParticle> particles)
     {
-        Particles = particles.ToReadOnlyParticleCollection<TParticle, TNode>();
-        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
+        Particles = particles.ToReadOnlyVertexCollection();
+        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
     }
 
     /// <inheritdoc />
-    public IReadOnlyParticleCollection<TParticle, TNode> Particles { get; }
+    public IReadOnlyVertexCollection<TParticle> Particles { get; }
 
     /// <inheritdoc />
-    public IReadOnlyNodeCollection<TNode> Nodes { get; }
+    public IReadOnlyVertexCollection<TNode> Nodes { get; }
 }

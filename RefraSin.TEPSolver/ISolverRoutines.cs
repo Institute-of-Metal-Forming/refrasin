@@ -55,7 +55,7 @@ public interface ISolverRoutines
     /// <summary>
     /// Routine to construct equation system.
     /// </summary>
-    EquationSystemBuilder EquationSystemBuilder { get; }
+    IEquationSystemBuilder EquationSystemBuilder { get; }
 
     void RegisterWithSolver(SinteringSolver solver);
 }

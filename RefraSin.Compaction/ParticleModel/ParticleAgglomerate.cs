@@ -5,6 +5,7 @@ using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Nodes.Extensions;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.Vertex;
 
 namespace RefraSin.Compaction.ParticleModel;
 
@@ -19,7 +20,7 @@ internal class ParticleAgglomerate : ICartesianCoordinateSystem, IAgglomerate
             .Centroid<AbsolutePoint, AbsoluteVector>();
         Particles = particlesArray
             .Select(p => new AgglomeratedParticle(p, this))
-            .ToReadOnlyParticleCollection<AgglomeratedParticle, Node>();
+            .ToReadOnlyVertexCollection();
         Surface = new ParticleSurface<Node>(CreateOuterSurface());
     }
 
@@ -67,7 +68,7 @@ internal class ParticleAgglomerate : ICartesianCoordinateSystem, IAgglomerate
     /// <inheritdoc />
     IPoint ICoordinateSystem.Origin => Coordinates;
 
-    public IReadOnlyParticleCollection<AgglomeratedParticle, Node> Particles { get; }
+    public IReadOnlyVertexCollection<AgglomeratedParticle> Particles { get; }
 
     IEnumerable<IMutableParticle<Node>> IAgglomerate.Elements => Particles;
 

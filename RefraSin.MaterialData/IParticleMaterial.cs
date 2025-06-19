@@ -1,21 +1,16 @@
+using RefraSin.Vertex;
+
 namespace RefraSin.MaterialData;
 
 /// <summary>
 /// Interface for types providing material data.
 /// </summary>
-public interface IMaterial
+public interface IParticleMaterial : IVertex
 {
-    /// <summary>
-    /// Unique id.
-    /// </summary>
-    Guid Id { get; }
-
     /// <summary>
     /// Human-readable name.
     /// </summary>
     string Name { get; }
-
-    IBulkProperties Bulk { get; }
 
     ISubstanceProperties Substance { get; }
 

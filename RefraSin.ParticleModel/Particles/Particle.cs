@@ -37,17 +37,20 @@ public record Particle<TNode> : IParticle<TNode>, IParticleMeasures
         MaxX = _nodes.Max(n => n.Coordinates.Absolute.X);
     }
 
-    public Particle(
-        IParticle<IParticleNode> template,
+    public static Particle<TNode> FromTemplate<TParticle>(
+        TParticle template,
         Func<IParticleNode, IParticle<TNode>, TNode> nodeSelector
     )
-        : this(
+        where TParticle : IParticle<IParticleNode>
+    {
+        return new Particle<TNode>(
             template.Id,
             template.Coordinates,
             template.RotationAngle,
             template.MaterialId,
             particle => template.Nodes.Select(n => nodeSelector(n, particle))
-        ) { }
+        );
+    }
 
     public IReadOnlyParticleSurface<TNode> Nodes => _nodes;
     public Guid Id { get; }

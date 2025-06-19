@@ -2,11 +2,11 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes.Extensions;
-using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.StepVectors;
+using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
@@ -14,7 +14,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
 {
     public SolutionState(
         ISystemState state,
-        IEnumerable<IMaterial> materials,
+        IEnumerable<IParticleMaterial> materials,
         ISinteringConditions conditions
     )
     {
@@ -23,8 +23,8 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         Materials = materials.ToDictionary(m => m.Id);
         Particles = state
             .Particles.Select(ps => new Particle(ps, this, conditions))
-            .ToReadOnlyParticleCollection<Particle, NodeBase>();
-        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
+            .ToReadOnlyVertexCollection();
+        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
 
         NodeContacts = Nodes.CreateContactNodePairs().ToArray();
         ParticleContacts = NodeContacts
@@ -45,9 +45,9 @@ public class SolutionState : ISystemState<Particle, NodeBase>
 
         Particles = oldState
             .Particles.Select(p => p.ApplyTimeStep(this, stepVector, timeStepWidth))
-            .ToReadOnlyParticleCollection<Particle, NodeBase>();
+            .ToReadOnlyVertexCollection();
 
-        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyNodeCollection();
+        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
         ParticleContacts = oldState
             .ParticleContacts.Select(c => new ContactPair<Particle>(
                 c.Id,
@@ -64,7 +64,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             .ToArray();
     }
 
-    public IReadOnlyDictionary<Guid, IMaterial> Materials { get; }
+    public IReadOnlyDictionary<Guid, IParticleMaterial> Materials { get; }
 
     /// <inheritdoc />
     public Guid Id { get; }
@@ -73,19 +73,18 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     public double Time { get; }
 
     /// <inheritdoc cref="ISystemState.Nodes"/>>
-    public IReadOnlyNodeCollection<NodeBase> Nodes { get; }
+    public IReadOnlyVertexCollection<NodeBase> Nodes { get; }
 
     /// <inheritdoc cref="ISystemState.Particles"/>>
-    public IReadOnlyParticleCollection<Particle, NodeBase> Particles { get; }
+    public IReadOnlyVertexCollection<Particle> Particles { get; }
 
     public IReadOnlyList<ContactPair<NodeBase>> NodeContacts { get; }
 
     public IReadOnlyList<ContactPair<Particle>> ParticleContacts { get; }
 
-    IReadOnlyNodeCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
+    IReadOnlyVertexCollection<NodeBase> IParticleSystem<Particle, NodeBase>.Nodes => Nodes;
 
-    IReadOnlyParticleCollection<Particle, NodeBase> IParticleSystem<Particle, NodeBase>.Particles =>
-        Particles;
+    IReadOnlyVertexCollection<Particle> IParticleSystem<Particle, NodeBase>.Particles => Particles;
 
     public SolutionState ApplyTimeStep(StepVector stepVector, double timeStepWidth) =>
         new(this, stepVector, timeStepWidth);
