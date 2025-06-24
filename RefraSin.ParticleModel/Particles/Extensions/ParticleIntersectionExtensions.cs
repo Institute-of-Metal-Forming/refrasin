@@ -86,21 +86,7 @@ public static class ParticleIntersectionExtensions
         if (!MayIntersectWithByRectangularApproximation(selfMeasures, otherMeasures))
             return false;
 
-        var othersCenterPolar = new PolarPoint(other.Coordinates, self);
-        var sightAngle = SinLaw.Alpha(otherMeasures.MaxRadius, othersCenterPolar.R, HalfOfPi);
-        IReadOnlyList<IParticleNode> possibleNodes;
-
-        if (!double.IsNaN(sightAngle))
-        {
-            var minAngle = othersCenterPolar.Phi - sightAngle;
-            var maxAngle = othersCenterPolar.Phi + sightAngle;
-
-            var lowestPossibleNode = self.Nodes.NextLowerNodeFrom(minAngle);
-            var highestPossibleNode = self.Nodes.NextUpperNodeFrom(maxAngle);
-            possibleNodes = self.Nodes[lowestPossibleNode.Index, highestPossibleNode.Index];
-        }
-        else
-            possibleNodes = self.Nodes;
+        var possibleNodes = self.Nodes;
 
         return self.ContainsPoint(other.Nodes[0].Coordinates, precision) // to catch edge case when other is fully contained in self
             || possibleNodes.Any(n => other.ContainsPoint(n.Coordinates, precision));

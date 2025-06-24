@@ -15,7 +15,7 @@ namespace RefraSin.Compaction.ProcessModel;
 public class FocalCompactionStep(
     IPoint focusPoint,
     double stepDistance,
-    double minimumRelativeIntrusion = 0.2,
+    double minimumIntrusion,
     int maxStepCount = 100
 ) : ProcessStepBase
 {
@@ -111,7 +111,5 @@ public class FocalCompactionStep(
 
     public double StepDistance { get; } = stepDistance;
 
-    public double MinimumRelativeIntrusion { get; } = minimumRelativeIntrusion;
-
-    public double MinimumIntrusion { get; } = stepDistance * minimumRelativeIntrusion;
+    public double MinimumIntrusion { get; } = minimumIntrusion;
 }

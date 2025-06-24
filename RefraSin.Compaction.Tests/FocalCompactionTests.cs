@@ -144,6 +144,40 @@ public class FocalCompactionTests
             },
             new AbsolutePoint(0, 0)
         );
+        yield return new TestFixtureData(
+            new[]
+            {
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (0, 0),
+                    Straight - HalfRight,
+                    200,
+                    1
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (1.5244284418067664, -1.2791473432762133),
+                    HalfRight,
+                    200,
+                    1
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (3.048856883613533, 0),
+                    -HalfRight,
+                    200,
+                    1
+                ).GetParticle(),
+                new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+                    Guid.Empty,
+                    (1.5244284418067664, 1.2791473432762133),
+                    -HalfRight,
+                    200,
+                    1
+                ).GetParticle(),
+            },
+            new AbsolutePoint(0, 0)
+        );
     }
 
     public FocalCompactionTests(IEnumerable<Particle<ParticleNode>> particles, AbsolutePoint focus)
@@ -153,12 +187,13 @@ public class FocalCompactionTests
     }
 
     [Test]
+    [TestCase(0)]
     [TestCase(0.01)]
     [TestCase(0.05)]
     [TestCase(0.10)]
     public void TestCompaction(double stepSize)
     {
-        var compactor = new FocalCompactionStep(_focus, stepSize, maxStepCount: 1000);
+        var compactor = new FocalCompactionStep(_focus, stepSize, 0.001, maxStepCount: 1000);
         var sol = compactor.Solve(_system);
 
         Chart
