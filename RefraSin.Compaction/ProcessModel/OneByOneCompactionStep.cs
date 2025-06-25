@@ -11,7 +11,7 @@ namespace RefraSin.Compaction.ProcessModel;
 
 public class OneByOneCompactionStep(
     double stepDistance,
-    double minimumRelativeIntrusion = 0.2,
+    double minimumIntrusion,
     int maxStepCount = 100
 ) : ProcessStepBase
 {
@@ -19,9 +19,7 @@ public class OneByOneCompactionStep(
 
     public double StepDistance { get; } = stepDistance;
 
-    public double MinimumRelativeIntrusion { get; } = minimumRelativeIntrusion;
-
-    public double MinimumIntrusion { get; } = stepDistance * minimumRelativeIntrusion;
+    public double MinimumIntrusion { get; } =  minimumIntrusion;
 
     public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(
         ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
