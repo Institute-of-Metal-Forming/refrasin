@@ -21,7 +21,9 @@ public class NeckNode : ContactNodeBase<NeckNode>
         Guid? contactedNodeId = null,
         Guid? contactedParticleId = null
     )
-        : base(node, particle, contactedNodeId, contactedParticleId) { }
+        : base(node, particle, contactedNodeId, contactedParticleId)
+    {
+    }
 
     private NeckNode(
         Guid id,
@@ -36,20 +38,32 @@ public class NeckNode : ContactNodeBase<NeckNode>
     /// <inheritdoc />
     public override NodeType Type => NodeType.Neck;
 
-    public override ToUpperToLower<double> InterfaceEnergy =>
-        _interfaceEnergy ??= new ToUpperToLower<double>(
-            Upper.InterfaceEnergy.ToLower,
-            Lower.InterfaceEnergy.ToUpper
-        );
+    public override ToUpperToLower<double> InterfaceEnergy
+    {
+        get
+        {
+            ThrowIfCorruptAdjacients();
+            return _interfaceEnergy ??= new ToUpperToLower<double>(
+                Upper.InterfaceEnergy.ToLower,
+                Lower.InterfaceEnergy.ToUpper
+            );
+        }
+    }
 
     private ToUpperToLower<double>? _interfaceEnergy;
 
     /// <inheritdoc />
-    public override ToUpperToLower<double> InterfaceDiffusionCoefficient =>
-        _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
-            Upper.InterfaceDiffusionCoefficient.ToLower,
-            Lower.InterfaceDiffusionCoefficient.ToUpper
-        );
+    public override ToUpperToLower<double> InterfaceDiffusionCoefficient
+    {
+        get
+        {
+            ThrowIfCorruptAdjacients();
+            return _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
+                Upper.InterfaceDiffusionCoefficient.ToLower,
+                Lower.InterfaceDiffusionCoefficient.ToUpper
+            );
+        }
+    }
 
     private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
 
@@ -81,5 +95,11 @@ public class NeckNode : ContactNodeBase<NeckNode>
             ContactedNodeId,
             ContactedParticleId
         );
+    }
+
+    private void ThrowIfCorruptAdjacients()
+    {
+        if (Upper.Type == NodeType.Neck || Lower.Type == NodeType.Neck)
+            throw new InvalidOperationException("Neck must have surface or grain boundary adjacent.");
     }
 }
