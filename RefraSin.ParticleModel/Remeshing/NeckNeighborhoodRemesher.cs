@@ -53,11 +53,13 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.5, double additio
             {
                 if (
                     node.Upper.Type == Neck
-                 && node.Lower.Type != Neck
                 )
                 {
                     if (node.SurfaceDistance.ToUpper < minDistance)
                     {
+                        if (node.Lower.Type == Neck)
+                            throw new InvalidOperationException("Last surface node to be removed.");
+
                         logger.Debug("Deleted node {Node}.", node);
                         continue; // delete node
                     }
@@ -74,15 +76,17 @@ public class NeckNeighborhoodRemesher(double deletionLimit = 0.5, double additio
 
                 if (
                     node.Lower.Type == Neck
-                 && node.Upper.Type != Neck
                 )
                 {
                     if (node.SurfaceDistance.ToLower < minDistance)
                     {
+                        if (node.Upper.Type == Neck)
+                            throw new InvalidOperationException("Last surface node to be removed.");
+
                         logger.Debug("Deleted node {Node}.", node);
                         continue; // delete node
                     }
-                    
+
                     if (node.SurfaceDistance.ToLower > maxDistance)
                     {
                         var newNode = new ParticleNode(Guid.NewGuid(), particle, node.Coordinates.Centroid(node.Lower.Coordinates), Surface);
