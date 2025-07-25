@@ -23,7 +23,8 @@ public class ShapeFunctionParticleFactoryEllipseOvalityCosPeaks(
     double baseRadius,
     double ovality = 1,
     int peakCount = 0,
-    double peakHeight = 0
+    double peakHeight = 0,
+    double peakShift = 0
 ) : ShapeFunctionParticleFactory(materialId, centerCoordinates, rotationAngle, nodeCount)
 {
     private double EllipseFunction(double phi)
@@ -36,7 +37,7 @@ public class ShapeFunctionParticleFactoryEllipseOvalityCosPeaks(
 
     /// <inheritdoc />
     public override double ParticleShapeFunction(double phi) =>
-        EllipseFunction(phi) + BaseRadius * PeakHeight * Cos(PeakCount * phi);
+        EllipseFunction(phi) + BaseRadius * PeakHeight * Cos(PeakCount * phi + 2 * PI * PeakShift);
 
     public double BaseRadius { get; } =
         baseRadius > 0 ? baseRadius : throw new ArgumentOutOfRangeException(nameof(baseRadius));
@@ -47,5 +48,9 @@ public class ShapeFunctionParticleFactoryEllipseOvalityCosPeaks(
     public double PeakHeight { get; } =
         peakHeight is >= 0 and < 1
             ? peakHeight
+            : throw new ArgumentOutOfRangeException(nameof(peakHeight));
+    public double PeakShift { get; } =
+        peakShift is >= 0 and < 0.5
+            ? peakShift
             : throw new ArgumentOutOfRangeException(nameof(peakHeight));
 }
