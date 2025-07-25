@@ -97,27 +97,11 @@ public static class ParticleIntersectionExtensions
         IParticle<IParticleNode> other
     )
     {
-        var othersCenterPolar = new PolarPoint(other.Coordinates, self);
-        var sightAngle = SinLaw.Alpha(other.ToMeasures().MaxRadius, othersCenterPolar.R, HalfOfPi);
-        IReadOnlyList<IParticleNode> possibleNodes;
-
-        if (!double.IsNaN(sightAngle))
-        {
-            var minAngle = othersCenterPolar.Phi - sightAngle;
-            var maxAngle = othersCenterPolar.Phi + sightAngle;
-
-            var lowestPossibleNode = self.Nodes.NextLowerNodeFrom(minAngle);
-            var highestPossibleNode = self.Nodes.NextUpperNodeFrom(maxAngle);
-            possibleNodes = self.Nodes[lowestPossibleNode.Index, highestPossibleNode.Index];
-        }
-        else
-            possibleNodes = self.Nodes;
-
         IPolarPoint? firstPoint = null;
         bool yieldFirstAtEnd = false;
-        bool currentlyIn = other.ContainsPoint(possibleNodes[0].Coordinates);
+        bool currentlyIn = other.ContainsPoint(self.Nodes[0].Coordinates);
 
-        foreach (var node in possibleNodes.Skip(1))
+        foreach (var node in self.Nodes.Skip(1))
         {
             var nodeIn = other.ContainsPoint(node.Coordinates);
 

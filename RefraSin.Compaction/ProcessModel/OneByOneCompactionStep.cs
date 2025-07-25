@@ -6,6 +6,7 @@ using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ProcessModel;
 using static RefraSin.ParticleModel.Nodes.NodeType;
 using Node = RefraSin.Compaction.ParticleModel.Node;
+using Log = Serilog.Log;
 
 namespace RefraSin.Compaction.ProcessModel;
 
@@ -25,6 +26,7 @@ public class OneByOneCompactionStep(
         ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
     )
     {
+        var logger = Log.ForContext<OneByOneCompactionStep>();
         var particleEnumerator = inputState.Particles.Select(p => new Particle(p)).GetEnumerator();
 
         if (!particleEnumerator.MoveNext())
@@ -44,8 +46,11 @@ public class OneByOneCompactionStep(
                     )
                     .ToArray();
 
-                if (contacts.Count(t => t.intersects) >= 2)
+                if (contacts.Count(t => t.intersects) >= (immobileParticles.Count > 1 ? 2 : 1))
+                {
+                    logger.Information("Contact created with {Count}/{Required} particles.", contacts.Count(t => t.intersects), (immobileParticles.Count > 1 ? 2 : 1));
                     break;
+                }
 
                 var vector = contacts
                     .Select(t =>
@@ -73,6 +78,7 @@ public class OneByOneCompactionStep(
 
             foreach (var p in immobileParticles)
             {
+                logger.Information("Creating grain boundaries between {Mobile} and {Immobile}.", mobileParticle, p);
                 mobileParticle.CreateGrainBoundariesAtIntersections(
                     p,
                     (point, particle) => new Node(Guid.NewGuid(), point.Absolute, Neck, particle),
@@ -84,8 +90,10 @@ public class OneByOneCompactionStep(
             immobileParticles.Add(mobileParticle);
         }
 
+        logger.Information("All particles processed.");
+
         particleEnumerator.Dispose();
-        return new SystemState(
+        var resultState = new SystemState(
             Guid.NewGuid(),
             inputState.Time,
             immobileParticles.Select(p =>
@@ -95,5 +103,7 @@ public class OneByOneCompactionStep(
                 )
             )
         );
+        ReportSystemState(resultState);
+        return resultState;
     }
 }
