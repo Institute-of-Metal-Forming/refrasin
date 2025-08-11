@@ -3,9 +3,7 @@ using RefraSin.Coordinates;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.Coordinates.Helpers;
 using RefraSin.Coordinates.Polar;
-using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
-using static RefraSin.Coordinates.Constants;
 using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.ParticleModel.Particles.Extensions;
@@ -17,7 +15,7 @@ public static class ParticleIntersectionExtensions
         IParticleMeasures other
     ) =>
         RangesOverlap(self.MinX, self.MaxX, other.MinX, other.MaxX)
-        && RangesOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
+     && RangesOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
 
     private static bool RangesOverlap(
         double selfMin,
@@ -42,7 +40,7 @@ public static class ParticleIntersectionExtensions
     public static bool ContainsPoint(
         this IParticle<IParticleNode> self,
         IPoint point,
-        double precision = 1e-8
+        double precision = 0
     )
     {
         var nodesPolarCoordinates = new PolarPoint(point, self);
@@ -52,7 +50,7 @@ public static class ParticleIntersectionExtensions
 
         if (
             nodesPolarCoordinates.R > upperNeighbor.Coordinates.R
-            && nodesPolarCoordinates.R > lowerNeighbor.Coordinates.R
+         && nodesPolarCoordinates.R > lowerNeighbor.Coordinates.R
         )
             return false;
 
@@ -60,8 +58,8 @@ public static class ParticleIntersectionExtensions
             SinLaw.A(
                 upperNeighbor.Coordinates.R,
                 upperNeighbor.SurfaceRadiusAngle.ToLower,
-                upperNeighbor.SurfaceRadiusAngle.ToLower
-                    + nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
+                Angle.Straight - upperNeighbor.SurfaceRadiusAngle.ToLower
+                               - nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
             ) + precision;
 
         return radiusAtAngle >= nodesPolarCoordinates.R;
@@ -101,7 +99,7 @@ public static class ParticleIntersectionExtensions
         bool yieldFirstAtEnd = false;
         bool currentlyIn = other.ContainsPoint(self.Nodes[0].Coordinates);
 
-        foreach (var node in self.Nodes.Skip(1))
+        foreach (var node in self.Nodes.Skip(1).Append(self.Nodes[0]))
         {
             var nodeIn = other.ContainsPoint(node.Coordinates);
 
@@ -161,8 +159,8 @@ public static class ParticleIntersectionExtensions
                 var intersectionOthersPolar = new PolarPoint(intersection, other);
                 if (
                     intersectionSelfsPolar.Phi < selfUpperNode.Coordinates.Phi
-                    && intersectionOthersPolar.Phi < otherUpperNode.Coordinates.Phi
-                    && intersectionOthersPolar.Phi > otherUpperNode.Lower.Coordinates.Phi
+                 && intersectionOthersPolar.Phi < otherUpperNode.Coordinates.Phi
+                 && intersectionOthersPolar.Phi > otherUpperNode.Lower.Coordinates.Phi
                 )
                     return intersectionSelfsPolar;
             }
@@ -175,10 +173,10 @@ public static class ParticleIntersectionExtensions
     public static (
         IParticle<IParticleNode> self,
         IParticle<IParticleNode> other
-    ) CreateGrainBoundariesAtIntersections(
-        this IParticle<IParticleNode> self,
-        IParticle<IParticleNode> other
-    )
+        ) CreateGrainBoundariesAtIntersections(
+            this IParticle<IParticleNode> self,
+            IParticle<IParticleNode> other
+        )
     {
         var mutableSelf = new MutableParticle<IParticleNode>(
             self,
@@ -235,8 +233,16 @@ public static class ParticleIntersectionExtensions
             {
                 var lowerToRemove = target.Surface.NextUpperNodeFrom(neckPair.Lower.Phi);
                 var upperToRemove = target.Surface.NextLowerNodeFrom(neckPair.Upper.Phi);
-                var lowerRemaining = target.Surface.LowerNeighborOf(lowerToRemove);
-                target.Surface.Remove(lowerToRemove, upperToRemove);
+                TNode lowerRemaining;
+                if (lowerToRemove.Coordinates.Phi > upperToRemove.Coordinates.Phi)
+                {
+                    lowerRemaining = upperToRemove;
+                }
+                else
+                {
+                    lowerRemaining = target.Surface.LowerNeighborOf(lowerToRemove);
+                    target.Surface.Remove(lowerToRemove, upperToRemove);
+                }
 
                 var lowerNeckPoint = new PolarPoint(neckPair.Lower, target);
                 var upperNeckPoint = new PolarPoint(neckPair.Upper, target);

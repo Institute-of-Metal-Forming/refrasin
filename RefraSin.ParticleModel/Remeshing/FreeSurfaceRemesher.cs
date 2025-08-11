@@ -21,7 +21,7 @@ public class FreeSurfaceRemesher(
     public IParticle<IParticleNode> Remesh(IParticle<IParticleNode> particle)
     {
         var logger = Log.ForContext<FreeSurfaceRemesher>();
-        logger.Debug("Remeshing particle {Particle}.", particle);
+        logger.Debug("Remeshing free surface of {Particle}.", particle);
         var meanDiscretizationWidth =
             particle.Nodes.Where(n => n.Type == Surface).Average(n => n.SurfaceDistance.Sum) / 2;
         logger.Debug(
@@ -87,7 +87,7 @@ public class FreeSurfaceRemesher(
                     continue;
                 }
 
-                if (node.SurfaceDistance.ToUpper < twinPointDistance)
+                if (node.SurfaceDistance.ToUpper < twinPointDistance && node.Upper.Type == node.Type)
                 {
                     lowerTwin = node;
                     continue;
@@ -95,10 +95,10 @@ public class FreeSurfaceRemesher(
 
                 if (
                     !lastNodeDeleted
-                    && node.Upper.Type != Neck
-                    && node.Lower.Type != Neck
                     && Abs(node.SurfaceRadiusAngle.Sum - Pi) < DeletionLimit
                     && node.SurfaceDistance.Sum < maxDistance
+                    && node.Upper.Type != Neck
+                    && node.Lower.Type != Neck
                     && !IsNodeInProtection(node)
                 )
                 {

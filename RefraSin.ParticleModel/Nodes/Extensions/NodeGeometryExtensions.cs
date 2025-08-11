@@ -24,11 +24,19 @@ public static class NodeGeometryExtensions
     public static ToUpperToLower<Angle> SurfaceRadiusAngle<TNode>(this TNode self)
         where TNode : INode, INodeGeometry, INodeNeighbors
     {
-        var alphau = CosLaw.Gamma(self.SurfaceDistance.ToUpper, self.Coordinates.R, self.Upper.Coordinates.R);
+        var alphau = CosLaw.Gamma(
+            self.SurfaceDistance.ToUpper,
+            self.Coordinates.R,
+            self.Upper.Coordinates.R
+        );
         if (self.AngleDistance.ToUpper < 0)
             alphau = Angle.Full - alphau;
 
-        var alphal = CosLaw.Gamma(self.SurfaceDistance.ToLower, self.Coordinates.R, self.Lower.Coordinates.R);
+        var alphal = CosLaw.Gamma(
+            self.SurfaceDistance.ToLower,
+            self.Coordinates.R,
+            self.Lower.Coordinates.R
+        );
         if (self.AngleDistance.ToLower < 0)
             alphal = Angle.Full - alphal;
 
@@ -51,13 +59,13 @@ public static class NodeGeometryExtensions
                 ? new ToUpperToLower<Angle>(
                     HalfOfPi,
                     ThreeHalfsOfPi
-                  - self.SurfaceRadiusAngle.ToUpper
-                  - self.SurfaceRadiusAngle.ToLower
+                        - self.SurfaceRadiusAngle.ToUpper
+                        - self.SurfaceRadiusAngle.ToLower
                 )
                 : new ToUpperToLower<Angle>(
                     ThreeHalfsOfPi
-                  - self.SurfaceRadiusAngle.ToUpper
-                  - self.SurfaceRadiusAngle.ToLower,
+                        - self.SurfaceRadiusAngle.ToUpper
+                        - self.SurfaceRadiusAngle.ToLower,
                     HalfOfPi
                 );
         }
