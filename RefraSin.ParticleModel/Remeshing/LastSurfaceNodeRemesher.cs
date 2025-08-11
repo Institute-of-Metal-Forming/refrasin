@@ -6,9 +6,7 @@ using Log = Serilog.Log;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
-public class LastSurfaceNodeRemesher(
-    double asymmetryLimit = 0.05
-) : IParticleRemesher
+public class LastSurfaceNodeRemesher(double asymmetryLimit = 0.05) : IParticleRemesher
 {
     public double AsymmetryLimit { get; } = asymmetryLimit;
 
@@ -19,11 +17,7 @@ public class LastSurfaceNodeRemesher(
         logger.Debug("Remeshing last surface nodes of {Particle}.", particle);
 
         IEnumerable<IParticleNode> NodeFactory(IParticle<IParticleNode> newParticle) =>
-            FilterNodes(
-                newParticle,
-                particle.Nodes,
-                logger
-            );
+            FilterNodes(newParticle, particle.Nodes, logger);
 
         var newParticle = new Particle<IParticleNode>(
             particle.Id,
@@ -48,13 +42,22 @@ public class LastSurfaceNodeRemesher(
             {
                 var asymmetryRatio = node.SurfaceDistance.ToUpper / node.SurfaceDistance.ToLower;
 
-                if (asymmetryRatio > 1) asymmetryRatio = 1 / asymmetryRatio;
+                if (asymmetryRatio > 1)
+                    asymmetryRatio = 1 / asymmetryRatio;
 
                 if (asymmetryRatio < AsymmetryLimit)
                 {
-                    var newNode = new ParticleNode(Guid.NewGuid(), particle,
-                        node.Upper.Coordinates.Centroid(node.Lower.Coordinates), Surface); 
-                    logger.Information("Remeshed last surface node {Node} to {NewNode}", node, newNode);
+                    var newNode = new ParticleNode(
+                        Guid.NewGuid(),
+                        particle,
+                        node.Upper.Coordinates.Centroid(node.Lower.Coordinates),
+                        Surface
+                    );
+                    logger.Information(
+                        "Remeshed last surface node {Node} to {NewNode}",
+                        node,
+                        newNode
+                    );
                     yield return newNode;
                     continue;
                 }

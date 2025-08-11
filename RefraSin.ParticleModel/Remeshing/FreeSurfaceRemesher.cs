@@ -87,7 +87,10 @@ public class FreeSurfaceRemesher(
                     continue;
                 }
 
-                if (node.SurfaceDistance.ToUpper < twinPointDistance && node.Upper.Type == node.Type)
+                if (
+                    node.SurfaceDistance.ToUpper < twinPointDistance
+                    && node.Upper.Type == node.Type
+                )
                 {
                     lowerTwin = node;
                     continue;

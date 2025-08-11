@@ -6,8 +6,8 @@ using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Particles.Extensions;
 using RefraSin.ProcessModel;
 using static RefraSin.ParticleModel.Nodes.NodeType;
-using Node = RefraSin.Compaction.ParticleModel.Node;
 using Log = Serilog.Log;
+using Node = RefraSin.Compaction.ParticleModel.Node;
 
 namespace RefraSin.Compaction.ProcessModel;
 
@@ -60,12 +60,16 @@ public class OneByOneCompactionStep(
                 var vectors = contacts
                     .Select(t =>
                         mobileParticle.Coordinates.VectorTo(t.p.Coordinates)
-                      * (t.intersects ? -0.5 : 1)
-                    ).ToArray();
-                var vector = vectors
-                    .Aggregate(new AbsoluteVector(), (v, sum) => sum.Add(v));
+                        * (t.intersects ? -0.5 : 1)
+                    )
+                    .ToArray();
+                var vector = vectors.Aggregate(new AbsoluteVector(), (v, sum) => sum.Add(v));
 
-                logger.Debug("Move along {Vector} (Components {Components}).", vector, new StringBuilder().AppendJoin(", ", vectors));
+                logger.Debug(
+                    "Move along {Vector} (Components {Components}).",
+                    vector,
+                    new StringBuilder().AppendJoin(", ", vectors)
+                );
                 mobileParticle.MoveBy(vector, StepDistance);
                 ReportSystemState(
                     new SystemState(

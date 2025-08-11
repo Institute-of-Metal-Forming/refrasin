@@ -15,7 +15,7 @@ public static class ParticleIntersectionExtensions
         IParticleMeasures other
     ) =>
         RangesOverlap(self.MinX, self.MaxX, other.MinX, other.MaxX)
-     && RangesOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
+        && RangesOverlap(self.MinY, self.MaxY, other.MinY, other.MaxY);
 
     private static bool RangesOverlap(
         double selfMin,
@@ -50,7 +50,7 @@ public static class ParticleIntersectionExtensions
 
         if (
             nodesPolarCoordinates.R > upperNeighbor.Coordinates.R
-         && nodesPolarCoordinates.R > lowerNeighbor.Coordinates.R
+            && nodesPolarCoordinates.R > lowerNeighbor.Coordinates.R
         )
             return false;
 
@@ -58,8 +58,9 @@ public static class ParticleIntersectionExtensions
             SinLaw.A(
                 upperNeighbor.Coordinates.R,
                 upperNeighbor.SurfaceRadiusAngle.ToLower,
-                Angle.Straight - upperNeighbor.SurfaceRadiusAngle.ToLower
-                               - nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
+                Angle.Straight
+                    - upperNeighbor.SurfaceRadiusAngle.ToLower
+                    - nodesPolarCoordinates.AngleTo(upperNeighbor.Coordinates)
             ) + precision;
 
         return radiusAtAngle >= nodesPolarCoordinates.R;
@@ -159,8 +160,8 @@ public static class ParticleIntersectionExtensions
                 var intersectionOthersPolar = new PolarPoint(intersection, other);
                 if (
                     intersectionSelfsPolar.Phi < selfUpperNode.Coordinates.Phi
-                 && intersectionOthersPolar.Phi < otherUpperNode.Coordinates.Phi
-                 && intersectionOthersPolar.Phi > otherUpperNode.Lower.Coordinates.Phi
+                    && intersectionOthersPolar.Phi < otherUpperNode.Coordinates.Phi
+                    && intersectionOthersPolar.Phi > otherUpperNode.Lower.Coordinates.Phi
                 )
                     return intersectionSelfsPolar;
             }
@@ -173,10 +174,10 @@ public static class ParticleIntersectionExtensions
     public static (
         IParticle<IParticleNode> self,
         IParticle<IParticleNode> other
-        ) CreateGrainBoundariesAtIntersections(
-            this IParticle<IParticleNode> self,
-            IParticle<IParticleNode> other
-        )
+    ) CreateGrainBoundariesAtIntersections(
+        this IParticle<IParticleNode> self,
+        IParticle<IParticleNode> other
+    )
     {
         var mutableSelf = new MutableParticle<IParticleNode>(
             self,

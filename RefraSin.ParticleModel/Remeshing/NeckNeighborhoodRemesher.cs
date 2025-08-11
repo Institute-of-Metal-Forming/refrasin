@@ -10,8 +10,7 @@ public class NeckNeighborhoodRemesher(
     double globalDeletionLimit = 0.3,
     double localAdditionLimit = 2.0,
     double globalAdditionLimit = 2.0
-)
-    : IParticleRemesher
+) : IParticleRemesher
 {
     /// <inheritdoc />
     public IParticle<IParticleNode> Remesh(IParticle<IParticleNode> particle)
@@ -54,21 +53,29 @@ public class NeckNeighborhoodRemesher(
     )
     {
         var lastNodeDeleted = false;
-        
+
         foreach (var node in nodes)
         {
             if (node.Type == Surface)
             {
                 if (node.Lower.Type == Neck && node.Upper.Type != Neck)
                 {
-                    if (node.SurfaceDistance.ToLower < LocalDeletionLimit * node.SurfaceDistance.ToUpper || node.SurfaceDistance.ToLower < minDistance)
+                    if (
+                        node.SurfaceDistance.ToLower
+                            < LocalDeletionLimit * node.SurfaceDistance.ToUpper
+                        || node.SurfaceDistance.ToLower < minDistance
+                    )
                     {
                         logger.Debug("Deleted node {Node}.", node);
                         lastNodeDeleted = true;
                         continue; // delete node
                     }
 
-                    if (node.SurfaceDistance.ToLower > LocalAdditionLimit * node.SurfaceDistance.ToUpper || node.SurfaceDistance.ToLower > maxDistance)
+                    if (
+                        node.SurfaceDistance.ToLower
+                            > LocalAdditionLimit * node.SurfaceDistance.ToUpper
+                        || node.SurfaceDistance.ToLower > maxDistance
+                    )
                     {
                         var newNode = new ParticleNode(
                             Guid.NewGuid(),
@@ -82,17 +89,25 @@ public class NeckNeighborhoodRemesher(
                         continue;
                     }
                 }
-                
+
                 if (node.Upper.Type == Neck && node.Lower.Type != Neck && !lastNodeDeleted)
                 {
-                    if (node.SurfaceDistance.ToUpper < LocalDeletionLimit * node.SurfaceDistance.ToLower || node.SurfaceDistance.ToUpper < minDistance)
+                    if (
+                        node.SurfaceDistance.ToUpper
+                            < LocalDeletionLimit * node.SurfaceDistance.ToLower
+                        || node.SurfaceDistance.ToUpper < minDistance
+                    )
                     {
                         logger.Debug("Deleted node {Node}.", node);
                         lastNodeDeleted = true;
                         continue; // delete node
                     }
 
-                    if (node.SurfaceDistance.ToUpper > LocalAdditionLimit * node.SurfaceDistance.ToLower || node.SurfaceDistance.ToUpper > maxDistance)
+                    if (
+                        node.SurfaceDistance.ToUpper
+                            > LocalAdditionLimit * node.SurfaceDistance.ToLower
+                        || node.SurfaceDistance.ToUpper > maxDistance
+                    )
                     {
                         var newNode = new ParticleNode(
                             Guid.NewGuid(),
