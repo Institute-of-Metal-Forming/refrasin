@@ -1,3 +1,4 @@
+using System.Text;
 using RefraSin.Compaction.ParticleModel;
 using RefraSin.Coordinates.Absolute;
 using RefraSin.ParticleModel.Nodes;
@@ -20,7 +21,7 @@ public class OneByOneCompactionStep(
 
     public double StepDistance { get; } = stepDistance;
 
-    public double MinimumIntrusion { get; } =  minimumIntrusion;
+    public double MinimumIntrusion { get; } = minimumIntrusion;
 
     public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(
         ISystemState<IParticle<IParticleNode>, IParticleNode> inputState
@@ -48,17 +49,23 @@ public class OneByOneCompactionStep(
 
                 if (contacts.Count(t => t.intersects) >= (immobileParticles.Count > 1 ? 2 : 1))
                 {
-                    logger.Information("Contact created with {Count}/{Required} particles.", contacts.Count(t => t.intersects), (immobileParticles.Count > 1 ? 2 : 1));
+                    logger.Information(
+                        "Contact created with {Count}/{Required} particles.",
+                        contacts.Count(t => t.intersects),
+                        (immobileParticles.Count > 1 ? 2 : 1)
+                    );
                     break;
                 }
 
-                var vector = contacts
+                var vectors = contacts
                     .Select(t =>
                         mobileParticle.Coordinates.VectorTo(t.p.Coordinates)
-                        * (t.intersects ? -1 : 1)
-                    )
+                      * (t.intersects ? -0.5 : 1)
+                    ).ToArray();
+                var vector = vectors
                     .Aggregate(new AbsoluteVector(), (v, sum) => sum.Add(v));
 
+                logger.Debug("Move along {Vector} (Components {Components}).", vector, new StringBuilder().AppendJoin(", ", vectors));
                 mobileParticle.MoveBy(vector, StepDistance);
                 ReportSystemState(
                     new SystemState(
@@ -78,7 +85,11 @@ public class OneByOneCompactionStep(
 
             foreach (var p in immobileParticles)
             {
-                logger.Information("Creating grain boundaries between {Mobile} and {Immobile}.", mobileParticle, p);
+                logger.Information(
+                    "Creating grain boundaries between {Mobile} and {Immobile}.",
+                    mobileParticle,
+                    p
+                );
                 mobileParticle.CreateGrainBoundariesAtIntersections(
                     p,
                     (point, particle) => new Node(Guid.NewGuid(), point.Absolute, Neck, particle),
