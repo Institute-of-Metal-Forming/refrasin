@@ -95,6 +95,12 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             );
             i++;
 
+            if (session.Routines.BreakConditions.Any(c => c.IsMet(newState)))
+            {
+                session.Logger.Information("A break condition was met.");
+                break;
+            }
+
             if (i % RemeshingEverySteps == 0)
             {
                 session.CurrentState.Sanitize();
@@ -117,7 +123,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             }
         }
 
-        session.Logger.Information("End time successfully reached after {StepCount} steps.", i);
+        session.Logger.Information("Simulation finished after {StepCount} steps.", i);
     }
 
     private StepVector SolveStepUntilValid(

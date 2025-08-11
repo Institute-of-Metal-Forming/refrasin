@@ -1,5 +1,5 @@
-using System.Diagnostics.SymbolStore;
 using RefraSin.ParticleModel.Remeshing;
+using RefraSin.TEPSolver.BreakConditions;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
@@ -46,6 +46,11 @@ public interface ISolverRoutines
     /// Collection of routines for recovering invalid solution states.
     /// </summary>
     IEnumerable<IStateRecoverer> StateRecoverers { get; }
+
+    /// <summary>
+    /// Collection of routines for checking if simulation shall be aborted.
+    /// </summary>
+    IEnumerable<IBreakCondition> BreakConditions { get; }
 
     /// <summary>
     /// Collection of routines for recovering invalid solution states.

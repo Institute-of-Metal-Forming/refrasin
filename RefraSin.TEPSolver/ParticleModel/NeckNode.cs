@@ -21,9 +21,7 @@ public class NeckNode : ContactNodeBase<NeckNode>
         Guid? contactedNodeId = null,
         Guid? contactedParticleId = null
     )
-        : base(node, particle, contactedNodeId, contactedParticleId)
-    {
-    }
+        : base(node, particle, contactedNodeId, contactedParticleId) { }
 
     private NeckNode(
         Guid id,
@@ -100,6 +98,8 @@ public class NeckNode : ContactNodeBase<NeckNode>
     private void ThrowIfCorruptAdjacients()
     {
         if (Upper.Type == NodeType.Neck || Lower.Type == NodeType.Neck)
-            throw new InvalidOperationException("Neck must have surface or grain boundary adjacent.");
+            throw new InvalidOperationException(
+                "Neck must have surface or grain boundary adjacent."
+            );
     }
 }

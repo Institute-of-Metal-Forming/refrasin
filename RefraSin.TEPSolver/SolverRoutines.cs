@@ -1,6 +1,7 @@
 using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.ParticleModel.Remeshing;
+using RefraSin.TEPSolver.BreakConditions;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.Normalization;
 using RefraSin.TEPSolver.ParticleModel;
@@ -23,6 +24,7 @@ public record SolverRoutines(
     INormalizer Normalizer,
     IStepWidthController StepWidthController,
     IEnumerable<IStateRecoverer> StateRecoverers,
+    IEnumerable<IBreakCondition> BreakConditions,
     IEnumerable<IParticleSystemRemesher> Remeshers,
     IEquationSystemBuilder EquationSystemBuilder
 ) : ISolverRoutines
@@ -37,6 +39,7 @@ public record SolverRoutines(
         new DefaultNormalizer(),
         new MaximumDisplacementAngleStepWidthController(),
         [new StepBackStateRecoverer()],
+        [],
         [new FreeSurfaceRemesher(), new NeckNeighborhoodRemesher()],
         new EquationSystemBuilder()
     );

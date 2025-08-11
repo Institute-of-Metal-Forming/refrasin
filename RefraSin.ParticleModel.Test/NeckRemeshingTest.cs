@@ -74,7 +74,7 @@ public class NeckRemeshingTest
             NodeFactory
         );
 
-        var remesher = new NeckNeighborhoodRemesher(deletionLimit: 0.4);
+        var remesher = new NeckNeighborhoodRemesher();
         var remeshedParticle = remesher.Remesh(particle);
 
         var plot = ParticlePlot.PlotParticle(particle);
