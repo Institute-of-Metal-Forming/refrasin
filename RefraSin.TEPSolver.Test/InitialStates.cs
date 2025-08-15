@@ -18,13 +18,15 @@ public static class InitialStates
     {
         yield return (nameof(OneParticle), OneParticle());
         yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
-        yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
+        // yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
         yield return (nameof(FourParticleRing), FourParticleRing());
         yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
         yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
+        yield return (nameof(Inert3PointBoundary), Inert3PointBoundary());
     }
 
     public static readonly Guid MaterialId = Guid.NewGuid();
+    public static readonly Guid InertMaterialId = Guid.NewGuid();
 
     private static ISystemState<IParticle<IParticleNode>, IParticleNode> OneParticle()
     {
@@ -71,7 +73,35 @@ public static class InitialStates
         ).GetParticle();
 
         var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
-        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6).Solve(
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
+            initialState
+        );
+
+        return compactedState;
+    }
+
+    private static ISystemState<IParticle<IParticleNode>, IParticleNode> Inert3PointBoundary()
+    {
+        var nodeCountPerParticle = 50;
+
+        var particle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            MaterialId,
+            (0, 0),
+            0,
+            nodeCountPerParticle,
+            100e-6
+        ).GetParticle();
+
+        var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            InertMaterialId,
+            (300e-6, 0),
+            Angle.Half,
+            nodeCountPerParticle,
+            100e-6
+        ).GetParticle();
+
+        var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
             initialState
         );
 
@@ -105,11 +135,9 @@ public static class InitialStates
         ).GetParticle();
 
         var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2]);
-        var compactedState = new FocalCompactionStep(
-            new AbsolutePoint(0, 0),
-            8e-6,
-            minimumRelativeIntrusion: 0.9
-        ).Solve(initialState);
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
+            initialState
+        );
 
         var remeshedState = new GrainBoundaryRemesher(-0.1).RemeshSystem(compactedState);
 
@@ -169,7 +197,7 @@ public static class InitialStates
             0,
             [particle1, particle2, particle3, particle4]
         );
-        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6).Solve(
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
             initialState
         );
 
@@ -205,7 +233,7 @@ public static class InitialStates
         ).GetParticle();
 
         var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2, particle3]);
-        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 5e-6).Solve(
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
             initialState
         );
 
@@ -241,7 +269,7 @@ public static class InitialStates
         ).GetParticle();
 
         var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2, particle3]);
-        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6).Solve(
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
             initialState
         );
 

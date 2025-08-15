@@ -84,12 +84,12 @@ public class OneByOneCompactionTests(IEnumerable<Particle<ParticleNode>> particl
     }
 
     [Test]
-    // [TestCase(0.01)]
+    [TestCase(0.01)]
     [TestCase(0.05)]
-    // [TestCase(0.10)]
+    [TestCase(0.10)]
     public void TestCompaction(double stepSize)
     {
-        var compactor = new OneByOneCompactionStep(stepSize, maxStepCount: 10000);
+        var compactor = new OneByOneCompactionStep(stepSize, stepSize / 2, maxStepCount: 10000);
         var storage = new InMemorySolutionStorage();
         compactor.UseStorage(storage);
         var sol = compactor.Solve(_system);

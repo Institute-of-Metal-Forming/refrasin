@@ -19,7 +19,7 @@ public class ProcessPlotTests
 
     public ProcessPlotTests()
     {
-        var compactor = new FocalCompactionStep(new AbsolutePoint(0, 0), 0.05);
+        var compactor = new FocalCompactionStep(new AbsolutePoint(0, 0), 0.05, 0.03);
 
         _id1 = Guid.NewGuid();
         _id2 = Guid.NewGuid();

@@ -43,7 +43,7 @@ public class SimulationTest
         var plotHandler = new PlotEventHandler(_tempDir);
         solver.SessionInitialized += plotHandler.Handle;
 
-        _sinteringProcess = new SinteringStep(Conditions, solver, [Material]);
+        _sinteringProcess = new SinteringStep(Conditions, solver, [Material, InertMaterial]);
         _sinteringProcess.UseStorage(_solutionStorage);
         _sinteringProcess.UseStorage(
             new ParquetStorage.ParquetStorage(Path.Combine(_tempDir, "results.parquet"))
@@ -66,6 +66,19 @@ public class SimulationTest
         new Dictionary<Guid, IInterfaceProperties>
         {
             { InitialStates.MaterialId, new InterfaceProperties(1.65e-14, 0.5) },
+            { InitialStates.InertMaterialId, new InterfaceProperties(1.65e-14, 0.5) },
+        }
+    );
+
+    private static readonly IParticleMaterial InertMaterial = new ParticleMaterial(
+        InitialStates.InertMaterialId,
+        "inert",
+        SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
+        new InterfaceProperties(1.65e-14 / 1e3, 0.9),
+        new Dictionary<Guid, IInterfaceProperties>
+        {
+            { InitialStates.MaterialId, new InterfaceProperties(1.65e-14 / 1e3, 0.5) },
+            { InitialStates.InertMaterialId, new InterfaceProperties(1.65e-14 / 1e3, 0.5) },
         }
     );
 
