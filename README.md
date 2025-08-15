@@ -1,7 +1,8 @@
 # RefraSin
 
-Programm zur Simulation von Sintervorgängen nichtidealer Teilchen und mehrphasiger Zusammensetzung.
+Library for simulation of sintering processes.
 
-`RefraSin.Core` ist die Kernbibliothek des Programms.
-
-`RefraSin.CLI` ist ein einfaches Kommandozeileninterface zur Benutzung der Bibliothek.
+> [!NOTE]
+> Details on the approach and theoretical background are to be published
+> soon as doctoral thesis of M.~Weiner and accompanying journal papers.
+> This note will be updated as soon as the respective documents are published.
