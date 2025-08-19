@@ -81,7 +81,13 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             );
             var newState = session.CurrentState.ApplyTimeStep(stepVector, timeStepWidth);
 
-            InvokeStepSuccessfullyCalculated(session, session.CurrentState, newState, stepVector);
+            InvokeStepSuccessfullyCalculated(
+                session,
+                session.CurrentState,
+                newState,
+                stepVector,
+                timeStepWidth
+            );
 
             session.CurrentState = newState;
             session.ReportCurrentState(stepVector);
@@ -217,12 +223,19 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         SolverSession solverSession,
         SolutionState oldState,
         SolutionState newState,
-        StepVector stepVector
+        StepVector stepVector,
+        double timeStepWidth
     )
     {
         StepSuccessfullyCalculated?.Invoke(
             this,
-            new StepSuccessfullyCalculatedEventArgs(solverSession, oldState, newState, stepVector)
+            new StepSuccessfullyCalculatedEventArgs(
+                solverSession,
+                oldState,
+                newState,
+                stepVector,
+                timeStepWidth
+            )
         );
     }
 
@@ -248,13 +261,15 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
         ISolverSession solverSession,
         SolutionState oldState,
         SolutionState newState,
-        StepVector stepVector
+        StepVector stepVector,
+        double timeStepWidth
     ) : EventArgs
     {
         public ISolverSession SolverSession { get; } = solverSession;
         public SolutionState OldState { get; } = oldState;
         public SolutionState NewState { get; } = newState;
         public StepVector StepVector { get; } = stepVector;
+        public double TimeStepWidth { get; } = timeStepWidth;
     }
 
     public class StepRejectedEventArgs(

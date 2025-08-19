@@ -57,5 +57,7 @@ public record SolverRoutines(
             validator.RegisterWithSolver(solver);
         foreach (var recoverer in StateRecoverers)
             recoverer.RegisterWithSolver(solver);
+        foreach (var condition in BreakConditions)
+            condition.RegisterWithSolver(solver);
     }
 }

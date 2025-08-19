@@ -6,7 +6,7 @@ using Log = Serilog.Log;
 
 namespace RefraSin.ParticleModel.Remeshing;
 
-public class LastSurfaceNodeRemesher(double asymmetryLimit = 0.05) : IParticleRemesher
+public class LastSurfaceNodeRemesher(double asymmetryLimit = 10) : IParticleRemesher
 {
     public double AsymmetryLimit { get; } = asymmetryLimit;
 
@@ -42,10 +42,10 @@ public class LastSurfaceNodeRemesher(double asymmetryLimit = 0.05) : IParticleRe
             {
                 var asymmetryRatio = node.SurfaceDistance.ToUpper / node.SurfaceDistance.ToLower;
 
-                if (asymmetryRatio > 1)
+                if (asymmetryRatio < 1)
                     asymmetryRatio = 1 / asymmetryRatio;
 
-                if (asymmetryRatio < AsymmetryLimit)
+                if (asymmetryRatio > AsymmetryLimit)
                 {
                     var newNode = new ParticleNode(
                         Guid.NewGuid(),

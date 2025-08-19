@@ -159,9 +159,9 @@ public static class ParticleIntersectionExtensions
                 var intersectionSelfsPolar = new PolarPoint(intersection, self);
                 var intersectionOthersPolar = new PolarPoint(intersection, other);
                 if (
-                    intersectionSelfsPolar.Phi < selfUpperNode.Coordinates.Phi
-                    && intersectionOthersPolar.Phi < otherUpperNode.Coordinates.Phi
-                    && intersectionOthersPolar.Phi > otherUpperNode.Lower.Coordinates.Phi
+                    intersectionSelfsPolar.Phi <= selfUpperNode.Coordinates.Phi
+                    && intersectionOthersPolar.Phi <= otherUpperNode.Coordinates.Phi
+                    && intersectionOthersPolar.Phi >= otherUpperNode.Lower.Coordinates.Phi
                 )
                     return intersectionSelfsPolar;
             }
