@@ -60,7 +60,7 @@ public class OneByOneCompactionStep(
                 var vectors = contacts
                     .Select(t =>
                         mobileParticle.Coordinates.VectorTo(t.p.Coordinates)
-                        * (t.intersects ? -0.5 : 1)
+                        * (t.intersects ? -0.99 : 1)
                     )
                     .ToArray();
                 var vector = vectors.Aggregate(new AbsoluteVector(), (v, sum) => sum.Add(v));
