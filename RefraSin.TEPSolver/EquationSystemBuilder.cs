@@ -44,6 +44,19 @@ public class EquationSystemBuilder : IEquationSystemBuilder
                 yield return new FluxToUpper(node);
                 yield return new VolumeBalanceConstraint(node);
             }
+
+            foreach (var pore in solutionState.Pores)
+            {
+                yield return new PoreDensity(pore);
+                yield return new PorePressure(pore);
+                yield return new PoreMassBalanceConstraint(pore);
+                yield return new MatrixPoreViscoElasticMaterialConstraint(pore);
+
+                foreach (var node in pore.Nodes)
+                {
+                    yield return new FluxToPore(node);
+                }
+            }
         }
 
         foreach (var nodeContact in solutionState.NodeContacts)
