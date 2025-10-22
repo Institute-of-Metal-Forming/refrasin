@@ -33,6 +33,7 @@ public class Particle : IParticle<NodeBase>
             conditions.Temperature * conditions.GasConstant / (material.Substance.MolarVolume);
 
         SurfaceProperties = material.Surface;
+        SubstanceProperties = material.Substance;
         InterfaceProperties = material.Interfaces;
 
         _nodes = particle
@@ -59,6 +60,7 @@ public class Particle : IParticle<NodeBase>
         MaterialId = previousState.MaterialId;
         VacancyVolumeEnergy = previousState.VacancyVolumeEnergy;
         SurfaceProperties = previousState.SurfaceProperties;
+        SubstanceProperties = previousState.SubstanceProperties;
         InterfaceProperties = previousState.InterfaceProperties;
 
         SolutionState = solutionState;
@@ -85,6 +87,8 @@ public class Particle : IParticle<NodeBase>
     public Guid MaterialId { get; }
 
     public IInterfaceProperties SurfaceProperties { get; }
+
+    public ISubstanceProperties SubstanceProperties { get; }
 
     /// <summary>
     /// Dictionary of material IDs to material interface data, assuming that the current instances material is always on the from side.

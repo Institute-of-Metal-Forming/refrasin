@@ -35,11 +35,21 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>
     /// <inheritdoc />
     public override NodeType Type => NodeType.GrainBoundary;
 
+    /// <summary>
+    /// Properties of the interface between two materials.
+    /// </summary>
+    public IInterfaceProperties GrainBoundaryProperties =>
+        _grainBoundaryProperties ??= Particle.InterfaceProperties[
+            ContactedNode.Particle.MaterialId
+        ];
+
+    private IInterfaceProperties? _grainBoundaryProperties;
+
     /// <inheritdoc />
     public override ToUpperToLower<double> InterfaceEnergy =>
         _interfaceEnergy ??= new ToUpperToLower<double>(
-            InterfaceProperties.Energy,
-            InterfaceProperties.Energy
+            GrainBoundaryProperties.Energy,
+            GrainBoundaryProperties.Energy
         );
 
     private ToUpperToLower<double>? _interfaceEnergy;
@@ -47,11 +57,19 @@ public class GrainBoundaryNode : ContactNodeBase<GrainBoundaryNode>
     /// <inheritdoc />
     public override ToUpperToLower<double> InterfaceDiffusionCoefficient =>
         _interfaceDiffusionCoefficient ??= new ToUpperToLower<double>(
-            InterfaceProperties.DiffusionCoefficient,
-            InterfaceProperties.DiffusionCoefficient
+            GrainBoundaryProperties.DiffusionCoefficient,
+            GrainBoundaryProperties.DiffusionCoefficient
         );
 
     private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
+
+    public override ToUpperToLower<double> InterfaceTransferCoefficient =>
+        _interfaceTransferCoefficient ??= new ToUpperToLower<double>(
+            GrainBoundaryProperties.TransferCoefficient,
+            GrainBoundaryProperties.TransferCoefficient
+        );
+
+    private ToUpperToLower<double>? _interfaceTransferCoefficient;
 
     /// <inheritdoc />
     public override NodeBase ApplyTimeStep(

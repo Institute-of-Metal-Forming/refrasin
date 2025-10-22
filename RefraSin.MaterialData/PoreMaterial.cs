@@ -1,7 +1,7 @@
 namespace RefraSin.MaterialData;
 
-public record MatrixMaterial(
+public record PoreMaterial(
     Guid Id,
     ISubstanceProperties Substance,
     IViscoElasticProperties ViscoElastic
-) : IMatrixMaterial { }
+) : IPoreMaterial { }

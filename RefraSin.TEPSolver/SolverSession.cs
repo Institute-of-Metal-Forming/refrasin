@@ -35,10 +35,13 @@ internal class SolverSession : ISolverSession
         _reportSystemState = step.ReportSystemState;
 
         Materials = step.Materials.Select(m => Norm.NormalizeMaterial(m)).ToArray();
+        PoreMaterial = step.PoreMaterial is null
+            ? null
+            : Norm.NormalizePoreMaterial(step.PoreMaterial);
 
         Routines = sinteringSolver.Routines;
 
-        CurrentState = new SolutionState(normalizedState, Materials, step);
+        CurrentState = new SolutionState(normalizedState, Materials, step, PoreMaterial);
         CurrentState.Sanitize();
         Logger = Log.ForContext<SinteringSolver>();
     }
@@ -56,9 +59,10 @@ internal class SolverSession : ISolverSession
         _reportSystemState = parentSession._reportSystemState;
 
         Materials = parentSession.Materials;
+        PoreMaterial = parentSession.PoreMaterial;
         Routines = parentSession.Routines;
 
-        CurrentState = new SolutionState(inputState, Materials, this);
+        CurrentState = new SolutionState(inputState, Materials, this, PoreMaterial);
         CurrentState.Sanitize();
         Logger = parentSession.Logger;
     }
@@ -82,6 +86,8 @@ internal class SolverSession : ISolverSession
     public SolutionState CurrentState { get; set; }
 
     public IReadOnlyList<IParticleMaterial> Materials { get; }
+
+    public IPoreMaterial? PoreMaterial { get; set; }
 
     /// <inheritdoc />
     public ISolverRoutines Routines { get; }

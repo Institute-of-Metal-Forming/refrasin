@@ -2,6 +2,7 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes.Extensions;
 using RefraSin.ParticleModel.Pores;
+using RefraSin.ParticleModel.Pores.Extensions;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
@@ -15,7 +16,8 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     public SolutionState(
         ISystemState state,
         IEnumerable<IParticleMaterial> materials,
-        ISinteringConditions conditions
+        ISinteringConditions conditions,
+        IPoreMaterial? poreMaterial
     )
     {
         Time = state.Time;
@@ -36,21 +38,36 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             ))
             .ToReadOnlyVertexCollection();
 
-        Pores = state
+        if (
+            state
             is IParticleSystemWithPores<
                 IParticle<IParticleNode>,
                 IParticleNode,
                 IPoreState<IParticleNode>
             > withPores
-            ? withPores
-                .Pores.Select(p => new Pore(
-                    p.Id,
-                    p.Nodes.Select(n => Nodes[n.Id]),
-                    p.RelativeDensity,
-                    p.Pressure
+        )
+        {
+            if (poreMaterial is null)
+                throw new ArgumentNullException(
+                    nameof(poreMaterial),
+                    "If a state with pores is passed, a pore material is required, too."
+                );
+
+            Pores = withPores
+                .Pores.Zip(withPores.Pores.UpdatePores<IPore<IParticleNode>, IParticleNode>(Nodes))
+                .Select(t => new Pore(
+                    t.Second,
+                    this,
+                    t.First.Density,
+                    t.First.Pressure,
+                    poreMaterial
                 ))
-                .ToReadOnlyVertexCollection()
-            : ReadOnlyVertexCollection<Pore>.Empty;
+                .ToReadOnlyVertexCollection();
+        }
+        else
+        {
+            Pores = ReadOnlyVertexCollection<Pore>.Empty;
+        }
     }
 
     private SolutionState(SolutionState oldState, StepVector stepVector, double timeStepWidth)
@@ -79,7 +96,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
             ))
             .ToReadOnlyVertexCollection();
         Pores = oldState
-            .Pores.Select(p => p.ApplyTimeStep(Nodes, stepVector, timeStepWidth))
+            .Pores.Select(p => p.ApplyTimeStep(this, stepVector, timeStepWidth))
             .ToReadOnlyVertexCollection();
     }
 

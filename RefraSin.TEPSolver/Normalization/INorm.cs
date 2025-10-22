@@ -6,7 +6,6 @@ using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
-using static System.Double;
 
 namespace RefraSin.TEPSolver.Normalization;
 
@@ -65,6 +64,14 @@ public interface INorm
             substanceProperties.MolarMass / Mass * Substance
         );
 
+    public IViscoElasticProperties NormalizeViscoElasticProperties(
+        IViscoElasticProperties viscoElasticProperties
+    ) =>
+        new ViscoElasticProperties(
+            viscoElasticProperties.CompressionModulus / Mass * Pow(Time, 2) * Length,
+            viscoElasticProperties.VolumeViscosity / Mass * Time * Length
+        );
+
     public IParticleMaterial NormalizeMaterial(IParticleMaterial material) =>
         new ParticleMaterial(
             material.Id,
@@ -75,6 +82,13 @@ public interface INorm
                 kv => kv.Key,
                 kv => NormalizeInterfaceProperties(kv.Value)
             )
+        );
+
+    public IPoreMaterial NormalizePoreMaterial(IPoreMaterial material) =>
+        new PoreMaterial(
+            material.Id,
+            NormalizeSubstanceProperties(material.Substance),
+            NormalizeViscoElasticProperties(material.ViscoElastic)
         );
 
     public ISinteringConditions NormalizeConditions(ISinteringConditions conditions) =>

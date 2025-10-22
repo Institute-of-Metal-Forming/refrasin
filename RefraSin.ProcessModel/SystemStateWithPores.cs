@@ -1,6 +1,8 @@
 using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Pores;
+using RefraSin.ParticleModel.Pores.Extensions;
 using RefraSin.ParticleModel.System;
+using RefraSin.Vertex;
 
 namespace RefraSin.ProcessModel;
 

@@ -41,6 +41,15 @@ public class SurfaceNode : NodeBase
     private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
 
     /// <inheritdoc />
+    public override ToUpperToLower<double> InterfaceTransferCoefficient =>
+        _interfaceTransferCoefficient ??= new ToUpperToLower<double>(
+            Particle.SurfaceProperties.TransferCoefficient,
+            Particle.SurfaceProperties.TransferCoefficient
+        );
+
+    private ToUpperToLower<double>? _interfaceTransferCoefficient;
+
+    /// <inheritdoc />
     public override NodeBase ApplyTimeStep(
         StepVector stepVector,
         double timeStepWidth,

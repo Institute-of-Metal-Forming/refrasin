@@ -1,48 +1,62 @@
-using RefraSin.ParticleModel.Collections;
+using RefraSin.MaterialData;
 using RefraSin.ParticleModel.Pores;
 using RefraSin.ParticleModel.Pores.Extensions;
+using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.StepVectors;
+using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
 public class Pore : IPore<NodeBase>, IPoreDensity, IPorePressure
 {
-    public Pore(Guid id, IEnumerable<NodeBase> nodes, double density, double pressure)
+    public Pore(
+        IPore<INode> pore,
+        SolutionState solutionState,
+        double density,
+        double pressure,
+        IPoreMaterial poreMaterial
+    )
     {
-        Id = id;
-        Nodes = nodes.ToReadOnlyVertexCollection();
-        RelativeDensity = density;
+        Id = pore.Id;
+        Nodes = pore.Nodes.Select(n => solutionState.Nodes[n.Id]).ToReadOnlyVertexCollection();
+        Density = density;
         Pressure = pressure;
         Volume = this.Volume<Pore, NodeBase>();
+        PoreMaterial = poreMaterial;
     }
 
     private Pore(
+        SolutionState solutionState,
         Pore previousState,
-        IReadOnlyVertexCollection<NodeBase> allNewNodes,
         StepVector stepVector,
         double timeStepWidth
     )
     {
         Id = previousState.Id;
-        Nodes = previousState.Nodes.Select(n => allNewNodes[n.Id]).ToReadOnlyVertexCollection();
-        RelativeDensity =
-            previousState.RelativeDensity
-            + stepVector.ItemValue<MatrixPoreDensity>(previousState) * timeStepWidth;
+        Nodes = previousState
+            .Nodes.Select(n => solutionState.Nodes[n.Id])
+            .ToReadOnlyVertexCollection();
+        Density =
+            previousState.Density
+            + stepVector.ItemValue<PoreDensity>(previousState) * timeStepWidth;
         Pressure =
             previousState.Pressure
-            + stepVector.ItemValue<MatrixPorePressure>(previousState) * timeStepWidth;
+            + stepVector.ItemValue<PorePressure>(previousState) * timeStepWidth;
+        PoreMaterial = previousState.PoreMaterial;
     }
 
     public Guid Id { get; }
     public IReadOnlyVertexCollection<NodeBase> Nodes { get; }
     public double Volume { get; }
-    public double RelativeDensity { get; }
+    public double Density { get; }
     public double Pressure { get; }
 
+    public IPoreMaterial PoreMaterial { get; }
+
     public Pore ApplyTimeStep(
-        IReadOnlyVertexCollection<NodeBase> allNewNodes,
+        SolutionState solutionState,
         StepVector stepVector,
         double timeStepWidth
-    ) => new(this, allNewNodes, stepVector, timeStepWidth);
+    ) => new(solutionState, this, stepVector, timeStepWidth);
 }

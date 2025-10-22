@@ -10,4 +10,6 @@ public interface ISinteringStep : IProcessStep, ISinteringConditions
     public IProcessStepSolver<ISinteringStep> Solver { get; }
 
     public IReadOnlyList<IParticleMaterial> Materials { get; }
+
+    public IPoreMaterial? PoreMaterial { get; }
 }

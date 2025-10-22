@@ -66,6 +66,21 @@ public class NeckNode : ContactNodeBase<NeckNode>
     private ToUpperToLower<double>? _interfaceDiffusionCoefficient;
 
     /// <inheritdoc />
+    public override ToUpperToLower<double> InterfaceTransferCoefficient
+    {
+        get
+        {
+            ThrowIfCorruptAdjacients();
+            return _interfaceTransferCoefficient ??= new ToUpperToLower<double>(
+                Upper.InterfaceTransferCoefficient.ToLower,
+                Lower.InterfaceTransferCoefficient.ToUpper
+            );
+        }
+    }
+
+    private ToUpperToLower<double>? _interfaceTransferCoefficient;
+
+    /// <inheritdoc />
     public override NodeBase ApplyTimeStep(
         StepVector stepVector,
         double timeStepWidth,
