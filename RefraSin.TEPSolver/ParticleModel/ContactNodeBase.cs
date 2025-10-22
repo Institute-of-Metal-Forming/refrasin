@@ -40,14 +40,6 @@ public abstract class ContactNodeBase<TContacted> : ContactNodeBase
             );
 
     private TContacted? _contactedNode;
-
-    /// <summary>
-    /// Properties of the interface between two materials.
-    /// </summary>
-    public IInterfaceProperties InterfaceProperties =>
-        _materialInterface ??= Particle.InterfaceProperties[ContactedNode.Particle.MaterialId];
-
-    private IInterfaceProperties? _materialInterface;
 }
 
 /// <summary>

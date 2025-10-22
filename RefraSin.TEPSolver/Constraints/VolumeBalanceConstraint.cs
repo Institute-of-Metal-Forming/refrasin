@@ -15,7 +15,12 @@ public class VolumeBalanceConstraint(NodeBase node) : INodeItem, IConstraint
             : 0;
         var fluxTerm =
             -stepVector.ItemValue<FluxToUpper>(Node)
-            + stepVector.ItemValue<FluxToUpper>(Node.Lower);
+            + stepVector.ItemValue<FluxToUpper>(Node.Lower)
+            - (
+                stepVector.StepVectorMap.HasItem<FluxToPore>(Node)
+                    ? stepVector.ItemValue<FluxToPore>(Node)
+                    : 0
+            );
 
         return normalVolumeTerm + tangentialVolumeTerm - fluxTerm;
     }

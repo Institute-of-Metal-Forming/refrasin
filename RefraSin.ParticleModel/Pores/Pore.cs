@@ -1,6 +1,6 @@
-using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Pores.Extensions;
+using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.Pores;
 

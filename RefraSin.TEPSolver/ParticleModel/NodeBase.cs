@@ -1,12 +1,8 @@
 using System.Globalization;
 using RefraSin.Coordinates;
-using RefraSin.Coordinates.Polar;
 using RefraSin.ParticleModel;
-using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Nodes.Extensions;
-using RefraSin.ParticleModel.Particles;
 using RefraSin.TEPSolver.StepVectors;
-using static System.Math;
 using static RefraSin.Coordinates.Angle.ReductionDomain;
 
 namespace RefraSin.TEPSolver.ParticleModel;
@@ -128,6 +124,9 @@ public abstract class NodeBase : IParticleNode, INodeGradients, INodeMaterialPro
 
     /// <inheritdoc />
     public abstract ToUpperToLower<double> InterfaceDiffusionCoefficient { get; }
+
+    /// <inheritdoc />
+    public abstract ToUpperToLower<double> InterfaceTransferCoefficient { get; }
 
     /// <inheritdoc />
     public NormalTangential<double> GibbsEnergyGradient =>

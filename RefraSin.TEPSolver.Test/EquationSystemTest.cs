@@ -49,7 +49,8 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         var solutionState = new SolutionState(
             normalizedState,
             [normalizedMaterial],
-            normalizedConditions
+            normalizedConditions,
+            null
         );
         var equationSystem = SolverRoutines.Default.EquationSystemBuilder.Build(solutionState);
         var stepVector = new StepEstimator().EstimateStep(equationSystem);

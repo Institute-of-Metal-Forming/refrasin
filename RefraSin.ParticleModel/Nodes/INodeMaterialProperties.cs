@@ -11,4 +11,9 @@ public interface INodeMaterialProperties
     /// Diffusion coefficient at the surface lines to the neighbor nodes.
     /// </summary>
     public ToUpperToLower<double> InterfaceDiffusionCoefficient { get; }
+
+    /// <summary>
+    /// Transfer coefficient cross the surface lines to the environment (other particle or pore).
+    /// </summary>
+    public ToUpperToLower<double> InterfaceTransferCoefficient { get; }
 }

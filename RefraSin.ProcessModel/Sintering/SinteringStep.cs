@@ -15,12 +15,14 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
     /// <param name="solver">the solver to use</param>
     /// <param name="gasConstant">value of the universal gas constant</param>
     /// <param name="materials"></param>
+    /// <param name="poreMaterial"></param>
     public SinteringStep(
         double duration,
         double temperature,
         IProcessStepSolver<ISinteringStep> solver,
         IReadOnlyList<IParticleMaterial> materials,
-        double gasConstant = 8.31446261815324
+        double gasConstant = 8.31446261815324,
+        IPoreMaterial? poreMaterial = null
     )
     {
         Duration = duration;
@@ -29,12 +31,14 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
         Materials = materials;
         Temperature = temperature;
         GasConstant = gasConstant;
+        PoreMaterial = poreMaterial;
     }
 
     public SinteringStep(
         ISinteringConditions conditions,
         IProcessStepSolver<ISinteringStep> solver,
-        IReadOnlyList<IParticleMaterial> materials
+        IReadOnlyList<IParticleMaterial> materials,
+        IPoreMaterial? poreMaterial = null
     )
     {
         Duration = conditions.Duration;
@@ -43,6 +47,7 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
         Materials = materials;
         Temperature = conditions.Temperature;
         GasConstant = conditions.GasConstant;
+        PoreMaterial = poreMaterial;
     }
 
     /// <summary>
@@ -61,6 +66,8 @@ public class SinteringStep : ProcessStepBase, ISinteringStep
 
     /// <inheritdoc />
     public IReadOnlyList<IParticleMaterial> Materials { get; }
+
+    public IPoreMaterial? PoreMaterial { get; }
 
     /// <inheritdoc />
     public override ISystemState<IParticle<IParticleNode>, IParticleNode> Solve(

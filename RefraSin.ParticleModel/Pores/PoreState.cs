@@ -10,7 +10,7 @@ public class PoreState<TNode>(
 ) : Pore<TNode>(id, nodes), IPoreDensity, IPorePressure
     where TNode : INode
 {
-    public double RelativeDensity { get; } = relativeDensity;
+    public double Density { get; } = relativeDensity;
 
     public double Pressure { get; } = pressure;
 }

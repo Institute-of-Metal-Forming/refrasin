@@ -1,7 +1,7 @@
-using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Pores;
+using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.System;
 
