@@ -13,14 +13,14 @@ public class Pore : IPore<NodeBase>, IPoreDensity, IPorePressure
     public Pore(
         IPore<INode> pore,
         SolutionState solutionState,
-        double density,
+        double relativeDensity,
         double pressure,
         IPoreMaterial poreMaterial
     )
     {
         Id = pore.Id;
         Nodes = pore.Nodes.Select(n => solutionState.Nodes[n.Id]).ToReadOnlyVertexCollection();
-        Density = density;
+        RelativeDensity = relativeDensity;
         Pressure = pressure;
         Volume = this.Volume<Pore, NodeBase>();
         PoreMaterial = poreMaterial;
@@ -37,19 +37,20 @@ public class Pore : IPore<NodeBase>, IPoreDensity, IPorePressure
         Nodes = previousState
             .Nodes.Select(n => solutionState.Nodes[n.Id])
             .ToReadOnlyVertexCollection();
-        Density =
-            previousState.Density
+        RelativeDensity =
+            previousState.RelativeDensity
             + stepVector.ItemValue<PoreDensity>(previousState) * timeStepWidth;
         Pressure =
             previousState.Pressure
             + stepVector.ItemValue<PorePressure>(previousState) * timeStepWidth;
         PoreMaterial = previousState.PoreMaterial;
+        Volume = this.Volume<Pore, NodeBase>();
     }
 
     public Guid Id { get; }
     public IReadOnlyVertexCollection<NodeBase> Nodes { get; }
     public double Volume { get; }
-    public double Density { get; }
+    public double RelativeDensity { get; }
     public double Pressure { get; }
 
     public IPoreMaterial PoreMaterial { get; }

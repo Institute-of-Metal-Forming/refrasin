@@ -9,7 +9,7 @@ public interface IParticleSystemWithPores<out TParticle, out TNode, out TPore>
     : IParticleSystem<TParticle, TNode>
     where TParticle : IParticle<TNode>
     where TNode : IParticleNode
-    where TPore : IPore<TNode>, IPoreDensity, IPorePressure
+    where TPore : IPore<TNode>
 {
     IReadOnlyVertexCollection<TPore> Pores { get; }
 }

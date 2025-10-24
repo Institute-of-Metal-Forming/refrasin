@@ -5,7 +5,8 @@ namespace RefraSin.TEPSolver.Quantities;
 
 public class PoreDensity(Pore pore) : IPoreItem, IStateVelocity
 {
-    public double DrivingForce(StepVector stepVector) => -Pore.Pressure / Pore.Density;
+    public double DrivingForce(StepVector stepVector) =>
+        -Pore.Pressure / Pore.RelativeDensity * Pore.Volume;
 
     public Pore Pore { get; } = pore;
 

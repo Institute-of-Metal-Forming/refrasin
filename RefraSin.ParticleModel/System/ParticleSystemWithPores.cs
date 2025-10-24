@@ -5,13 +5,17 @@ using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.System;
 
-public class ParticleSystemWithPores<TParticle, TNode, TPore>(
-    IEnumerable<TParticle> particles,
-    IEnumerable<TPore> pores
-) : ParticleSystem<TParticle, TNode>(particles), IParticleSystemWithPores<TParticle, TNode, TPore>
+public record ParticleSystemWithPores<TParticle, TNode, TPore>(
+    IReadOnlyVertexCollection<TParticle> Particles,
+    IReadOnlyVertexCollection<TPore> Pores
+) : ParticleSystem<TParticle, TNode>(Particles), IParticleSystemWithPores<TParticle, TNode, TPore>
     where TParticle : IParticle<TNode>
     where TNode : IParticleNode
-    where TPore : IPore<TNode>, IPoreDensity, IPorePressure
+    where TPore : IPore<TNode>
 {
-    public IReadOnlyVertexCollection<TPore> Pores { get; } = pores.ToReadOnlyVertexCollection();
+    public ParticleSystemWithPores(IParticleSystemWithPores<TParticle, TNode, TPore> system)
+        : this(system.Particles, system.Pores) { }
+
+    public ParticleSystemWithPores(IEnumerable<TParticle> particles, IEnumerable<TPore> pores)
+        : this(particles.ToReadOnlyVertexCollection(), pores.ToReadOnlyVertexCollection()) { }
 }

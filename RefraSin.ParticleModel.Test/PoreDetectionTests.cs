@@ -90,12 +90,9 @@ public class PoreDetectionTests(
             .Particles.DetectPores<IParticle<IParticleNode>, IParticleNode>()
             .ToArray();
 
-        Assert.That(pores, Has.Length.EqualTo(poreCount + 1));
-
         var poresWithout = pores
             .WithoutOuterSurface<IPore<IParticleNode>, IParticleNode>()
             .ToArray();
-        Assert.That(poresWithout, Has.Length.EqualTo(poreCount));
 
         var particlePlot = ParticlePlot.PlotParticles<IParticle<IParticleNode>, IParticleNode>(
             system.Particles
@@ -116,5 +113,9 @@ public class PoreDetectionTests(
         );
         plot.SaveHtml(path);
         TestContext.WriteLine($"file://{path}");
+
+        Assert.That(pores, Has.Length.EqualTo(poreCount + 1));
+        Assert.That(poresWithout, Has.Length.EqualTo(poreCount));
+        Assert.That(poresWithout.Select(p => p.Volume), Is.All.Positive);
     }
 }

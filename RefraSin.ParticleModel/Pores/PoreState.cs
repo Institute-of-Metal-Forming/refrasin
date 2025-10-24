@@ -7,10 +7,10 @@ public class PoreState<TNode>(
     IEnumerable<TNode> nodes,
     double relativeDensity,
     double pressure = 0
-) : Pore<TNode>(id, nodes), IPoreDensity, IPorePressure
+) : Pore<TNode>(id, nodes), IPoreState<TNode>
     where TNode : INode
 {
-    public double Density { get; } = relativeDensity;
+    public double RelativeDensity { get; } = relativeDensity;
 
     public double Pressure { get; } = pressure;
 }

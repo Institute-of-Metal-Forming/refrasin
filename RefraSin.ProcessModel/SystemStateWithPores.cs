@@ -1,10 +1,42 @@
-using RefraSin.ParticleModel.Collections;
 using RefraSin.ParticleModel.Pores;
-using RefraSin.ParticleModel.Pores.Extensions;
 using RefraSin.ParticleModel.System;
 using RefraSin.Vertex;
 
 namespace RefraSin.ProcessModel;
+
+public record SystemStateWithPores<TParticle, TNode, TPore>(
+    Guid Id,
+    double Time,
+    IReadOnlyVertexCollection<TParticle> Particles,
+    IReadOnlyVertexCollection<TPore> Pores
+)
+    : SystemState<TParticle, TNode>(Id, Time, Particles),
+        ISystemStateWithPores<TParticle, TNode, TPore>
+    where TParticle : IParticle<TNode>
+    where TNode : IParticleNode
+    where TPore : IPoreState<TNode>
+{
+    public SystemStateWithPores(
+        Guid id,
+        double time,
+        IParticleSystem<TParticle, TNode> system,
+        IEnumerable<TPore> pores
+    )
+        : this(id, time, system.Particles, pores.ToReadOnlyVertexCollection()) { }
+
+    public SystemStateWithPores(
+        Guid id,
+        double time,
+        IEnumerable<TParticle> particles,
+        IEnumerable<TPore> pores
+    )
+        : this(
+            id,
+            time,
+            new ParticleSystem<TParticle, TNode>(particles),
+            pores.ToReadOnlyVertexCollection()
+        ) { }
+}
 
 public record SystemStateWithPores(
     Guid Id,
@@ -12,8 +44,12 @@ public record SystemStateWithPores(
     IReadOnlyVertexCollection<IParticle<IParticleNode>> Particles,
     IReadOnlyVertexCollection<IPoreState<IParticleNode>> Pores
 )
-    : SystemState(Id, Time, Particles),
-        IParticleSystemWithPores<IParticle<IParticleNode>, IParticleNode, IPoreState<IParticleNode>>
+    : SystemStateWithPores<IParticle<IParticleNode>, IParticleNode, IPoreState<IParticleNode>>(
+        Id,
+        Time,
+        Particles,
+        Pores
+    )
 {
     public SystemStateWithPores(
         Guid id,
