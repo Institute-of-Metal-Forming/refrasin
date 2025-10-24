@@ -4,8 +4,12 @@ using RefraSin.MaterialData;
 using RefraSin.ParticleModel;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.ParticleModel.Pores;
+using RefraSin.ParticleModel.Pores.Extensions;
+using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
+using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.Normalization;
 
@@ -20,11 +24,10 @@ public interface INorm
     public double Area { get; }
     public double Volume { get; }
     public double Energy { get; }
-    public double DiffusionCoefficient { get; }
-    public double InterfaceEnergy { get; }
 
-    public ISystemState NormalizeSystemState(ISystemState state) =>
-        new SystemState(
+    public ISystemState NormalizeSystemState(ISystemState state)
+    {
+        var normalizedState = new SystemState(
             state.Id,
             state.Time,
             state.Particles.Select(p =>
@@ -47,13 +50,45 @@ public interface INorm
             })
         );
 
+        if (
+            state
+            is IParticleSystemWithPores<
+                IParticle<IParticleNode>,
+                IParticleNode,
+                IPoreState<IParticleNode>
+            > withPores
+        )
+        {
+            return new SystemStateWithPores(
+                normalizedState.Id,
+                normalizedState.Time,
+                normalizedState.Particles,
+                withPores
+                    .Pores.Zip(
+                        withPores.Pores.UpdatePores<IPore<IParticleNode>, IParticleNode>(
+                            normalizedState.Nodes
+                        )
+                    )
+                    .Select(t => new PoreState<IParticleNode>(
+                        t.Second.Id,
+                        t.Second.Nodes,
+                        t.First.RelativeDensity,
+                        t.First.Pressure / Mass * Pow(Time, 2) * Length
+                    ))
+                    .ToReadOnlyVertexCollection()
+            );
+        }
+
+        return normalizedState;
+    }
+
     public IInterfaceProperties NormalizeInterfaceProperties(
         IInterfaceProperties interfaceProperties
     ) =>
         new InterfaceProperties(
-            interfaceProperties.DiffusionCoefficient / DiffusionCoefficient,
-            interfaceProperties.Energy / InterfaceEnergy,
-            interfaceProperties.TransferCoefficient / DiffusionCoefficient * Length
+            interfaceProperties.DiffusionCoefficient / Volume * Time,
+            interfaceProperties.Energy / Energy * Area,
+            interfaceProperties.TransferCoefficient / Length * Time
         );
 
     public ISubstanceProperties NormalizeSubstanceProperties(

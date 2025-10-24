@@ -10,7 +10,7 @@ public class PoreMassBalanceConstraint(Pore pore) : IPoreItem, IConstraint
     {
         var densityTerm = Pore.Volume * stepVector.ItemValue<PoreDensity>(Pore);
         var volumeTerm =
-            -Pore.Density
+            -Pore.RelativeDensity
             * (
                 Pore.Nodes.Sum(n =>
                     n.VolumeGradient.Normal * stepVector.ItemValue<NormalDisplacement>(n)
@@ -23,7 +23,11 @@ public class PoreMassBalanceConstraint(Pore pore) : IPoreItem, IConstraint
             );
         var fluxTerm = Pore
             .Nodes.Where(stepVector.StepVectorMap.HasItem<FluxToPore>)
-            .Sum(n => n.Particle.SubstanceProperties.Density * stepVector.ItemValue<FluxToPore>(n));
+            .Sum(n =>
+                n.Particle.SubstanceProperties.Density
+                / Pore.PoreMaterial.Substance.Density
+                * stepVector.ItemValue<FluxToPore>(n)
+            );
 
         return densityTerm + volumeTerm + fluxTerm;
     }
@@ -39,14 +43,14 @@ public class PoreMassBalanceConstraint(Pore pore) : IPoreItem, IConstraint
         {
             yield return (
                 stepVector.StepVectorMap.ItemIndex<NormalDisplacement>(n),
-                -Pore.Density * n.VolumeGradient.Normal
+                -Pore.RelativeDensity * n.VolumeGradient.Normal
             );
 
             if (stepVector.StepVectorMap.HasItem<TangentialDisplacement>(n))
             {
                 yield return (
                     stepVector.StepVectorMap.ItemIndex<TangentialDisplacement>(n),
-                    -Pore.Density * n.VolumeGradient.Tangential
+                    -Pore.RelativeDensity * n.VolumeGradient.Tangential
                 );
             }
 
@@ -54,7 +58,7 @@ public class PoreMassBalanceConstraint(Pore pore) : IPoreItem, IConstraint
             {
                 yield return (
                     stepVector.StepVectorMap.ItemIndex<FluxToPore>(n),
-                    n.Particle.SubstanceProperties.Density
+                    n.Particle.SubstanceProperties.Density / Pore.PoreMaterial.Substance.Density
                 );
             }
         }

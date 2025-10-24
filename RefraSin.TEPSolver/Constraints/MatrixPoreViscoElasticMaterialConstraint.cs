@@ -8,7 +8,7 @@ public class MatrixPoreViscoElasticMaterialConstraint(Pore pore) : IPoreItem, IC
 {
     public double Residual(EquationSystem equationSystem, StepVector stepVector)
     {
-        var densityTerm = stepVector.ItemValue<PoreDensity>(Pore) / Pore.Density;
+        var densityTerm = stepVector.ItemValue<PoreDensity>(Pore) / Pore.RelativeDensity;
         var viscoseTerm = Pore.Pressure / Pore.PoreMaterial.ViscoElastic.VolumeViscosity;
         var elasticTerm =
             stepVector.ItemValue<PorePressure>(Pore)
@@ -22,7 +22,10 @@ public class MatrixPoreViscoElasticMaterialConstraint(Pore pore) : IPoreItem, IC
         StepVector stepVector
     )
     {
-        yield return (stepVector.StepVectorMap.ItemIndex<PoreDensity>(Pore), 1 / Pore.Density);
+        yield return (
+            stepVector.StepVectorMap.ItemIndex<PoreDensity>(Pore),
+            1 / Pore.RelativeDensity
+        );
         yield return (
             stepVector.StepVectorMap.ItemIndex<PorePressure>(Pore),
             1 / Pore.PoreMaterial.ViscoElastic.CompressionModulus

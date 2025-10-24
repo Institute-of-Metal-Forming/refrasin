@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Text;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -29,11 +30,17 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         InitialStates.MaterialId,
         "Al2O3",
         SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
-        new InterfaceProperties(1.65e-14, 0.9),
+        new InterfaceProperties(1.65e-14, 0.9, 1e-6),
         new Dictionary<Guid, IInterfaceProperties>
         {
             { InitialStates.MaterialId, new InterfaceProperties(1.65e-14, 0.5) },
         }
+    );
+
+    private static readonly IPoreMaterial PoreMaterial = new PoreMaterial(
+        Guid.NewGuid(),
+        SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
+        new ViscoElasticProperties(1, 2e6)
     );
 
     // [Test]
@@ -42,6 +49,7 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         var norm = new DefaultNormalizer().GetNorm(state, Conditions, [Material]);
         var normalizedState = norm.NormalizeSystemState(state);
         var normalizedMaterial = norm.NormalizeMaterial(Material);
+        var normalizedPoreMaterial = norm.NormalizePoreMaterial(PoreMaterial);
         var normalizedConditions = norm.NormalizeConditions(Conditions);
 
         PlotState(normalizedState);
@@ -50,13 +58,13 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
             normalizedState,
             [normalizedMaterial],
             normalizedConditions,
-            null
+            normalizedPoreMaterial
         );
         var equationSystem = SolverRoutines.Default.EquationSystemBuilder.Build(solutionState);
         var stepVector = new StepEstimator().EstimateStep(equationSystem);
 
         var jac = equationSystem.Jacobian(stepVector);
-        jac.CoerceZero(1e-8);
+        // jac.CoerceZero(1e-8);
         DumpMatrix(jac, -equationSystem.Lagrangian(stepVector));
         PlotJacobianStructure(jac);
     }
@@ -72,49 +80,56 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
     private void DumpMatrix(Matrix<double> matrix, Vector<double> rightSide)
     {
         var builder = new StringBuilder();
-        builder.AppendLine(
-            matrix
-                .Append(Matrix<double>.Build.DenseOfColumnVectors(rightSide))
-                .ToMatrixString(
-                    matrix.RowCount,
-                    matrix.ColumnCount + 1,
-                    null,
-                    CultureInfo.InvariantCulture
-                )
-        );
-        builder.AppendLine(
-            rightSide.ToVectorString(1, int.MaxValue, null, CultureInfo.InvariantCulture)
-        );
-        builder.AppendLine(
-            $"Determinant: {matrix.Determinant().ToString(CultureInfo.InvariantCulture)}"
-        );
-        builder.AppendLine(
-            $"Condition: {matrix.ConditionNumber().ToString(CultureInfo.InvariantCulture)}"
-        );
-        builder.AppendLine(
-            $"IsSymmetric: {matrix.IsSymmetric().ToString(CultureInfo.InvariantCulture)}"
-        );
-        builder.AppendLine(
-            "Secondary Determinants: "
-                + string.Join(
-                    ' ',
-                    Enumerable
-                        .Range(0, matrix.ColumnCount)
-                        .Select(i =>
-                        {
-                            var m = matrix.Clone();
-                            m.SetColumn(i, rightSide);
-                            return m.Determinant().Round(8).ToString(CultureInfo.InvariantCulture);
-                        })
-                )
-        );
-        builder.AppendLine($"Rank: {matrix.Rank()}({matrix.Rank() - matrix.RowCount})");
-
-        File.WriteAllText(
-            Path.Combine(_tmpDir, $"jacobian.txt"),
-            builder.ToString(),
-            Encoding.UTF8
-        );
+        try
+        {
+            builder.AppendLine(
+                matrix
+                    .Append(Matrix<double>.Build.DenseOfColumnVectors(rightSide))
+                    .ToMatrixString(
+                        matrix.RowCount,
+                        matrix.ColumnCount + 1,
+                        null,
+                        CultureInfo.InvariantCulture
+                    )
+            );
+            builder.AppendLine(
+                rightSide.ToVectorString(1, int.MaxValue, null, CultureInfo.InvariantCulture)
+            );
+            builder.AppendLine(
+                $"Determinant: {matrix.Determinant().ToString(CultureInfo.InvariantCulture)}"
+            );
+            builder.AppendLine($"Rank: {matrix.Rank()}({matrix.Rank() - matrix.RowCount})");
+            builder.AppendLine(
+                $"Condition: {matrix.ConditionNumber().ToString(CultureInfo.InvariantCulture)}"
+            );
+            builder.AppendLine(
+                $"IsSymmetric: {matrix.IsSymmetric().ToString(CultureInfo.InvariantCulture)}"
+            );
+            builder.AppendLine(
+                "Secondary Determinants: "
+                    + string.Join(
+                        ' ',
+                        Enumerable
+                            .Range(0, matrix.ColumnCount)
+                            .Select(i =>
+                            {
+                                var m = matrix.Clone();
+                                m.SetColumn(i, rightSide);
+                                return m.Determinant()
+                                    .Round(8)
+                                    .ToString(CultureInfo.InvariantCulture);
+                            })
+                    )
+            );
+        }
+        finally
+        {
+            File.WriteAllText(
+                Path.Combine(_tmpDir, $"jacobian.txt"),
+                builder.ToString(),
+                Encoding.UTF8
+            );
+        }
     }
 
     private void PlotJacobianStructure(Matrix<double> jacobian)

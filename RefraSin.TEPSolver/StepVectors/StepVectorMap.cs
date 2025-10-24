@@ -39,6 +39,11 @@ public class StepVectorMap
                 var key = (particleContactItem.GetType(), particleContactItem.ParticleContact.Id);
                 _itemIndexMap.Add(key, index);
             }
+            else if (item is IPoreItem poreItem)
+            {
+                var key = (poreItem.GetType(), poreItem.Pore.Id);
+                _itemIndexMap.Add(key, index);
+            }
             else
                 throw new ArgumentException($"Invalid item type: {item.GetType()}");
 
@@ -80,6 +85,8 @@ public class StepVectorMap
             return _itemIndexMap[
                 (particleContactItem.GetType(), particleContactItem.ParticleContact.Id)
             ];
+        if (item is IPoreItem poreItem)
+            return _itemIndexMap[(poreItem.GetType(), poreItem.Pore.Id)];
         throw new ArgumentException($"Invalid item type: {item.GetType()}");
     }
 

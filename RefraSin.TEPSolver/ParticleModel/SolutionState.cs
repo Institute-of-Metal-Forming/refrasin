@@ -58,7 +58,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 .Select(t => new Pore(
                     t.Second,
                     this,
-                    t.First.Density,
+                    t.First.RelativeDensity,
                     t.First.Pressure,
                     poreMaterial
                 ))

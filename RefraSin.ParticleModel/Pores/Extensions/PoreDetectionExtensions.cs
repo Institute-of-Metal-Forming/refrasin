@@ -3,16 +3,22 @@ using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Nodes.Extensions;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.System;
+using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.Pores.Extensions;
 
 public static class PoreDetectionExtensions
 {
-    public static IEnumerable<IPore<TNode>> DetectPores<TParticle, TNode>(
-        this IParticleSystem<TParticle, TNode> system
-    )
+    public static IParticleSystemWithPores<TParticle, TNode, IPore<TNode>> DetectPores<
+        TParticle,
+        TNode
+    >(this IParticleSystem<TParticle, TNode> system)
         where TParticle : IParticle<TNode>
-        where TNode : IParticleNode => system.Particles.DetectPores<TParticle, TNode>();
+        where TNode : IParticleNode =>
+        new ParticleSystemWithPores<TParticle, TNode, IPore<TNode>>(
+            system.Particles,
+            system.Particles.DetectPores<TParticle, TNode>().ToReadOnlyVertexCollection()
+        );
 
     public static IEnumerable<IPore<TNode>> DetectPores<TParticle, TNode>(
         this IEnumerable<TParticle> particles
@@ -80,7 +86,7 @@ public static class PoreDetectionExtensions
 
             if (currentNode.Type is NodeType.Neck)
             {
-                if (currentNode.Upper.Type is NodeType.GrainBoundary)
+                if (currentNode.Lower.Type is NodeType.GrainBoundary)
                 {
                     if (currentNode is INodeContact contact)
                         currentNode = allNodes[contact.ContactedNodeId];
@@ -91,12 +97,12 @@ public static class PoreDetectionExtensions
                 }
                 else
                 {
-                    currentNode = allNodes[currentNode.Upper.Id];
+                    currentNode = allNodes[currentNode.Lower.Id];
                 }
             }
             else
             {
-                currentNode = allNodes[currentNode.Upper.Id];
+                currentNode = allNodes[currentNode.Lower.Id];
             }
 
             allNodes.Remove(currentNode.Id);
@@ -107,13 +113,18 @@ public static class PoreDetectionExtensions
         this IEnumerable<TPore> pores
     )
         where TNode : IParticleNode
+        where TPore : IPore<TNode> => pores.Where(p => p.Volume >= 0);
+
+    public static IParticleSystemWithPores<TParticle, TNode, TPore> WithoutOuterSurface<
+        TParticle,
+        TNode,
+        TPore
+    >(this IParticleSystemWithPores<TParticle, TNode, TPore> system)
+        where TNode : IParticleNode
         where TPore : IPore<TNode>
-    {
-        var poresDictionary = pores.ToDictionary(p => p.Id);
-        var largestPore = poresDictionary.Values.MaxBy(p => p.Volume);
-        poresDictionary.Remove(
-            largestPore?.Id ?? throw new InvalidOperationException("pore sequence empty")
+        where TParticle : IParticle<TNode> =>
+        new ParticleSystemWithPores<TParticle, TNode, TPore>(
+            system.Particles,
+            system.Pores.WithoutOuterSurface<TPore, TNode>().ToReadOnlyVertexCollection()
         );
-        return poresDictionary.Values;
-    }
 }

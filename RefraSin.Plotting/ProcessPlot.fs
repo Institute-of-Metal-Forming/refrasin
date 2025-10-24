@@ -109,3 +109,57 @@ let PlotParticleCenters (states: ISystemState<_, _> seq) : GenericChart =
 
 let PlotParticleRotations (states: ISystemState<_, _> seq) : GenericChart =
     plotForAllParticles states PlotParticleRotation
+
+let PlotPorePressures (states: ISystemStateWithPores<_, _, _> seq) =
+    let times = [ for s in states -> s.Time ]
+
+    let pores =
+        states
+        |> Seq.map (fun s -> s.Pores |> Seq.map (_.Pressure) |> Seq.toList)
+        |> List.transpose
+
+    seq {
+        for pore in pores do
+            Chart.Line(x = times, y = pore)
+
+    }
+    |> Chart.combine
+    |> Commons.ApplyDefaultPlotProperties
+    |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
+    |> Chart.withYAxisStyle (TitleText = "Pore Pressure", AxisType = AxisType.Log)
+
+let PlotPoreDensities (states: ISystemStateWithPores<_, _, _> seq) =
+    let times = [ for s in states -> s.Time ]
+
+    let pores =
+        states
+        |> Seq.map (fun s -> s.Pores |> Seq.map (_.RelativeDensity) |> Seq.toList)
+        |> List.transpose
+
+    seq {
+        for pore in pores do
+            Chart.Line(x = times, y = pore)
+
+    }
+    |> Chart.combine
+    |> Commons.ApplyDefaultPlotProperties
+    |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
+    |> Chart.withYAxisStyle (TitleText = "Pore Density", AxisType = AxisType.Log)
+
+let PlotPoreVolumes (states: ISystemStateWithPores<_, _, _> seq) =
+    let times = [ for s in states -> s.Time ]
+
+    let pores =
+        states
+        |> Seq.map (fun s -> s.Pores |> Seq.map (_.Volume) |> Seq.toList)
+        |> List.transpose
+
+    seq {
+        for pore in pores do
+            Chart.Line(x = times, y = pore)
+
+    }
+    |> Chart.combine
+    |> Commons.ApplyDefaultPlotProperties
+    |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
+    |> Chart.withYAxisStyle (TitleText = "Pore Density", AxisType = AxisType.Log)

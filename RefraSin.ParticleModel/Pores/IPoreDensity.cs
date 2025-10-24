@@ -2,5 +2,5 @@ namespace RefraSin.ParticleModel.Pores;
 
 public interface IPoreDensity
 {
-    public double Density { get; }
+    public double RelativeDensity { get; }
 }

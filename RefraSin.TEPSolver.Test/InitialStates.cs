@@ -6,6 +6,7 @@ using RefraSin.ParticleModel.ParticleFactories;
 using RefraSin.ParticleModel.Particles;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ProcessModel;
+using RefraSin.ProcessModel.Extensions;
 
 namespace RefraSin.TEPSolver.Test;
 
@@ -16,13 +17,17 @@ public static class InitialStates
         ISystemState<IParticle<IParticleNode>, IParticleNode> state
     )> Generate()
     {
-        yield return (nameof(OneParticle), OneParticle());
-        yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
-        // yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
-        yield return (nameof(FourParticleRing), FourParticleRing());
+        // yield return (nameof(OneParticle), OneParticle());
+        // yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
+        // // yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
+        // yield return (nameof(FourParticleRing), FourParticleRing());
         yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
-        yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
-        yield return (nameof(Inert3PointBoundary), Inert3PointBoundary());
+        // yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
+        // yield return (nameof(Inert3PointBoundary), Inert3PointBoundary());
+        yield return (
+            nameof(ThreeParticleRingCircularWithFilledPore),
+            ThreeParticleRingCircularWithFilledPore()
+        );
     }
 
     public static readonly Guid MaterialId = Guid.NewGuid();
@@ -274,5 +279,46 @@ public static class InitialStates
         );
 
         return compactedState;
+    }
+
+    private static ISystemState<
+        IParticle<IParticleNode>,
+        IParticleNode
+    > ThreeParticleRingCircularWithFilledPore()
+    {
+        var nodeCountPerParticle = 40;
+
+        var particle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            MaterialId,
+            (0, -110e-6),
+            Angle.Right,
+            nodeCountPerParticle,
+            100e-6
+        ).GetParticle();
+
+        var particle2 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            MaterialId,
+            (105e-6, 110e-6),
+            Angle.Right + Angle.FromDegrees(120),
+            nodeCountPerParticle,
+            100e-6
+        ).GetParticle();
+
+        var particle3 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
+            MaterialId,
+            (-105e-6, 110e-6),
+            Angle.Right - Angle.FromDegrees(120),
+            nodeCountPerParticle,
+            100e-6
+        ).GetParticle();
+
+        var initialState = new SystemState(Guid.Empty, 0, [particle1, particle2, particle3]);
+        var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
+            initialState
+        );
+
+        var stateWithPores = compactedState.DetectPores(0.5, 1e6).WithoutOuterSurface();
+
+        return stateWithPores;
     }
 }

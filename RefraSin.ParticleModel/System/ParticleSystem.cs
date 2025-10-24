@@ -5,19 +5,18 @@ using RefraSin.Vertex;
 
 namespace RefraSin.ParticleModel.System;
 
-public class ParticleSystem<TParticle, TNode> : IParticleSystem<TParticle, TNode>
+public record ParticleSystem<TParticle, TNode>(IReadOnlyVertexCollection<TParticle> Particles)
+    : IParticleSystem<TParticle, TNode>
     where TParticle : IParticle<TNode>
     where TNode : IParticleNode
 {
+    public ParticleSystem(IParticleSystem<TParticle, TNode> system)
+        : this(system.Particles) { }
+
     public ParticleSystem(IEnumerable<TParticle> particles)
-    {
-        Particles = particles.ToReadOnlyVertexCollection();
-        Nodes = Particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
-    }
+        : this(particles.ToReadOnlyVertexCollection()) { }
 
     /// <inheritdoc />
-    public IReadOnlyVertexCollection<TParticle> Particles { get; }
-
-    /// <inheritdoc />
-    public IReadOnlyVertexCollection<TNode> Nodes { get; }
+    public IReadOnlyVertexCollection<TNode> Nodes { get; } =
+        Particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
 }
