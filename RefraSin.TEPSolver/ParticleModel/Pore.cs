@@ -42,7 +42,11 @@ public class Pore : IPore<NodeBase>, IPoreDensity, IPorePressure
             + stepVector.ItemValue<PoreDensity>(previousState) * timeStepWidth;
         Pressure =
             previousState.Pressure
-            + stepVector.ItemValue<PorePressure>(previousState) * timeStepWidth;
+            + (
+                stepVector.StepVectorMap.HasItem<PorePressure>(previousState)
+                    ? stepVector.ItemValue<PorePressure>(previousState) * timeStepWidth
+                    : 0
+            );
         PoreMaterial = previousState.PoreMaterial;
         Volume = this.Volume<Pore, NodeBase>();
     }

@@ -64,16 +64,11 @@ public interface INorm
                 normalizedState.Time,
                 normalizedState.Particles,
                 withPores
-                    .Pores.Zip(
-                        withPores.Pores.UpdatePores<IPore<IParticleNode>, IParticleNode>(
-                            normalizedState.Nodes
-                        )
-                    )
-                    .Select(t => new PoreState<IParticleNode>(
-                        t.Second.Id,
-                        t.Second.Nodes,
-                        t.First.RelativeDensity,
-                        t.First.Pressure / Mass * Pow(Time, 2) * Length
+                    .Pores.Select(p => new PoreState<IParticleNode>(
+                        p.Id,
+                        p.Nodes,
+                        p.RelativeDensity,
+                        p.Pressure / Mass * Pow(Time, 2) * Length
                     ))
                     .ToReadOnlyVertexCollection()
             );

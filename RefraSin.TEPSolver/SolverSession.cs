@@ -1,5 +1,4 @@
 using RefraSin.MaterialData;
-using RefraSin.ParticleModel.Collections;
 using RefraSin.ProcessModel;
 using RefraSin.ProcessModel.Sintering;
 using RefraSin.TEPSolver.Normalization;
@@ -44,6 +43,7 @@ internal class SolverSession : ISolverSession
         CurrentState = new SolutionState(normalizedState, Materials, step, PoreMaterial);
         CurrentState.Sanitize();
         Logger = Log.ForContext<SinteringSolver>();
+        ParentSession = null;
     }
 
     public SolverSession(SolverSession parentSession, ISystemState inputState)
@@ -65,6 +65,7 @@ internal class SolverSession : ISolverSession
         CurrentState = new SolutionState(inputState, Materials, this, PoreMaterial);
         CurrentState.Sanitize();
         Logger = parentSession.Logger;
+        ParentSession = parentSession;
     }
 
     public double StartTime { get; }
@@ -95,14 +96,38 @@ internal class SolverSession : ISolverSession
     /// <inheritdoc />
     public INorm Norm { get; }
 
+    /// <inheritdoc />
+    public ISolverSession? ParentSession { get; }
+
     public void ReportCurrentState(StepVector? stepVector = null)
     {
         var particles = CurrentState
             .Particles.Select(p => new ParticleReturn(p, stepVector, Norm))
             .ToReadOnlyVertexCollection();
-        _reportSystemState(
-            new SystemState(CurrentState.Id, CurrentState.Time * Norm.Time, particles)
-        );
+
+        if (CurrentState.Pores.Count == 0)
+            _reportSystemState(
+                new SystemState(CurrentState.Id, CurrentState.Time * Norm.Time, particles)
+            );
+        else
+        {
+            var nodes = particles.SelectMany(p => p.Nodes).ToReadOnlyVertexCollection();
+            var pores = CurrentState.Pores.Select(p => new PoreReturn(
+                p.Id,
+                p.Nodes.Select(n => nodes[n.Id]),
+                p.RelativeDensity,
+                p.Pressure,
+                Norm
+            ));
+            _reportSystemState(
+                new SystemStateWithPores(
+                    CurrentState.Id,
+                    CurrentState.Time * Norm.Time,
+                    particles,
+                    pores
+                )
+            );
+        }
     }
 
     public ILogger Logger { get; }

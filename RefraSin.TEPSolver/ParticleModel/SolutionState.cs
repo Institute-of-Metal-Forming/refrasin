@@ -54,19 +54,16 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 );
 
             Pores = withPores
-                .Pores.Zip(withPores.Pores.UpdatePores<IPore<IParticleNode>, IParticleNode>(Nodes))
-                .Select(t => new Pore(
-                    t.Second,
-                    this,
-                    t.First.RelativeDensity,
-                    t.First.Pressure,
-                    poreMaterial
-                ))
+                .Pores.Select(p => new Pore(p, this, p.RelativeDensity, p.Pressure, poreMaterial))
                 .ToReadOnlyVertexCollection();
+            NodesOfPores = Pores
+                .SelectMany(p => p.Nodes.Select(n => (n, p)))
+                .ToDictionary(t => t.n, t => t.p);
         }
         else
         {
             Pores = ReadOnlyVertexCollection<Pore>.Empty;
+            NodesOfPores = new Dictionary<NodeBase, Pore>();
         }
     }
 
@@ -98,6 +95,9 @@ public class SolutionState : ISystemState<Particle, NodeBase>
         Pores = oldState
             .Pores.Select(p => p.ApplyTimeStep(this, stepVector, timeStepWidth))
             .ToReadOnlyVertexCollection();
+        NodesOfPores = Pores
+            .SelectMany(p => p.Nodes.Select(n => (n, p)))
+            .ToDictionary(t => t.n, t => t.p);
     }
 
     public IReadOnlyDictionary<Guid, IParticleMaterial> Materials { get; }
@@ -115,6 +115,8 @@ public class SolutionState : ISystemState<Particle, NodeBase>
     public IReadOnlyVertexCollection<Particle> Particles { get; }
 
     public IReadOnlyVertexCollection<Pore> Pores { get; }
+
+    public IReadOnlyDictionary<NodeBase, Pore> NodesOfPores { get; }
 
     public IReadOnlyVertexCollection<ContactPair<NodeBase>> NodeContacts { get; }
 
