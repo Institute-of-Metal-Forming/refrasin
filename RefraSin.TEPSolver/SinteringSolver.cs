@@ -1,4 +1,6 @@
 using RefraSin.Numerics.Exceptions;
+using RefraSin.ParticleModel.Pores;
+using RefraSin.ParticleModel.Pores.Extensions;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.ParticleModel.System;
 using RefraSin.ProcessModel;
@@ -110,20 +112,42 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
             if (i % RemeshingEverySteps == 0)
             {
                 session.CurrentState.Sanitize();
-                var remeshedState = new SystemState(
-                    Guid.NewGuid(),
-                    session.CurrentState.Time,
-                    session.Routines.Remeshers.Aggregate<
-                        IParticleSystemRemesher,
-                        IParticleSystem<IParticle<IParticleNode>, IParticleNode>
-                    >(session.CurrentState, (state, remesher) => remesher.RemeshSystem(state))
-                );
+                var remeshedSystem = session.Routines.Remeshers.Aggregate<
+                    IParticleSystemRemesher,
+                    IParticleSystem<IParticle<IParticleNode>, IParticleNode>
+                >(session.CurrentState, (state, remesher) => remesher.RemeshSystem(state));
 
-                session = new SolverSession(session, remeshedState);
+                session = new SolverSession(
+                    session,
+                    session.CurrentState.Pores.Count == 0
+                        ? new SystemState(Guid.NewGuid(), session.CurrentState.Time, remeshedSystem)
+                        : new SystemStateWithPores<
+                            IParticle<IParticleNode>,
+                            IParticleNode,
+                            IPoreState<IParticleNode>
+                        >(
+                            Guid.NewGuid(),
+                            session.CurrentState.Time,
+                            remeshedSystem.Particles,
+                            session
+                                .CurrentState.Pores.Zip(
+                                    session.CurrentState.Pores.UpdatePores<
+                                        IPore<IParticleNode>,
+                                        IParticleNode
+                                    >(remeshedSystem.Nodes)
+                                )
+                                .Select(t => new PoreState<IParticleNode>(
+                                    t.First.Id,
+                                    t.Second.Nodes,
+                                    t.First.RelativeDensity,
+                                    t.First.Pressure
+                                ))
+                        )
+                );
                 InvokeSessionInitialized(session);
                 session.Logger.Information(
                     "Remeshed session created. Now {NodeCount} nodes present.",
-                    remeshedState.Nodes.Count
+                    remeshedSystem.Nodes.Count
                 );
                 session.ReportCurrentState();
             }
