@@ -23,4 +23,6 @@ public interface ISolverSession : ISinteringConditions
     public ISolverRoutines Routines { get; }
 
     INorm Norm { get; }
+
+    ISolverSession? ParentSession { get; }
 }

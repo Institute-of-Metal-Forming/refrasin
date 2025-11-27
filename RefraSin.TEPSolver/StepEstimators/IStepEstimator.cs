@@ -7,5 +7,5 @@ namespace RefraSin.TEPSolver.StepEstimators;
 
 public interface IStepEstimator : ISolverRoutine
 {
-    StepVector EstimateStep(EquationSystem estimateSystem);
+    StepVector EstimateStep(ISolverSession? solverSession, EquationSystem estimateSystem);
 }
