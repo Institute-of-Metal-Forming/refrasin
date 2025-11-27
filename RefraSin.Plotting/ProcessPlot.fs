@@ -115,7 +115,7 @@ let PlotPorePressures (states: ISystemStateWithPores<_, _, _> seq) =
 
     let pores =
         states
-        |> Seq.map (fun s -> s.Pores |> Seq.map (_.Pressure) |> Seq.toList)
+        |> Seq.map (fun s -> s.Pores |> Seq.map (_.Pressure) |> Seq.map abs |> Seq.toList)
         |> List.transpose
 
     seq {
@@ -162,4 +162,4 @@ let PlotPoreVolumes (states: ISystemStateWithPores<_, _, _> seq) =
     |> Chart.combine
     |> Commons.ApplyDefaultPlotProperties
     |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
-    |> Chart.withYAxisStyle (TitleText = "Pore Density", AxisType = AxisType.Log)
+    |> Chart.withYAxisStyle (TitleText = "Pore Volume", AxisType = AxisType.Log)
