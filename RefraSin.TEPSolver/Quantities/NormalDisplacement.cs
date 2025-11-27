@@ -5,7 +5,16 @@ namespace RefraSin.TEPSolver.Quantities;
 
 public class NormalDisplacement(NodeBase node) : IStateVelocity, INodeItem
 {
-    public double DrivingForce(StepVector stepVector) => -Node.GibbsEnergyGradient.Normal;
+    public double DrivingForce(StepVector stepVector)
+    {
+        var interfaceEnergyTerm = -Node.GibbsEnergyGradient.Normal;
+
+        var porePressureTerm = 0.0;
+        if (Node.Particle.SolutionState.NodesOfPores.TryGetValue(Node, out var pore))
+            porePressureTerm = pore.Pressure * Node.VolumeGradient.Normal;
+
+        return interfaceEnergyTerm + porePressureTerm;
+    }
 
     public NodeBase Node { get; } = node;
 

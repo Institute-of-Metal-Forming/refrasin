@@ -106,4 +106,28 @@ public class StepVectorMap
     public bool HasItem<TItem>(ContactPair<NodeBase> nodeContact)
         where TItem : INodeContactItem =>
         _itemIndexMap.ContainsKey((typeof(TItem), nodeContact.Id));
+
+    public bool HasItem<TItem>(Pore pore)
+        where TItem : IPoreItem => _itemIndexMap.ContainsKey((typeof(TItem), pore.Id));
+
+    public bool HasItem(ISystemItem item)
+    {
+        if (item is IGlobalItem globalItem)
+            return _itemIndexMap.ContainsKey((globalItem.GetType(), Guid.Empty));
+        if (item is IParticleItem particleItem)
+            return _itemIndexMap.ContainsKey((particleItem.GetType(), particleItem.Particle.Id));
+        if (item is INodeItem nodeItem)
+            return _itemIndexMap.ContainsKey((nodeItem.GetType(), nodeItem.Node.Id));
+        if (item is INodeContactItem nodeContactItem)
+            return _itemIndexMap.ContainsKey(
+                (nodeContactItem.GetType(), nodeContactItem.NodeContact.Id)
+            );
+        if (item is IParticleContactItem particleContactItem)
+            return _itemIndexMap.ContainsKey(
+                (particleContactItem.GetType(), particleContactItem.ParticleContact.Id)
+            );
+        if (item is IPoreItem poreItem)
+            return _itemIndexMap.ContainsKey((poreItem.GetType(), poreItem.Pore.Id));
+        throw new ArgumentException($"Invalid item type: {item.GetType()}");
+    }
 }
