@@ -5,7 +5,16 @@ namespace RefraSin.TEPSolver.Quantities;
 
 public class TangentialDisplacement(NodeBase node) : INodeItem, IStateVelocity
 {
-    public double DrivingForce(StepVector stepVector) => -Node.GibbsEnergyGradient.Tangential;
+    public double DrivingForce(StepVector stepVector)
+    {
+        var interfaceEnergyTerm = -Node.GibbsEnergyGradient.Tangential;
+
+        var porePressureTerm = 0.0;
+        if (Node.Particle.SolutionState.NodesOfPores.TryGetValue(Node, out var pore))
+            porePressureTerm = pore.Pressure * Node.VolumeGradient.Tangential;
+
+        return interfaceEnergyTerm + porePressureTerm;
+    }
 
     public NodeBase Node { get; } = node;
 
