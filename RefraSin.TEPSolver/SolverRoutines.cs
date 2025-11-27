@@ -2,17 +2,13 @@ using RefraSin.Numerics.LinearSolvers;
 using RefraSin.Numerics.RootFinding;
 using RefraSin.ParticleModel.Remeshing;
 using RefraSin.TEPSolver.BreakConditions;
-using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.Normalization;
-using RefraSin.TEPSolver.ParticleModel;
-using RefraSin.TEPSolver.Quantities;
 using RefraSin.TEPSolver.Recovery;
 using RefraSin.TEPSolver.RootFinding;
 using RefraSin.TEPSolver.StepEstimators;
 using RefraSin.TEPSolver.StepValidators;
 using RefraSin.TEPSolver.StepWidthControllers;
 using RefraSin.TEPSolver.TimeSteppers;
-using static RefraSin.ParticleModel.Nodes.NodeType;
 
 namespace RefraSin.TEPSolver;
 
@@ -30,7 +26,7 @@ public record SolverRoutines(
 ) : ISolverRoutines
 {
     public static readonly SolverRoutines Default = new(
-        new StepEstimator(),
+        new RememberingStepEstimator(new StepEstimator()),
         new EulerTimeStepper(),
         [],
         new DirectLagrangianRootFinder(

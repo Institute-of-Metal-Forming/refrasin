@@ -10,15 +10,11 @@ public class EulerTimeStepper : ITimeStepper
     {
         var equationSystem = solverSession.Routines.EquationSystemBuilder.Build(baseState);
 
-        var estimate = _lastSteps.GetValueOrDefault(
-            solverSession.Id,
-            solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
-        );
         try
         {
             var step = solverSession.Routines.LagrangianRootFinder.FindRoot(
                 equationSystem,
-                estimate
+                solverSession.Routines.StepEstimator.EstimateStep(solverSession, equationSystem)
             );
             return step;
         }
@@ -28,19 +24,6 @@ public class EulerTimeStepper : ITimeStepper
         }
     }
 
-    private readonly Dictionary<Guid, StepVector> _lastSteps = new();
-
     /// <inheritdoc />
-    public void RegisterWithSolver(SinteringSolver solver)
-    {
-        solver.StepSuccessfullyCalculated += HandleStepSuccessfullyCalculated;
-    }
-
-    private void HandleStepSuccessfullyCalculated(
-        object? sender,
-        SinteringSolver.StepSuccessfullyCalculatedEventArgs e
-    )
-    {
-        _lastSteps[e.SolverSession.Id] = e.StepVector;
-    }
+    public void RegisterWithSolver(SinteringSolver solver) { }
 }

@@ -1,4 +1,3 @@
-using RefraSin.Coordinates;
 using RefraSin.TEPSolver.Constraints;
 using RefraSin.TEPSolver.ParticleModel;
 using RefraSin.TEPSolver.Quantities;
@@ -8,9 +7,9 @@ using NeckNode = RefraSin.TEPSolver.ParticleModel.NeckNode;
 
 namespace RefraSin.TEPSolver.StepEstimators;
 
-class StepEstimator : IStepEstimator
+public class StepEstimator : IStepEstimator
 {
-    public StepVector EstimateStep(EquationSystem equationSystem)
+    public StepVector EstimateStep(ISolverSession? solverSession, EquationSystem equationSystem)
     {
         Log.Logger.Debug("Estimate time step.");
         var map = new StepVectorMap(equationSystem);

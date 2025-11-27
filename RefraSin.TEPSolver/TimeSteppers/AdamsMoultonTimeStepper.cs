@@ -20,7 +20,7 @@ public class AdamsMoultonTimeStepper : ITimeStepper
             var step = TryCalculateStep(
                 solverSession,
                 equationSystem,
-                solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
+                solverSession.Routines.StepEstimator.EstimateStep(solverSession, equationSystem)
             );
             return step;
         }

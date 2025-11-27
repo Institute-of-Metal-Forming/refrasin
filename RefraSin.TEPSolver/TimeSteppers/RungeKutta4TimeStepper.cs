@@ -41,9 +41,9 @@ public class RungeKutta4TimeStepper : ITimeStepper
     )
     {
         var equationSystem = solverSession.Routines.EquationSystemBuilder.Build(baseState);
-        estimate ??= _lastSteps.GetValueOrDefault(
-            solverSession.Id,
-            solverSession.Routines.StepEstimator.EstimateStep(equationSystem)
+        estimate ??= solverSession.Routines.StepEstimator.EstimateStep(
+            solverSession,
+            equationSystem
         );
         try
         {
@@ -55,19 +55,6 @@ public class RungeKutta4TimeStepper : ITimeStepper
         }
     }
 
-    private readonly Dictionary<Guid, StepVector> _lastSteps = new();
-
     /// <inheritdoc />
-    public void RegisterWithSolver(SinteringSolver solver)
-    {
-        solver.StepSuccessfullyCalculated += HandleStepSuccessfullyCalculated;
-    }
-
-    private void HandleStepSuccessfullyCalculated(
-        object? sender,
-        SinteringSolver.StepSuccessfullyCalculatedEventArgs e
-    )
-    {
-        _lastSteps[e.SolverSession.Id] = e.StepVector;
-    }
+    public void RegisterWithSolver(SinteringSolver solver) { }
 }
