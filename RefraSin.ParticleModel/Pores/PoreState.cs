@@ -5,12 +5,12 @@ namespace RefraSin.ParticleModel.Pores;
 public class PoreState<TNode>(
     Guid id,
     IEnumerable<TNode> nodes,
-    double relativeDensity,
-    double pressure = 0
+    double porosity,
+    double hydrostaticStress = 0
 ) : Pore<TNode>(id, nodes), IPoreState<TNode>
     where TNode : INode
 {
-    public double RelativeDensity { get; } = relativeDensity;
+    public double Porosity { get; } = porosity;
 
-    public double Pressure { get; } = pressure;
+    public double HydrostaticStress { get; } = hydrostaticStress;
 }

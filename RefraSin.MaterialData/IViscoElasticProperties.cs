@@ -2,6 +2,6 @@ namespace RefraSin.MaterialData;
 
 public interface IViscoElasticProperties
 {
-    public double CompressionModulus { get; }
-    double VolumeViscosity { get; }
+    public double ElasticModulus { get; }
+    double ShearViscosity { get; }
 }

@@ -1,4 +1,4 @@
 namespace RefraSin.MaterialData;
 
-public record ViscoElasticProperties(double CompressionModulus, double VolumeViscosity)
+public record ViscoElasticProperties(double ElasticModulus, double ShearViscosity)
     : IViscoElasticProperties { }

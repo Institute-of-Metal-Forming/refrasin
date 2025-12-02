@@ -120,8 +120,8 @@ internal class SolverSession : ISolverSession
             var pores = CurrentState.Pores.Select(p => new PoreReturn(
                 p.Id,
                 p.Nodes.Select(n => nodes[n.Id]),
-                p.RelativeDensity,
-                p.Pressure,
+                p.Porosity,
+                p.HydrostaticStress,
                 Norm
             ));
             _reportSystemState(

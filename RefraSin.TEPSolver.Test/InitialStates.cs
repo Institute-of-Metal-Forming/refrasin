@@ -21,7 +21,7 @@ public static class InitialStates
         // yield return (nameof(Symmetric3PointBoundary), Symmetric3PointBoundary());
         // // yield return (nameof(Symmetric5PointBoundary), Symmetric5PointBoundary());
         // yield return (nameof(FourParticleRing), FourParticleRing());
-        yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
+        // yield return (nameof(ThreeParticleRingCircular), ThreeParticleRingCircular());
         // yield return (nameof(ThreeParticleTreeCircular), ThreeParticleTreeCircular());
         // yield return (nameof(Inert3PointBoundary), Inert3PointBoundary());
         yield return (
@@ -35,7 +35,7 @@ public static class InitialStates
 
     private static ISystemState<IParticle<IParticleNode>, IParticleNode> OneParticle()
     {
-        var nodeCountPerParticle = 50;
+        var nodeCountPerParticle = 100;
 
         var particle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
             MaterialId,
@@ -316,8 +316,13 @@ public static class InitialStates
         var compactedState = new FocalCompactionStep(new AbsolutePoint(0, 0), 2e-6, 1.5e-6).Solve(
             initialState
         );
+        var remeshedSystem = ((IParticleSystemRemesher)new NeckNeighborhoodRemesher()).RemeshSystem(
+            compactedState
+        );
 
-        var stateWithPores = compactedState.DetectPores(0.5, 1e6).WithoutOuterSurface();
+        var stateWithPores = new SystemState(Guid.Empty, 0, remeshedSystem)
+            .DetectPores(0.2, -1e6)
+            .WithoutOuterSurface();
 
         return stateWithPores;
     }

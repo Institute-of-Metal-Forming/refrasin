@@ -8,20 +8,20 @@ using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
-public class Pore : IPore<NodeBase>, IPoreDensity, IPorePressure
+public class Pore : IPore<NodeBase>, IPorePorosity, IPorePressure
 {
     public Pore(
         IPore<INode> pore,
         SolutionState solutionState,
-        double relativeDensity,
-        double pressure,
+        double porosity,
+        double hydrostaticStress,
         IPoreMaterial poreMaterial
     )
     {
         Id = pore.Id;
         Nodes = pore.Nodes.Select(n => solutionState.Nodes[n.Id]).ToReadOnlyVertexCollection();
-        RelativeDensity = relativeDensity;
-        Pressure = pressure;
+        Porosity = porosity;
+        HydrostaticStress = hydrostaticStress;
         Volume = this.Volume<Pore, NodeBase>();
         PoreMaterial = poreMaterial;
     }
@@ -37,14 +37,14 @@ public class Pore : IPore<NodeBase>, IPoreDensity, IPorePressure
         Nodes = previousState
             .Nodes.Select(n => solutionState.Nodes[n.Id])
             .ToReadOnlyVertexCollection();
-        RelativeDensity =
-            previousState.RelativeDensity
-            + stepVector.ItemValue<PoreDensity>(previousState) * timeStepWidth;
-        Pressure =
-            previousState.Pressure
+        Porosity =
+            previousState.Porosity
+            + stepVector.ItemValue<PorePorosity>(previousState) * timeStepWidth;
+        HydrostaticStress =
+            previousState.HydrostaticStress
             + (
-                stepVector.StepVectorMap.HasItem<PorePressure>(previousState)
-                    ? stepVector.ItemValue<PorePressure>(previousState) * timeStepWidth
+                stepVector.StepVectorMap.HasItem<PoreHydrostaticStress>(previousState)
+                    ? stepVector.ItemValue<PoreHydrostaticStress>(previousState) * timeStepWidth
                     : 0
             );
         PoreMaterial = previousState.PoreMaterial;
@@ -54,8 +54,21 @@ public class Pore : IPore<NodeBase>, IPoreDensity, IPorePressure
     public Guid Id { get; }
     public IReadOnlyVertexCollection<NodeBase> Nodes { get; }
     public double Volume { get; }
-    public double RelativeDensity { get; }
-    public double Pressure { get; }
+    public double Porosity { get; }
+    public double HydrostaticStress { get; }
+
+    public double PorousCompressionModulus
+    {
+        get
+        {
+            var elasticModulus =
+                PoreMaterial.ViscoElastic.ElasticModulus * (1 - 5.0 / 3.0 * Porosity);
+            return 4.0 / 3.0 * elasticModulus * (1 - Porosity) / Porosity;
+        }
+    }
+
+    public double PorousVolumeViscosity =>
+        4.0 / 3.0 * PoreMaterial.ViscoElastic.ShearViscosity * Pow(1 - Porosity, 3) / Porosity;
 
     public IPoreMaterial PoreMaterial { get; }
 

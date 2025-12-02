@@ -10,8 +10,8 @@ public class TangentialDisplacement(NodeBase node) : INodeItem, IStateVelocity
         var interfaceEnergyTerm = -Node.GibbsEnergyGradient.Tangential;
 
         var porePressureTerm = 0.0;
-        if (Node.Particle.SolutionState.NodesOfPores.TryGetValue(Node, out var pore))
-            porePressureTerm = pore.Pressure * Node.VolumeGradient.Tangential;
+        // if (Node.Particle.SolutionState.NodesOfPores.TryGetValue(Node, out var pore))
+        //     porePressureTerm = pore.HydrostaticStress * Node.VolumeGradient.Tangential;
 
         return interfaceEnergyTerm + porePressureTerm;
     }

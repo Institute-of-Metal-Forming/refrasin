@@ -139,8 +139,8 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                                 .Select(t => new PoreState<IParticleNode>(
                                     t.First.Id,
                                     t.Second.Nodes,
-                                    t.First.RelativeDensity,
-                                    t.First.Pressure
+                                    t.First.Porosity,
+                                    t.First.HydrostaticStress
                                 ))
                         )
                 );
