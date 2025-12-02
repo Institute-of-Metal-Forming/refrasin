@@ -10,8 +10,8 @@ public class NormalDisplacement(NodeBase node) : IStateVelocity, INodeItem
         var interfaceEnergyTerm = -Node.GibbsEnergyGradient.Normal;
 
         var porePressureTerm = 0.0;
-        if (Node.Particle.SolutionState.NodesOfPores.TryGetValue(Node, out var pore))
-            porePressureTerm = pore.Pressure * Node.VolumeGradient.Normal;
+        // if (Node.Particle.SolutionState.NodesOfPores.TryGetValue(Node, out var pore))
+        //     porePressureTerm = pore.HydrostaticStress * Node.VolumeGradient.Normal;
 
         return interfaceEnergyTerm + porePressureTerm;
     }

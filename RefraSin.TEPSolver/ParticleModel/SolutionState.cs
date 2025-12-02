@@ -54,7 +54,7 @@ public class SolutionState : ISystemState<Particle, NodeBase>
                 );
 
             Pores = withPores
-                .Pores.Select(p => new Pore(p, this, p.RelativeDensity, p.Pressure, poreMaterial))
+                .Pores.Select(p => new Pore(p, this, p.Porosity, p.HydrostaticStress, poreMaterial))
                 .ToReadOnlyVertexCollection();
             NodesOfPores = Pores
                 .SelectMany(p => p.Nodes.Select(n => (n, p)))

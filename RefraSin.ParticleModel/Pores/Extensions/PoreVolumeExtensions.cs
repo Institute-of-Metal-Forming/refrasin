@@ -52,6 +52,25 @@ public static class PoreVolumeExtensions
         return volumeDifferential / 2;
     }
 
+    public static IEnumerable<(double x, double y)> VolumeDifferentials<TPore, TNode>(
+        this TPore pore
+    )
+        where TPore : IPore<TNode>
+        where TNode : INode
+    {
+        var xValues = pore.Nodes.Select(n => n.Coordinates.Absolute.X).ToArray();
+        var yValues = pore.Nodes.Select(n => n.Coordinates.Absolute.Y).ToArray();
+        var n = pore.Nodes.Count;
+
+        for (int i = 0; i < n; i++)
+        {
+            yield return (
+                (yValues[ReduceIndex(i + 1, n)] - yValues[ReduceIndex(i - 1, n)]) / 2,
+                (xValues[ReduceIndex(i - 1, n)] - xValues[ReduceIndex(i + 1, n)]) / 2
+            );
+        }
+    }
+
     private static int ReduceIndex(int i, int n)
     {
         while (i >= n)

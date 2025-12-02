@@ -40,7 +40,9 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
     private static readonly IPoreMaterial PoreMaterial = new PoreMaterial(
         Guid.NewGuid(),
         SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
-        new ViscoElasticProperties(1, 2e6)
+        1e-6,
+        Material.Surface.Energy,
+        new ViscoElasticProperties(100e9, 1e-2 * 100e9)
     );
 
     // [Test]
@@ -61,7 +63,7 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
             normalizedPoreMaterial
         );
         var equationSystem = SolverRoutines.Default.EquationSystemBuilder.Build(solutionState);
-        var stepVector = new StepEstimator().EstimateStep(equationSystem);
+        var stepVector = new StepEstimator().EstimateStep(null, equationSystem);
 
         var jac = equationSystem.Jacobian(stepVector);
         // jac.CoerceZero(1e-8);

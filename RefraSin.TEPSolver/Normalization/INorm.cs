@@ -67,8 +67,8 @@ public interface INorm
                     .Pores.Select(p => new PoreState<IParticleNode>(
                         p.Id,
                         p.Nodes,
-                        p.RelativeDensity,
-                        p.Pressure / Mass * Pow(Time, 2) * Length
+                        p.Porosity,
+                        p.HydrostaticStress / Mass * Pow(Time, 2) * Length
                     ))
                     .ToReadOnlyVertexCollection()
             );
@@ -98,8 +98,8 @@ public interface INorm
         IViscoElasticProperties viscoElasticProperties
     ) =>
         new ViscoElasticProperties(
-            viscoElasticProperties.CompressionModulus / Mass * Pow(Time, 2) * Length,
-            viscoElasticProperties.VolumeViscosity / Mass * Time * Length
+            viscoElasticProperties.ElasticModulus / Mass * Pow(Time, 2) * Length,
+            viscoElasticProperties.ShearViscosity / Mass * Time * Length
         );
 
     public IParticleMaterial NormalizeMaterial(IParticleMaterial material) =>
@@ -118,6 +118,8 @@ public interface INorm
         new PoreMaterial(
             material.Id,
             NormalizeSubstanceProperties(material.Substance),
+            material.AverageParticleRadius / Length,
+            material.InterfaceEnergy / Energy * Area,
             NormalizeViscoElasticProperties(material.ViscoElastic)
         );
 
