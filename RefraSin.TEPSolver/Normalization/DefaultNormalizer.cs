@@ -34,8 +34,7 @@ public class DefaultNormalizer : INormalizer
             Volume = Pow(Length, 3);
 
             Time =
-                1e-3
-                * sinteringStep.GasConstant
+                sinteringStep.GasConstant
                 * sinteringStep.Temperature
                 * Pow(Length, 4)
                 / (

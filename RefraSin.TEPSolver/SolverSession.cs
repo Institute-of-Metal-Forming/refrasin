@@ -40,7 +40,12 @@ internal class SolverSession : ISolverSession
 
         Routines = sinteringSolver.Routines;
 
-        CurrentState = new SolutionState(normalizedState, Materials, step, PoreMaterial);
+        CurrentState = new SolutionState(
+            normalizedState,
+            Materials,
+            normalizedConditions,
+            PoreMaterial
+        );
         CurrentState.Sanitize();
         Logger = Log.ForContext<SinteringSolver>();
         ParentSession = null;
