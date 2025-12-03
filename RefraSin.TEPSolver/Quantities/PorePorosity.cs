@@ -13,7 +13,7 @@ public class PorePorosity(Pore pore) : IPoreItem, IStateVelocity, IFlux
             / Pore.PoreMaterial.AverageParticleRadius
             * Pow(1 - Pore.Porosity, 2);
 
-        return (Pore.HydrostaticStress + internalSinteringForce)
+        return (Pore.PorousCompressionModulus * Pore.ElasticStrain + internalSinteringForce)
             / (1 - Pore.Porosity)
             * Pore.Volume;
     }

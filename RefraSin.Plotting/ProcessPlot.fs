@@ -110,12 +110,12 @@ let PlotParticleCenters (states: ISystemState<_, _> seq) : GenericChart =
 let PlotParticleRotations (states: ISystemState<_, _> seq) : GenericChart =
     plotForAllParticles states PlotParticleRotation
 
-let PlotPoreStress (states: ISystemStateWithPores<_, _, _> seq) =
+let PlotPoreElasticStrain (states: ISystemStateWithPores<_, _, _> seq) =
     let times = [ for s in states -> s.Time ]
 
     let pores =
         states
-        |> Seq.map (fun s -> s.Pores |> Seq.map (_.HydrostaticStress) |> Seq.map abs |> Seq.toList)
+        |> Seq.map (fun s -> s.Pores |> Seq.map (_.ElasticStrain) |> Seq.toList)
         |> List.transpose
 
     seq {
@@ -126,7 +126,7 @@ let PlotPoreStress (states: ISystemStateWithPores<_, _, _> seq) =
     |> Chart.combine
     |> Commons.ApplyDefaultPlotProperties
     |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
-    |> Chart.withYAxisStyle (TitleText = "Pore Stress", AxisType = AxisType.Linear)
+    |> Chart.withYAxisStyle (TitleText = "Pore Elastic Strain", AxisType = AxisType.Linear)
 
 let PlotPorePorosity (states: ISystemStateWithPores<_, _, _> seq) =
     let times = [ for s in states -> s.Time ]
@@ -163,3 +163,21 @@ let PlotPoreVolume (states: ISystemStateWithPores<_, _, _> seq) =
     |> Commons.ApplyDefaultPlotProperties
     |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
     |> Chart.withYAxisStyle (TitleText = "Pore Volume", AxisType = AxisType.Linear)
+
+let PlotParticleVolume (states: ISystemState<_, _> seq) =
+    let times = [ for s in states -> s.Time ]
+
+    let particles =
+        states
+        |> Seq.map (fun s -> s.Particles |> Seq.map (_.Volume()) |> Seq.toList)
+        |> List.transpose
+
+    seq {
+        for particle in particles do
+            Chart.Line(x = times, y = particle)
+
+    }
+    |> Chart.combine
+    |> Commons.ApplyDefaultPlotProperties
+    |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
+    |> Chart.withYAxisStyle (TitleText = "Shrinkage in %", AxisType = AxisType.Log)

@@ -3,10 +3,10 @@ using RefraSin.TEPSolver.StepVectors;
 
 namespace RefraSin.TEPSolver.Quantities;
 
-public class PoreHydrostaticStress(Pore pore) : IPoreItem, IStateVelocity
+public class PoreElasticStrain(Pore pore) : IPoreItem, IStateVelocity
 {
     public double DrivingForce(StepVector stepVector) =>
-        0 * -Pore.Volume / Pore.PorousCompressionModulus * Pore.HydrostaticStress;
+        -Pore.Volume * Pore.PorousCompressionModulus * Pore.ElasticStrain;
 
     public Pore Pore { get; } = pore;
 

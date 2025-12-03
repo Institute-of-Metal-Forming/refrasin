@@ -140,7 +140,7 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
                                     t.First.Id,
                                     t.Second.Nodes,
                                     t.First.Porosity,
-                                    t.First.HydrostaticStress
+                                    t.First.ElasticStrain
                                 ))
                         )
                 );
