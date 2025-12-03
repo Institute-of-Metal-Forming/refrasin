@@ -286,7 +286,7 @@ public static class InitialStates
         IParticleNode
     > ThreeParticleRingCircularWithFilledPore()
     {
-        var nodeCountPerParticle = 40;
+        var nodeCountPerParticle = 100;
 
         var particle1 = new ShapeFunctionParticleFactoryCosOvalityCosPeaks(
             MaterialId,
@@ -321,7 +321,7 @@ public static class InitialStates
         );
 
         var stateWithPores = new SystemState(Guid.Empty, 0, remeshedSystem)
-            .DetectPores(0.2, -1e6)
+            .DetectPores(0.2, 0)
             .WithoutOuterSurface();
 
         return stateWithPores;

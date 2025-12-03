@@ -9,7 +9,7 @@ public static class PoreExtensions
     public static ISystemStateWithPores<TParticle, TNode, IPoreState<TNode>> DetectPores<
         TParticle,
         TNode
-    >(this ISystemState<TParticle, TNode> system, double porePorosity, double poreHydrostaticStress)
+    >(this ISystemState<TParticle, TNode> system, double porePorosity, double poreElasticStrain)
         where TParticle : IParticle<TNode>
         where TNode : IParticleNode =>
         new SystemStateWithPores<TParticle, TNode, IPoreState<TNode>>(
@@ -20,7 +20,7 @@ public static class PoreExtensions
                 .Particles.DetectPores<TParticle, TNode>()
                 .Select(
                     IPoreState<TNode> (p) =>
-                        new PoreState<TNode>(p.Id, p.Nodes, porePorosity, poreHydrostaticStress)
+                        new PoreState<TNode>(p.Id, p.Nodes, porePorosity, poreElasticStrain)
                 )
                 .ToReadOnlyVertexCollection()
         );

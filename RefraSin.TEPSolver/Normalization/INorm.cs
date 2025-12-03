@@ -68,7 +68,7 @@ public interface INorm
                         p.Id,
                         p.Nodes,
                         p.Porosity,
-                        p.HydrostaticStress / Mass * Pow(Time, 2) * Length
+                        p.ElasticStrain
                     ))
                     .ToReadOnlyVertexCollection()
             );

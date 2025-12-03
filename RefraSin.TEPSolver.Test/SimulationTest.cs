@@ -61,7 +61,7 @@ public class SimulationTest
     public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
         InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e2);
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e1);
     private readonly ISystemState<IParticle<IParticleNode>, IParticleNode> _initialState;
     private readonly SinteringStep _sinteringProcess;
     private readonly InMemorySolutionStorage _solutionStorage = new();
@@ -95,7 +95,7 @@ public class SimulationTest
         SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
         1e-6,
         Material.Surface.Energy,
-        new ViscoElasticProperties(100e9, 1e-3 * 100e9)
+        new ViscoElasticProperties(100e3, 1e-3 * 100e9)
     );
 
     private readonly string _tempDir = TempPath.CreateTempDir();
@@ -127,9 +127,10 @@ public class SimulationTest
             PlotNeckWidths();
             PlotTimeSteps();
             PlotParticleCenter();
-            PlotPoreStress();
+            PlotPoreElasticStrain();
             PlotPorePorosity();
             PlotPoreVolume();
+            PlotParticleVolume();
         }
 
         if (exception is not null)
@@ -181,7 +182,7 @@ public class SimulationTest
         plot.SaveHtml(Path.Combine(_tempDir, "necks.html"));
     }
 
-    private void PlotPoreStress()
+    private void PlotPoreElasticStrain()
     {
         if (_solutionStorage.States.Count == 0)
             return;
@@ -199,8 +200,8 @@ public class SimulationTest
         if (states.Length == 0)
             return;
 
-        var plot = ProcessPlot.PlotPoreStress(states);
-        plot.SaveHtml(Path.Combine(_tempDir, "pore_stress.html"));
+        var plot = ProcessPlot.PlotPoreElasticStrain(states);
+        plot.SaveHtml(Path.Combine(_tempDir, "pore_elastic.html"));
     }
 
     private void PlotPorePorosity()
@@ -245,6 +246,15 @@ public class SimulationTest
 
         var plot = ProcessPlot.PlotPoreVolume(states);
         plot.SaveHtml(Path.Combine(_tempDir, "pore_volume.html"));
+    }
+
+    private void PlotParticleVolume()
+    {
+        if (_solutionStorage.States.Count == 0)
+            return;
+
+        var plot = ProcessPlot.PlotParticleVolume(_solutionStorage.States);
+        plot.SaveHtml(Path.Combine(_tempDir, "particle_volume.html"));
     }
 
     class PlotEventHandler(string dir)

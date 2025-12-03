@@ -55,7 +55,7 @@ public class EquationSystemBuilder : IEquationSystemBuilder
         foreach (var pore in solutionState.Pores)
         {
             yield return new PorePorosity(pore);
-            yield return new PoreHydrostaticStress(pore);
+            yield return new PoreElasticStrain(pore);
 
             foreach (var node in pore.Nodes)
             {

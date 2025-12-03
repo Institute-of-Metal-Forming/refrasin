@@ -8,20 +8,20 @@ using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
-public class Pore : IPore<NodeBase>, IPorePorosity, IPorePressure
+public class Pore : IPore<NodeBase>, IPorePorosity, IPoreElasticStrain
 {
     public Pore(
         IPore<INode> pore,
         SolutionState solutionState,
         double porosity,
-        double hydrostaticStress,
+        double elasticStrain,
         IPoreMaterial poreMaterial
     )
     {
         Id = pore.Id;
         Nodes = pore.Nodes.Select(n => solutionState.Nodes[n.Id]).ToReadOnlyVertexCollection();
         Porosity = porosity;
-        HydrostaticStress = hydrostaticStress;
+        ElasticStrain = elasticStrain;
         Volume = this.Volume<Pore, NodeBase>();
         PoreMaterial = poreMaterial;
     }
@@ -40,11 +40,11 @@ public class Pore : IPore<NodeBase>, IPorePorosity, IPorePressure
         Porosity =
             previousState.Porosity
             + stepVector.ItemValue<PorePorosity>(previousState) * timeStepWidth;
-        HydrostaticStress =
-            previousState.HydrostaticStress
+        ElasticStrain =
+            previousState.ElasticStrain
             + (
-                stepVector.StepVectorMap.HasItem<PoreHydrostaticStress>(previousState)
-                    ? stepVector.ItemValue<PoreHydrostaticStress>(previousState) * timeStepWidth
+                stepVector.StepVectorMap.HasItem<PoreElasticStrain>(previousState)
+                    ? stepVector.ItemValue<PoreElasticStrain>(previousState) * timeStepWidth
                     : 0
             );
         PoreMaterial = previousState.PoreMaterial;
@@ -55,7 +55,7 @@ public class Pore : IPore<NodeBase>, IPorePorosity, IPorePressure
     public IReadOnlyVertexCollection<NodeBase> Nodes { get; }
     public double Volume { get; }
     public double Porosity { get; }
-    public double HydrostaticStress { get; }
+    public double ElasticStrain { get; }
 
     public double PorousCompressionModulus
     {

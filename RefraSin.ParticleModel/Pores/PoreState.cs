@@ -6,11 +6,11 @@ public class PoreState<TNode>(
     Guid id,
     IEnumerable<TNode> nodes,
     double porosity,
-    double hydrostaticStress = 0
+    double elasticStrain = 0
 ) : Pore<TNode>(id, nodes), IPoreState<TNode>
     where TNode : INode
 {
     public double Porosity { get; } = porosity;
 
-    public double HydrostaticStress { get; } = hydrostaticStress;
+    public double ElasticStrain { get; } = elasticStrain;
 }

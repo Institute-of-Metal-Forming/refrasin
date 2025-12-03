@@ -11,20 +11,20 @@ internal record PoreReturn : IPoreState<NodeReturn>
         Guid id,
         IEnumerable<NodeReturn> nodes,
         double porosity,
-        double pressure,
+        double elasticStrain,
         INorm norm
     )
     {
         Id = id;
         Nodes = nodes.ToReadOnlyVertexCollection();
         Porosity = porosity;
-        HydrostaticStress = pressure * norm.Mass / double.Pow(norm.Time, 2) / norm.Length;
+        ElasticStrain = elasticStrain;
         Volume = this.Volume<PoreReturn, NodeReturn>();
     }
 
     public Guid Id { get; }
     public double Porosity { get; }
     public double Volume { get; }
-    public double HydrostaticStress { get; }
+    public double ElasticStrain { get; }
     public IReadOnlyVertexCollection<NodeReturn> Nodes { get; }
 }
