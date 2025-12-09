@@ -61,7 +61,7 @@ public class SimulationTest
     public static IEnumerable<TestFixtureData> GetTestFixtureData() =>
         InitialStates.Generate().Select(s => new TestFixtureData(s.state) { TestName = s.label });
 
-    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e1);
+    private static readonly ISinteringConditions Conditions = new SinteringConditions(2073, 3.6e-2);
     private readonly ISystemState<IParticle<IParticleNode>, IParticleNode> _initialState;
     private readonly SinteringStep _sinteringProcess;
     private readonly InMemorySolutionStorage _solutionStorage = new();
@@ -95,7 +95,7 @@ public class SimulationTest
         SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
         1e-6,
         Material.Surface.Energy,
-        new ViscoElasticProperties(100e3, 1e-3 * 100e9)
+        new ViscoElasticProperties(100e9, 1e-3 * 100e9)
     );
 
     private readonly string _tempDir = TempPath.CreateTempDir();

@@ -9,11 +9,10 @@ public class RungeKutta4TimeStepper : ITimeStepper
     public StepVector Step(ISolverSession solverSession, SolutionState baseState)
     {
         var k1 = CalculateIntermediateStep(solverSession, baseState, null);
-        var timeStep = solverSession.Routines.StepWidthController.GetStepWidth(
-            solverSession,
-            baseState,
-            k1
-        );
+        var timeStep =
+            solverSession.Routines.StepWidthControllers.Min(c =>
+                c.GetStepWidth(solverSession, baseState, k1)
+            ) ?? throw new InvalidOperationException("No step width could be computed.");
 
         var k2 = CalculateIntermediateStep(
             solverSession,
