@@ -18,7 +18,7 @@ public record SolverRoutines(
     IEnumerable<IStepValidator> StepValidators,
     ILagrangianRootFinder LagrangianRootFinder,
     INormalizer Normalizer,
-    IStepWidthController StepWidthController,
+    IEnumerable<IStepWidthController> StepWidthControllers,
     IEnumerable<IStateRecoverer> StateRecoverers,
     IEnumerable<IBreakCondition> BreakConditions,
     IEnumerable<IParticleSystemRemesher> Remeshers,
@@ -33,7 +33,7 @@ public record SolverRoutines(
             new NewtonRaphsonRootFinder(new SparseLUSolver(), absoluteTolerance: 1e-4)
         ),
         new DefaultNormalizer(),
-        new MaximumDisplacementAngleStepWidthController(),
+        [new MaximumDisplacementAngleStepWidthController(), new PoreElasticStepWidthController()],
         [new StepBackStateRecoverer()],
         [],
         [new FreeSurfaceRemesher(), new NeckNeighborhoodRemesher()],
@@ -47,8 +47,9 @@ public record SolverRoutines(
         TimeStepper.RegisterWithSolver(solver);
         LagrangianRootFinder.RegisterWithSolver(solver);
         Normalizer.RegisterWithSolver(solver);
-        StepWidthController.RegisterWithSolver(solver);
 
+        foreach (var controller in StepWidthControllers)
+            controller.RegisterWithSolver(solver);
         foreach (var validator in StepValidators)
             validator.RegisterWithSolver(solver);
         foreach (var recoverer in StateRecoverers)

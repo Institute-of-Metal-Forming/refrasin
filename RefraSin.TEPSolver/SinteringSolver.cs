@@ -75,17 +75,21 @@ public class SinteringSolver : IProcessStepSolver<ISinteringStep>
 
         while (session.CurrentState.Time < session.EndTime)
         {
-            var stepVector = SolveStepUntilValid(session, session.CurrentState, recoverersArray);
-            var timeStepWidth = session.Routines.StepWidthController.GetStepWidth(
-                session,
-                session.CurrentState,
-                stepVector
+            var currentSession = session;
+            var stepVector = SolveStepUntilValid(
+                currentSession,
+                currentSession.CurrentState,
+                recoverersArray
             );
+            var timeStepWidth =
+                session.Routines.StepWidthControllers.Min(c =>
+                    c.GetStepWidth(currentSession, currentSession.CurrentState, stepVector)
+                ) ?? throw new InvalidOperationException("No step width could be computed.");
             var newState = session.CurrentState.ApplyTimeStep(stepVector, timeStepWidth);
 
             InvokeStepSuccessfullyCalculated(
-                session,
-                session.CurrentState,
+                currentSession,
+                currentSession.CurrentState,
                 newState,
                 stepVector,
                 timeStepWidth

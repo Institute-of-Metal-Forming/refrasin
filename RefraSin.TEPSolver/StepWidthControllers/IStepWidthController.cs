@@ -5,7 +5,7 @@ namespace RefraSin.TEPSolver.StepWidthControllers;
 
 public interface IStepWidthController : ISolverRoutine
 {
-    double GetStepWidth(
+    double? GetStepWidth(
         ISolverSession solverSession,
         SolutionState currentState,
         StepVector stepVector

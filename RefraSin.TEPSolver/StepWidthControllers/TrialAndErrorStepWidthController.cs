@@ -51,7 +51,7 @@ public class TrialAndErrorStepWidthController(
     }
 
     /// <inheritdoc />
-    public double GetStepWidth(
+    public double? GetStepWidth(
         ISolverSession solverSession,
         SolutionState currentState,
         StepVector stepVector

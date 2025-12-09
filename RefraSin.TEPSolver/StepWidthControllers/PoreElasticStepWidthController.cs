@@ -6,9 +6,9 @@ using Log = Serilog.Log;
 
 namespace RefraSin.TEPSolver.StepWidthControllers;
 
-public class MaximumDisplacementAngleStepWidthController(
+public class PoreElasticStepWidthController(
     double initialTimeStepWidth = 1,
-    double maximumDisplacementAngle = 0.005,
+    double maximumRelativeStress = 0.2,
     double increaseFactor = 2,
     double decreaseFactor = 0.8,
     double minimalTimeStepWidth = double.NegativeInfinity,
@@ -56,58 +56,30 @@ public class MaximumDisplacementAngleStepWidthController(
         StepVector stepVector
     )
     {
+        if (currentState.Pores.Count == 0)
+            return null;
+
         var stepWidth = _stepWidths[solverSession.Id] * IncreaseFactor;
 
         while (true)
         {
             var stepWidth1 = stepWidth;
-            var normalDisplacementAngles = currentState.Nodes.Select(n =>
+            var maxStress = currentState.Pores.Max(p =>
             {
-                var displacement = stepVector.ItemValue<NormalDisplacement>(n) * stepWidth1;
-                var upperAngle = SinLaw.Alpha(
-                    displacement,
-                    CosLaw.C(displacement, n.SurfaceDistance.ToUpper, n.SurfaceNormalAngle.ToUpper),
-                    n.SurfaceNormalAngle.ToUpper
+                var internalSinteringForce =
+                    3
+                    * p.PoreMaterial.InterfaceEnergy
+                    / p.PoreMaterial.AverageParticleRadius
+                    * Pow(1 - p.Porosity, 2);
+                return Abs(
+                    stepVector.ItemValue<PoreElasticStrain>(p)
+                        * p.PorousCompressionModulus
+                        * stepWidth1
+                        / internalSinteringForce
                 );
-                var lowerAngle = SinLaw.Alpha(
-                    displacement,
-                    CosLaw.C(displacement, n.SurfaceDistance.ToLower, n.SurfaceNormalAngle.ToLower),
-                    n.SurfaceNormalAngle.ToLower
-                );
-                return double.Max(double.Abs(upperAngle), double.Abs(lowerAngle));
             });
-            var maxNormalDisplacementAngle = normalDisplacementAngles.Max();
 
-            var tangentialDisplacementAngles = currentState
-                .Nodes.OfType<NeckNode>()
-                .Select(n =>
-                {
-                    var displacement = stepVector.ItemValue<TangentialDisplacement>(n) * stepWidth1;
-                    var upperAngle = SinLaw.Alpha(
-                        displacement,
-                        CosLaw.C(
-                            displacement,
-                            n.SurfaceDistance.ToUpper,
-                            n.SurfaceTangentAngle.ToUpper
-                        ),
-                        n.SurfaceTangentAngle.ToUpper
-                    );
-                    var lowerAngle = SinLaw.Alpha(
-                        displacement,
-                        CosLaw.C(
-                            displacement,
-                            n.SurfaceDistance.ToLower,
-                            n.SurfaceTangentAngle.ToLower
-                        ),
-                        n.SurfaceTangentAngle.ToLower
-                    );
-                    return double.Max(double.Abs(upperAngle), double.Abs(lowerAngle));
-                });
-            var maxTangentialDisplacementAngle = tangentialDisplacementAngles.Prepend(0).Max(); // prepend to avoid InvalidOperationException when no necks present
-
-            var maxAngle = double.Max(maxNormalDisplacementAngle, maxTangentialDisplacementAngle);
-
-            if (maxAngle < MaximumDisplacementAngle)
+            if (maxStress < MaximumRelativeStress)
             {
                 _stepWidths[solverSession.Id] = stepWidth;
 
@@ -126,7 +98,7 @@ public class MaximumDisplacementAngleStepWidthController(
     private readonly Dictionary<Guid, double> _stepWidths = new();
 
     public double InitialTimeStepWidth { get; } = initialTimeStepWidth;
-    public double MaximumDisplacementAngle { get; } = maximumDisplacementAngle;
+    public double MaximumRelativeStress { get; } = maximumRelativeStress;
     public double IncreaseFactor { get; } = increaseFactor;
     public double DecreaseFactor { get; } = decreaseFactor;
     public double MinimalTimeStepWidth { get; } = minimalTimeStepWidth;

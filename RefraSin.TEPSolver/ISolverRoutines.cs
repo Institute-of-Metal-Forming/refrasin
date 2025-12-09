@@ -38,9 +38,9 @@ public interface ISolverRoutines
     INormalizer Normalizer { get; }
 
     /// <summary>
-    /// Subroutine to determine time step width.
+    /// Subroutines to determine time step width. Minimal suggested value is actually taken.
     /// </summary>
-    IStepWidthController StepWidthController { get; }
+    IEnumerable<IStepWidthController> StepWidthControllers { get; }
 
     /// <summary>
     /// Collection of routines for recovering invalid solution states.
