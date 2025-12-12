@@ -119,7 +119,9 @@ public interface INorm
             material.Id,
             NormalizeSubstanceProperties(material.Substance),
             material.AverageParticleRadius / Length,
-            material.InterfaceEnergy / Energy * Area,
+            material.SurfaceEnergy / Energy * Area,
+            material.GrainBoundaryEnergy / Energy * Area,
+            material.InitialPorosity,
             NormalizeViscoElasticProperties(material.ViscoElastic)
         );
 
