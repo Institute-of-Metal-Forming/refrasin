@@ -9,9 +9,11 @@ public class PorePorosity(Pore pore) : IPoreItem, IStateVelocity, IFlux
     {
         var internalSinteringForce =
             -3
-            * Pore.PoreMaterial.InterfaceEnergy
+            * (2 * Pore.PoreMaterial.SurfaceEnergy - Pore.PoreMaterial.GrainBoundaryEnergy)
             / Pore.PoreMaterial.AverageParticleRadius
-            * Pow(1 - Pore.Porosity, 2);
+            * Pow(1 - Pore.Porosity, 2)
+            * (2 * (1 - Pore.Porosity) - (1 - Pore.PoreMaterial.InitialPorosity))
+            / (1 - Pore.PoreMaterial.InitialPorosity);
 
         return (Pore.PorousCompressionModulus * Pore.ElasticStrain + internalSinteringForce)
             / (1 - Pore.Porosity)

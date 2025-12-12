@@ -4,6 +4,8 @@ public record PoreMaterial(
     Guid Id,
     ISubstanceProperties Substance,
     double AverageParticleRadius,
-    double InterfaceEnergy,
+    double SurfaceEnergy,
+    double GrainBoundaryEnergy,
+    double InitialPorosity,
     IViscoElasticProperties ViscoElastic
 ) : IPoreMaterial { }

@@ -6,6 +6,8 @@ public interface IPoreMaterial : IVertex
 {
     ISubstanceProperties Substance { get; }
     double AverageParticleRadius { get; }
-    double InterfaceEnergy { get; }
+    double SurfaceEnergy { get; }
+    double GrainBoundaryEnergy { get; }
+    double InitialPorosity { get; }
     IViscoElasticProperties ViscoElastic { get; }
 }

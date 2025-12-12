@@ -67,10 +67,12 @@ public class PoreElasticStepWidthController(
             var maxStress = currentState.Pores.Max(p =>
             {
                 var internalSinteringForce =
-                    3
-                    * p.PoreMaterial.InterfaceEnergy
+                    -3
+                    * (2 * p.PoreMaterial.SurfaceEnergy - p.PoreMaterial.GrainBoundaryEnergy)
                     / p.PoreMaterial.AverageParticleRadius
-                    * Pow(1 - p.Porosity, 2);
+                    * Pow(1 - p.Porosity, 2)
+                    * (2 * (1 - p.Porosity) - (1 - p.PoreMaterial.InitialPorosity))
+                    / (1 - p.PoreMaterial.InitialPorosity);
                 return Abs(
                     stepVector.ItemValue<PoreElasticStrain>(p)
                         * p.PorousCompressionModulus
