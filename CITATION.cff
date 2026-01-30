@@ -10,10 +10,6 @@ authors:
     email: max.weiner@imf.tu-freiberg.de
     affiliation: TU Bergakademie Freiberg
     orcid: 'https://orcid.org/0000-0002-8232-6877'
-identifiers:
-  - type: doi
-    value: 10.1234/zenodo.4321
-    description: Zenodo
 repository-code: 'https://github.com/Institute-of-Metal-Forming/refrasin'
 repository: 'https://github.com/axtimhaus/dissertation'
 abstract: >-
