@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: RefraSin
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Max
+    family-names: Weiner
+    email: max.weiner@imf.tu-freiberg.de
+    affiliation: TU Bergakademie Freiberg
+    orcid: 'https://orcid.org/0000-0002-8232-6877'
+identifiers:
+  - type: doi
+    value: 10.1234/zenodo.4321
+    description: Zenodo
+repository-code: 'https://github.com/Institute-of-Metal-Forming/refrasin'
+repository: 'https://github.com/axtimhaus/dissertation'
+abstract: >-
+  A library for simulation of sintering processes regarding
+  surface and grain boundary diffusion using a sharp
+  interface description and a thermodynamic extremal
+  principle (TEP) solution approach. Provides higher
+  efficiency and computational speed, with equal
+  versatility, compared to state-of-the-art phase field
+  method (PFM) approaches.
+keywords:
+  - Sintering
+  - Thermodynamic Extremal Principle
+  - Internal Variables of State
+  - Modeling
+  - Simulation
+  - Diffusion
+  - Powder
+  - Ceramics
+license: MIT
+commit: 894576b928bc9bd895b3bee1e2eca101594edd04
+version: 1.1.0
+date-released: '2026-01-30'
