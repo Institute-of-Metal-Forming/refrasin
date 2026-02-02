@@ -10,6 +10,10 @@ authors:
     email: max.weiner@imf.tu-freiberg.de
     affiliation: TU Bergakademie Freiberg
     orcid: 'https://orcid.org/0000-0002-8232-6877'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.18455088
+    description: Zenodo
 repository-code: 'https://github.com/Institute-of-Metal-Forming/refrasin'
 repository: 'https://github.com/axtimhaus/dissertation'
 abstract: >-
@@ -31,5 +35,5 @@ keywords:
   - Ceramics
 license: MIT
 commit: 894576b928bc9bd895b3bee1e2eca101594edd04
-version: 1.1.0
-date-released: '2026-01-30'
+version: 1.0.0
+date-released: '2026-02-02'
