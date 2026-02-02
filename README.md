@@ -1,5 +1,7 @@
 # RefraSin - 2D Sintering Simulation with Sharp Interfaces
 
+[![DOI](https://zenodo.org/badge/638136820.svg)](https://doi.org/10.5281/zenodo.18455088)
+
 RefraSin is a library for simulation of sintering processes regarding surface and grain boundary diffusion using a sharp interface description and a thermodynamic extremal principle (TEP) solution approach.
 It provides higher efficiency and computational speed, with equal versatility, compared to state-of-the-art phase field method (PFM) approaches.
 The software is implemented based on the .NET-Core platform in the C# and F# programming languages.
