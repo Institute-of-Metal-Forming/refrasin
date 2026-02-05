@@ -24,6 +24,7 @@ public class Pore : IPore<NodeBase>, IPorePorosity, IPoreElasticStrain
         ElasticStrain = elasticStrain;
         Volume = this.Volume<Pore, NodeBase>();
         PoreMaterial = poreMaterial;
+        DenseVolume = Volume * (1 - Porosity);
     }
 
     private Pore(
@@ -49,28 +50,34 @@ public class Pore : IPore<NodeBase>, IPorePorosity, IPoreElasticStrain
             );
         PoreMaterial = previousState.PoreMaterial;
         Volume = this.Volume<Pore, NodeBase>();
+        DenseVolume =
+            previousState.DenseVolume
+            + stepVector.ItemValue<PoreDenseVolume>(previousState) * timeStepWidth;
     }
 
     public Guid Id { get; }
     public IReadOnlyVertexCollection<NodeBase> Nodes { get; }
     public double Volume { get; }
+    public double DenseVolume { get; }
     public double Porosity { get; }
     public double ElasticStrain { get; }
 
-    public double PorousCompressionModulus
-    {
-        get
-        {
-            var elasticModulus =
-                PoreMaterial.ViscoElastic.ElasticModulus * (1 - 5.0 / 3.0 * Porosity);
-            return 4.0 / 3.0 * elasticModulus * (1 - Porosity) / Porosity;
-        }
-    }
+    public double PorousCompressionModulus =>
+        4.0 / 3.0 * PoreMaterial.ViscoElastic.ElasticModulus * Pow(1 - Porosity, 3) / Porosity;
 
     public double PorousVolumeViscosity =>
         4.0 / 3.0 * PoreMaterial.ViscoElastic.ShearViscosity * Pow(1 - Porosity, 3) / Porosity;
 
     public IPoreMaterial PoreMaterial { get; }
+
+    public double SpecificSurfaceArea => 2 * PI * PoreMaterial.AverageParticleRadius * Porosity;
+    public double SpecificGrainBoundaryArea => 0;
+
+    public double SpecificSurfaceAreaDerivative => 2 * PI * PoreMaterial.AverageParticleRadius;
+    public double SpecificGrainBoundaryAreaDerivative => 0;
+
+    public double ParticleCount => DenseVolume / (PI * Pow(PoreMaterial.AverageParticleRadius, 2));
+    public double ParticleCountDerivative => 1 / (PI * Pow(PoreMaterial.AverageParticleRadius, 2));
 
     public Pore ApplyTimeStep(
         SolutionState solutionState,

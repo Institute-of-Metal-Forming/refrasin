@@ -21,15 +21,9 @@ public class PoreVolumeBalanceConstraint(Pore pore) : IPoreItem, IConstraint
         var densityTerm =
             stepVector.ItemValue<PorePorosity>(Pore) / (1 - Pore.Porosity) * Pore.Volume;
         var elasticTerm = stepVector.ItemValue<PoreElasticStrain>(Pore) * Pore.Volume;
-        var fluxTerm =
-            Pore.Nodes.Where(stepVector.StepVectorMap.HasItem<FluxToPore>)
-                .Sum(n =>
-                    n.Particle.SubstanceProperties.Density
-                    / Pore.PoreMaterial.Substance.Density
-                    * stepVector.ItemValue<FluxToPore>(n)
-                ) / (1 - Pore.Porosity);
+        var denseVolumeTerm = stepVector.ItemValue<PoreDenseVolume>(Pore) / (1 - Pore.Porosity);
 
-        return densityTerm + elasticTerm + fluxTerm - volumeTerm;
+        return densityTerm + elasticTerm + denseVolumeTerm - volumeTerm;
     }
 
     public IEnumerable<(int index, double value)> Derivatives(
@@ -42,6 +36,10 @@ public class PoreVolumeBalanceConstraint(Pore pore) : IPoreItem, IConstraint
             Pore.Volume / (1 - Pore.Porosity)
         );
         yield return (stepVector.StepVectorMap.ItemIndex<PoreElasticStrain>(Pore), Pore.Volume);
+        yield return (
+            stepVector.StepVectorMap.ItemIndex<PoreDenseVolume>(Pore),
+            1 / (1 - Pore.Porosity)
+        );
 
         foreach (
             var (n, volumeDifferential) in Pore.Nodes.Zip(
@@ -52,16 +50,6 @@ public class PoreVolumeBalanceConstraint(Pore pore) : IPoreItem, IConstraint
             foreach (var (i, x, y) in GlobalNodeDisplacementDerivatives(stepVector, n))
             {
                 yield return (i, -(volumeDifferential.x * x + volumeDifferential.y * y));
-            }
-
-            if (stepVector.StepVectorMap.HasItem<FluxToPore>(n))
-            {
-                yield return (
-                    stepVector.StepVectorMap.ItemIndex<FluxToPore>(n),
-                    n.Particle.SubstanceProperties.Density
-                        / Pore.PoreMaterial.Substance.Density
-                        / (1 - Pore.Porosity)
-                );
             }
         }
     }

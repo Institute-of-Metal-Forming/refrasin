@@ -95,7 +95,9 @@ public class SimulationTest
         SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
         1e-6,
         Material.Surface.Energy,
-        new ViscoElasticProperties(100e9, 1e-3 * 100e9)
+        Material.Interfaces[Material.Id].Energy,
+        0.36,
+        new ViscoElasticProperties(100e9, 1e-2 * 100e9)
     );
 
     private readonly string _tempDir = TempPath.CreateTempDir();

@@ -42,6 +42,8 @@ public class EquationSystemTest(ISystemState<IParticle<IParticleNode>, IParticle
         SubstanceProperties.FromDensityAndMolarMass(1.8e3, 101.96e-3),
         1e-6,
         Material.Surface.Energy,
+        Material.Interfaces[Material.Id].Energy,
+        0.36,
         new ViscoElasticProperties(100e9, 1e-2 * 100e9)
     );
 
