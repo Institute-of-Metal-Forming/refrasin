@@ -14,14 +14,19 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
-        <PackageReference Include="NUnit"/>
-        <PackageReference Include="NUnit3TestAdapter"/>
-        <PackageReference Include="NUnit.Analyzers"/>
-        <PackageReference Include="coverlet.collector"/>
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit3TestAdapter" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="coverlet.collector" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RefraSin.ParquetStorage\RefraSin.ParquetStorage.csproj" />
+      <ProjectReference
+            Include="..\RefraSin.ParquetStorage\RefraSin.ParquetStorage.csproj"
+        />
+      <ProjectReference
+            Include="..\RefraSin.Compaction\RefraSin.Compaction.csproj"
+        />
     </ItemGroup>
 
 </Project>

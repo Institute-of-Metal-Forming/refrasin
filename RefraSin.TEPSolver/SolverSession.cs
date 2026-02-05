@@ -122,6 +122,7 @@ internal class SolverSession : ISolverSession
                 p.Nodes.Select(n => nodes[n.Id]),
                 p.Porosity,
                 p.ElasticStrain,
+                p.DenseVolume,
                 Norm
             ));
             _reportSystemState(

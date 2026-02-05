@@ -5,13 +5,14 @@ using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
-internal record PoreReturn : IPoreState<NodeReturn>
+internal record PoreReturn : IPoreState<NodeReturn>, IPoreDenseVolume
 {
     public PoreReturn(
         Guid id,
         IEnumerable<NodeReturn> nodes,
         double porosity,
         double elasticStrain,
+        double denseVolume,
         INorm norm
     )
     {
@@ -19,12 +20,14 @@ internal record PoreReturn : IPoreState<NodeReturn>
         Nodes = nodes.ToReadOnlyVertexCollection();
         Porosity = porosity;
         ElasticStrain = elasticStrain;
+        DenseVolume = denseVolume;
         Volume = this.Volume<PoreReturn, NodeReturn>();
     }
 
     public Guid Id { get; }
     public double Porosity { get; }
     public double Volume { get; }
+    public double DenseVolume { get; }
     public double ElasticStrain { get; }
     public IReadOnlyVertexCollection<NodeReturn> Nodes { get; }
 }

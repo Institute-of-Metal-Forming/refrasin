@@ -8,7 +8,7 @@ using RefraSin.Vertex;
 
 namespace RefraSin.TEPSolver.ParticleModel;
 
-public class Pore : IPore<NodeBase>, IPorePorosity, IPoreElasticStrain
+public class Pore : IPore<NodeBase>, IPorePorosity, IPoreElasticStrain, IPoreDenseVolume
 {
     public Pore(
         IPore<INode> pore,

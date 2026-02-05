@@ -3,6 +3,7 @@ using Parquet.Schema;
 using Parquet.Serialization;
 using RefraSin.ParticleModel.Nodes;
 using RefraSin.ParticleModel.Particles;
+using RefraSin.ParticleModel.Pores;
 using RefraSin.ProcessModel;
 using RefraSin.Storage;
 using Serilog;
@@ -27,6 +28,13 @@ public class ParquetStorage(
         ISystemState<IParticle<IParticleNode>, IParticleNode> state
     )
     {
+        var stateWithPores =
+            state
+            as ISystemStateWithPores<
+                IParticle<IParticleNode>,
+                IParticleNode,
+                IPoreState<IParticleNode>
+            >;
         var stateData = StateData.From(state);
 
         foreach (var particle in state.Particles)
@@ -36,12 +44,17 @@ public class ParquetStorage(
             foreach (var node in particle.Nodes)
             {
                 var nodeData = NodeData.From(node);
+                var poreData = PoreData.From(
+                    stateWithPores?.Pores.FirstOrDefault(p => p.Nodes.Contains(node.Id))
+                );
+
                 _rowBuffer.Add(
                     new Row
                     {
                         State = stateData,
                         Particle = particleData,
                         Node = nodeData,
+                        Pore = poreData,
                     }
                 );
             }
