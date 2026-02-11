@@ -20,7 +20,9 @@ public class PoreVolumeBalanceConstraint(Pore pore) : IPoreItem, IConstraint
             .Sum(t => t.First.x * t.Second.x + t.First.y * t.Second.y);
         var densityTerm =
             stepVector.ItemValue<PorePorosity>(Pore) / (1 - Pore.Porosity) * Pore.Volume;
-        var elasticTerm = stepVector.ItemValue<PoreElasticStrain>(Pore) * Pore.Volume;
+        var elasticTerm = stepVector.StepVectorMap.HasItem<PoreElasticStrain>(Pore)
+            ? stepVector.ItemValue<PoreElasticStrain>(Pore) * Pore.Volume
+            : 0;
         var denseVolumeTerm = stepVector.ItemValue<PoreDenseVolume>(Pore) / (1 - Pore.Porosity);
 
         return densityTerm + elasticTerm + denseVolumeTerm - volumeTerm;
@@ -35,7 +37,8 @@ public class PoreVolumeBalanceConstraint(Pore pore) : IPoreItem, IConstraint
             stepVector.StepVectorMap.ItemIndex<PorePorosity>(Pore),
             Pore.Volume / (1 - Pore.Porosity)
         );
-        yield return (stepVector.StepVectorMap.ItemIndex<PoreElasticStrain>(Pore), Pore.Volume);
+        if (stepVector.StepVectorMap.HasItem<PoreElasticStrain>(Pore))
+            yield return (stepVector.StepVectorMap.ItemIndex<PoreElasticStrain>(Pore), Pore.Volume);
         yield return (
             stepVector.StepVectorMap.ItemIndex<PoreDenseVolume>(Pore),
             1 / (1 - Pore.Porosity)

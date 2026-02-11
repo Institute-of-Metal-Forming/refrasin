@@ -10,5 +10,5 @@ public class PoreElasticStrain(Pore pore) : IPoreItem, IStateVelocity
 
     public Pore Pore { get; } = pore;
 
-    public override string ToString() => $"hydrostatic stress of {Pore}";
+    public override string ToString() => $"elastic strain of {Pore}";
 }

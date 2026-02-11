@@ -73,12 +73,14 @@ public class PoreElasticStepWidthController(
                     * Pow(1 - p.Porosity, 2)
                     * (2 * (1 - p.Porosity) - (1 - p.PoreMaterial.InitialPorosity))
                     / (1 - p.PoreMaterial.InitialPorosity);
-                return Abs(
-                    stepVector.ItemValue<PoreElasticStrain>(p)
-                        * p.PorousCompressionModulus
-                        * stepWidth1
-                        / internalSinteringForce
-                );
+                return stepVector.StepVectorMap.HasItem<PoreElasticStrain>(p)
+                    ? Abs(
+                        stepVector.ItemValue<PoreElasticStrain>(p)
+                            * p.PorousCompressionModulus
+                            * stepWidth1
+                            / internalSinteringForce
+                    )
+                    : 0;
             });
 
             if (maxStress < MaximumRelativeStress)
