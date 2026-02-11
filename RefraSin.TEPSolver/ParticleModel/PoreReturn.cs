@@ -20,7 +20,7 @@ internal record PoreReturn : IPoreState<NodeReturn>, IPoreDenseVolume
         Nodes = nodes.ToReadOnlyVertexCollection();
         Porosity = porosity;
         ElasticStrain = elasticStrain;
-        DenseVolume = denseVolume;
+        DenseVolume = denseVolume * norm.Area;
         Volume = this.Volume<PoreReturn, NodeReturn>();
     }
 

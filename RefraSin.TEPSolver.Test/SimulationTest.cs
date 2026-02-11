@@ -131,6 +131,7 @@ public class SimulationTest
             PlotParticleCenter();
             PlotPoreElasticStrain();
             PlotPorePorosity();
+            PlotPoreDenseVolume();
             PlotPoreVolume();
             PlotParticleVolume();
         }
@@ -204,6 +205,28 @@ public class SimulationTest
 
         var plot = ProcessPlot.PlotPoreElasticStrain(states);
         plot.SaveHtml(Path.Combine(_tempDir, "pore_elastic.html"));
+    }
+
+    private void PlotPoreDenseVolume()
+    {
+        if (_solutionStorage.States.Count == 0)
+            return;
+
+        var states = _solutionStorage
+            .States.OfType<
+                ISystemStateWithPores<
+                    IParticle<IParticleNode>,
+                    IParticleNode,
+                    IPoreState<IParticleNode>
+                >
+            >()
+            .ToArray();
+
+        if (states.Length == 0)
+            return;
+
+        var plot = ProcessPlot.PlotPoreDenseVolume(states);
+        plot.SaveHtml(Path.Combine(_tempDir, "pore_dense_volume.html"));
     }
 
     private void PlotPorePorosity()

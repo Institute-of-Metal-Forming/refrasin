@@ -4,6 +4,7 @@ open Plotly.NET
 open Plotly.NET.StyleParam
 open RefraSin.Coordinates.Absolute
 open RefraSin.ParticleModel.Particles
+open RefraSin.ParticleModel.Pores
 open RefraSin.ProcessModel
 open RefraSin.Analysis
 
@@ -145,6 +146,31 @@ let PlotPorePorosity (states: ISystemStateWithPores<_, _, _> seq) =
     |> Commons.ApplyDefaultPlotProperties
     |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
     |> Chart.withYAxisStyle (TitleText = "Pore Porosity", AxisType = AxisType.Linear)
+
+let PlotPoreDenseVolume (states: ISystemStateWithPores<_, _, _> seq) =
+    let times = [ for s in states -> s.Time ]
+
+    let pores =
+        states
+        |> Seq.map (fun s ->
+            s.Pores
+            |> Seq.map (function
+                | p ->
+                    match box p with
+                    | :? IPoreDenseVolume as dvp -> dvp.DenseVolume
+                    | _ -> p.Volume * (1.0 - p.Porosity))
+            |> Seq.toList)
+        |> List.transpose
+
+    seq {
+        for pore in pores do
+            Chart.Line(x = times, y = pore)
+
+    }
+    |> Chart.combine
+    |> Commons.ApplyDefaultPlotProperties
+    |> Chart.withXAxisStyle (TitleText = "Time", AxisType = AxisType.Log)
+    |> Chart.withYAxisStyle (TitleText = "Pore Dense Volume", AxisType = AxisType.Linear)
 
 let PlotPoreVolume (states: ISystemStateWithPores<_, _, _> seq) =
     let times = [ for s in states -> s.Time ]
